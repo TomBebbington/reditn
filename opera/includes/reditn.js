@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Reditn
 // @namespace   http://userscripts.org/user/tophattedcoder/
-// @description A collection of reddit enhancements.
+// @description A collection of reddit tweaks and enhancements.
 // @include     reddit.com
 // @include     reddit.com/*
 // @include		*.reddit.com
