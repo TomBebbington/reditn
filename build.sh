@@ -1,3 +1,9 @@
+#! /bin/bash
+haxe build.hxml
+cat info >> temp
+cat reditn.js >> temp
+mv temp reditn.js
+rm temp
 cp ./reditn.js ./chrome/
 cp ./icon.svg ./chrome/
 cd ./chrome

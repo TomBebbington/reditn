@@ -1,7 +1,7 @@
 reditn
 ======
 
-Reddit plugin that adds much-needed functionality such as image toggle buttons, advert blocking and more!
+Reddit plugin that adds much-needed functionality such as image toggle buttons, advert blocking and more, implemented in good ol' Haxe!
 
 Features
 --------

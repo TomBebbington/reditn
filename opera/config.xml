@@ -1,4 +1,4 @@
-<widget xmlns="http://www.w3.org/ns/widgets" id="http://github.com/TopHattedCoder/reditn" version="1.25">
+<widget xmlns="http://www.w3.org/ns/widgets" id="http://github.com/TopHattedCoder/reditn" version="1.4">
 	<name short="Reditn">Reditn - reddit plugin</name>
 	<description xml:lang="en">Reddit plugin that adds much-needed functionality such as image toggle buttons, advert blocking and more!</description>
 	<author href="http://github.com/TopHattedCoder" email="tophattedcoder@gmail.com">
