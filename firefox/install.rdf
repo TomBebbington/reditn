@@ -6,6 +6,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>reditn@tophattedcoder.org</em:id>
     <em:version>1.23</em:version>
+    <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
     <em:type>2</em:type>
     
     <!-- Target Application this extension can install into,

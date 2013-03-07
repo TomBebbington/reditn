@@ -1,1 +1,2 @@
-content     reditn    chrome/content/
+content	reditn	content/
+overlay	chrome://browser/content/browser.xul	chrome://reditn/content/reditn-overlay.xul
