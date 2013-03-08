@@ -1,5 +1,6 @@
 import js.*;
 import js.html.*;
+import haxe.Timer;
 import haxe.*;
 class Expand {
 	public static var expandInfo:ExpandInfo = {maxWidth:0, maxHeight:0};
@@ -108,7 +109,7 @@ class Expand {
 		img.src = url;
 		img.className = "resize";
 		initResize(img);
-		img.onload = function(_) {
+		var autosize = function() {
 			if(img.width > expandInfo.maxWidth) {
 				var rt = img.height / img.width;
 				img.width = expandInfo.maxWidth;
@@ -118,6 +119,13 @@ class Expand {
 				var rt = img.width / img.height;
 				img.height = expandInfo.maxHeight;
 				img.width = Std.int(img.height * rt);
+			}
+		}
+		var t = new Timer(30);
+		t.run = function() {
+			if(img.width > 0 && img.height > 0) {
+				t.stop();
+				autosize();
 			}
 		}
 		return img;
