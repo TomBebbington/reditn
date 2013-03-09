@@ -3,16 +3,18 @@ import js.html.*;
 import haxe.Timer;
 import haxe.*;
 class Expand {
-	public static var expandInfo:ExpandInfo = {maxWidth:0, maxHeight:0};
+	public static var maxWidth:Int = 0;
+	public static var maxHeight:Int = 0;
 	public static var expandButtons:Array<Element> = [];
 
 	public static function init() {
-		expandInfo.maxWidth = Std.int(try {
-			Math.abs(Browser.window.innerWidth - untyped Browser.document.body.getElementsByClassName("side")[0].offsetWidth); // just in case something goes horrible wrong...
+		maxWidth = Std.int(try {
+			var a = Math.abs(Browser.window.innerWidth - untyped Browser.document.body.getElementsByClassName("side")[0].offsetWidth); // just in case something goes horrible wrong...
+			Math.min(a, Browser.window.innerWidth*0.6);
 		} catch(e:Dynamic) {
-			Browser.window.innerWidth*0.7;
+			Browser.window.innerWidth*0.6;
 		});
-		expandInfo.maxHeight = Std.int(Browser.window.innerHeight*0.5);
+		maxHeight = Std.int(Browser.window.innerHeight*0.5);
 
 
 		var links = Browser.document.body.getElementsByClassName("title");
@@ -110,14 +112,14 @@ class Expand {
 		img.className = "resize";
 		initResize(img);
 		var autosize = function() {
-			if(img.width > expandInfo.maxWidth) {
+			if(img.width > maxWidth) {
 				var rt = img.height / img.width;
-				img.width = expandInfo.maxWidth;
+				img.width = maxWidth;
 				img.height = Std.int(img.width * rt);
 			}
-			if(img.height > expandInfo.maxHeight) {
+			if(img.height > maxHeight) {
 				var rt = img.width / img.height;
-				img.height = expandInfo.maxHeight;
+				img.height = maxHeight;
 				img.width = Std.int(img.height * rt);
 			}
 		}

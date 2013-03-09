@@ -1,3 +1,4 @@
+ 
 // ==UserScript==
 // @name        Reditn
 // @namespace   http://userscripts.org/user/tophattedcoder/
@@ -6,7 +7,7 @@
 // @include     reddit.com/*
 // @include		*.reddit.com
 // @include		*.reddit.com/*
-// @version     1.4
+// @version     1.4.1
 // @grant		none
 // ==/UserScript==
 (function () { "use strict";
@@ -43,16 +44,21 @@ var Expand = function() { }
 $hxClasses["Expand"] = Expand;
 Expand.__name__ = true;
 Expand.init = function() {
-	Expand.expandInfo.maxWidth = (function($this) {
+	Expand.maxWidth = (function($this) {
 		var $r;
 		try {
-			$r = Math.abs(js.Browser.window.innerWidth - js.Browser.document.body.getElementsByClassName("side")[0].offsetWidth);
+			$r = (function($this) {
+				var $r;
+				var a = Math.abs(js.Browser.window.innerWidth - js.Browser.document.body.getElementsByClassName("side")[0].offsetWidth);
+				$r = Math.min(a,js.Browser.window.innerWidth * 0.6);
+				return $r;
+			}($this));
 		} catch( e ) {
-			$r = js.Browser.window.innerWidth * 0.7;
+			$r = js.Browser.window.innerWidth * 0.6;
 		}
 		return $r;
 	}(this)) | 0;
-	Expand.expandInfo.maxHeight = js.Browser.window.innerHeight * 0.5 | 0;
+	Expand.maxHeight = js.Browser.window.innerHeight * 0.5 | 0;
 	var links = js.Browser.document.body.getElementsByClassName("title");
 	var _g1 = 0, _g = links.length;
 	while(_g1 < _g) {
@@ -121,16 +127,23 @@ Expand.loadImage = function(url) {
 	img.src = url;
 	img.className = "resize";
 	Expand.initResize(img);
-	img.onload = function(_) {
-		if(img.width > Expand.expandInfo.maxWidth) {
+	var autosize = function() {
+		if(img.width > Expand.maxWidth) {
 			var rt = img.height / img.width;
-			img.width = Expand.expandInfo.maxWidth;
+			img.width = Expand.maxWidth;
 			img.height = img.width * rt | 0;
 		}
-		if(img.height > Expand.expandInfo.maxHeight) {
+		if(img.height > Expand.maxHeight) {
 			var rt = img.width / img.height;
-			img.height = Expand.expandInfo.maxHeight;
+			img.height = Expand.maxHeight;
 			img.width = img.height * rt | 0;
+		}
+	};
+	var t = new haxe.Timer(30);
+	t.run = function() {
+		if(img.width > 0 && img.height > 0) {
+			t.stop();
+			autosize();
 		}
 	};
 	return img;
@@ -281,6 +294,7 @@ Reditn.init = function() {
 	Adblock.init();
 	Expand.init();
 	UserInfo.init();
+	SubredditInfo.init();
 	Header.init();
 }
 Reditn.getLinkType = function(url) {
@@ -310,6 +324,11 @@ Reditn.getLinkType = function(url) {
 	}(this)):HxOverrides.substr(url,0,10) == "imgur.com/" && HxOverrides.substr(url,10,2) != "a/" || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || url.indexOf("deviantart.com/art/") != -1?LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?LinkType.VIDEO:LinkType.UNKNOWN;
 }
 Reditn.popUp = function(bs,el,x,y) {
+	if(y == null) y = 0;
+	if(x == null) x = 0;
+	js.Browser.document.body.appendChild(el);
+	el.className = "reditnpopup";
+	el.innerHTML = el.innerText = "Loading...";
 	el.style.position = "absolute";
 	el.style.top = y + "px";
 	el.style.left = x + "px";
@@ -322,9 +341,6 @@ Reditn.popUp = function(bs,el,x,y) {
 		el.parentNode.removeChild(el);
 		bs.mouseover = false;
 	};
-	js.Browser.document.body.appendChild(el);
-	el.className = "reditnpopup";
-	el.innerHTML = "Loading...";
 	return el;
 }
 var Reflect = function() { }
@@ -376,6 +392,31 @@ StringTools.urlEncode = function(s) {
 StringTools.urlDecode = function(s) {
 	return decodeURIComponent(s.split("+").join(" "));
 }
+var SubredditInfo = function() { }
+$hxClasses["SubredditInfo"] = SubredditInfo;
+SubredditInfo.__name__ = true;
+SubredditInfo.init = function() {
+	var subs = js.Browser.document.body.getElementsByClassName("subreddit");
+	var _g = 0;
+	while(_g < subs.length) {
+		var i = subs[_g];
+		++_g;
+		i.onmouseover = SubredditInfo._onMouseOverSubreddit;
+	}
+}
+SubredditInfo._onMouseOverSubreddit = function(e) {
+	var e1 = e.target;
+	var name = e1.innerHTML;
+	var div = js.Browser.document.createElement("div");
+	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth + 3,e1.offsetTop);
+	(function(d) {
+		if(d.data != null) d = d.data;
+		var html = "<b>Name:</b> " + Std.string(d.display_name) + "<br>";
+		html += "<b>Subscribers:</b> " + Std.string(d.subscribers) + "<br>";
+		html += "<b>Description:</b> " + Std.string(d.public_description) + "<br>";
+		div.innerHTML = html;
+	})(haxe.Json.parse(haxe.Http.requestUrl("/r/" + name + "/about.json")));
+}
 var Type = function() { }
 $hxClasses["Type"] = Type;
 Type.__name__ = true;
@@ -412,18 +453,39 @@ $hxClasses["UserInfo"] = UserInfo;
 UserInfo.__name__ = true;
 UserInfo.init = function() {
 	var users = js.Browser.document.body.getElementsByClassName("author");
-	var _g1 = 0, _g = users.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		users[i].onmouseover = UserInfo._onMouseOverUser;
+	var _g = 0;
+	while(_g < users.length) {
+		var i = users[_g];
+		++_g;
+		i.onmouseover = UserInfo._onMouseOverUser;
 	}
 }
 UserInfo._onMouseOverUser = function(e) {
-	var user = e.href;
+	var e1 = e.target;
+	var user = e1.innerHTML;
 	user = HxOverrides.substr(user,user.lastIndexOf("/") + 1,null);
 	var div = js.Browser.document.createElement("div");
-	Reditn.popUp(e.target,div,e.offsetLeft + e.offsetWidth + 3,e.offsetTop);
-	haxe.Json.parse(haxe.Http.requestUrl("/user/" + user + "/about.json"));
+	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth + 3,e1.offsetTop);
+	(function(d) {
+		if(d.data != null) d = d.data;
+		var html = "<b>User:</b> " + Std.string(d.name) + "<br>";
+		var diff = (function($this) {
+			var $r;
+			var d1 = new Date();
+			d1.setTime(haxe.Timer.stamp() - d.created_utc * 1000);
+			$r = d1;
+			return $r;
+		}(this));
+		var years = diff.getFullYear() - 1970, months = diff.getMonth(), days = diff.getDate();
+		html += "<b>Account age:</b> ";
+		if(years > 0) html += "" + years + " years, ";
+		if(months > 0) html += "" + months + " months, ";
+		html += "" + days + " days<br>";
+		html += "<b>Karma:</b> " + Std.string(d.link_karma) + " link karma, " + Std.string(d.comment_karma) + " comment karma";
+		if(d.is_mod != null) html += "<br><b>Moderator</b>";
+		if(d.is_gold != null) html += "<br><b>Gold</b>";
+		div.innerHTML = html;
+	})(haxe.Json.parse(haxe.Http.requestUrl("/user/" + user + "/about.json")));
 }
 var haxe = {}
 haxe.Http = function(url) {
@@ -709,6 +771,28 @@ haxe.Json.prototype = {
 		return this.parseRec();
 	}
 	,__class__: haxe.Json
+}
+haxe.Timer = function(time_ms) {
+	var me = this;
+	this.id = setInterval(function() {
+		me.run();
+	},time_ms);
+};
+$hxClasses["haxe.Timer"] = haxe.Timer;
+haxe.Timer.__name__ = true;
+haxe.Timer.stamp = function() {
+	return new Date().getTime() / 1000;
+}
+haxe.Timer.prototype = {
+	run: function() {
+		console.log("run");
+	}
+	,stop: function() {
+		if(this.id == null) return;
+		clearInterval(this.id);
+		this.id = null;
+	}
+	,__class__: haxe.Timer
 }
 haxe.Unserializer = function(buf) {
 	this.buf = buf;
@@ -1299,7 +1383,8 @@ Bool.__ename__ = ["Bool"];
 var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
-Expand.expandInfo = { maxWidth : 0, maxHeight : 0};
+Expand.maxWidth = 0;
+Expand.maxHeight = 0;
 Expand.expandButtons = [];
 haxe.Unserializer.DEFAULT_RESOLVER = Type;
 haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";

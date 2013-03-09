@@ -1,5 +1,6 @@
 #! /bin/bash
 haxe build.hxml
+echo " " >> temp
 cat info >> temp
 cat reditn.js >> temp
 mv temp reditn.js

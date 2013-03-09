@@ -16,8 +16,18 @@ class Reditn {
 		//Style.init();
 		Expand.init();
 		UserInfo.init();
-		//RedditInfo.init();
+		SubredditInfo.init();
 		Header.init();
+	}
+	public static function formatNumber(n:Int):String {
+		var s = Std.string(n);
+		var ns = "";
+		for(i in 0...s.length) {
+			ns += s.charAt(i);
+			if((s.length-i) % 3 == 0)
+				ns += ",";
+		}
+		return ns;
 	}
 	public static function getLinkType(url:String):LinkType {
 		if(url.substr(0, 7) == "http://")
@@ -50,9 +60,12 @@ class Reditn {
 		Browser.window.localStorage.setItem("reditn", haxe.Serializer.run(settings));
 	}
 	public static inline function getJSON(url:String, func:Dynamic->Void) {
-		return haxe.Json.parse(haxe.Http.requestUrl(url));
+		func(haxe.Json.parse(haxe.Http.requestUrl(url)));
 	}
-	public static function popUp(bs:Element, el:Element, x:Float, y:Float) {
+	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
+		Browser.document.body.appendChild(el);
+		el.className="reditnpopup";
+		el.innerHTML = el.innerText = "Loading...";
 		el.style.position = "absolute";
 		el.style.top = y+"px";
 		el.style.left = x+"px";
@@ -65,9 +78,6 @@ class Reditn {
 			el.parentNode.removeChild(el);
 			untyped bs.mouseover = false;
 		}
-		Browser.document.body.appendChild(el);
-		el.className="reditnpopup";
-		el.innerHTML = "Loading...";
 		return el;
 	}
 }
