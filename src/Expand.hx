@@ -47,6 +47,8 @@ class Expand {
 					else {
 						throw "Bad DOM";
 					}
+					if(Header.toggled)
+						show.onclick(null);
 					Header.refresh();
 				});
 			} else {
@@ -67,8 +69,6 @@ class Expand {
 				el.parentNode.removeChild(el);
 		}
 		e.style.cursor = "pointer";
-		if(Header.toggled)
-			e.onclick(null);
 		return e;
 	}
 	static inline function getEntry(l:Element) {
@@ -82,6 +82,10 @@ class Expand {
 			url = url.substr(8);
 		if(url.substr(0, 4) == "www.")
 			url = url.substr(4);
+		if(url.indexOf("&") != -1)
+			url = url.substr(0, url.indexOf("&"));
+		if(url.indexOf("?") != -1)
+			url = url.substr(0, url.indexOf("?"));
 		if(url.substr(0, 12) == "i.imgur.com/" && url.split(".").length == 3)
 			cb("http://"+url+".jpg", el);
 		else if(url.substr(0, 10) == "imgur.com/") {

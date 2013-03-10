@@ -14,18 +14,17 @@ class Reditn {
 	}
 	static function init() {
 		Settings.init();
-		if(Settings.data.get("Adblock enabled"))
+		if(Settings.data.get(Settings.ADBLOCK_ENABLED))
 			Adblock.init();
-		//Style.init();
-		if(Settings.data.get("Image expanding enabled")) {
+		if(Settings.data.get(Settings.EXPAND_ENABLED)) {
 			Header.init();
 			Expand.init();
 		}
-		if(Settings.data.get("Hover information enabled")) {
+		if(Settings.data.get(Settings.USERINFO_ENABLED))
 			UserInfo.init();
+		if(Settings.data.get(Settings.SUBINFO_ENABLED))
 			SubredditInfo.init();
-		}
-		if(Settings.data.get("Hide duplicates"))
+		if(Settings.data.get(Settings.DUPLICATE_HIDER_ENABLED))
 			DuplicateHider.init();
 	}
 	public static function formatNumber(n:Int):String {
