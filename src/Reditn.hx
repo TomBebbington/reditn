@@ -1,8 +1,14 @@
 import js.html.*;
 import js.Browser;
+using StringTools;
 class Reditn {
 	public static var settings:Map<String, Dynamic> = null;
+	static inline var year = 31557600;
+	static inline var month = 2629800;
+	static inline var day = 86400;
+	static inline var hour = 3600;
 	static function main() {
+		trace(5 % 3 == 2);
 		if(untyped document.readyState=="complete")
 			init();
 		else
@@ -20,14 +26,41 @@ class Reditn {
 		Header.init();
 	}
 	public static function formatNumber(n:Int):String {
-		var s = Std.string(n);
-		var ns = "";
-		for(i in 0...s.length) {
-			ns += s.charAt(i);
-			if((s.length-i) % 3 == 0)
-				ns += ",";
+		return if (!Math.isFinite(n))
+			Std.string(n);
+		else {
+			var s = Std.string(n);
+			if (s.length >= 3) {
+				var ns = "";
+				for(i in 0...s.length) {
+					ns += s.charAt(i);
+					if((s.length - (i + 1)) % 3 == 0 && i < s.length-1)
+						ns += ",";
+				}
+				s = ns;
+			}
+			s;
 		}
-		return ns;
+	}
+	static inline function plural(n:Int) {
+		return n <= 1 ? "" : "s";
+	}
+	public static function age(t:Float):String {
+		t = haxe.Timer.stamp() - t;
+		var days = Std.int((t / day) % (month / day));
+		var months = Std.int((t / month) % 12);
+		var years = Std.int((t / month)/12);
+		var s = "";
+		if(years > 0)	
+			s += '$years year' + plural(years);
+		if(months > 0)
+			s += ', $months month' + plural(months);
+		s += ', $days day' + plural(days);
+		if(s.substr(0, 2) == ", ")
+			s = s.substr(2);
+		while(s.indexOf(", , ") != -1)
+			s = s.replace(", , ", ", ");
+		return s;
 	}
 	public static function getLinkType(url:String):LinkType {
 		if(url.substr(0, 7) == "http://")
@@ -65,7 +98,7 @@ class Reditn {
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);
 		el.className="reditnpopup";
-		el.innerHTML = el.innerText = "Loading...";
+		el.innerHTML = "<em>Loading...</em>";
 		el.style.position = "absolute";
 		el.style.top = y+"px";
 		el.style.left = x+"px";

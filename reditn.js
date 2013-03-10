@@ -7,7 +7,7 @@
 // @include     reddit.com/*
 // @include		*.reddit.com
 // @include		*.reddit.com/*
-// @version     1.4.1
+// @version     1.4.2
 // @grant		none
 // ==/UserScript==
 (function () { "use strict";
@@ -284,6 +284,7 @@ var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
 Reditn.__name__ = true;
 Reditn.main = function() {
+	console.log(5 % 3 == 2);
 	if(document.readyState == "complete") Reditn.init(); else window.onload = function(e) {
 		Reditn.init();
 	};
@@ -296,6 +297,37 @@ Reditn.init = function() {
 	UserInfo.init();
 	SubredditInfo.init();
 	Header.init();
+}
+Reditn.formatNumber = function(n) {
+	return !Math.isFinite(n)?Std.string(n):(function($this) {
+		var $r;
+		var s = Std.string(n);
+		if(s.length >= 3) {
+			var ns = "";
+			var _g1 = 0, _g = s.length;
+			while(_g1 < _g) {
+				var i = _g1++;
+				ns += s.charAt(i);
+				if((s.length - (i + 1)) % 3 == 0 && i < s.length - 1) ns += ",";
+			}
+			s = ns;
+		}
+		$r = s;
+		return $r;
+	}(this));
+}
+Reditn.age = function(t) {
+	t = haxe.Timer.stamp() - t;
+	var days = t / 86400 % 30.4375 | 0;
+	var months = t / 2629800 % 12 | 0;
+	var years = t / 2629800 / 12 | 0;
+	var s = "";
+	if(years > 0) s += "" + years + " year" + (years <= 1?"":"s");
+	if(months > 0) s += ", " + months + " month" + (months <= 1?"":"s");
+	s += ", " + days + " day" + (days <= 1?"":"s");
+	if(HxOverrides.substr(s,0,2) == ", ") s = HxOverrides.substr(s,2,null);
+	while(s.indexOf(", , ") != -1) s = StringTools.replace(s,", , ",", ");
+	return s;
 }
 Reditn.getLinkType = function(url) {
 	if(HxOverrides.substr(url,0,7) == "http://") url = HxOverrides.substr(url,7,null); else if(HxOverrides.substr(url,0,8) == "https://") url = HxOverrides.substr(url,8,null);
@@ -328,7 +360,7 @@ Reditn.popUp = function(bs,el,x,y) {
 	if(x == null) x = 0;
 	js.Browser.document.body.appendChild(el);
 	el.className = "reditnpopup";
-	el.innerHTML = el.innerText = "Loading...";
+	el.innerHTML = "<em>Loading...</em>";
 	el.style.position = "absolute";
 	el.style.top = y + "px";
 	el.style.left = x + "px";
@@ -392,6 +424,9 @@ StringTools.urlEncode = function(s) {
 StringTools.urlDecode = function(s) {
 	return decodeURIComponent(s.split("+").join(" "));
 }
+StringTools.replace = function(s,sub,by) {
+	return s.split(sub).join(by);
+}
 var SubredditInfo = function() { }
 $hxClasses["SubredditInfo"] = SubredditInfo;
 SubredditInfo.__name__ = true;
@@ -412,8 +447,10 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 	(function(d) {
 		if(d.data != null) d = d.data;
 		var html = "<b>Name:</b> " + Std.string(d.display_name) + "<br>";
-		html += "<b>Subscribers:</b> " + Std.string(d.subscribers) + "<br>";
+		html += "<b>Subscribers:</b> " + Reditn.formatNumber(d.subscribers) + "<br>";
 		html += "<b>Description:</b> " + Std.string(d.public_description) + "<br>";
+		var age = Reditn.age(d.created_utc);
+		html += "<b>Age:</b> " + age + "<br>";
 		div.innerHTML = html;
 	})(haxe.Json.parse(haxe.Http.requestUrl("/r/" + name + "/about.json")));
 }
@@ -469,21 +506,11 @@ UserInfo._onMouseOverUser = function(e) {
 	(function(d) {
 		if(d.data != null) d = d.data;
 		var html = "<b>User:</b> " + Std.string(d.name) + "<br>";
-		var diff = (function($this) {
-			var $r;
-			var d1 = new Date();
-			d1.setTime(haxe.Timer.stamp() - d.created_utc * 1000);
-			$r = d1;
-			return $r;
-		}(this));
-		var years = diff.getFullYear() - 1970, months = diff.getMonth(), days = diff.getDate();
-		html += "<b>Account age:</b> ";
-		if(years > 0) html += "" + years + " years, ";
-		if(months > 0) html += "" + months + " months, ";
-		html += "" + days + " days<br>";
-		html += "<b>Karma:</b> " + Std.string(d.link_karma) + " link karma, " + Std.string(d.comment_karma) + " comment karma";
-		if(d.is_mod != null) html += "<br><b>Moderator</b>";
-		if(d.is_gold != null) html += "<br><b>Gold</b>";
+		var age = Reditn.age(d.created_utc);
+		html += "<b>Account age:</b> " + age + "<br>";
+		html += "<b>Karma:</b> " + Reditn.formatNumber(d.link_karma) + " link karma, " + Reditn.formatNumber(d.comment_karma) + " comment karma";
+		if(d.is_mod != null && d.is_mod) html += "<br><b>Moderator</b>";
+		if(d.is_gold != null && d.is_gold) html += "<br><b>Gold</b>";
 		div.innerHTML = html;
 	})(haxe.Json.parse(haxe.Http.requestUrl("/user/" + user + "/about.json")));
 }

@@ -17,16 +17,12 @@ class UserInfo {
 			if(d.data != null)
 				d = d.data;
 			var html = '<b>User:</b> ${d.name}<br>';
-			var diff = Date.fromTime(haxe.Timer.stamp() - d.created_utc*1000);
-			var years = diff.getFullYear()-1970, months = diff.getMonth(), days = diff.getDate();
-			html += "<b>Account age:</b> ";
-			if(years > 0) html += '$years years, ';
-			if(months > 0) html += '$months months, ';
-			html += '$days days<br>';
-			html += '<b>Karma:</b> ${d.link_karma} link karma, ${d.comment_karma} comment karma';
-			if(d.is_mod != null)
+			var age = Reditn.age(d.created_utc);
+			html += '<b>Account age:</b> $age<br>';
+			html += '<b>Karma:</b> ${Reditn.formatNumber(d.link_karma)} link karma, ${Reditn.formatNumber(d.comment_karma)} comment karma';
+			if(d.is_mod != null && d.is_mod)
 				html += "<br><b>Moderator</b>";
-			if(d.is_gold != null)
+			if(d.is_gold != null && d.is_gold)
 				html += "<br><b>Gold</b>";
 			div.innerHTML = html;
 		});
