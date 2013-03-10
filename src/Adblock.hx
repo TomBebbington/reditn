@@ -3,6 +3,7 @@ import js.html.*;
 class Adblock {
 	public static function init() {
 		removeAll(Browser.document.body.getElementsByClassName("promoted"));
+		removeAll(Browser.document.body.getElementsByClassName("goldvertisement"));
 		removeTop();
 		var sidebarAd = Browser.document.getElementById("ad-frame");
 		if(sidebarAd != null)

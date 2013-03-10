@@ -2,34 +2,35 @@ import js.html.*;
 import js.Browser;
 using StringTools;
 class Reditn {
-	public static var settings:Map<String, Dynamic> = null;
 	static inline var year = 31557600;
 	static inline var month = 2629800;
 	static inline var day = 86400;
 	static inline var hour = 3600;
 	static function main() {
-		trace(5 % 3 == 2);
 		if(untyped document.readyState=="complete")
 			init();
 		else
 			untyped window.onload = function(e) init();
 	}
 	static function init() {
-		var sets = Browser.window.localStorage.getItem("reditn");
-		settings = sets == null ? new Map<String, Dynamic>() : haxe.Unserializer.run(sets);
-
-		Adblock.init();
+		Settings.init();
+		if(Settings.data.get("Adblock enabled"))
+			Adblock.init();
 		//Style.init();
-		Expand.init();
-		UserInfo.init();
-		SubredditInfo.init();
-		Header.init();
+		if(Settings.data.get("Image expanding enabled")) {
+			Expand.init();
+			Header.init();
+		}
+		if(Settings.data.get("Hover information enabled")) {
+			UserInfo.init();
+			SubredditInfo.init();
+		}
 	}
 	public static function formatNumber(n:Int):String {
 		return if (!Math.isFinite(n))
 			Std.string(n);
 		else {
-			var s = Std.string(n);
+			var s = Std.string(Math.abs(n));
 			if (s.length >= 3) {
 				var ns = "";
 				for(i in 0...s.length) {
@@ -39,7 +40,7 @@ class Reditn {
 				}
 				s = ns;
 			}
-			s;
+			n < 0 ? "-"+s:s;
 		}
 	}
 	static inline function plural(n:Int) {
@@ -89,15 +90,12 @@ class Reditn {
 			LinkType.UNKNOWN;
 		}
 	}
-	public static function saveSettings():Void {
-		Browser.window.localStorage.setItem("reditn", haxe.Serializer.run(settings));
-	}
 	public static inline function getJSON(url:String, func:Dynamic->Void) {
 		func(haxe.Json.parse(haxe.Http.requestUrl(url)));
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);
-		el.className="reditnpopup";
+		el.className="reditn-popup";
 		el.innerHTML = "<em>Loading...</em>";
 		el.style.position = "absolute";
 		el.style.top = y+"px";
@@ -111,6 +109,37 @@ class Reditn {
 			el.parentNode.removeChild(el);
 			untyped bs.mouseover = false;
 		}
+		return el;
+	}
+	public static function fullPopUp(el:Element) {
+		var old = Browser.document.getElementById("reditn-full-popup");
+		if(old != null)
+			old.parentNode.removeChild(old);
+		Browser.document.body.appendChild(el);
+		var head = Browser.document.getElementById("header");
+		var close = Browser.document.createAnchorElement();
+		close.innerHTML = "<b>Close</b>";
+		close.href = "javascript:void(0);";
+		close.style.position = "absolute";
+		close.style.right = "5px";
+		close.style.top = "0px";
+		close.style.fontStyle = "bold";
+		close.onclick = function(e) {
+			el.parentNode.removeChild(el);
+		}
+		el.appendChild(close);
+		el.id="reditn-full-popup";
+		el.style.zIndex = "50";
+		el.style.position = "absolute";
+		el.style.top = head.offsetHeight + "px";
+		el.style.left = "25%";
+		el.style.marginLeft = "auto";
+		el.style.marginRight = "auto";
+		el.style.padding = "5px";
+		el.style.backgroundColor = "#fcfcfc";
+		el.style.border = "1px solid black";
+		el.style.borderRadius = "6px";
+		el.style.width = "50%";
 		return el;
 	}
 }

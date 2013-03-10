@@ -6,6 +6,6 @@
 // @include     reddit.com/*
 // @include		*.reddit.com
 // @include		*.reddit.com/*
-// @version     1.4.2
+// @version     1.4.3
 // @grant		none
 // ==/UserScript==

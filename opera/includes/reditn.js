@@ -7,16 +7,17 @@
 // @include     reddit.com/*
 // @include		*.reddit.com
 // @include		*.reddit.com/*
-// @version     1.4.2
+// @version     1.4.3
 // @grant		none
 // ==/UserScript==
 (function () { "use strict";
 var $hxClasses = {},$estr = function() { return js.Boot.__string_rec(this,''); };
 var Adblock = function() { }
 $hxClasses["Adblock"] = Adblock;
-Adblock.__name__ = true;
+Adblock.__name__ = ["Adblock"];
 Adblock.init = function() {
 	Adblock.removeAll(js.Browser.document.body.getElementsByClassName("promoted"));
+	Adblock.removeAll(js.Browser.document.body.getElementsByClassName("goldvertisement"));
 	Adblock.removeTop();
 	var sidebarAd = js.Browser.document.getElementById("ad-frame");
 	if(sidebarAd != null) {
@@ -42,7 +43,7 @@ Adblock.removeTop = function() {
 }
 var Expand = function() { }
 $hxClasses["Expand"] = Expand;
-Expand.__name__ = true;
+Expand.__name__ = ["Expand"];
 Expand.init = function() {
 	Expand.maxWidth = (function($this) {
 		var $r;
@@ -184,8 +185,11 @@ Expand.removeSymbols = function(s) {
 }
 var Header = function() { }
 $hxClasses["Header"] = Header;
-Header.__name__ = true;
+Header.__name__ = ["Header"];
 Header.init = function() {
+	if(Expand.expandButtons.length > 0) Header.initShowAll();
+}
+Header.initShowAll = function() {
 	var menu = js.Browser.document.getElementsByClassName("tabmenu")[0];
 	var li = js.Browser.document.createElement("li");
 	var l = js.Browser.document.createElement("a");
@@ -209,7 +213,15 @@ Header.init = function() {
 }
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
-HxOverrides.__name__ = true;
+HxOverrides.__name__ = ["HxOverrides"];
+HxOverrides.dateStr = function(date) {
+	var m = date.getMonth() + 1;
+	var d = date.getDate();
+	var h = date.getHours();
+	var mi = date.getMinutes();
+	var s = date.getSeconds();
+	return date.getFullYear() + "-" + (m < 10?"0" + m:"" + m) + "-" + (d < 10?"0" + d:"" + d) + " " + (h < 10?"0" + h:"" + h) + ":" + (mi < 10?"0" + mi:"" + mi) + ":" + (s < 10?"0" + s:"" + s);
+}
 HxOverrides.strDate = function(s) {
 	switch(s.length) {
 	case 8:
@@ -253,7 +265,7 @@ HxOverrides.iter = function(a) {
 		return this.arr[this.cur++];
 	}};
 }
-var LinkType = $hxClasses["LinkType"] = { __ename__ : true, __constructs__ : ["IMAGE","VIDEO","AUDIO","UNKNOWN"] }
+var LinkType = $hxClasses["LinkType"] = { __ename__ : ["LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","UNKNOWN"] }
 LinkType.IMAGE = ["IMAGE",0];
 LinkType.IMAGE.toString = $estr;
 LinkType.IMAGE.__enum__ = LinkType;
@@ -270,9 +282,19 @@ var List = function() {
 	this.length = 0;
 };
 $hxClasses["List"] = List;
-List.__name__ = true;
+List.__name__ = ["List"];
 List.prototype = {
-	add: function(item) {
+	iterator: function() {
+		return { h : this.h, hasNext : function() {
+			return this.h != null;
+		}, next : function() {
+			if(this.h == null) return null;
+			var x = this.h[0];
+			this.h = this.h[1];
+			return x;
+		}};
+	}
+	,add: function(item) {
 		var x = [item];
 		if(this.h == null) this.h = x; else this.q[1] = x;
 		this.q = x;
@@ -282,26 +304,28 @@ List.prototype = {
 }
 var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
-Reditn.__name__ = true;
+Reditn.__name__ = ["Reditn"];
 Reditn.main = function() {
-	console.log(5 % 3 == 2);
 	if(document.readyState == "complete") Reditn.init(); else window.onload = function(e) {
 		Reditn.init();
 	};
 }
 Reditn.init = function() {
-	var sets = js.Browser.window.localStorage.getItem("reditn");
-	Reditn.settings = sets == null?new haxe.ds.StringMap():haxe.Unserializer.run(sets);
-	Adblock.init();
-	Expand.init();
-	UserInfo.init();
-	SubredditInfo.init();
-	Header.init();
+	Settings.init();
+	if(Settings.data.get("Adblock enabled")) Adblock.init();
+	if(Settings.data.get("Image expanding enabled")) {
+		Expand.init();
+		Header.init();
+	}
+	if(Settings.data.get("Hover information enabled")) {
+		UserInfo.init();
+		SubredditInfo.init();
+	}
 }
 Reditn.formatNumber = function(n) {
 	return !Math.isFinite(n)?Std.string(n):(function($this) {
 		var $r;
-		var s = Std.string(n);
+		var s = Std.string(Math.abs(n));
 		if(s.length >= 3) {
 			var ns = "";
 			var _g1 = 0, _g = s.length;
@@ -312,7 +336,7 @@ Reditn.formatNumber = function(n) {
 			}
 			s = ns;
 		}
-		$r = s;
+		$r = n < 0?"-" + s:s;
 		return $r;
 	}(this));
 }
@@ -359,7 +383,7 @@ Reditn.popUp = function(bs,el,x,y) {
 	if(y == null) y = 0;
 	if(x == null) x = 0;
 	js.Browser.document.body.appendChild(el);
-	el.className = "reditnpopup";
+	el.className = "reditn-popup";
 	el.innerHTML = "<em>Loading...</em>";
 	el.style.position = "absolute";
 	el.style.top = y + "px";
@@ -375,9 +399,42 @@ Reditn.popUp = function(bs,el,x,y) {
 	};
 	return el;
 }
+Reditn.fullPopUp = function(el) {
+	var old = js.Browser.document.getElementById("reditn-full-popup");
+	if(old != null) old.parentNode.removeChild(old);
+	js.Browser.document.body.appendChild(el);
+	var head = js.Browser.document.getElementById("header");
+	var close = js.Browser.document.createElement("a");
+	close.innerHTML = "<b>Close</b>";
+	close.href = "javascript:void(0);";
+	close.style.position = "absolute";
+	close.style.right = "5px";
+	close.style.top = "0px";
+	close.style.fontStyle = "bold";
+	close.onclick = function(e) {
+		el.parentNode.removeChild(el);
+	};
+	el.appendChild(close);
+	el.id = "reditn-full-popup";
+	el.style.zIndex = "50";
+	el.style.position = "absolute";
+	el.style.top = head.offsetHeight + "px";
+	el.style.left = "25%";
+	el.style.marginLeft = "auto";
+	el.style.marginRight = "auto";
+	el.style.padding = "5px";
+	el.style.backgroundColor = "#fcfcfc";
+	el.style.border = "1px solid black";
+	el.style.borderRadius = "6px";
+	el.style.width = "50%";
+	return el;
+}
 var Reflect = function() { }
 $hxClasses["Reflect"] = Reflect;
-Reflect.__name__ = true;
+Reflect.__name__ = ["Reflect"];
+Reflect.hasField = function(o,field) {
+	return Object.prototype.hasOwnProperty.call(o,field);
+}
 Reflect.field = function(o,field) {
 	var v = null;
 	try {
@@ -386,12 +443,117 @@ Reflect.field = function(o,field) {
 	}
 	return v;
 }
+Reflect.fields = function(o) {
+	var a = [];
+	if(o != null) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		for( var f in o ) {
+		if(f != "__id__" && hasOwnProperty.call(o,f)) a.push(f);
+		}
+	}
+	return a;
+}
 Reflect.isFunction = function(f) {
 	return typeof(f) == "function" && !(f.__name__ || f.__ename__);
 }
+Reflect.deleteField = function(o,f) {
+	if(!Reflect.hasField(o,f)) return false;
+	delete(o[f]);
+	return true;
+}
+var Settings = function() { }
+$hxClasses["Settings"] = Settings;
+Settings.__name__ = ["Settings"];
+Settings.save = function() {
+	js.Browser.window.localStorage.setItem("reditn",haxe.Serializer.run(Settings.data));
+}
+Settings.init = function() {
+	var dt = js.Browser.window.localStorage.getItem("reditn");
+	if(dt != null) Settings.data = haxe.Unserializer.run(dt);
+	var $it0 = Settings.values.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		if(!Settings.data.exists(k)) {
+			var value = Settings.values.get(k);
+			Settings.data.set(k,value);
+		}
+	}
+	var h = js.Browser.document.getElementById("header-bottom-right");
+	var prefs = h.getElementsByTagName("ul")[0];
+	var d = js.Browser.document.createElement("a");
+	d.innerHTML = "reditn";
+	d.className = "pref-lang";
+	d.href = "javascript:void(0);";
+	d.onclick = function(e) {
+		Settings.settingsPopUp();
+	};
+	h.insertBefore(d,prefs);
+	var sep = js.Browser.document.createElement("span");
+	sep.innerHTML = " | ";
+	sep.className = "seperator";
+	h.insertBefore(sep,prefs);
+}
+Settings.settingsPopUp = function() {
+	var e = js.Browser.document.createElement("div");
+	var h = js.Browser.document.createElement("h1");
+	h.innerHTML = "Reditn settings";
+	e.appendChild(h);
+	var form = js.Browser.document.createElement("form");
+	form.action = "javascript:void(0);";
+	form.onsubmit = function(ev) {
+		var a = form.childNodes;
+		var _g = 0;
+		while(_g < a.length) {
+			var i = a[_g];
+			++_g;
+			if(i.nodeName.toLowerCase() != "input") continue;
+			var i1 = i;
+			var val = (function($this) {
+				var $r;
+				var _g1 = i1.type.toLowerCase();
+				$r = (function($this) {
+					var $r;
+					switch(_g1) {
+					case "checkbox":
+						$r = i1.checked == true;
+						break;
+					default:
+						$r = i1.value;
+					}
+					return $r;
+				}($this));
+				return $r;
+			}(this));
+			Settings.data.set(i1.name,i1.value);
+		}
+		Settings.save();
+		e.parentNode.removeChild(e);
+	};
+	e.appendChild(form);
+	var $it0 = Settings.values.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		var label = js.Browser.document.createElement("label");
+		label.setAttribute("for",k);
+		label.innerHTML = k;
+		form.appendChild(label);
+		var input = js.Browser.document.createElement("input");
+		input.name = k;
+		form.appendChild(input);
+		form.appendChild(js.Browser.document.createElement("br"));
+		var d = Settings.values.get(k);
+		input.type = js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":null;
+		if(js.Boot.__instanceof(d,Bool)) input.checked = Settings.data.get(k); else input.value = Settings.data.get(k);
+	}
+	var submit = js.Browser.document.createElement("input");
+	submit.type = "submit";
+	submit.value = "Save";
+	form.appendChild(submit);
+	Reditn.fullPopUp(e);
+}
 var Std = function() { }
 $hxClasses["Std"] = Std;
-Std.__name__ = true;
+Std.__name__ = ["Std"];
 Std.string = function(s) {
 	return js.Boot.__string_rec(s,"");
 }
@@ -408,7 +570,7 @@ var StringBuf = function() {
 	this.b = "";
 };
 $hxClasses["StringBuf"] = StringBuf;
-StringBuf.__name__ = true;
+StringBuf.__name__ = ["StringBuf"];
 StringBuf.prototype = {
 	addSub: function(s,pos,len) {
 		this.b += len == null?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len);
@@ -417,7 +579,7 @@ StringBuf.prototype = {
 }
 var StringTools = function() { }
 $hxClasses["StringTools"] = StringTools;
-StringTools.__name__ = true;
+StringTools.__name__ = ["StringTools"];
 StringTools.urlEncode = function(s) {
 	return encodeURIComponent(s);
 }
@@ -429,7 +591,7 @@ StringTools.replace = function(s,sub,by) {
 }
 var SubredditInfo = function() { }
 $hxClasses["SubredditInfo"] = SubredditInfo;
-SubredditInfo.__name__ = true;
+SubredditInfo.__name__ = ["SubredditInfo"];
 SubredditInfo.init = function() {
 	var subs = js.Browser.document.body.getElementsByClassName("subreddit");
 	var _g = 0;
@@ -454,9 +616,41 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 		div.innerHTML = html;
 	})(haxe.Json.parse(haxe.Http.requestUrl("/r/" + name + "/about.json")));
 }
+var ValueType = $hxClasses["ValueType"] = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
+ValueType.TNull = ["TNull",0];
+ValueType.TNull.toString = $estr;
+ValueType.TNull.__enum__ = ValueType;
+ValueType.TInt = ["TInt",1];
+ValueType.TInt.toString = $estr;
+ValueType.TInt.__enum__ = ValueType;
+ValueType.TFloat = ["TFloat",2];
+ValueType.TFloat.toString = $estr;
+ValueType.TFloat.__enum__ = ValueType;
+ValueType.TBool = ["TBool",3];
+ValueType.TBool.toString = $estr;
+ValueType.TBool.__enum__ = ValueType;
+ValueType.TObject = ["TObject",4];
+ValueType.TObject.toString = $estr;
+ValueType.TObject.__enum__ = ValueType;
+ValueType.TFunction = ["TFunction",5];
+ValueType.TFunction.toString = $estr;
+ValueType.TFunction.__enum__ = ValueType;
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; }
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; }
+ValueType.TUnknown = ["TUnknown",8];
+ValueType.TUnknown.toString = $estr;
+ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { }
 $hxClasses["Type"] = Type;
-Type.__name__ = true;
+Type.__name__ = ["Type"];
+Type.getClassName = function(c) {
+	var a = c.__name__;
+	return a.join(".");
+}
+Type.getEnumName = function(e) {
+	var a = e.__ename__;
+	return a.join(".");
+}
 Type.resolveClass = function(name) {
 	var cl = $hxClasses[name];
 	if(cl == null || !cl.__name__) return null;
@@ -485,9 +679,35 @@ Type.getEnumConstructs = function(e) {
 	var a = e.__constructs__;
 	return a.slice();
 }
+Type["typeof"] = function(v) {
+	var _g = typeof(v);
+	switch(_g) {
+	case "boolean":
+		return ValueType.TBool;
+	case "string":
+		return ValueType.TClass(String);
+	case "number":
+		if(Math.ceil(v) == v % 2147483648.0) return ValueType.TInt;
+		return ValueType.TFloat;
+	case "object":
+		if(v == null) return ValueType.TNull;
+		var e = v.__enum__;
+		if(e != null) return ValueType.TEnum(e);
+		var c = v.__class__;
+		if(c != null) return ValueType.TClass(c);
+		return ValueType.TObject;
+	case "function":
+		if(v.__name__ || v.__ename__) return ValueType.TObject;
+		return ValueType.TFunction;
+	case "undefined":
+		return ValueType.TNull;
+	default:
+		return ValueType.TUnknown;
+	}
+}
 var UserInfo = function() { }
 $hxClasses["UserInfo"] = UserInfo;
-UserInfo.__name__ = true;
+UserInfo.__name__ = ["UserInfo"];
 UserInfo.init = function() {
 	var users = js.Browser.document.body.getElementsByClassName("author");
 	var _g = 0;
@@ -522,7 +742,7 @@ haxe.Http = function(url) {
 	this.async = true;
 };
 $hxClasses["haxe.Http"] = haxe.Http;
-haxe.Http.__name__ = true;
+haxe.Http.__name__ = ["haxe","Http"];
 haxe.Http.requestUrl = function(url) {
 	var h = new haxe.Http(url);
 	h.async = false;
@@ -606,7 +826,7 @@ haxe.Http.prototype = {
 haxe.Json = function() {
 };
 $hxClasses["haxe.Json"] = haxe.Json;
-haxe.Json.__name__ = true;
+haxe.Json.__name__ = ["haxe","Json"];
 haxe.Json.parse = function(text) {
 	return new haxe.Json().doParse(text);
 }
@@ -799,6 +1019,256 @@ haxe.Json.prototype = {
 	}
 	,__class__: haxe.Json
 }
+haxe.Serializer = function() {
+	this.buf = new StringBuf();
+	this.cache = new Array();
+	this.useCache = haxe.Serializer.USE_CACHE;
+	this.useEnumIndex = haxe.Serializer.USE_ENUM_INDEX;
+	this.shash = new haxe.ds.StringMap();
+	this.scount = 0;
+};
+$hxClasses["haxe.Serializer"] = haxe.Serializer;
+haxe.Serializer.__name__ = ["haxe","Serializer"];
+haxe.Serializer.run = function(v) {
+	var s = new haxe.Serializer();
+	s.serialize(v);
+	return s.toString();
+}
+haxe.Serializer.prototype = {
+	serialize: function(v) {
+		var _g = Type["typeof"](v);
+		var $e = (_g);
+		switch( $e[1] ) {
+		case 0:
+			this.buf.b += "n";
+			break;
+		case 1:
+			if(v == 0) {
+				this.buf.b += "z";
+				return;
+			}
+			this.buf.b += "i";
+			this.buf.b += Std.string(v);
+			break;
+		case 2:
+			if(Math.isNaN(v)) this.buf.b += "k"; else if(!Math.isFinite(v)) this.buf.b += Std.string(v < 0?"m":"p"); else {
+				this.buf.b += "d";
+				this.buf.b += Std.string(v);
+			}
+			break;
+		case 3:
+			this.buf.b += Std.string(v?"t":"f");
+			break;
+		case 6:
+			var _g_eTClass_0 = $e[2];
+			if(_g_eTClass_0 == String) {
+				this.serializeString(v);
+				return;
+			}
+			if(this.useCache && this.serializeRef(v)) return;
+			switch(_g_eTClass_0) {
+			case Array:
+				var ucount = 0;
+				this.buf.b += "a";
+				var l = v.length;
+				var _g1 = 0;
+				while(_g1 < l) {
+					var i = _g1++;
+					if(v[i] == null) ucount++; else {
+						if(ucount > 0) {
+							if(ucount == 1) this.buf.b += "n"; else {
+								this.buf.b += "u";
+								this.buf.b += Std.string(ucount);
+							}
+							ucount = 0;
+						}
+						this.serialize(v[i]);
+					}
+				}
+				if(ucount > 0) {
+					if(ucount == 1) this.buf.b += "n"; else {
+						this.buf.b += "u";
+						this.buf.b += Std.string(ucount);
+					}
+				}
+				this.buf.b += "h";
+				break;
+			case List:
+				this.buf.b += "l";
+				var v1 = v;
+				var $it0 = v1.iterator();
+				while( $it0.hasNext() ) {
+					var i = $it0.next();
+					this.serialize(i);
+				}
+				this.buf.b += "h";
+				break;
+			case Date:
+				var d = v;
+				this.buf.b += "v";
+				this.buf.b += Std.string(HxOverrides.dateStr(d));
+				break;
+			case haxe.ds.StringMap:
+				this.buf.b += "b";
+				var v1 = v;
+				var $it1 = v1.keys();
+				while( $it1.hasNext() ) {
+					var k = $it1.next();
+					this.serializeString(k);
+					this.serialize(v1.get(k));
+				}
+				this.buf.b += "h";
+				break;
+			case haxe.ds.IntMap:
+				this.buf.b += "q";
+				var v1 = v;
+				var $it2 = v1.keys();
+				while( $it2.hasNext() ) {
+					var k = $it2.next();
+					this.buf.b += ":";
+					this.buf.b += Std.string(k);
+					this.serialize(v1.get(k));
+				}
+				this.buf.b += "h";
+				break;
+			case haxe.ds.ObjectMap:
+				this.buf.b += "M";
+				var v1 = v;
+				var $it3 = v1.keys();
+				while( $it3.hasNext() ) {
+					var k = $it3.next();
+					var id = Reflect.field(k,"__id__");
+					Reflect.deleteField(k,"__id__");
+					this.serialize(k);
+					k.__id__ = id;
+					this.serialize(v1.h[k.__id__]);
+				}
+				this.buf.b += "h";
+				break;
+			case haxe.io.Bytes:
+				var v1 = v;
+				var i = 0;
+				var max = v1.length - 2;
+				var charsBuf = new StringBuf();
+				var b64 = haxe.Serializer.BASE64;
+				while(i < max) {
+					var b1 = v1.b[i++];
+					var b2 = v1.b[i++];
+					var b3 = v1.b[i++];
+					charsBuf.b += Std.string(b64.charAt(b1 >> 2));
+					charsBuf.b += Std.string(b64.charAt((b1 << 4 | b2 >> 4) & 63));
+					charsBuf.b += Std.string(b64.charAt((b2 << 2 | b3 >> 6) & 63));
+					charsBuf.b += Std.string(b64.charAt(b3 & 63));
+				}
+				if(i == max) {
+					var b1 = v1.b[i++];
+					var b2 = v1.b[i++];
+					charsBuf.b += Std.string(b64.charAt(b1 >> 2));
+					charsBuf.b += Std.string(b64.charAt((b1 << 4 | b2 >> 4) & 63));
+					charsBuf.b += Std.string(b64.charAt(b2 << 2 & 63));
+				} else if(i == max + 1) {
+					var b1 = v1.b[i++];
+					charsBuf.b += Std.string(b64.charAt(b1 >> 2));
+					charsBuf.b += Std.string(b64.charAt(b1 << 4 & 63));
+				}
+				var chars = charsBuf.b;
+				this.buf.b += "s";
+				this.buf.b += Std.string(chars.length);
+				this.buf.b += ":";
+				this.buf.b += Std.string(chars);
+				break;
+			default:
+				this.cache.pop();
+				if(v.hxSerialize != null) {
+					this.buf.b += "C";
+					this.serializeString(Type.getClassName(_g_eTClass_0));
+					this.cache.push(v);
+					v.hxSerialize(this);
+					this.buf.b += "g";
+				} else {
+					this.buf.b += "c";
+					this.serializeString(Type.getClassName(_g_eTClass_0));
+					this.cache.push(v);
+					this.serializeFields(v);
+				}
+			}
+			break;
+		case 4:
+			if(this.useCache && this.serializeRef(v)) return;
+			this.buf.b += "o";
+			this.serializeFields(v);
+			break;
+		case 7:
+			var _g_eTEnum_0 = $e[2];
+			if(this.useCache && this.serializeRef(v)) return;
+			this.cache.pop();
+			this.buf.b += Std.string(this.useEnumIndex?"j":"w");
+			this.serializeString(Type.getEnumName(_g_eTEnum_0));
+			if(this.useEnumIndex) {
+				this.buf.b += ":";
+				this.buf.b += Std.string(v[1]);
+			} else this.serializeString(v[0]);
+			this.buf.b += ":";
+			var l = v.length;
+			this.buf.b += Std.string(l - 2);
+			var _g1 = 2;
+			while(_g1 < l) {
+				var i = _g1++;
+				this.serialize(v[i]);
+			}
+			this.cache.push(v);
+			break;
+		case 5:
+			throw "Cannot serialize function";
+			break;
+		default:
+			throw "Cannot serialize " + Std.string(v);
+		}
+	}
+	,serializeFields: function(v) {
+		var _g = 0, _g1 = Reflect.fields(v);
+		while(_g < _g1.length) {
+			var f = _g1[_g];
+			++_g;
+			this.serializeString(f);
+			this.serialize(Reflect.field(v,f));
+		}
+		this.buf.b += "g";
+	}
+	,serializeRef: function(v) {
+		var vt = typeof(v);
+		var _g1 = 0, _g = this.cache.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var ci = this.cache[i];
+			if(typeof(ci) == vt && ci == v) {
+				this.buf.b += "r";
+				this.buf.b += Std.string(i);
+				return true;
+			}
+		}
+		this.cache.push(v);
+		return false;
+	}
+	,serializeString: function(s) {
+		var x = this.shash.get(s);
+		if(x != null) {
+			this.buf.b += "R";
+			this.buf.b += Std.string(x);
+			return;
+		}
+		this.shash.set(s,this.scount++);
+		this.buf.b += "y";
+		s = StringTools.urlEncode(s);
+		this.buf.b += Std.string(s.length);
+		this.buf.b += ":";
+		this.buf.b += Std.string(s);
+	}
+	,toString: function() {
+		return this.buf.b;
+	}
+	,__class__: haxe.Serializer
+}
 haxe.Timer = function(time_ms) {
 	var me = this;
 	this.id = setInterval(function() {
@@ -806,7 +1276,7 @@ haxe.Timer = function(time_ms) {
 	},time_ms);
 };
 $hxClasses["haxe.Timer"] = haxe.Timer;
-haxe.Timer.__name__ = true;
+haxe.Timer.__name__ = ["haxe","Timer"];
 haxe.Timer.stamp = function() {
 	return new Date().getTime() / 1000;
 }
@@ -835,7 +1305,7 @@ haxe.Unserializer = function(buf) {
 	this.setResolver(r);
 };
 $hxClasses["haxe.Unserializer"] = haxe.Unserializer;
-haxe.Unserializer.__name__ = true;
+haxe.Unserializer.__name__ = ["haxe","Unserializer"];
 haxe.Unserializer.initCodes = function() {
 	var codes = new Array();
 	var _g1 = 0, _g = haxe.Unserializer.BASE64.length;
@@ -1089,7 +1559,7 @@ haxe.ds.IntMap = function() {
 	this.h = { };
 };
 $hxClasses["haxe.ds.IntMap"] = haxe.ds.IntMap;
-haxe.ds.IntMap.__name__ = true;
+haxe.ds.IntMap.__name__ = ["haxe","ds","IntMap"];
 haxe.ds.IntMap.prototype = {
 	toString: function() {
 		var s = new StringBuf();
@@ -1142,7 +1612,7 @@ haxe.ds.ObjectMap = function(weakKeys) {
 	this.h.__keys__ = { };
 };
 $hxClasses["haxe.ds.ObjectMap"] = haxe.ds.ObjectMap;
-haxe.ds.ObjectMap.__name__ = true;
+haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
 haxe.ds.ObjectMap.prototype = {
 	toString: function() {
 		var s = new StringBuf();
@@ -1197,7 +1667,7 @@ haxe.ds.StringMap = function() {
 	this.h = { };
 };
 $hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
-haxe.ds.StringMap.__name__ = true;
+haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
 haxe.ds.StringMap.prototype = {
 	toString: function() {
 		var s = new StringBuf();
@@ -1251,7 +1721,7 @@ haxe.io.Bytes = function(length,b) {
 	this.b = b;
 };
 $hxClasses["haxe.io.Bytes"] = haxe.io.Bytes;
-haxe.io.Bytes.__name__ = true;
+haxe.io.Bytes.__name__ = ["haxe","io","Bytes"];
 haxe.io.Bytes.alloc = function(length) {
 	var a = new Array();
 	var _g = 0;
@@ -1267,7 +1737,7 @@ haxe.io.Bytes.prototype = {
 var js = {}
 js.Boot = function() { }
 $hxClasses["js.Boot"] = js.Boot;
-js.Boot.__name__ = true;
+js.Boot.__name__ = ["js","Boot"];
 js.Boot.__string_rec = function(o,s) {
 	if(o == null) return "null";
 	if(s.length >= 5) return "<...>";
@@ -1378,7 +1848,7 @@ js.Boot.__instanceof = function(o,cl) {
 }
 js.Browser = function() { }
 $hxClasses["js.Browser"] = js.Browser;
-js.Browser.__name__ = true;
+js.Browser.__name__ = ["js","Browser"];
 js.Browser.createXMLHttpRequest = function() {
 	if(typeof XMLHttpRequest != "undefined") return new XMLHttpRequest();
 	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
@@ -1396,9 +1866,9 @@ Math.isNaN = function(i) {
 	return isNaN(i);
 };
 String.prototype.__class__ = $hxClasses.String = String;
-String.__name__ = true;
+String.__name__ = ["String"];
 Array.prototype.__class__ = $hxClasses.Array = Array;
-Array.__name__ = true;
+Array.__name__ = ["Array"];
 Date.prototype.__class__ = $hxClasses.Date = Date;
 Date.__name__ = ["Date"];
 var Int = $hxClasses.Int = { __name__ : ["Int"]};
@@ -1413,6 +1883,19 @@ if(typeof(JSON) != "undefined") haxe.Json = JSON;
 Expand.maxWidth = 0;
 Expand.maxHeight = 0;
 Expand.expandButtons = [];
+Settings.values = (function($this) {
+	var $r;
+	var m = new haxe.ds.StringMap();
+	m.set("Adblock enabled",true);
+	m.set("Image expanding enabled",true);
+	m.set("Hover information enabled",true);
+	$r = m;
+	return $r;
+}(this));
+Settings.data = new haxe.ds.StringMap();
+haxe.Serializer.USE_CACHE = false;
+haxe.Serializer.USE_ENUM_INDEX = false;
+haxe.Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe.Unserializer.DEFAULT_RESOLVER = Type;
 haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe.ds.ObjectMap.count = 0;

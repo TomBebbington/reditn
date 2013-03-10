@@ -3,6 +3,10 @@ import js.html.*;
 
 class Header {
 	public static function init() {
+		if(Expand.expandButtons.length > 0)
+			initShowAll();
+	}
+	static function initShowAll() {
 		var menu = Browser.document.getElementsByClassName("tabmenu")[0];
 		var li:LIElement = Browser.document.createLIElement();
 		var l:AnchorElement = Browser.document.createAnchorElement();
