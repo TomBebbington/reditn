@@ -12,13 +12,13 @@ class Expand {
 	static inline function get_maxWidth():Int {
 		return Std.int(try {
 			var a = Math.abs(Browser.window.innerWidth - untyped Browser.document.body.getElementsByClassName("side")[0].offsetWidth); // just in case something goes horrible wrong...
-			Math.min(a, Browser.window.innerWidth*0.6);
+			Math.min(a, Browser.window.innerWidth*0.7);
 		} catch(e:Dynamic) {
-			Browser.window.innerWidth*0.6;
+			Browser.window.innerWidth*0.7;
 		});
 	}
 	static inline function get_maxHeight():Int {
-		return Std.int(Browser.window.innerHeight*0.5);
+		return Std.int(Browser.window.innerHeight*0.6);
 	}
 	static inline function get_maxArea():Int {
 		return maxWidth * maxHeight;
@@ -58,7 +58,8 @@ class Expand {
 	}
 	static function showButton(el:Element) {
 		var e = Browser.document.createSpanElement();
-		e.innerHTML = "<b>show</b>";
+		e.className = "reditn-show-img";
+		e.innerHTML = "show";
 		untyped e.toggled = false;
 		e.onclick = function(ev) {
 			untyped e.toggled = !e.toggled;
@@ -68,7 +69,6 @@ class Expand {
 			} else if(el.parentNode != null)
 				el.parentNode.removeChild(el);
 		}
-		e.style.cursor = "pointer";
 		return e;
 	}
 	static inline function getEntry(l:Element) {

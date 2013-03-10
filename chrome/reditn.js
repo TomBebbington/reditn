@@ -7,7 +7,7 @@
 // @include     reddit.com/*
 // @include		*.reddit.com
 // @include		*.reddit.com/*
-// @version     1.4.5
+// @version     1.4.6
 // @grant		none
 // ==/UserScript==
 (function () { "use strict";
@@ -66,11 +66,11 @@ Expand.get_maxWidth = function() {
 			$r = (function($this) {
 				var $r;
 				var a = Math.abs(js.Browser.window.innerWidth - js.Browser.document.body.getElementsByClassName("side")[0].offsetWidth);
-				$r = Math.min(a,js.Browser.window.innerWidth * 0.6);
+				$r = Math.min(a,js.Browser.window.innerWidth * 0.7);
 				return $r;
 			}($this));
 		} catch( e ) {
-			$r = js.Browser.window.innerWidth * 0.6;
+			$r = js.Browser.window.innerWidth * 0.7;
 		}
 		return $r;
 	}(this)) | 0;
@@ -102,14 +102,14 @@ Expand.init = function() {
 }
 Expand.showButton = function(el) {
 	var e = js.Browser.document.createElement("span");
-	e.innerHTML = "<b>show</b>";
+	e.className = "reditn-show-img";
+	e.innerHTML = "show";
 	e.toggled = false;
 	e.onclick = function(ev) {
 		e.toggled = !e.toggled;
 		e.innerHTML = e.toggled?"<b>hide</b>":"<b>show</b>";
 		if(e.toggled) e.parentNode.parentNode.appendChild(el); else if(el.parentNode != null) el.parentNode.removeChild(el);
 	};
-	e.style.cursor = "pointer";
 	return e;
 }
 Expand.getImageLink = function(ourl,el,cb) {
@@ -150,7 +150,7 @@ Expand.getImageLink = function(ourl,el,cb) {
 				var s = sizes[_g];
 				++_g;
 				var size = Std.parseInt(s.width) * Std.parseInt(s.height);
-				if(largest == null || size >= largestSize && size <= Expand.get_maxWidth() * (js.Browser.window.innerHeight * 0.5 | 0)) {
+				if(largest == null || size >= largestSize && size <= Expand.get_maxWidth() * (js.Browser.window.innerHeight * 0.6 | 0)) {
 					largest = s.source;
 					largestSize = size;
 				}
@@ -177,9 +177,9 @@ Expand.loadImage = function(url) {
 			img.width = Expand.get_maxWidth();
 			img.height = img.width * rt | 0;
 		}
-		if(img.height > (js.Browser.window.innerHeight * 0.5 | 0)) {
+		if(img.height > (js.Browser.window.innerHeight * 0.6 | 0)) {
 			var rt = img.width / img.height;
-			img.height = js.Browser.window.innerHeight * 0.5 | 0;
+			img.height = js.Browser.window.innerHeight * 0.6 | 0;
 			img.width = img.height * rt | 0;
 		}
 	};
@@ -245,6 +245,7 @@ Header.refresh = function() {
 			var i1 = i;
 			if(Header.toggled && i1.href.indexOf("#") == -1) i1.href += "#showall"; else if(!Header.toggled && i1.href.indexOf("#") != -1) i1.href = HxOverrides.substr(i1.href,0,i1.href.indexOf("#"));
 		}
+		Header.button.style.visibility = Expand.expandButtons.length == 0?"hidden":"visible";
 	}
 }
 Header.initShowAll = function() {
@@ -381,6 +382,7 @@ Reditn.main = function() {
 	};
 }
 Reditn.init = function() {
+	Style.init();
 	Settings.init();
 	if(Settings.data.get("Block advertisements and sponsors")) Adblock.init();
 	if(Settings.data.get("Show image expansion buttons")) {
@@ -390,6 +392,7 @@ Reditn.init = function() {
 	if(Settings.data.get("Show information about a user upon hover")) UserInfo.init();
 	if(Settings.data.get("Show information about a subreddit upon hover")) SubredditInfo.init();
 	if(Settings.data.get("Hide duplicates")) DuplicateHider.init();
+	if(Settings.data.get("Tag nicknames to users")) UserTagger.init();
 }
 Reditn.formatNumber = function(n) {
 	return !Math.isFinite(n)?Std.string(n):(function($this) {
@@ -464,49 +467,29 @@ Reditn.popUp = function(bs,el,x,y) {
 	js.Browser.document.body.appendChild(el);
 	el.className = "reditn-popup";
 	el.innerHTML = "<em>Loading...</em>";
-	el.style.position = "absolute";
-	el.style.top = y + "px";
-	el.style.left = x + "px";
-	el.style.padding = "2px";
-	el.style.backgroundColor = "#fcfcfc";
-	el.style.border = "1px solid black";
-	el.style.borderRadius = "4px";
-	el.style.zIndex = "99";
-	el.style.maxWidth = js.Browser.window.innerWidth * 0.4 + "px";
-	bs.onmouseout = function(e) {
+	el.style.left = "" + x + "px";
+	el.style.top = "" + y + "px";
+	bs.onmouseout = el.onblur = function(e) {
 		el.parentNode.removeChild(el);
 		bs.mouseover = false;
 	};
 	return el;
 }
-Reditn.fullPopUp = function(el) {
-	var old = js.Browser.document.getElementById("reditn-full-popup");
+Reditn.fullPopUp = function(el,a) {
+	var old = js.Browser.document.getElementsByClassName("reditn-full-popup")[0];
 	if(old != null) old.parentNode.removeChild(old);
 	js.Browser.document.body.appendChild(el);
 	var head = js.Browser.document.getElementById("header");
 	var close = js.Browser.document.createElement("a");
+	close.className = "reditn-close";
 	close.innerHTML = "<b>Close</b>";
 	close.href = "javascript:void(0);";
-	close.style.position = "absolute";
-	close.style.right = "5px";
-	close.style.top = "0px";
-	close.style.fontStyle = "bold";
-	close.onclick = function(e) {
+	close.onclick = el.onblur = function(e) {
 		el.parentNode.removeChild(el);
 	};
 	el.appendChild(close);
-	el.id = "reditn-full-popup";
-	el.style.zIndex = "100";
-	el.style.position = "absolute";
-	el.style.top = head.offsetHeight + "px";
-	el.style.left = "25%";
-	el.style.marginLeft = "auto";
-	el.style.marginRight = "auto";
-	el.style.padding = "5px";
-	el.style.backgroundColor = "#fcfcfc";
-	el.style.border = "1px solid black";
-	el.style.borderRadius = "6px";
-	el.style.width = "50%";
+	el.className = "reditn-full-popup";
+	el.style.top = a == null?"50px":a.offsetTop + "px";
 	return el;
 }
 var Reflect = function() { }
@@ -541,10 +524,65 @@ Reflect.deleteField = function(o,f) {
 	delete(o[f]);
 	return true;
 }
+var haxe = {}
+haxe.ds = {}
+haxe.ds.StringMap = function() {
+	this.h = { };
+};
+$hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
+haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
+haxe.ds.StringMap.prototype = {
+	toString: function() {
+		var s = new StringBuf();
+		s.b += "{";
+		var it = this.keys();
+		while( it.hasNext() ) {
+			var i = it.next();
+			s.b += Std.string(i);
+			s.b += " => ";
+			s.b += Std.string(Std.string(this.get(i)));
+			if(it.hasNext()) s.b += ", ";
+		}
+		s.b += "}";
+		return s.b;
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref["$" + i];
+		}};
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
+		}
+		return HxOverrides.iter(a);
+	}
+	,remove: function(key) {
+		key = "$" + key;
+		if(!this.h.hasOwnProperty(key)) return false;
+		delete(this.h[key]);
+		return true;
+	}
+	,exists: function(key) {
+		return this.h.hasOwnProperty("$" + key);
+	}
+	,get: function(key) {
+		return this.h["$" + key];
+	}
+	,set: function(key,value) {
+		this.h["$" + key] = value;
+	}
+	,__class__: haxe.ds.StringMap
+}
 var Settings = function() { }
 $hxClasses["Settings"] = Settings;
 Settings.__name__ = ["Settings"];
 Settings.save = function() {
+	haxe.Serializer.USE_CACHE = false;
 	js.Browser.window.localStorage.setItem("reditn",haxe.Serializer.run(Settings.data));
 }
 Settings.init = function() {
@@ -553,10 +591,7 @@ Settings.init = function() {
 	var $it0 = Settings.values.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		if(!Settings.data.exists(k)) {
-			var value = Settings.values.get(k);
-			Settings.data.set(k,value);
-		}
+		if(!Settings.data.exists(k)) Settings.data.set(k,Settings.values.get(k));
 	}
 	var h = js.Browser.document.getElementById("header-bottom-right");
 	var prefs = h.getElementsByTagName("ul")[0];
@@ -578,9 +613,14 @@ Settings.settingsPopUp = function() {
 	var h = js.Browser.document.createElement("h1");
 	h.innerHTML = "Reditn settings";
 	e.appendChild(h);
+	e.appendChild(Settings.createForm(Settings.values));
+	Reditn.fullPopUp(e);
+}
+Settings.createForm = function(values,create) {
+	if(create == null) create = false;
 	var form = js.Browser.document.createElement("form");
 	form.action = "javascript:void(0);";
-	form.onsubmit = function(ev) {
+	form.onchange = function(ev) {
 		var a = form.childNodes;
 		var _g = 0;
 		while(_g < a.length) {
@@ -607,29 +647,25 @@ Settings.settingsPopUp = function() {
 			Settings.data.set(i1.name,i1.value);
 		}
 		Settings.save();
-		e.parentNode.removeChild(e);
 	};
-	e.appendChild(form);
-	var $it0 = Settings.values.keys();
+	var $it0 = values.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		var d = Settings.values.get(k);
-		var label = js.Browser.document.createElement("label");
-		label.setAttribute("for",k);
-		label.innerHTML = k + " ";
-		form.appendChild(label);
-		var input = js.Browser.document.createElement("input");
-		input.name = k;
-		form.appendChild(input);
-		form.appendChild(js.Browser.document.createElement("br"));
-		input.type = js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":null;
-		if(js.Boot.__instanceof(d,Bool)) input.checked = Settings.data.get(k); else input.value = Settings.data.get(k);
+		var d = values.get(k);
+		if(!js.Boot.__instanceof(d,haxe.ds.StringMap)) {
+			var label = js.Browser.document.createElement("label");
+			label.setAttribute("for",k);
+			label.innerHTML = k + " ";
+			form.appendChild(label);
+			var input = js.Browser.document.createElement("input");
+			input.name = k;
+			form.appendChild(input);
+			form.appendChild(js.Browser.document.createElement("br"));
+			input.type = js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":null;
+			if(js.Boot.__instanceof(d,Bool)) input.checked = Settings.data.get(k); else input.value = Settings.data.get(k);
+		}
 	}
-	var submit = js.Browser.document.createElement("input");
-	submit.type = "submit";
-	submit.value = "Save";
-	form.appendChild(submit);
-	Reditn.fullPopUp(e);
+	return form;
 }
 var Std = function() { }
 $hxClasses["Std"] = Std;
@@ -666,11 +702,44 @@ StringTools.urlEncode = function(s) {
 StringTools.urlDecode = function(s) {
 	return decodeURIComponent(s.split("+").join(" "));
 }
+StringTools.htmlEscape = function(s,quotes) {
+	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
+}
 StringTools.startsWith = function(s,start) {
 	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
 }
+StringTools.isSpace = function(s,pos) {
+	var c = HxOverrides.cca(s,pos);
+	return c > 8 && c < 14 || c == 32;
+}
+StringTools.ltrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,r)) r++;
+	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
+}
+StringTools.rtrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
+	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
+}
+StringTools.trim = function(s) {
+	return StringTools.ltrim(StringTools.rtrim(s));
+}
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
+}
+var Style = function() { }
+$hxClasses["Style"] = Style;
+Style.__name__ = ["Style"];
+Style.init = function() {
+	var css = ".reditn-popup {\n\tposition: absolute;\n\tpadding: 5px;\n\tbackground-color: #fcfcfc;\n\tborder: 1px solid black;\n\tborderRadius: 4px;\n\tzIndex: 99;\n\tmaxWidth: 40%;\n}\n.reditn-close {\n\t position: absolute;\n\t right: 5px;\n\t top: 2px;\n\t font-weight: bold;\n}\n.reditn-full-popup {\n\tz-index: 100;\n\tposition: absolute;\n\twidth: 45%;\n\tleft: 32.5%;\n\tpadding: 5px;\n\tbackground-color: #fcfcfc;\n\tborder: 1px solid black;\n\tborder-radius: 6px;\n\topacity: 0.8;\n}\n.reditn-show-img {\n\tcursor:pointer;\n\tfont-weight: bold;\n}";
+	var style = js.Browser.document.createElement("style");
+	style.type = "text/css";
+	if(style.styleSheet) style.styleSheet.cssText = css; else style.appendChild(js.Browser.document.createTextNode(css));
+	js.Browser.document.head.appendChild(style);
 }
 var SubredditInfo = function() { }
 $hxClasses["SubredditInfo"] = SubredditInfo;
@@ -817,7 +886,52 @@ UserInfo._onMouseOverUser = function(e) {
 		div.innerHTML = html;
 	})(haxe.Json.parse(haxe.Http.requestUrl("/user/" + user + "/about.json")));
 }
-var haxe = {}
+var UserTagger = function() { }
+$hxClasses["UserTagger"] = UserTagger;
+UserTagger.__name__ = ["UserTagger"];
+UserTagger.init = function() {
+	var authors = js.Browser.document.body.getElementsByClassName("author");
+	var _g = 0;
+	while(_g < authors.length) {
+		var a = authors[_g];
+		++_g;
+		UserTagger.getTag(a);
+	}
+}
+UserTagger.getTag = function(a) {
+	var tagline = a.parentNode;
+	var tag = js.Browser.document.createElement("span");
+	var user = StringTools.trim(a.innerHTML);
+	var currentTag = Settings.data.get("User tags").exists(user)?Settings.data.get("User tags").get(user):null;
+	tag.className = "flair";
+	var tagName = js.Browser.document.createElement("span");
+	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
+	tag.appendChild(tagName);
+	var link = js.Browser.document.createElement("a");
+	link.href = "javascript:void(0);";
+	link.innerHTML = "[+]";
+	tag.appendChild(link);
+	link.onclick = function(e) {
+		var div = js.Browser.document.createElement("div");
+		var label = js.Browser.document.createElement("label");
+		label.setAttribute("for","tag-change");
+		label.innerHTML = "Tag for " + user + " ";
+		div.appendChild(label);
+		var box = js.Browser.document.createElement("input");
+		box.name = "tag-change";
+		box.value = currentTag;
+		box.style.width = "100%";
+		box.onchange = function(ev) {
+			Settings.data.get("User tags").set(user,box.value);
+			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.save();
+		};
+		div.appendChild(box);
+		Reditn.fullPopUp(div,link);
+		box.focus();
+	};
+	a.parentNode.insertBefore(tag,a.nextSibling);
+}
 haxe.Http = function(url) {
 	this.url = url;
 	this.headers = new haxe.ds.StringMap();
@@ -1637,7 +1751,6 @@ haxe.Unserializer.prototype = {
 	}
 	,__class__: haxe.Unserializer
 }
-haxe.ds = {}
 haxe.ds.IntMap = function() {
 	this.h = { };
 };
@@ -1745,58 +1858,6 @@ haxe.ds.ObjectMap.prototype = {
 		this.h.__keys__[id] = key;
 	}
 	,__class__: haxe.ds.ObjectMap
-}
-haxe.ds.StringMap = function() {
-	this.h = { };
-};
-$hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
-haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
-haxe.ds.StringMap.prototype = {
-	toString: function() {
-		var s = new StringBuf();
-		s.b += "{";
-		var it = this.keys();
-		while( it.hasNext() ) {
-			var i = it.next();
-			s.b += Std.string(i);
-			s.b += " => ";
-			s.b += Std.string(Std.string(this.get(i)));
-			if(it.hasNext()) s.b += ", ";
-		}
-		s.b += "}";
-		return s.b;
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref["$" + i];
-		}};
-	}
-	,keys: function() {
-		var a = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
-		}
-		return HxOverrides.iter(a);
-	}
-	,remove: function(key) {
-		key = "$" + key;
-		if(!this.h.hasOwnProperty(key)) return false;
-		delete(this.h[key]);
-		return true;
-	}
-	,exists: function(key) {
-		return this.h.hasOwnProperty("$" + key);
-	}
-	,get: function(key) {
-		return this.h["$" + key];
-	}
-	,set: function(key,value) {
-		this.h["$" + key] = value;
-	}
-	,__class__: haxe.ds.StringMap
 }
 haxe.io = {}
 haxe.io.Bytes = function(length,b) {
@@ -1976,6 +2037,8 @@ Settings.values = (function($this) {
 	m.set("Show information about a subreddit upon hover",true);
 	m.set("Show image expansion buttons",true);
 	m.set("Hide duplicates",true);
+	m.set("Tag nicknames to users",true);
+	m.set("User tags",new haxe.ds.StringMap());
 	$r = m;
 	return $r;
 }(this));

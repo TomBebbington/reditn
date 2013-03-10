@@ -13,6 +13,7 @@ class Reditn {
 			untyped window.onload = function(e) init();
 	}
 	static function init() {
+		Style.init();
 		Settings.init();
 		if(Settings.data.get(Settings.ADBLOCK_ENABLED))
 			Adblock.init();
@@ -26,6 +27,8 @@ class Reditn {
 			SubredditInfo.init();
 		if(Settings.data.get(Settings.DUPLICATE_HIDER_ENABLED))
 			DuplicateHider.init();
+		if(Settings.data.get(Settings.USER_TAGGER_ENABLED))
+			UserTagger.init();
 	}
 	public static function formatNumber(n:Int):String {
 		return if (!Math.isFinite(n))
@@ -52,6 +55,9 @@ class Reditn {
 	}
 	public static inline function remove(e:Element):Void {
 		e.parentNode.removeChild(e);
+	}
+	public static inline function insertAfter(ref:Element, after:Element) {
+		after.parentNode.insertBefore(ref, after.nextSibling);
 	}
 	public static function age(t:Float):String {
 		t = haxe.Timer.stamp() - t;
@@ -116,50 +122,31 @@ class Reditn {
 		Browser.document.body.appendChild(el);
 		el.className="reditn-popup";
 		el.innerHTML = "<em>Loading...</em>";
-		el.style.position = "absolute";
-		el.style.top = y+"px";
-		el.style.left = x+"px";
-		el.style.padding = "2px";
-		el.style.backgroundColor = "#fcfcfc";
-		el.style.border = "1px solid black";
-		el.style.borderRadius = "4px";
-		el.style.zIndex = "99";
-		el.style.maxWidth = (Browser.window.innerWidth*0.4)+"px";
-		bs.onmouseout=function(e) {
+		el.style.left = '${x}px';
+		el.style.top = '${y}px';
+		bs.onmouseout = el.onblur =function(e) {
 			remove(el);
 			untyped bs.mouseover = false;
 		}
 		return el;
 	}
-	public static function fullPopUp(el:Element) {
-		var old = Browser.document.getElementById("reditn-full-popup");
+	public static function fullPopUp(el:Element, ?a:Element) {
+		var old:Element = untyped Browser.document.getElementsByClassName("reditn-full-popup")[0];
 		if(old != null)
 			old.parentNode.removeChild(old);
 		Browser.document.body.appendChild(el);
 		var head = Browser.document.getElementById("header");
 		var close = Browser.document.createAnchorElement();
+		close.className = "reditn-close";
 		close.innerHTML = "<b>Close</b>";
 		close.href = "javascript:void(0);";
-		close.style.position = "absolute";
-		close.style.right = "5px";
-		close.style.top = "0px";
-		close.style.fontStyle = "bold";
-		close.onclick = function(e) {
+		close.onclick = el.onblur = function(e) {
 			remove(el);
 		}
 		el.appendChild(close);
-		el.id="reditn-full-popup";
-		el.style.zIndex = "100";
-		el.style.position = "absolute";
-		el.style.top = head.offsetHeight + "px";
-		el.style.left = "25%";
-		el.style.marginLeft = "auto";
-		el.style.marginRight = "auto";
-		el.style.padding = "5px";
-		el.style.backgroundColor = "#fcfcfc";
-		el.style.border = "1px solid black";
-		el.style.borderRadius = "6px";
-		el.style.width = "50%";
+		el.className = "reditn-full-popup";
+		el.style.top = if(a == null) "50px" else
+			a.offsetTop +"px";
 		return el;
 	}
 }

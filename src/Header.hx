@@ -22,6 +22,7 @@ class Header {
 				else if(!toggled && i.href.indexOf("#")!=-1)
 					i.href = i.href.substr(0, i.href.indexOf("#"));
 			}
+			button.style.visibility = Expand.expandButtons.length == 0 ? "hidden" : "visible";
 		}
 	}
 	static function initShowAll() {
