@@ -18,13 +18,15 @@ class Reditn {
 			Adblock.init();
 		//Style.init();
 		if(Settings.data.get("Image expanding enabled")) {
-			Expand.init();
 			Header.init();
+			Expand.init();
 		}
 		if(Settings.data.get("Hover information enabled")) {
 			UserInfo.init();
 			SubredditInfo.init();
 		}
+		if(Settings.data.get("Hide duplicates"))
+			DuplicateHider.init();
 	}
 	public static function formatNumber(n:Int):String {
 		return if (!Math.isFinite(n))
@@ -45,6 +47,12 @@ class Reditn {
 	}
 	static inline function plural(n:Int) {
 		return n <= 1 ? "" : "s";
+	}
+	public static inline function hide(e:Element):Void {
+		e.style.display = "none";
+	}
+	public static inline function remove(e:Element):Void {
+		e.parentNode.removeChild(e);
 	}
 	public static function age(t:Float):String {
 		t = haxe.Timer.stamp() - t;
@@ -70,7 +78,9 @@ class Reditn {
 			url = url.substr(8);
 		if(url.substr(0, 4) == "www.")
 			url = url.substr(4);
-		return if(url.lastIndexOf(".") != url.indexOf(".")) {
+		var t = if(url.substr(0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1)
+			LinkType.TEXT;
+		else if(url.lastIndexOf(".") != url.indexOf(".") && url.substr(url.lastIndexOf(".")).length <= 4) {
 			var ext = url.substr(url.lastIndexOf(".")+1).toLowerCase();
 			switch(ext) {
 				case "gif", "jpg", "jpeg", "bmp", "png", "webp", "svg", "ico", "tiff", "raw":
@@ -82,16 +92,26 @@ class Reditn {
 				default:
 					LinkType.UNKNOWN;
 			}
-		} else if((url.substr(0, 10) == "imgur.com/" && url.substr(10,2) != "a/") || url.substr(0, 12) == "i.imgur.com/" || url.substr(0, 8) == "qkme.me/" || url.substr(0,19) == "quickmeme.com/meme/" || url.substr(0, 20) == "memecrunch.com/meme/" || url.substr(0, 27) == "memegenerator.net/instance/" || url.indexOf("deviantart.com/art/")!=-1) {
+		} else if((url.startsWith("flickr.com/photos/") && url.length > 18) || url.indexOf("deviantart.com/") != -1 || (url.substr(0, 10) == "imgur.com/" && url.substr(10,2) != "a/") || url.substr(0, 12) == "i.imgur.com/" || url.substr(0, 8) == "qkme.me/" || url.substr(0,19) == "quickmeme.com/meme/" || url.substr(0, 20) == "memecrunch.com/meme/" || url.substr(0, 27) == "memegenerator.net/instance/" || url.startsWith("fav.me/")) {
 			LinkType.IMAGE;
 		} else if(url.substr(0, 17) == "youtube.com/watch") {
 			LinkType.VIDEO;
 		} else {
 			LinkType.UNKNOWN;
-		}
+		};
+		return t;
 	}
 	public static inline function getJSON(url:String, func:Dynamic->Void) {
 		func(haxe.Json.parse(haxe.Http.requestUrl(url)));
+	}
+	public static function getJSONP(url:String, func:Dynamic->Void) {
+		var r = Std.int(Math.random()*10000000);
+		var id = "temp" + r;
+		untyped window[id] = func;
+		var sc = Browser.document.createScriptElement();
+		sc.type = "text/javascript";
+		sc.src = url + id;
+		Browser.document.head.appendChild(sc);
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);
@@ -104,9 +124,10 @@ class Reditn {
 		el.style.backgroundColor = "#fcfcfc";
 		el.style.border = "1px solid black";
 		el.style.borderRadius = "4px";
+		el.style.zIndex = "99";
 		el.style.maxWidth = (Browser.window.innerWidth*0.4)+"px";
 		bs.onmouseout=function(e) {
-			el.parentNode.removeChild(el);
+			remove(el);
 			untyped bs.mouseover = false;
 		}
 		return el;
@@ -125,11 +146,11 @@ class Reditn {
 		close.style.top = "0px";
 		close.style.fontStyle = "bold";
 		close.onclick = function(e) {
-			el.parentNode.removeChild(el);
+			remove(el);
 		}
 		el.appendChild(close);
 		el.id="reditn-full-popup";
-		el.style.zIndex = "50";
+		el.style.zIndex = "100";
 		el.style.position = "absolute";
 		el.style.top = head.offsetHeight + "px";
 		el.style.left = "25%";

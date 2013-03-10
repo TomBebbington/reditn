@@ -7,7 +7,7 @@
 // @include     reddit.com/*
 // @include		*.reddit.com
 // @include		*.reddit.com/*
-// @version     1.4.3
+// @version     1.4.4
 // @grant		none
 // ==/UserScript==
 (function () { "use strict";
@@ -41,11 +41,26 @@ Adblock.removeTop = function() {
 		if(link != null && link.parentNode != null) link.parentNode.removeChild(link);
 	}
 }
+var DuplicateHider = function() { }
+$hxClasses["DuplicateHider"] = DuplicateHider;
+DuplicateHider.__name__ = ["DuplicateHider"];
+DuplicateHider.init = function() {
+	var links = js.Browser.document.body.getElementsByClassName("title");
+	var seen = [];
+	var _g = 0;
+	while(_g < links.length) {
+		var link = links[_g];
+		++_g;
+		if(link.nodeName.toLowerCase() != "a") continue;
+		if(Lambda.has(seen,link.href)) link.parentNode.style.display = "none";
+		seen.push(link.href);
+	}
+}
 var Expand = function() { }
 $hxClasses["Expand"] = Expand;
 Expand.__name__ = ["Expand"];
-Expand.init = function() {
-	Expand.maxWidth = (function($this) {
+Expand.get_maxWidth = function() {
+	return (function($this) {
 		var $r;
 		try {
 			$r = (function($this) {
@@ -59,7 +74,8 @@ Expand.init = function() {
 		}
 		return $r;
 	}(this)) | 0;
-	Expand.maxHeight = js.Browser.window.innerHeight * 0.5 | 0;
+}
+Expand.init = function() {
 	var links = js.Browser.document.body.getElementsByClassName("title");
 	var _g1 = 0, _g = links.length;
 	while(_g1 < _g) {
@@ -79,6 +95,10 @@ Expand.init = function() {
 			li.appendChild(show);
 			var btns = e.getElementsByClassName("buttons")[0];
 			if(btns != null) btns.insertBefore(li,btns.childNodes[0]); else throw "Bad DOM";
+			if(Header.button != null) {
+				Header.button.innerHTML = Header.toggled?"hide images (" + Expand.expandButtons.length + ")":"show images (" + Expand.expandButtons.length + ")";
+				Header.button.href = Header.toggled?"#showall":"#";
+			}
 		}); else Expand.preload(l.href);
 	}
 }
@@ -86,12 +106,13 @@ Expand.showButton = function(el) {
 	var e = js.Browser.document.createElement("span");
 	e.innerHTML = "<b>show</b>";
 	e.toggled = false;
-	e.onmousedown = function(ev) {
+	e.onclick = function(ev) {
 		e.toggled = !e.toggled;
 		e.innerHTML = e.toggled?"<b>hide</b>":"<b>show</b>";
 		if(e.toggled) e.parentNode.parentNode.appendChild(el); else if(el.parentNode != null) el.parentNode.removeChild(el);
 	};
 	e.style.cursor = "pointer";
+	if(Header.toggled) e.onclick(null);
 	return e;
 }
 Expand.getImageLink = function(ourl,el,cb) {
@@ -114,7 +135,30 @@ Expand.getImageLink = function(ourl,el,cb) {
 	} else if(HxOverrides.substr(url,0,27) == "memegenerator.net/instance/") {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,27,null));
 		cb("http://cdn.memegenerator.net/instances/400x/" + id + ".jpg",el);
-	} else if(url.indexOf(".deviantart.com/art/") != -1) {
+	} else if(ourl.indexOf("deviantart.com/") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSONP("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=jsonp&callback=",function(d) {
+		cb(d.url,el);
+	}); else if(StringTools.startsWith(url,"flickr.com/photos/")) {
+		var id = HxOverrides.substr(url,18,null);
+		id = HxOverrides.substr(id,id.indexOf("/") + 1,null);
+		id = HxOverrides.substr(id,0,id.indexOf("/"));
+		Reditn.getJSONP("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + "99dcc3e77bcd8fb489f17e58191f32f7" + "&photo_id=" + id + "&format=json&jsoncallback=",function(d) {
+			if(d.sizes == null || d.sizes.size == null) return;
+			var sizes = d.sizes.size;
+			var largest = null;
+			var largestSize = 0;
+			var _g = 0;
+			while(_g < sizes.length) {
+				var s = sizes[_g];
+				++_g;
+				var size = Std.parseInt(s.width) * Std.parseInt(s.height);
+				if(largest == null || size >= largestSize && size <= Expand.get_maxWidth() * (js.Browser.window.innerHeight * 0.5 | 0)) {
+					largest = s.source;
+					largestSize = size;
+				}
+			}
+			if(largest == null) largest = sizes[0].source;
+			cb(largest,el);
+		});
 	} else cb(ourl,el);
 }
 Expand.preload = function(url) {
@@ -129,14 +173,14 @@ Expand.loadImage = function(url) {
 	img.className = "resize";
 	Expand.initResize(img);
 	var autosize = function() {
-		if(img.width > Expand.maxWidth) {
+		if(img.width > Expand.get_maxWidth()) {
 			var rt = img.height / img.width;
-			img.width = Expand.maxWidth;
+			img.width = Expand.get_maxWidth();
 			img.height = img.width * rt | 0;
 		}
-		if(img.height > Expand.maxHeight) {
+		if(img.height > (js.Browser.window.innerHeight * 0.5 | 0)) {
 			var rt = img.width / img.height;
-			img.height = Expand.maxHeight;
+			img.height = js.Browser.window.innerHeight * 0.5 | 0;
 			img.width = img.height * rt | 0;
 		}
 	};
@@ -150,31 +194,30 @@ Expand.loadImage = function(url) {
 	return img;
 }
 Expand.initResize = function(e) {
-	var drag = null;
+	var drx = 0.0, dry = 0.0, rt = 1.0;
+	var drag = false;
 	e.onmousedown = function(ev) {
+		drag = true;
 		var ev1 = ev;
-		drag = { rtx : e.offsetWidth / ev1.clientX, rty : e.offsetHeight / ev1.clientY, rt : e.offsetWidth / e.offsetHeight};
+		drx = e.offsetWidth / ev1.clientX;
+		dry = e.offsetHeight / ev1.clientY;
+		rt = e.offsetWidth / e.offsetHeight;
 		ev1.preventDefault();
 	};
 	e.onmousemove = function(ev) {
 		var ev1 = ev;
-		if(drag != null) {
-			var nw = ev1.clientX * drag.rtx;
-			var nwh = nw / drag.rt;
-			var nh = ev1.clientY * drag.rty;
-			var nhw = nh * drag.rt;
-			if(nwh > nh) {
-				e.setAttribute("width",Std.string(nw));
-				e.setAttribute("height",Std.string(nwh));
-			} else {
-				e.setAttribute("width",Std.string(nhw));
-				e.setAttribute("height",Std.string(nh));
-			}
+		if(drag) {
+			var nw = ev1.clientX * drx;
+			var nwh = nw / rt;
+			var nh = ev1.clientY * dry;
+			var nhw = nh * rt;
+			e.width = (nwh > nh?nw:nhw) | 0;
+			e.height = (nwh > nh?nwh:nh) | 0;
 		}
 		ev1.preventDefault();
 	};
 	e.onmouseup = e.onmouseout = function(ev) {
-		drag = null;
+		drag = false;
 		ev.preventDefault();
 	};
 }
@@ -187,29 +230,42 @@ var Header = function() { }
 $hxClasses["Header"] = Header;
 Header.__name__ = ["Header"];
 Header.init = function() {
-	if(Expand.expandButtons.length > 0) Header.initShowAll();
+	Header.toggled = js.Browser.window.location.hash == "#showall";
+	Header.initShowAll();
 }
 Header.initShowAll = function() {
 	var menu = js.Browser.document.getElementsByClassName("tabmenu")[0];
 	var li = js.Browser.document.createElement("li");
-	var l = js.Browser.document.createElement("a");
-	var toggled = false;
-	l.innerHTML = "show images (" + Expand.expandButtons.length + ")";
-	l.href = "javascript:void(0)";
-	l.onclick = function(e) {
-		l.className = "selected";
-		toggled = !toggled;
+	Header.button = js.Browser.document.createElement("a");
+	Header.button.innerHTML = "show images (" + Expand.expandButtons.length + ")";
+	Header.button.href = "#showall";
+	Header.button.onclick = function(e) {
+		Header.button.className = "selected";
+		Header.toggled = !Header.toggled;
 		var _g = 0, _g1 = Expand.expandButtons;
 		while(_g < _g1.length) {
 			var btn = _g1[_g];
 			++_g;
-			btn.toggled = !toggled;
-			btn.onmousedown(null);
+			btn.toggled = !Header.toggled;
+			btn.onclick(null);
 		}
-		l.innerHTML = toggled?"hide images (" + Expand.expandButtons.length + ")":"show images (" + Expand.expandButtons.length + ")";
+		if(Header.button != null) {
+			Header.button.innerHTML = Header.toggled?"hide images (" + Expand.expandButtons.length + ")":"show images (" + Expand.expandButtons.length + ")";
+			Header.button.href = Header.toggled?"#showall":"#";
+		}
+		var c = js.Browser.document.body.getElementsByClassName("nextprev")[0].childNodes;
+		var _g = 0;
+		while(_g < c.length) {
+			var i = c[_g];
+			++_g;
+			if(i.nodeName.toLowerCase() != "a") continue;
+			var i1 = i;
+			if(Header.toggled) i1.href += "#showall"; else i1.href = HxOverrides.substr(i1.href,0,i1.href.indexOf("#"));
+		}
 	};
-	li.appendChild(l);
+	li.appendChild(Header.button);
 	menu.appendChild(li);
+	if(Header.toggled) Header.button.onclick(null);
 }
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
@@ -265,7 +321,18 @@ HxOverrides.iter = function(a) {
 		return this.arr[this.cur++];
 	}};
 }
-var LinkType = $hxClasses["LinkType"] = { __ename__ : ["LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","UNKNOWN"] }
+var Lambda = function() { }
+$hxClasses["Lambda"] = Lambda;
+Lambda.__name__ = ["Lambda"];
+Lambda.has = function(it,elt) {
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var x = $it0.next();
+		if(x == elt) return true;
+	}
+	return false;
+}
+var LinkType = $hxClasses["LinkType"] = { __ename__ : ["LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","UNKNOWN"] }
 LinkType.IMAGE = ["IMAGE",0];
 LinkType.IMAGE.toString = $estr;
 LinkType.IMAGE.__enum__ = LinkType;
@@ -275,7 +342,10 @@ LinkType.VIDEO.__enum__ = LinkType;
 LinkType.AUDIO = ["AUDIO",2];
 LinkType.AUDIO.toString = $estr;
 LinkType.AUDIO.__enum__ = LinkType;
-LinkType.UNKNOWN = ["UNKNOWN",3];
+LinkType.TEXT = ["TEXT",3];
+LinkType.TEXT.toString = $estr;
+LinkType.TEXT.__enum__ = LinkType;
+LinkType.UNKNOWN = ["UNKNOWN",4];
 LinkType.UNKNOWN.toString = $estr;
 LinkType.UNKNOWN.__enum__ = LinkType;
 var List = function() {
@@ -314,13 +384,14 @@ Reditn.init = function() {
 	Settings.init();
 	if(Settings.data.get("Adblock enabled")) Adblock.init();
 	if(Settings.data.get("Image expanding enabled")) {
-		Expand.init();
 		Header.init();
+		Expand.init();
 	}
 	if(Settings.data.get("Hover information enabled")) {
 		UserInfo.init();
 		SubredditInfo.init();
 	}
+	if(Settings.data.get("Hide duplicates")) DuplicateHider.init();
 }
 Reditn.formatNumber = function(n) {
 	return !Math.isFinite(n)?Std.string(n):(function($this) {
@@ -356,7 +427,7 @@ Reditn.age = function(t) {
 Reditn.getLinkType = function(url) {
 	if(HxOverrides.substr(url,0,7) == "http://") url = HxOverrides.substr(url,7,null); else if(HxOverrides.substr(url,0,8) == "https://") url = HxOverrides.substr(url,8,null);
 	if(HxOverrides.substr(url,0,4) == "www.") url = HxOverrides.substr(url,4,null);
-	return url.lastIndexOf(".") != url.indexOf(".")?(function($this) {
+	var t = HxOverrides.substr(url,0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1?LinkType.TEXT:url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4?(function($this) {
 		var $r;
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
 		$r = (function($this) {
@@ -377,7 +448,17 @@ Reditn.getLinkType = function(url) {
 			return $r;
 		}($this));
 		return $r;
-	}(this)):HxOverrides.substr(url,0,10) == "imgur.com/" && HxOverrides.substr(url,10,2) != "a/" || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || url.indexOf("deviantart.com/art/") != -1?LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?LinkType.VIDEO:LinkType.UNKNOWN;
+	}(this)):StringTools.startsWith(url,"flickr.com/photos/") && url.length > 18 || url.indexOf("deviantart.com/") != -1 || HxOverrides.substr(url,0,10) == "imgur.com/" && HxOverrides.substr(url,10,2) != "a/" || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || StringTools.startsWith(url,"fav.me/")?LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?LinkType.VIDEO:LinkType.UNKNOWN;
+	return t;
+}
+Reditn.getJSONP = function(url,func) {
+	var r = Math.random() * 10000000 | 0;
+	var id = "temp" + r;
+	window[id] = func;
+	var sc = js.Browser.document.createElement("script");
+	sc.type = "text/javascript";
+	sc.src = url + id;
+	js.Browser.document.head.appendChild(sc);
 }
 Reditn.popUp = function(bs,el,x,y) {
 	if(y == null) y = 0;
@@ -392,6 +473,7 @@ Reditn.popUp = function(bs,el,x,y) {
 	el.style.backgroundColor = "#fcfcfc";
 	el.style.border = "1px solid black";
 	el.style.borderRadius = "4px";
+	el.style.zIndex = "99";
 	el.style.maxWidth = js.Browser.window.innerWidth * 0.4 + "px";
 	bs.onmouseout = function(e) {
 		el.parentNode.removeChild(el);
@@ -416,7 +498,7 @@ Reditn.fullPopUp = function(el) {
 	};
 	el.appendChild(close);
 	el.id = "reditn-full-popup";
-	el.style.zIndex = "50";
+	el.style.zIndex = "100";
 	el.style.position = "absolute";
 	el.style.top = head.offsetHeight + "px";
 	el.style.left = "25%";
@@ -487,7 +569,7 @@ Settings.init = function() {
 	d.onclick = function(e) {
 		Settings.settingsPopUp();
 	};
-	h.insertBefore(d,prefs);
+	if(prefs == null) h.appendChild(d); else h.insertBefore(d,prefs);
 	var sep = js.Browser.document.createElement("span");
 	sep.innerHTML = " | ";
 	sep.className = "seperator";
@@ -533,15 +615,15 @@ Settings.settingsPopUp = function() {
 	var $it0 = Settings.values.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
+		var d = Settings.values.get(k);
 		var label = js.Browser.document.createElement("label");
 		label.setAttribute("for",k);
-		label.innerHTML = k;
+		label.innerHTML = k + " ";
 		form.appendChild(label);
 		var input = js.Browser.document.createElement("input");
 		input.name = k;
 		form.appendChild(input);
 		form.appendChild(js.Browser.document.createElement("br"));
-		var d = Settings.values.get(k);
 		input.type = js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":null;
 		if(js.Boot.__instanceof(d,Bool)) input.checked = Settings.data.get(k); else input.value = Settings.data.get(k);
 	}
@@ -585,6 +667,9 @@ StringTools.urlEncode = function(s) {
 }
 StringTools.urlDecode = function(s) {
 	return decodeURIComponent(s.split("+").join(" "));
+}
+StringTools.startsWith = function(s,start) {
+	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
 }
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
@@ -1854,6 +1939,9 @@ js.Browser.createXMLHttpRequest = function() {
 	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
 	throw "Unable to create XMLHttpRequest object.";
 }
+function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
+var $_;
+function $bind(o,m) { var f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; return f; };
 Math.__name__ = ["Math"];
 Math.NaN = Number.NaN;
 Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
@@ -1880,15 +1968,15 @@ Bool.__ename__ = ["Bool"];
 var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
-Expand.maxWidth = 0;
-Expand.maxHeight = 0;
 Expand.expandButtons = [];
+Header.toggled = false;
 Settings.values = (function($this) {
 	var $r;
 	var m = new haxe.ds.StringMap();
 	m.set("Adblock enabled",true);
 	m.set("Image expanding enabled",true);
 	m.set("Hover information enabled",true);
+	m.set("Hide duplicates",true);
 	$r = m;
 	return $r;
 }(this));

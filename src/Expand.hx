@@ -2,21 +2,28 @@ import js.*;
 import js.html.*;
 import haxe.Timer;
 import haxe.*;
+using StringTools;
 class Expand {
-	public static var maxWidth:Int = 0;
-	public static var maxHeight:Int = 0;
+	static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
+	public static var maxWidth(get, null):Int;
+	public static var maxHeight(get, null):Int;
+	public static var maxArea(get, null):Int;
 	public static var expandButtons:Array<Element> = [];
-
-	public static function init() {
-		maxWidth = Std.int(try {
+	static inline function get_maxWidth():Int {
+		return Std.int(try {
 			var a = Math.abs(Browser.window.innerWidth - untyped Browser.document.body.getElementsByClassName("side")[0].offsetWidth); // just in case something goes horrible wrong...
 			Math.min(a, Browser.window.innerWidth*0.6);
 		} catch(e:Dynamic) {
 			Browser.window.innerWidth*0.6;
 		});
-		maxHeight = Std.int(Browser.window.innerHeight*0.5);
-
-
+	}
+	static inline function get_maxHeight():Int {
+		return Std.int(Browser.window.innerHeight*0.5);
+	}
+	static inline function get_maxArea():Int {
+		return maxWidth * maxHeight;
+	}
+	public static function init() {
 		var links = Browser.document.body.getElementsByClassName("title");
 		for(i in 0...links.length) {
 			var l:AnchorElement = untyped links[i];
@@ -40,6 +47,7 @@ class Expand {
 					else {
 						throw "Bad DOM";
 					}
+					Header.refresh();
 				});
 			} else {
 				preload(l.href);
@@ -50,7 +58,7 @@ class Expand {
 		var e = Browser.document.createSpanElement();
 		e.innerHTML = "<b>show</b>";
 		untyped e.toggled = false;
-		e.onmousedown = function(ev) {
+		e.onclick = function(ev) {
 			untyped e.toggled = !e.toggled;
 			e.innerHTML = untyped e.toggled ? "<b>hide</b>" : "<b>show</b>";
 			if(untyped e.toggled) {
@@ -59,6 +67,8 @@ class Expand {
 				el.parentNode.removeChild(el);
 		}
 		e.style.cursor = "pointer";
+		if(Header.toggled)
+			e.onclick(null);
 		return e;
 	}
 	static inline function getEntry(l:Element) {
@@ -91,11 +101,31 @@ class Expand {
 		} else if(url.substr(0, 27) == "memegenerator.net/instance/") {
 			var id = removeSymbols(url.substr(27));
 			cb("http://cdn.memegenerator.net/instances/400x/"+id+".jpg", el);
-		} else if(url.indexOf(".deviantart.com/art/")!=-1) {
-			/*var s = Http.requestUrl("http://backend.deviantart.com/oembed?url="+encodeURI(url)+"&format=jsonp&callback=?",
-			function(data){
-				cb(data.url, el);
-			});*/
+		} else if(ourl.indexOf("deviantart.com/") != -1 || ourl.indexOf("fav.me") != -1) {
+			Reditn.getJSONP("http://backend.deviantart.com/oembed?url="+ourl.urlEncode()+"&format=jsonp&callback=", function(d) {
+				cb(d.url, el);
+			});
+		} else if(url.startsWith("flickr.com/photos/")) {
+			var id = url.substr(18);
+			id = id.substr(id.indexOf("/")+1);
+			id = id.substr(0, id.indexOf("/"));
+			Reditn.getJSONP('http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=${FLICKR_KEY}&photo_id=${id}&format=json&jsoncallback=', function(d) {
+				if(d.sizes == null || d.sizes.size == null)
+					return;
+				var sizes:Array<Dynamic> = d.sizes.size;
+				var largest:String = null;
+				var largestSize:Int = 0;
+				for(s in sizes) {
+					var size = Std.parseInt(s.width) * Std.parseInt(s.height);
+					if(largest == null || (size >= largestSize && size <= maxArea)) {
+						largest = s.source;
+						largestSize = size;
+					}
+				}
+				if(largest == null)
+					largest = sizes[0].source;
+				cb(largest, el);
+			});
 		} else {
 			cb(ourl, el);
 		}
@@ -132,32 +162,31 @@ class Expand {
 		}
 		return img;
 	}
-	public static function initResize(e:Element):Void {
-		var drag:Dynamic = null;
+	public static function initResize(e:ImageElement):Void {
+		var drx = 0.0, dry = 0.0, rt = 1.0;
+		var drag = false;
 		e.onmousedown = function(ev) {
+			drag = true;
 			var ev:MouseEvent = cast ev;
-			drag = {rtx:e.offsetWidth/ev.clientX, rty:e.offsetHeight/ev.clientY, rt: e.offsetWidth/e.offsetHeight};
+			drx = e.offsetWidth/ev.clientX;
+			dry = e.offsetHeight/ev.clientY;
+			rt = e.offsetWidth/e.offsetHeight;
 			ev.preventDefault();
 		}
 		e.onmousemove = function(ev) {
 			var ev:MouseEvent = cast ev;
-			if(drag != null) {
-				var nw = ev.clientX * drag.rtx;
-				var nwh = nw / drag.rt;
-				var nh = ev.clientY * drag.rty;
-				var nhw = nh * drag.rt;
-				if(nwh > nh) {
-					e.setAttribute("width", Std.string(nw));
-					e.setAttribute("height", Std.string(nwh));
-				} else {
-					e.setAttribute("width", Std.string(nhw));
-					e.setAttribute("height", Std.string(nh));
-				}
+			if(drag) {
+				var nw = ev.clientX * drx;
+				var nwh = nw / rt;
+				var nh = ev.clientY * dry;
+				var nhw = nh * rt;
+				e.width = Std.int(nwh > nh ? nw : nhw);
+				e.height = Std.int(nwh > nh ? nwh : nh);
 			}
 			ev.preventDefault();
 		}
 		e.onmouseup = e.onmouseout = function(ev) {
-			drag = null;
+			drag = false;
 			ev.preventDefault();
 		}
 	}

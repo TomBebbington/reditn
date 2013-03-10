@@ -2,27 +2,46 @@ import js.*;
 import js.html.*;
 
 class Header {
+	public static var toggled(default, null):Bool = false;
+	public static var button(default, null):AnchorElement = null;
 	public static function init() {
-		if(Expand.expandButtons.length > 0)
-			initShowAll();
+		toggled = Browser.window.location.hash == "#showall";
+		initShowAll();
+	}
+	public static inline function refresh() {
+		if(button != null) {
+			button.innerHTML = toggled ? "hide images ("+Expand.expandButtons.length+")" : "show images ("+Expand.expandButtons.length+")";
+			button.href = toggled ? "#showall" : "#";
+		}
 	}
 	static function initShowAll() {
 		var menu = Browser.document.getElementsByClassName("tabmenu")[0];
 		var li:LIElement = Browser.document.createLIElement();
-		var l:AnchorElement = Browser.document.createAnchorElement();
-		var toggled = false;
-		l.innerHTML = "show images ("+Expand.expandButtons.length+")";
-		l.href = "javascript:void(0)";
-		l.onclick = function(e) {
-			l.className = "selected";
+		button = Browser.document.createAnchorElement();
+		button.innerHTML = "show images ("+Expand.expandButtons.length+")";
+		button.href = "#showall";
+		button.onclick = function(e) {
+			button.className = "selected";
 			toggled = !toggled;
 			for(btn in Expand.expandButtons) {
 				untyped btn.toggled = !toggled;
-				btn.onmousedown(null);
+				btn.onclick(null);
 			}
-			l.innerHTML = toggled ? "hide images ("+Expand.expandButtons.length+")" : "show images ("+Expand.expandButtons.length+")";
+			refresh();
+			var c:Array<AnchorElement> = untyped Browser.document.body.getElementsByClassName("nextprev")[0].childNodes;
+			for(i in c) {
+				if(i.nodeName.toLowerCase() != "a")
+					continue;
+				var i:AnchorElement = cast i;
+				if(toggled)
+					i.href += "#showall";
+				else
+					i.href = i.href.substr(0, i.href.indexOf("#"));
+			}
 		};
-		li.appendChild(l);
+		li.appendChild(button);
 		menu.appendChild(li);
+		if(toggled)
+			button.onclick(null);
 	}
 }

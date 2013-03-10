@@ -4,7 +4,6 @@ echo " " >> temp
 cat info >> temp
 cat reditn.js >> temp
 mv temp reditn.js
-rm temp
 cp ./reditn.js ./firefox/content/
 zip -r firefox.xpi ./firefox/
 cp ./reditn.js ./chrome/
