@@ -12,16 +12,19 @@ class Header {
 		if(button != null) {
 			button.innerHTML = toggled ? "hide images ("+Expand.expandButtons.length+")" : "show images ("+Expand.expandButtons.length+")";
 			button.href = toggled ? "#showall" : "#";
-			var c:Array<AnchorElement> = untyped Browser.document.body.getElementsByClassName("nextprev")[0].childNodes;
-			for(i in c) {
-				if(i.nodeName.toLowerCase() != "a")
-					continue;
-				var i:AnchorElement = cast i;
-				if(toggled && i.href.indexOf("#")==-1)
-					i.href += "#showall";
-				else if(!toggled && i.href.indexOf("#")!=-1)
-					i.href = i.href.substr(0, i.href.indexOf("#"));
-			}
+			var np:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
+			if(np.length > 0) {
+				var c:Array<AnchorElement> = cast np[0].childNodes;
+				for(i in c) {
+					if(i.nodeName.toLowerCase() != "a")
+						continue;
+					var i:AnchorElement = cast i;
+					if(toggled && i.href.indexOf("#")==-1)
+						i.href += "#showall";
+					else if(!toggled && i.href.indexOf("#")!=-1)
+						i.href = i.href.substr(0, i.href.indexOf("#"));
+				}
+		}
 			button.style.visibility = Expand.expandButtons.length == 0 ? "hidden" : "visible";
 		}
 	}

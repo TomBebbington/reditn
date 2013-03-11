@@ -1,0 +1,33 @@
+.reditn-popup {
+	position: absolute;
+	padding: 5px;
+	background-color: #fcfcfc;
+	border: 1px solid black;
+	borderRadius: 4px;
+	zIndex: 99;
+	maxWidth: 40%;
+}
+.reditn-close {
+	 position: absolute;
+	 right: 5px;
+	 top: 2px;
+	 font-weight: bold;
+}
+.reditn-full-popup {
+	z-index: 100;
+	position: absolute;
+	width: 45%;
+	left: 32.5%;
+	padding: 5px;
+	background-color: #fcfcfc;
+	border: 1px solid black;
+	border-radius: 6px;
+	opacity: 0.8;
+}
+.reditn-show-img {
+	cursor:pointer;
+	font-weight: bold;
+}
+.comment {
+	border-left: 2px solid #C0C0C0;
+}

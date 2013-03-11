@@ -7,7 +7,7 @@
 // @include     reddit.com/*
 // @include		*.reddit.com
 // @include		*.reddit.com/*
-// @version     1.4.6
+// @version     1.4.7
 // @grant		none
 // ==/UserScript==
 (function () { "use strict";
@@ -236,14 +236,17 @@ Header.refresh = function() {
 	if(Header.button != null) {
 		Header.button.innerHTML = Header.toggled?"hide images (" + Expand.expandButtons.length + ")":"show images (" + Expand.expandButtons.length + ")";
 		Header.button.href = Header.toggled?"#showall":"#";
-		var c = js.Browser.document.body.getElementsByClassName("nextprev")[0].childNodes;
-		var _g = 0;
-		while(_g < c.length) {
-			var i = c[_g];
-			++_g;
-			if(i.nodeName.toLowerCase() != "a") continue;
-			var i1 = i;
-			if(Header.toggled && i1.href.indexOf("#") == -1) i1.href += "#showall"; else if(!Header.toggled && i1.href.indexOf("#") != -1) i1.href = HxOverrides.substr(i1.href,0,i1.href.indexOf("#"));
+		var np = js.Browser.document.body.getElementsByClassName("nextprev");
+		if(np.length > 0) {
+			var c = np[0].childNodes;
+			var _g = 0;
+			while(_g < c.length) {
+				var i = c[_g];
+				++_g;
+				if(i.nodeName.toLowerCase() != "a") continue;
+				var i1 = i;
+				if(Header.toggled && i1.href.indexOf("#") == -1) i1.href += "#showall"; else if(!Header.toggled && i1.href.indexOf("#") != -1) i1.href = HxOverrides.substr(i1.href,0,i1.href.indexOf("#"));
+			}
 		}
 		Header.button.style.visibility = Expand.expandButtons.length == 0?"hidden":"visible";
 	}
@@ -735,7 +738,7 @@ var Style = function() { }
 $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
-	var css = ".reditn-popup {\n\tposition: absolute;\n\tpadding: 5px;\n\tbackground-color: #fcfcfc;\n\tborder: 1px solid black;\n\tborderRadius: 4px;\n\tzIndex: 99;\n\tmaxWidth: 40%;\n}\n.reditn-close {\n\t position: absolute;\n\t right: 5px;\n\t top: 2px;\n\t font-weight: bold;\n}\n.reditn-full-popup {\n\tz-index: 100;\n\tposition: absolute;\n\twidth: 45%;\n\tleft: 32.5%;\n\tpadding: 5px;\n\tbackground-color: #fcfcfc;\n\tborder: 1px solid black;\n\tborder-radius: 6px;\n\topacity: 0.8;\n}\n.reditn-show-img {\n\tcursor:pointer;\n\tfont-weight: bold;\n}";
+	var css = ".reditn-popup {\n\tposition: absolute;\n\tpadding: 5px;\n\tbackground-color: #fcfcfc;\n\tborder: 1px solid black;\n\tborderRadius: 4px;\n\tzIndex: 99;\n\tmaxWidth: 40%;\n}\n.reditn-close {\n\t position: absolute;\n\t right: 5px;\n\t top: 2px;\n\t font-weight: bold;\n}\n.reditn-full-popup {\n\tz-index: 100;\n\tposition: absolute;\n\twidth: 45%;\n\tleft: 32.5%;\n\tpadding: 5px;\n\tbackground-color: #fcfcfc;\n\tborder: 1px solid black;\n\tborder-radius: 6px;\n\topacity: 0.8;\n}\n.reditn-show-img {\n\tcursor:pointer;\n\tfont-weight: bold;\n}\n.comment {\n\tborder-left: 2px solid #C0C0C0;\n}";
 	var style = js.Browser.document.createElement("style");
 	style.type = "text/css";
 	if(style.styleSheet) style.styleSheet.cssText = css; else style.appendChild(js.Browser.document.createTextNode(css));
