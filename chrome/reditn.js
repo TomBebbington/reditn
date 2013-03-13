@@ -86,13 +86,13 @@ Expand.init = function() {
 }
 Expand.showButton = function(el) {
 	var e = js.Browser.document.createElement("a");
-	e.style.fontWeight = "bold";
+	e.style.fontStyle = "italic";
 	e.href = "javascript:void(0);";
 	e.innerHTML = "show";
 	e.toggled = false;
 	e.onclick = function(ev) {
 		e.toggled = !e.toggled;
-		e.innerHTML = e.toggled?"<b>hide</b>":"<b>show</b>";
+		e.innerHTML = e.toggled?"hide":"show";
 		if(e.toggled) e.parentNode.parentNode.appendChild(el); else if(el.parentNode != null) el.parentNode.removeChild(el);
 	};
 	return e;

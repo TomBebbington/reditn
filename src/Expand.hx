@@ -53,13 +53,13 @@ class Expand {
 	}
 	static function showButton(el:Element) {
 		var e = Browser.document.createAnchorElement();
-		e.style.fontWeight = "bold";
+		e.style.fontStyle = "italic";
 		e.href = "javascript:void(0);";
 		e.innerHTML = "show";
 		untyped e.toggled = false;
 		e.onclick = function(ev) {
 			untyped e.toggled = !e.toggled;
-			e.innerHTML = untyped e.toggled ? "<b>hide</b>" : "<b>show</b>";
+			e.innerHTML = untyped e.toggled ? "hide" : "show";
 			if(untyped e.toggled) {
 				e.parentNode.parentNode.appendChild(el);
 			} else if(el.parentNode != null)
