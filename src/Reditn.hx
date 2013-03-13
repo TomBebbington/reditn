@@ -13,7 +13,6 @@ class Reditn {
 			untyped window.onload = function(e) init();
 	}
 	static function init() {
-		Style.init();
 		Settings.init();
 		if(Settings.data.get(Settings.ADBLOCK_ENABLED))
 			Adblock.init();
@@ -120,8 +119,9 @@ class Reditn {
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);
-		el.className="reditn-popup";
+		el.className="popup";
 		el.innerHTML = "<em>Loading...</em>";
+		el.style.width = Std.int(Browser.window.innerWidth*0.25)+"px";
 		el.style.left = '${x}px';
 		el.style.top = '${y}px';
 		bs.onmouseout = el.onblur =function(e) {
@@ -137,14 +137,15 @@ class Reditn {
 		Browser.document.body.appendChild(el);
 		var head = Browser.document.getElementById("header");
 		var close = Browser.document.createAnchorElement();
-		close.className = "reditn-close";
+		close.style.position = "absolute";
+		close.style.right = close.style.top = "5px";
 		close.innerHTML = "<b>Close</b>";
 		close.href = "javascript:void(0);";
 		close.onclick = el.onblur = function(e) {
 			remove(el);
 		}
 		el.appendChild(close);
-		el.className = "reditn-full-popup";
+		el.className = "popup";
 		el.style.top = if(a == null) "50px" else
 			a.offsetTop +"px";
 		return el;

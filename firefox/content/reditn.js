@@ -59,22 +59,6 @@ DuplicateHider.init = function() {
 var Expand = function() { }
 $hxClasses["Expand"] = Expand;
 Expand.__name__ = ["Expand"];
-Expand.get_maxWidth = function() {
-	return (function($this) {
-		var $r;
-		try {
-			$r = (function($this) {
-				var $r;
-				var a = Math.abs(js.Browser.window.innerWidth - js.Browser.document.body.getElementsByClassName("side")[0].offsetWidth);
-				$r = Math.min(a,js.Browser.window.innerWidth * 0.7);
-				return $r;
-			}($this));
-		} catch( e ) {
-			$r = js.Browser.window.innerWidth * 0.7;
-		}
-		return $r;
-	}(this)) | 0;
-}
 Expand.init = function() {
 	var links = js.Browser.document.body.getElementsByClassName("title");
 	var _g1 = 0, _g = links.length;
@@ -101,8 +85,9 @@ Expand.init = function() {
 	}
 }
 Expand.showButton = function(el) {
-	var e = js.Browser.document.createElement("span");
-	e.className = "reditn-show-img";
+	var e = js.Browser.document.createElement("a");
+	e.style.fontWeight = "bold";
+	e.href = "javascript:void(0);";
 	e.innerHTML = "show";
 	e.toggled = false;
 	e.onclick = function(ev) {
@@ -150,7 +135,7 @@ Expand.getImageLink = function(ourl,el,cb) {
 				var s = sizes[_g];
 				++_g;
 				var size = Std.parseInt(s.width) * Std.parseInt(s.height);
-				if(largest == null || size >= largestSize && size <= Expand.get_maxWidth() * (js.Browser.window.innerHeight * 0.6 | 0)) {
+				if(largest == null || size >= largestSize && size <= (js.Browser.window.innerWidth * 0.6 | 0) * (js.Browser.window.innerHeight * 0.7 | 0)) {
 					largest = s.source;
 					largestSize = size;
 				}
@@ -172,14 +157,14 @@ Expand.loadImage = function(url) {
 	img.className = "resize";
 	Expand.initResize(img);
 	var autosize = function() {
-		if(img.width > Expand.get_maxWidth()) {
+		if(img.width > (js.Browser.window.innerWidth * 0.6 | 0)) {
 			var rt = img.height / img.width;
-			img.width = Expand.get_maxWidth();
+			img.width = js.Browser.window.innerWidth * 0.6 | 0;
 			img.height = img.width * rt | 0;
 		}
-		if(img.height > (js.Browser.window.innerHeight * 0.6 | 0)) {
+		if(img.height > (js.Browser.window.innerHeight * 0.7 | 0)) {
 			var rt = img.width / img.height;
-			img.height = js.Browser.window.innerHeight * 0.6 | 0;
+			img.height = js.Browser.window.innerHeight * 0.7 | 0;
 			img.width = img.height * rt | 0;
 		}
 	};
@@ -385,7 +370,6 @@ Reditn.main = function() {
 	};
 }
 Reditn.init = function() {
-	Style.init();
 	Settings.init();
 	if(Settings.data.get("Block advertisements and sponsors")) Adblock.init();
 	if(Settings.data.get("Show image expansion buttons")) {
@@ -468,8 +452,9 @@ Reditn.popUp = function(bs,el,x,y) {
 	if(y == null) y = 0;
 	if(x == null) x = 0;
 	js.Browser.document.body.appendChild(el);
-	el.className = "reditn-popup";
+	el.className = "popup";
 	el.innerHTML = "<em>Loading...</em>";
+	el.style.width = (js.Browser.window.innerWidth * 0.25 | 0) + "px";
 	el.style.left = "" + x + "px";
 	el.style.top = "" + y + "px";
 	bs.onmouseout = el.onblur = function(e) {
@@ -484,14 +469,15 @@ Reditn.fullPopUp = function(el,a) {
 	js.Browser.document.body.appendChild(el);
 	var head = js.Browser.document.getElementById("header");
 	var close = js.Browser.document.createElement("a");
-	close.className = "reditn-close";
+	close.style.position = "absolute";
+	close.style.right = close.style.top = "5px";
 	close.innerHTML = "<b>Close</b>";
 	close.href = "javascript:void(0);";
 	close.onclick = el.onblur = function(e) {
 		el.parentNode.removeChild(el);
 	};
 	el.appendChild(close);
-	el.className = "reditn-full-popup";
+	el.className = "popup";
 	el.style.top = a == null?"50px":a.offsetTop + "px";
 	return el;
 }
@@ -658,9 +644,16 @@ Settings.createForm = function(values,create) {
 		if(!js.Boot.__instanceof(d,haxe.ds.StringMap)) {
 			var label = js.Browser.document.createElement("label");
 			label.setAttribute("for",k);
+			label.style.position = "absolute";
+			label.style.width = "46%";
+			label.style.textAlign = "right";
 			label.innerHTML = k + " ";
 			form.appendChild(label);
 			var input = js.Browser.document.createElement("input");
+			input.style.position = "absolute";
+			input.style.left = "54%";
+			input.style.textAlign = "left";
+			input.style.width = "46%";
 			input.name = k;
 			form.appendChild(input);
 			form.appendChild(js.Browser.document.createElement("br"));
@@ -733,16 +726,6 @@ StringTools.trim = function(s) {
 }
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
-}
-var Style = function() { }
-$hxClasses["Style"] = Style;
-Style.__name__ = ["Style"];
-Style.init = function() {
-	var css = ".reditn-popup {\n\tposition: absolute;\n\tpadding: 5px;\n\tbackground-color: #fcfcfc;\n\tborder: 1px solid black;\n\tborderRadius: 4px;\n\tzIndex: 99;\n\tmaxWidth: 40%;\n}\n.reditn-close {\n\t position: absolute;\n\t right: 5px;\n\t top: 2px;\n\t font-weight: bold;\n}\n.reditn-full-popup {\n\tz-index: 100;\n\tposition: absolute;\n\twidth: 45%;\n\tleft: 32.5%;\n\tpadding: 5px;\n\tbackground-color: #fcfcfc;\n\tborder: 1px solid black;\n\tborder-radius: 6px;\n\topacity: 0.8;\n}\n.reditn-show-img {\n\tcursor:pointer;\n\tfont-weight: bold;\n}\n.comment {\n\tborder-left: 2px solid #C0C0C0;\n}";
-	var style = js.Browser.document.createElement("style");
-	style.type = "text/css";
-	if(style.styleSheet) style.styleSheet.cssText = css; else style.appendChild(js.Browser.document.createTextNode(css));
-	js.Browser.document.head.appendChild(style);
 }
 var SubredditInfo = function() { }
 $hxClasses["SubredditInfo"] = SubredditInfo;

@@ -10,15 +10,10 @@ class Expand {
 	public static var maxArea(get, null):Int;
 	public static var expandButtons:Array<Element> = [];
 	static inline function get_maxWidth():Int {
-		return Std.int(try {
-			var a = Math.abs(Browser.window.innerWidth - untyped Browser.document.body.getElementsByClassName("side")[0].offsetWidth); // just in case something goes horrible wrong...
-			Math.min(a, Browser.window.innerWidth*0.7);
-		} catch(e:Dynamic) {
-			Browser.window.innerWidth*0.7;
-		});
+		return Std.int(Browser.window.innerWidth*0.6);
 	}
 	static inline function get_maxHeight():Int {
-		return Std.int(Browser.window.innerHeight*0.6);
+		return Std.int(Browser.window.innerHeight*0.7);
 	}
 	static inline function get_maxArea():Int {
 		return maxWidth * maxHeight;
@@ -57,8 +52,9 @@ class Expand {
 		}
 	}
 	static function showButton(el:Element) {
-		var e = Browser.document.createSpanElement();
-		e.className = "reditn-show-img";
+		var e = Browser.document.createAnchorElement();
+		e.style.fontWeight = "bold";
+		e.href = "javascript:void(0);";
 		e.innerHTML = "show";
 		untyped e.toggled = false;
 		e.onclick = function(ev) {

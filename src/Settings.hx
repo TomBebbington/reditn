@@ -78,9 +78,16 @@ class Settings {
 			if(!Std.is(d, StringMap)) {
 				var label = Browser.document.createLabelElement();
 				label.setAttribute("for", k);
+				label.style.position = "absolute";
+				label.style.width = "46%";
+				label.style.textAlign = "right";
 				label.innerHTML = k+" ";
 				form.appendChild(label);
 				var input = Browser.document.createInputElement();
+				input.style.position = "absolute";
+				input.style.left = "54%";
+				input.style.textAlign = "left";
+				input.style.width = "46%";
 				input.name = k;
 				form.appendChild(input);
 				form.appendChild(Browser.document.createBRElement());
