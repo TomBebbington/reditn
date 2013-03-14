@@ -28,6 +28,8 @@ class Reditn {
 			DuplicateHider.init();
 		if(Settings.data.get(Settings.USER_TAGGER_ENABLED))
 			UserTagger.init();
+		if(Settings.data.get(Settings.SUBREDDIT_TAGGER_ENABLED))
+			SubredditTagger.init();
 	}
 	public static function formatNumber(n:Int):String {
 		return if (!Math.isFinite(n))

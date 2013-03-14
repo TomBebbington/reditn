@@ -8,7 +8,9 @@ class Settings {
 	public static inline var EXPAND_ENABLED = "Show image expansion buttons";
 	public static inline var DUPLICATE_HIDER_ENABLED = "Hide duplicates";
 	public static inline var USER_TAGGER_ENABLED = "Tag nicknames to users";
+	public static inline var SUBREDDIT_TAGGER_ENABLED = "Tag nicknames to subreddits";
 	public static inline var USER_TAGS = "User tags";
+	public static inline var SUBREDDIT_TAGS = "Subreddit tags";
 	public static var defaults = {
 		var m = new Map<String, Dynamic>();
 		m.set(ADBLOCK_ENABLED, true);
@@ -17,7 +19,9 @@ class Settings {
 		m.set(EXPAND_ENABLED, true);
 		m.set(DUPLICATE_HIDER_ENABLED, true);
 		m.set(USER_TAGGER_ENABLED, true);
+		m.set(SUBREDDIT_TAGGER_ENABLED, true);
 		m.set(USER_TAGS, new StringMap<String>());
+		m.set(SUBREDDIT_TAGS, new StringMap<String>());
 		m;
 	};
 	public static var data = new StringMap<Dynamic>();

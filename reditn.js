@@ -1,15 +1,3 @@
- 
-// ==UserScript==
-// @name        Reditn
-// @namespace   http://userscripts.org/user/tophattedcoder/
-// @description Reddit tweaks and enhancements.
-// @include     reddit.com
-// @include     reddit.com/*
-// @include		*.reddit.com
-// @include		*.reddit.com/*
-// @version     1.4.8
-// @grant		none
-// ==/UserScript==
 (function () { "use strict";
 var $hxClasses = {},$estr = function() { return js.Boot.__string_rec(this,''); };
 var Adblock = function() { }
@@ -380,6 +368,7 @@ Reditn.init = function() {
 	if(Settings.data.get("Show information about a subreddit upon hover")) SubredditInfo.init();
 	if(Settings.data.get("Hide duplicates")) DuplicateHider.init();
 	if(Settings.data.get("Tag nicknames to users")) UserTagger.init();
+	if(Settings.data.get("Tag nicknames to subreddits")) SubredditTagger.init();
 }
 Reditn.formatNumber = function(n) {
 	return !Math.isFinite(n)?Std.string(n):(function($this) {
@@ -772,6 +761,52 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 		html += "<b>Age:</b> " + age + "<br>";
 		div.innerHTML = html;
 	})(haxe.Json.parse(haxe.Http.requestUrl("/r/" + name + "/about.json")));
+}
+var SubredditTagger = function() { }
+$hxClasses["SubredditTagger"] = SubredditTagger;
+SubredditTagger.__name__ = ["SubredditTagger"];
+SubredditTagger.init = function() {
+	var d = js.Browser.document.body.getElementsByClassName("subreddit");
+	var _g = 0;
+	while(_g < d.length) {
+		var s = d[_g];
+		++_g;
+		SubredditTagger.getTag(s);
+	}
+}
+SubredditTagger.getTag = function(a) {
+	var tagline = a.parentNode;
+	var tag = js.Browser.document.createElement("span");
+	var sub = StringTools.trim(a.innerHTML);
+	var currentTag = Settings.data.get("Subreddit tags").exists(sub)?Settings.data.get("Subreddit tags").get(sub):null;
+	tag.className = "flair";
+	var tagName = js.Browser.document.createElement("span");
+	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
+	tag.appendChild(tagName);
+	var link = js.Browser.document.createElement("a");
+	link.href = "javascript:void(0);";
+	link.innerHTML = "[+]";
+	tag.appendChild(link);
+	link.onclick = function(e) {
+		var div = js.Browser.document.createElement("div");
+		var label = js.Browser.document.createElement("label");
+		label.setAttribute("for","tag-change");
+		label.innerHTML = "Tag for " + sub + " ";
+		div.appendChild(label);
+		var box = js.Browser.document.createElement("input");
+		box.name = "tag-change";
+		box.value = currentTag;
+		box.style.width = "100%";
+		box.onchange = function(ev) {
+			Settings.data.get("Subreddit tags").set(sub,box.value);
+			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.save();
+		};
+		div.appendChild(box);
+		Reditn.fullPopUp(div,link);
+		box.focus();
+	};
+	a.parentNode.insertBefore(tag,a.nextSibling);
 }
 var ValueType = $hxClasses["ValueType"] = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
 ValueType.TNull = ["TNull",0];
@@ -2047,7 +2082,9 @@ Settings.defaults = (function($this) {
 	m.set("Show image expansion buttons",true);
 	m.set("Hide duplicates",true);
 	m.set("Tag nicknames to users",true);
+	m.set("Tag nicknames to subreddits",true);
 	m.set("User tags",new haxe.ds.StringMap());
+	m.set("Subreddit tags",new haxe.ds.StringMap());
 	$r = m;
 	return $r;
 }(this));
