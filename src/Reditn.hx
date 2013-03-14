@@ -13,6 +13,7 @@ class Reditn {
 			untyped window.onload = function(e) init();
 	}
 	static function init() {
+		trace(Markdown.parse("#reddit\n*Awesomeness*"));
 		Settings.init();
 		if(Settings.data.get(Settings.ADBLOCK_ENABLED))
 			Adblock.init();
@@ -30,6 +31,8 @@ class Reditn {
 			UserTagger.init();
 		if(Settings.data.get(Settings.SUBREDDIT_TAGGER_ENABLED))
 			SubredditTagger.init();
+		if(Settings.data.get(Settings.PREVIEW_ENABLED))
+			Preview.init();
 	}
 	public static function formatNumber(n:Int):String {
 		return if (!Math.isFinite(n))
@@ -122,7 +125,7 @@ class Reditn {
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);
 		el.className="popup";
-		el.innerHTML = "<em>Loading...</em>";
+		el.style.position = "absolute";
 		el.style.width = Std.int(Browser.window.innerWidth*0.25)+"px";
 		el.style.left = '${x}px';
 		el.style.top = '${y}px';

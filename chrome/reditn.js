@@ -56,6 +56,18 @@ DuplicateHider.init = function() {
 		seen.push(link.href);
 	}
 }
+var EReg = function(r,opt) {
+	opt = opt.split("u").join("");
+	this.r = new RegExp(r,opt);
+};
+$hxClasses["EReg"] = EReg;
+EReg.__name__ = ["EReg"];
+EReg.prototype = {
+	replace: function(s,by) {
+		return s.replace(this.r,by);
+	}
+	,__class__: EReg
+}
 var Expand = function() { }
 $hxClasses["Expand"] = Expand;
 Expand.__name__ = ["Expand"];
@@ -361,6 +373,40 @@ List.prototype = {
 	}
 	,__class__: List
 }
+var Markdown = function() { }
+$hxClasses["Markdown"] = Markdown;
+Markdown.__name__ = ["Markdown"];
+Markdown.parse = function(s) {
+	var _g = 0, _g1 = Markdown.regex;
+	while(_g < _g1.length) {
+		var r = _g1[_g];
+		++_g;
+		s = r.from.replace(s,r.to);
+	}
+	return StringTools.trim(s);
+}
+var Preview = function() { }
+$hxClasses["Preview"] = Preview;
+Preview.__name__ = ["Preview"];
+Preview.init = function() {
+	var ts = js.Browser.document.body.getElementsByClassName("usertext-edit");
+	var _g = 0;
+	while(_g < ts.length) {
+		var t = ts[_g];
+		++_g;
+		Preview.makePreviewable(t);
+	}
+}
+Preview.makePreviewable = function(e) {
+	var box = e.getElementsByTagName("textarea")[0];
+	if(box == null) return;
+	var preview = js.Browser.document.createElement("div");
+	e.appendChild(preview);
+	preview.className = "md";
+	box.onchange = function(e1) {
+		preview.innerHTML = Markdown.parse(box.value);
+	};
+}
 var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
 Reditn.__name__ = ["Reditn"];
@@ -370,6 +416,7 @@ Reditn.main = function() {
 	};
 }
 Reditn.init = function() {
+	console.log(Markdown.parse("#reddit\n*Awesomeness*"));
 	Settings.init();
 	if(Settings.data.get("Block advertisements and sponsors")) Adblock.init();
 	if(Settings.data.get("Show image expansion buttons")) {
@@ -380,6 +427,8 @@ Reditn.init = function() {
 	if(Settings.data.get("Show information about a subreddit upon hover")) SubredditInfo.init();
 	if(Settings.data.get("Hide duplicates")) DuplicateHider.init();
 	if(Settings.data.get("Tag nicknames to users")) UserTagger.init();
+	if(Settings.data.get("Tag nicknames to subreddits")) SubredditTagger.init();
+	if(Settings.data.get("Preview any comments or posts I make")) Preview.init();
 }
 Reditn.formatNumber = function(n) {
 	return !Math.isFinite(n)?Std.string(n):(function($this) {
@@ -453,7 +502,7 @@ Reditn.popUp = function(bs,el,x,y) {
 	if(x == null) x = 0;
 	js.Browser.document.body.appendChild(el);
 	el.className = "popup";
-	el.innerHTML = "<em>Loading...</em>";
+	el.style.position = "absolute";
 	el.style.width = (js.Browser.window.innerWidth * 0.25 | 0) + "px";
 	el.style.left = "" + x + "px";
 	el.style.top = "" + y + "px";
@@ -595,6 +644,7 @@ Settings.init = function() {
 	var sep = js.Browser.document.createElement("span");
 	sep.innerHTML = " | ";
 	sep.className = "seperator";
+	sep.style.fontWeight = "none";
 	h.insertBefore(sep,prefs);
 }
 Settings.settingsPopUp = function() {
@@ -762,16 +812,62 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 	var e1 = e.target;
 	var name = e1.innerHTML;
 	var div = js.Browser.document.createElement("div");
-	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth + 3,e1.offsetTop);
+	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
 	(function(d) {
 		if(d.data != null) d = d.data;
-		var html = "<b>Name:</b> " + Std.string(d.display_name) + "<br>";
-		html += "<b>Subscribers:</b> " + Reditn.formatNumber(d.subscribers) + "<br>";
-		html += "<b>Description:</b> " + Std.string(d.public_description) + "<br>";
-		var age = Reditn.age(d.created_utc);
+		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), desc = Markdown.parse(d.public_description == null?d.description:d.public_description), age = Reditn.age(d.created_utc);
+		var html = "<b>Name:</b> " + name + "<br>";
+		html += "<b>Subscribers:</b> " + subs + "<br>";
+		html += "<b>Description:</b> " + desc + "<br>";
 		html += "<b>Age:</b> " + age + "<br>";
 		div.innerHTML = html;
 	})(haxe.Json.parse(haxe.Http.requestUrl("/r/" + name + "/about.json")));
+}
+var SubredditTagger = function() { }
+$hxClasses["SubredditTagger"] = SubredditTagger;
+SubredditTagger.__name__ = ["SubredditTagger"];
+SubredditTagger.init = function() {
+	var d = js.Browser.document.body.getElementsByClassName("subreddit");
+	var _g = 0;
+	while(_g < d.length) {
+		var s = d[_g];
+		++_g;
+		SubredditTagger.getTag(s);
+	}
+}
+SubredditTagger.getTag = function(a) {
+	var tagline = a.parentNode;
+	var tag = js.Browser.document.createElement("span");
+	var sub = StringTools.trim(a.innerHTML);
+	var currentTag = Settings.data.get("Subreddit tags").exists(sub)?Settings.data.get("Subreddit tags").get(sub):null;
+	tag.className = "flair";
+	var tagName = js.Browser.document.createElement("span");
+	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
+	tag.appendChild(tagName);
+	var link = js.Browser.document.createElement("a");
+	link.href = "javascript:void(0);";
+	link.innerHTML = "[+]";
+	tag.appendChild(link);
+	link.onclick = function(e) {
+		var div = js.Browser.document.createElement("div");
+		var label = js.Browser.document.createElement("label");
+		label.setAttribute("for","tag-change");
+		label.innerHTML = "Tag for " + sub + " ";
+		div.appendChild(label);
+		var box = js.Browser.document.createElement("input");
+		box.name = "tag-change";
+		box.value = currentTag;
+		box.style.width = "100%";
+		box.onchange = function(ev) {
+			Settings.data.get("Subreddit tags").set(sub,box.value);
+			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.save();
+		};
+		div.appendChild(box);
+		Reditn.fullPopUp(div,link);
+		box.focus();
+	};
+	a.parentNode.insertBefore(tag,a.nextSibling);
 }
 var ValueType = $hxClasses["ValueType"] = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
 ValueType.TNull = ["TNull",0];
@@ -883,7 +979,7 @@ UserInfo._onMouseOverUser = function(e) {
 	var user = e1.innerHTML;
 	user = HxOverrides.substr(user,user.lastIndexOf("/") + 1,null);
 	var div = js.Browser.document.createElement("div");
-	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth + 3,e1.offsetTop);
+	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
 	(function(d) {
 		if(d.data != null) d = d.data;
 		var html = "<b>User:</b> " + Std.string(d.name) + "<br>";
@@ -2038,6 +2134,7 @@ var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
 Expand.expandButtons = [];
 Header.toggled = false;
+Markdown.regex = [{ from : new EReg("___([^___]+)___","g"), to : "<b><i>$1</i></b>"},{ from : new EReg("\\*\\*([^\\*\\*|\\*]+)\\*\\*","g"), to : "<b>$1</b>"},{ from : new EReg("__([^__|_]+)__","g"), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*|\\*\\*]+)\\*","g"), to : "<i>$1</i>"},{ from : new EReg("_([^_|__]+)_","g"), to : "<i>$1</i>"},{ from : new EReg("\\[([^\\[]+)\\]\\(([^\\)]+)\\)","g"), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("(.*?)\n\\x3D=*","g"), to : "<h2>$1</h2>"},{ from : new EReg("(.*?)\n\\x2D-*","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h6>$1</h6>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h5>$1</h5>"},{ from : new EReg("\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h4>$1</h4>"},{ from : new EReg("\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23([^\n]+)\n","g"), to : "<h2>$1</h2>"},{ from : new EReg("\\x23([^\n]+)\n","g"), to : "<h1>$1</h1>"},{ from : new EReg("\n?([^\n]+)\n\n","g"), to : "<p>$1</p>"},{ from : new EReg("\n?([^\n]+)\n","g"), to : "$1 "},{ from : new EReg("\n[\\+\\*\\-] ([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\\x3Cli\\x3E([^\n+]+)\\x3C/li\\x3E",""), to : "<ul><li>$1</li></ul>"}];
 Settings.defaults = (function($this) {
 	var $r;
 	var m = new haxe.ds.StringMap();
@@ -2047,7 +2144,10 @@ Settings.defaults = (function($this) {
 	m.set("Show image expansion buttons",true);
 	m.set("Hide duplicates",true);
 	m.set("Tag nicknames to users",true);
+	m.set("Tag nicknames to subreddits",true);
+	m.set("Preview any comments or posts I make",true);
 	m.set("User tags",new haxe.ds.StringMap());
+	m.set("Subreddit tags",new haxe.ds.StringMap());
 	$r = m;
 	return $r;
 }(this));

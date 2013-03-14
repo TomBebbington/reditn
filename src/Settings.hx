@@ -9,6 +9,7 @@ class Settings {
 	public static inline var DUPLICATE_HIDER_ENABLED = "Hide duplicates";
 	public static inline var USER_TAGGER_ENABLED = "Tag nicknames to users";
 	public static inline var SUBREDDIT_TAGGER_ENABLED = "Tag nicknames to subreddits";
+	public static inline var PREVIEW_ENABLED = "Preview any comments or posts I make";
 	public static inline var USER_TAGS = "User tags";
 	public static inline var SUBREDDIT_TAGS = "Subreddit tags";
 	public static var defaults = {
@@ -20,6 +21,7 @@ class Settings {
 		m.set(DUPLICATE_HIDER_ENABLED, true);
 		m.set(USER_TAGGER_ENABLED, true);
 		m.set(SUBREDDIT_TAGGER_ENABLED, true);
+		m.set(PREVIEW_ENABLED, true);
 		m.set(USER_TAGS, new StringMap<String>());
 		m.set(SUBREDDIT_TAGS, new StringMap<String>());
 		m;
@@ -50,6 +52,7 @@ class Settings {
 		var sep = Browser.document.createSpanElement();
 		sep.innerHTML = " | ";
 		sep.className = "seperator";
+		sep.style.fontWeight = "none";
 		h.insertBefore(sep, prefs);
 	}
 	static function settingsPopUp() {

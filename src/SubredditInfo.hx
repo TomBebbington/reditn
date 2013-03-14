@@ -1,7 +1,6 @@
 import js.*;
 import js.html.*;
 class SubredditInfo {
-	public static inline var offset = 3;
 	public static function init() {
 		var subs:Array<Element> = cast Browser.document.body.getElementsByClassName("subreddit");
 		for(i in subs)
@@ -11,14 +10,17 @@ class SubredditInfo {
 		var e:Element = e.target;
 		var name:String = e.innerHTML;
 		var div = Browser.document.createElement("div");
-		Reditn.popUp(e, div, e.offsetLeft + e.offsetWidth + offset, e.offsetTop);
+		Reditn.popUp(e, div, e.offsetLeft + e.offsetWidth, e.offsetTop);
 		Reditn.getJSON('/r/${name}/about.json', function(d:Dynamic){
 			if(d.data != null)
 				d = d.data;
-			var html = '<b>Name:</b> ${d.display_name}<br>';
-			html += '<b>Subscribers:</b> ${Reditn.formatNumber(d.subscribers)}<br>';
-			html += '<b>Description:</b> ${d.public_description}<br>';
-			var age = Reditn.age(d.created_utc);
+			var title:String = d.display_name,
+				subs:String = Reditn.formatNumber(d.subscribers),
+				desc:String = Markdown.parse(d.public_description == null ? d.description : d.public_description),
+				age:String = Reditn.age(d.created_utc);
+			var html = '<b>Name:</b> ${name}<br>';
+			html += '<b>Subscribers:</b> ${subs}<br>';
+			html += '<b>Description:</b> ${desc}<br>';
 			html += '<b>Age:</b> ${age}<br>';
 			div.innerHTML = html;
 		});
