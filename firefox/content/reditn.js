@@ -577,10 +577,10 @@ Settings.save = function() {
 Settings.init = function() {
 	var dt = js.Browser.window.localStorage.getItem("reditn");
 	if(dt != null) Settings.data = haxe.Unserializer.run(dt);
-	var $it0 = Settings.values.keys();
+	var $it0 = Settings.defaults.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		if(!Settings.data.exists(k)) Settings.data.set(k,Settings.values.get(k));
+		if(!Settings.data.exists(k) || !js.Boot.__instanceof(Settings.data.get(k),Type.getClass(Settings.defaults.get(k)))) Settings.data.set(k,Settings.defaults.get(k));
 	}
 	var h = js.Browser.document.getElementById("header-bottom-right");
 	var prefs = h.getElementsByTagName("ul")[0];
@@ -598,16 +598,18 @@ Settings.init = function() {
 	h.insertBefore(sep,prefs);
 }
 Settings.settingsPopUp = function() {
+	var old = js.Browser.document.getElementById("reditn-config");
+	if(old != null) old.parentNode.removeChild(old);
 	var e = js.Browser.document.createElement("div");
 	var h = js.Browser.document.createElement("h1");
 	h.innerHTML = "Reditn settings";
 	e.appendChild(h);
-	e.appendChild(Settings.createForm(Settings.values));
+	e.appendChild(Settings.createForm());
 	Reditn.fullPopUp(e);
 }
-Settings.createForm = function(values,create) {
-	if(create == null) create = false;
+Settings.createForm = function() {
 	var form = js.Browser.document.createElement("form");
+	form.id = "reditn-config";
 	form.action = "javascript:void(0);";
 	form.onchange = function(ev) {
 		var a = form.childNodes;
@@ -615,6 +617,7 @@ Settings.createForm = function(values,create) {
 		while(_g < a.length) {
 			var i = a[_g];
 			++_g;
+			if(i.type == "button") continue;
 			if(i.nodeName.toLowerCase() != "input") continue;
 			var i1 = i;
 			var val = (function($this) {
@@ -624,7 +627,7 @@ Settings.createForm = function(values,create) {
 					var $r;
 					switch(_g1) {
 					case "checkbox":
-						$r = i1.checked == true;
+						$r = i1.checked;
 						break;
 					default:
 						$r = i1.value;
@@ -633,15 +636,24 @@ Settings.createForm = function(values,create) {
 				}($this));
 				return $r;
 			}(this));
-			Settings.data.set(i1.name,i1.value);
+			Settings.data.set(i1.name,val);
 		}
 		Settings.save();
 	};
-	var $it0 = values.keys();
+	var delb = js.Browser.document.createElement("input");
+	delb.type = "button";
+	delb.value = "Restore default settings";
+	delb.onclick = function(_) {
+		Settings.restoreDefaults();
+		Settings.settingsPopUp();
+	};
+	form.appendChild(delb);
+	form.appendChild(js.Browser.document.createElement("br"));
+	var $it0 = Settings.data.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		var d = values.get(k);
-		if(!js.Boot.__instanceof(d,haxe.ds.StringMap)) {
+		var d = Settings.data.get(k);
+		if(!js.Boot.__instanceof(d,haxe.ds.StringMap) && Settings.defaults.exists(k)) {
 			var label = js.Browser.document.createElement("label");
 			label.setAttribute("for",k);
 			label.style.position = "absolute";
@@ -662,6 +674,13 @@ Settings.createForm = function(values,create) {
 		}
 	}
 	return form;
+}
+Settings.restoreDefaults = function() {
+	var $it0 = Settings.defaults.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		Settings.data.set(k,Settings.defaults.get(k));
+	}
 }
 var Std = function() { }
 $hxClasses["Std"] = Std;
@@ -781,6 +800,10 @@ ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { }
 $hxClasses["Type"] = Type;
 Type.__name__ = ["Type"];
+Type.getClass = function(o) {
+	if(o == null) return null;
+	return o.__class__;
+}
 Type.getClassName = function(c) {
 	var a = c.__name__;
 	return a.join(".");
@@ -2015,7 +2038,7 @@ var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
 Expand.expandButtons = [];
 Header.toggled = false;
-Settings.values = (function($this) {
+Settings.defaults = (function($this) {
 	var $r;
 	var m = new haxe.ds.StringMap();
 	m.set("Block advertisements and sponsors",true);

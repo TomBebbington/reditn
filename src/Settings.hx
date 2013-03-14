@@ -9,7 +9,7 @@ class Settings {
 	public static inline var DUPLICATE_HIDER_ENABLED = "Hide duplicates";
 	public static inline var USER_TAGGER_ENABLED = "Tag nicknames to users";
 	public static inline var USER_TAGS = "User tags";
-	public static var values = {
+	public static var defaults = {
 		var m = new Map<String, Dynamic>();
 		m.set(ADBLOCK_ENABLED, true);
 		m.set(USERINFO_ENABLED, true);
@@ -29,9 +29,9 @@ class Settings {
 		var dt = Browser.window.localStorage.getItem("reditn");
 		if(dt != null)
 			data = haxe.Unserializer.run(dt);
-		for(k in values.keys())
-			if(!data.exists(k))
-				data.set(k, values.get(k));
+		for(k in defaults.keys())
+			if(!data.exists(k) || !Std.is(data.get(k), Type.getClass(defaults.get(k))))
+				data.set(k, defaults.get(k));
 		var h = Browser.document.getElementById("header-bottom-right");
 		var prefs = untyped h.getElementsByTagName("ul")[0];
 		var d = Browser.document.createAnchorElement();
@@ -49,33 +49,48 @@ class Settings {
 		h.insertBefore(sep, prefs);
 	}
 	static function settingsPopUp() {
+		var old = Browser.document.getElementById("reditn-config");
+		if(old != null)
+			Reditn.remove(old);
 		var e = Browser.document.createDivElement();
 		var h = Browser.document.createElement("h1");
 		h.innerHTML = "Reditn settings";
 		e.appendChild(h);
-		e.appendChild(createForm(values));
+		e.appendChild(createForm());
 		Reditn.fullPopUp(e);
 	}
-	static function createForm(values:StringMap<Dynamic>, create:Bool=false):FormElement {
+	static function createForm():FormElement {
 		var form = Browser.document.createFormElement();
+		form.id = "reditn-config";
 		form.action = "javascript:void(0);";
 		form.onchange = function(ev) {
-			var a:Array<Element> = cast form.childNodes;
+			var a:Array<InputElement> = cast form.childNodes;
 			for(i in a) {
+				if(i.type == "button")
+					continue;
 				if(i.nodeName.toLowerCase() != "input")
 					continue;
 				var i:js.html.InputElement = cast i;
 				var val:Dynamic = switch(i.type.toLowerCase()) {
-					case "checkbox": i.checked == true;
+					case "checkbox": i.checked;
 					default: i.value;
 				}
-				data.set(i.name, i.value);
+				data.set(i.name, val);
 			}
 			save();
 		}
-		for(k in values.keys()) {
-			var d = values.get(k);
-			if(!Std.is(d, StringMap)) {
+		var delb = Browser.document.createInputElement();
+		delb.type = "button";
+		delb.value = "Restore default settings";
+		delb.onclick = function(_) {
+			restoreDefaults();
+			settingsPopUp();
+		}
+		form.appendChild(delb);
+		form.appendChild(Browser.document.createBRElement());
+		for(k in data.keys()) {
+			var d = data.get(k);
+			if(!Std.is(d, StringMap) && defaults.exists(k)) {
 				var label = Browser.document.createLabelElement();
 				label.setAttribute("for", k);
 				label.style.position = "absolute";
@@ -105,5 +120,9 @@ class Settings {
 			}
 		}
 		return form;
+	}
+	static function restoreDefaults() {
+		for(k in defaults.keys())
+			data.set(k, defaults.get(k));
 	}
 }
