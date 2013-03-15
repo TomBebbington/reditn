@@ -4,9 +4,9 @@ class Preview {
 	public static function init() {
 		var ts:Array<Element> = cast Browser.document.body.getElementsByClassName("usertext-edit");
 		for(t in ts)
-			makePreviewable(t);
+			preview(t);
 	}
-	public static function makePreviewable(e:Element) {
+	public static function preview(e:Element) {
 		var box:TextAreaElement = untyped e.getElementsByTagName("textarea")[0];
 		if(box == null)
 			return;

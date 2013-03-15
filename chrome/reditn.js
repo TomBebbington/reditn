@@ -73,6 +73,8 @@ $hxClasses["Expand"] = Expand;
 Expand.__name__ = ["Expand"];
 Expand.init = function() {
 	var links = js.Browser.document.body.getElementsByClassName("title");
+	Expand.toggled = js.Browser.window.location.hash == "#showall";
+	Expand.initShowAll();
 	var _g1 = 0, _g = links.length;
 	while(_g1 < _g) {
 		var i = _g1++;
@@ -91,10 +93,49 @@ Expand.init = function() {
 			li.appendChild(show);
 			var btns = e.getElementsByClassName("buttons")[0];
 			if(btns != null) btns.insertBefore(li,btns.childNodes[0]); else throw "Bad DOM";
-			if(Header.toggled) show.onclick(null);
-			Header.refresh();
+			if(Expand.toggled) show.onclick(null);
+			Expand.refresh();
 		}); else Expand.preload(l.href);
 	}
+}
+Expand.refresh = function() {
+	if(Expand.button != null) {
+		Expand.button.innerHTML = Expand.toggled?"hide images (" + Expand.expandButtons.length + ")":"show images (" + Expand.expandButtons.length + ")";
+		Expand.button.href = Expand.toggled?"#showall":"#";
+		var np = js.Browser.document.body.getElementsByClassName("nextprev");
+		if(np.length > 0) {
+			var c = np[0].childNodes;
+			var _g = 0;
+			while(_g < c.length) {
+				var i = c[_g];
+				++_g;
+				if(i.nodeName.toLowerCase() != "a") continue;
+				var i1 = i;
+				if(Expand.toggled && i1.href.indexOf("#") == -1) i1.href += "#showall"; else if(!Expand.toggled && i1.href.indexOf("#") != -1) i1.href = HxOverrides.substr(i1.href,0,i1.href.indexOf("#"));
+			}
+		}
+		Expand.button.style.visibility = Expand.expandButtons.length == 0?"hidden":"visible";
+	}
+}
+Expand.initShowAll = function() {
+	var menu = js.Browser.document.getElementsByClassName("tabmenu")[0];
+	var li = js.Browser.document.createElement("li");
+	Expand.button = js.Browser.document.createElement("a");
+	Expand.refresh();
+	Expand.button.onclick = function(e) {
+		Expand.button.className = "selected";
+		Expand.toggled = !Expand.toggled;
+		var _g = 0, _g1 = Expand.expandButtons;
+		while(_g < _g1.length) {
+			var btn = _g1[_g];
+			++_g;
+			btn.toggled = !Expand.toggled;
+			btn.onclick(null);
+		}
+		Expand.refresh();
+	};
+	li.appendChild(Expand.button);
+	menu.appendChild(li);
 }
 Expand.showButton = function(el) {
 	var e = js.Browser.document.createElement("a");
@@ -222,52 +263,6 @@ Expand.removeSymbols = function(s) {
 	if(s.lastIndexOf("/") != -1) s = HxOverrides.substr(s,0,s.lastIndexOf("/"));
 	return s;
 }
-var Header = function() { }
-$hxClasses["Header"] = Header;
-Header.__name__ = ["Header"];
-Header.init = function() {
-	Header.toggled = js.Browser.window.location.hash == "#showall";
-	Header.initShowAll();
-}
-Header.refresh = function() {
-	if(Header.button != null) {
-		Header.button.innerHTML = Header.toggled?"hide images (" + Expand.expandButtons.length + ")":"show images (" + Expand.expandButtons.length + ")";
-		Header.button.href = Header.toggled?"#showall":"#";
-		var np = js.Browser.document.body.getElementsByClassName("nextprev");
-		if(np.length > 0) {
-			var c = np[0].childNodes;
-			var _g = 0;
-			while(_g < c.length) {
-				var i = c[_g];
-				++_g;
-				if(i.nodeName.toLowerCase() != "a") continue;
-				var i1 = i;
-				if(Header.toggled && i1.href.indexOf("#") == -1) i1.href += "#showall"; else if(!Header.toggled && i1.href.indexOf("#") != -1) i1.href = HxOverrides.substr(i1.href,0,i1.href.indexOf("#"));
-			}
-		}
-		Header.button.style.visibility = Expand.expandButtons.length == 0?"hidden":"visible";
-	}
-}
-Header.initShowAll = function() {
-	var menu = js.Browser.document.getElementsByClassName("tabmenu")[0];
-	var li = js.Browser.document.createElement("li");
-	Header.button = js.Browser.document.createElement("a");
-	Header.refresh();
-	Header.button.onclick = function(e) {
-		Header.button.className = "selected";
-		Header.toggled = !Header.toggled;
-		var _g = 0, _g1 = Expand.expandButtons;
-		while(_g < _g1.length) {
-			var btn = _g1[_g];
-			++_g;
-			btn.toggled = !Header.toggled;
-			btn.onclick(null);
-		}
-		Header.refresh();
-	};
-	li.appendChild(Header.button);
-	menu.appendChild(li);
-}
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
 HxOverrides.__name__ = ["HxOverrides"];
@@ -394,10 +389,10 @@ Preview.init = function() {
 	while(_g < ts.length) {
 		var t = ts[_g];
 		++_g;
-		Preview.makePreviewable(t);
+		Preview.preview(t);
 	}
 }
-Preview.makePreviewable = function(e) {
+Preview.preview = function(e) {
 	var box = e.getElementsByTagName("textarea")[0];
 	if(box == null) return;
 	var preview = js.Browser.document.createElement("div");
@@ -416,13 +411,9 @@ Reditn.main = function() {
 	};
 }
 Reditn.init = function() {
-	console.log(Markdown.parse("#reddit\n*Awesomeness*"));
 	Settings.init();
 	if(Settings.data.get("Block advertisements and sponsors")) Adblock.init();
-	if(Settings.data.get("Show image expansion buttons")) {
-		Header.init();
-		Expand.init();
-	}
+	if(Settings.data.get("Show image expansion buttons")) Expand.init();
 	if(Settings.data.get("Show information about a user upon hover")) UserInfo.init();
 	if(Settings.data.get("Show information about a subreddit upon hover")) SubredditInfo.init();
 	if(Settings.data.get("Hide duplicates")) DuplicateHider.init();
@@ -2133,7 +2124,7 @@ var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
 Expand.expandButtons = [];
-Header.toggled = false;
+Expand.toggled = false;
 Markdown.regex = [{ from : new EReg("___([^___]+)___","g"), to : "<b><i>$1</i></b>"},{ from : new EReg("\\*\\*([^\\*\\*|\\*]+)\\*\\*","g"), to : "<b>$1</b>"},{ from : new EReg("__([^__|_]+)__","g"), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*|\\*\\*]+)\\*","g"), to : "<i>$1</i>"},{ from : new EReg("_([^_|__]+)_","g"), to : "<i>$1</i>"},{ from : new EReg("\\[([^\\[]+)\\]\\(([^\\)]+)\\)","g"), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("(.*?)\n\\x3D=*","g"), to : "<h2>$1</h2>"},{ from : new EReg("(.*?)\n\\x2D-*","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h6>$1</h6>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h5>$1</h5>"},{ from : new EReg("\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h4>$1</h4>"},{ from : new EReg("\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23([^\n]+)\n","g"), to : "<h2>$1</h2>"},{ from : new EReg("\\x23([^\n]+)\n","g"), to : "<h1>$1</h1>"},{ from : new EReg("\n?([^\n]+)\n\n","g"), to : "<p>$1</p>"},{ from : new EReg("\n?([^\n]+)\n","g"), to : "$1 "},{ from : new EReg("\n[\\+\\*\\-] ([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\\x3Cli\\x3E([^\n+]+)\\x3C/li\\x3E",""), to : "<ul><li>$1</li></ul>"}];
 Settings.defaults = (function($this) {
 	var $r;

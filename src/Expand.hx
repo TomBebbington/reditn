@@ -9,6 +9,8 @@ class Expand {
 	public static var maxHeight(get, null):Int;
 	public static var maxArea(get, null):Int;
 	public static var expandButtons:Array<Element> = [];
+	public static var toggled(default, null):Bool = false;
+	public static var button(default, null):AnchorElement = null;
 	static inline function get_maxWidth():Int {
 		return Std.int(Browser.window.innerWidth*0.6);
 	}
@@ -20,6 +22,8 @@ class Expand {
 	}
 	public static function init() {
 		var links = Browser.document.body.getElementsByClassName("title");
+		toggled = Browser.window.location.hash == "#showall";
+		initShowAll();
 		for(i in 0...links.length) {
 			var l:AnchorElement = untyped links[i];
 			if(l.nodeName.toLowerCase()!="a")
@@ -42,14 +46,52 @@ class Expand {
 					else {
 						throw "Bad DOM";
 					}
-					if(Header.toggled)
+					if(toggled)
 						show.onclick(null);
-					Header.refresh();
+					refresh();
 				});
 			} else {
 				preload(l.href);
 			}
 		}
+	}
+	public static function refresh() {
+		if(button != null) {
+			button.innerHTML = toggled ? "hide images ("+Expand.expandButtons.length+")" : "show images ("+Expand.expandButtons.length+")";
+			button.href = toggled ? "#showall" : "#";
+			var np:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
+			if(np.length > 0) {
+				var c:Array<AnchorElement> = cast np[0].childNodes;
+				for(i in c) {
+					if(i.nodeName.toLowerCase() != "a")
+						continue;
+					var i:AnchorElement = cast i;
+					if(toggled && i.href.indexOf("#")==-1)
+						i.href += "#showall";
+					else if(!toggled && i.href.indexOf("#")!=-1)
+						i.href = i.href.substr(0, i.href.indexOf("#"));
+				}
+		}
+			button.style.visibility = Expand.expandButtons.length == 0 ? "hidden" : "visible";
+		}
+	}
+
+	static function initShowAll() {
+		var menu = Browser.document.getElementsByClassName("tabmenu")[0];
+		var li:LIElement = Browser.document.createLIElement();
+		button = Browser.document.createAnchorElement();
+		refresh();
+		button.onclick = function(e) {
+			button.className = "selected";
+			toggled = !toggled;
+			for(btn in Expand.expandButtons) {
+				untyped btn.toggled = !toggled;
+				btn.onclick(null);
+			}
+			refresh();
+		};
+		li.appendChild(button);
+		menu.appendChild(li);
 	}
 	static function showButton(el:Element) {
 		var e = Browser.document.createAnchorElement();

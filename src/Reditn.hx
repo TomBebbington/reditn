@@ -13,14 +13,11 @@ class Reditn {
 			untyped window.onload = function(e) init();
 	}
 	static function init() {
-		trace(Markdown.parse("#reddit\n*Awesomeness*"));
 		Settings.init();
 		if(Settings.data.get(Settings.ADBLOCK_ENABLED))
 			Adblock.init();
-		if(Settings.data.get(Settings.EXPAND_ENABLED)) {
-			Header.init();
+		if(Settings.data.get(Settings.EXPAND_ENABLED))
 			Expand.init();
-		}
 		if(Settings.data.get(Settings.USERINFO_ENABLED))
 			UserInfo.init();
 		if(Settings.data.get(Settings.SUBINFO_ENABLED))
