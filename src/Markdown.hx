@@ -3,7 +3,6 @@ import js.html.*;
 using StringTools;
 class Markdown {
 	static var regex:Array<Regex> = [
-		//{from: ~/\*\*\*([^\*\*\*]+)\*\*\*/g, to: "<b><i>$1</i></b>"},
 		{from: ~/___([^___]+)___/g, to: "<b><i>$1</i></b>"},
 		{from: ~/\*\*([^\*\*|\*]+)\*\*/g, to: "<b>$1</b>"},
 		{from: ~/__([^__|_]+)__/g, to: "<b>$1</b>"},
@@ -20,7 +19,9 @@ class Markdown {
 		{from: ~/\x23([^\n]+)\n/g, to: "<h1>$1</h1>"},
 		{from: ~/\n?([^\n]+)\n\n/g, to: "<p>$1</p>"},
 		{from: ~/\n?([^\n]+)\n/g, to: "$1 "},
+		{from: ~/\x3E ([^\n]+)/g, to: "<blockquote>$1</blockquote>"},
 		{from: ~/\n[\+\*\-] ([^\n]+)/g, to: "<li><p>$1</p></li>"},
+		{from: ~/\n[0-9]*[.\):]([^\n]+)/g, to: "<li><p>$1</p></li>"},
 		{from: ~/\x3Cli\x3E([^\n+]+)\x3C\/li\x3E/, to: "<ul><li>$1</li></ul>"}
 	];
 	public static function parse(s:String):String {

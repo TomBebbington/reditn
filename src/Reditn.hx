@@ -133,7 +133,7 @@ class Reditn {
 		return el;
 	}
 	public static function fullPopUp(el:Element, ?a:Element) {
-		var old:Element = untyped Browser.document.getElementsByClassName("reditn-full-popup")[0];
+		var old:Element = untyped Browser.document.getElementsByClassName("popup")[0];
 		if(old != null)
 			old.parentNode.removeChild(old);
 		Browser.document.body.appendChild(el);

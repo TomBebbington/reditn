@@ -36,7 +36,7 @@ class Settings {
 		if(dt != null)
 			data = haxe.Unserializer.run(dt);
 		for(k in defaults.keys())
-			if(!data.exists(k) || !Std.is(data.get(k), Type.getClass(defaults.get(k))))
+			if(!data.exists(k))
 				data.set(k, defaults.get(k));
 		var h = Browser.document.getElementById("header-bottom-right");
 		var prefs = untyped h.getElementsByTagName("ul")[0];
