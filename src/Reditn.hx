@@ -6,7 +6,7 @@ class Reditn {
 	static inline var month = 2629800;
 	static inline var day = 86400;
 	static inline var hour = 3600;
-	public static var links:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("title");
+	public static var links:Array<AnchorElement> = null;
 	static function main() {
 		if(untyped document.readyState=="complete")
 			init();
@@ -14,23 +14,27 @@ class Reditn {
 			untyped window.onload = function(e) init();
 	}
 	static function init() {
-		Settings.init();
-		if(Settings.data.get(Settings.ADBLOCK))
-			Adblock.init();
-		if(Settings.data.get(Settings.EXPAND))
-			Expand.init();
-		if(Settings.data.get(Settings.USERINFO))
-			UserInfo.init();
-		if(Settings.data.get(Settings.SUBINFO))
-			SubredditInfo.init();
-		if(Settings.data.get(Settings.DUPLICATE_HIDER))
-			DuplicateHider.init();
-		if(Settings.data.get(Settings.USER_TAGGER))
-			UserTagger.init();
-		if(Settings.data.get(Settings.SUBREDDIT_TAGGER))
-			SubredditTagger.init();
-		if(Settings.data.get(Settings.PREVIEW))
-			Preview.init();
+		links = cast Browser.document.body.getElementsByClassName("title");
+		wrap(Settings.init);
+		wrap(Adblock.init, Settings.ADBLOCK);
+		wrap(DuplicateHider.init, Settings.DUPLICATE_HIDER);
+		wrap(Expand.init, Settings.EXPAND);
+		wrap(Keyboard.init, Settings.KEYBOARD);
+		wrap(Preview.init, Settings.PREVIEW);
+		wrap(SubredditInfo.init, Settings.SUBINFO);
+		wrap(UserInfo.init, Settings.USERINFO);
+		wrap(UserTagger.init, Settings.USER_TAGGER);
+		wrap(SubredditTagger.init, Settings.SUBREDDIT_TAGGER);
+	}
+	static function wrap(fn:Void->Void, ?id:String) {
+		if(id == null || Settings.data.get(id))
+			try
+				fn()
+			catch(d:Dynamic) {
+				Browser.window.alert('Module $id has failed to load in Reditn due to the following error:\n $d');
+				Settings.data.set(id, false);
+		trace(Settings.data);
+			}
 	}
 	public static function formatNumber(n:Int):String {
 		return if (!Math.isFinite(n))

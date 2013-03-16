@@ -1,6 +1,7 @@
 import js.*;
 import js.html.*;
 import haxe.ds.StringMap;
+import haxe.crypto.BaseCode;
 class Settings {
 	static inline var NOTE_TEXT = "Close this dialog and refresh the page to see your changes in effect. Changes will be saved automatically.";
 	public static inline var ADBLOCK = "adblock";
@@ -11,8 +12,10 @@ class Settings {
 	public static inline var USER_TAGGER = "user-tag";
 	public static inline var SUBREDDIT_TAGGER = "sub-tag";
 	public static inline var PREVIEW = "preview";
+	public static inline var KEYBOARD = "keys";
 	public static inline var USER_TAGS = "user-tags";
 	public static inline var SUBREDDIT_TAGS = "sub-tags";
+	static var SAVE_BASE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=/";
 	static var DESC = [
 		ADBLOCK => "Block advertisements and sponsors",
 		USERINFO => "Show information about a user upon hover",
@@ -21,7 +24,8 @@ class Settings {
 		DUPLICATE_HIDER => "Hide duplicate links",
 		USER_TAGGER => "Tag users",
 		SUBREDDIT_TAGGER => "Tag subreddits",
-		PREVIEW => "Preview comments and posts"
+		PREVIEW => "Preview comments and posts",
+		KEYBOARD => "Keyboard shortcuts"
 	];
 	public static var DEFAULTS:StringMap<Dynamic> = untyped [
 		ADBLOCK => true,
@@ -32,12 +36,12 @@ class Settings {
 		USER_TAGGER => true,
 		SUBREDDIT_TAGGER => true,
 		PREVIEW => true,
+		KEYBOARD => true,
 		USER_TAGS => ["TopHattedCoder" => "Jesus"],
 		SUBREDDIT_TAGS => []
 	];
 	public static var data = new StringMap<Dynamic>();
-	public static function save() {
-		haxe.Serializer.USE_CACHE = false;
+	static function optimisedData():String {
 		var e = new Map<String, Dynamic>();
 		for(k in data.keys()) {
 			var v:Dynamic = data.get(k);
@@ -45,15 +49,17 @@ class Settings {
 			if(DEFAULTS.get(k) != v && (untyped v.iterator ? Lambda.count(v) > 0 : true))
 				e.set(k, v);
 		}
-		Browser.window.localStorage.setItem("reditn", haxe.Serializer.run(e));
+		return haxe.Serializer.run(e);
+	}
+	public static function save() {
+		haxe.Serializer.USE_CACHE = false;
+		Browser.window.localStorage.setItem("reditn", optimisedData());
 	}
 	public static function init() {
 		var dt = Browser.window.localStorage.getItem("reditn");
 		if(dt != null)
 			data = haxe.Unserializer.run(dt);
-		for(k in DEFAULTS.keys())
-			if(!data.exists(k))
-				data.set(k, DEFAULTS.get(k));
+		fixMissing();
 		var h = Browser.document.getElementById("header-bottom-right");
 		var prefs = untyped h.getElementsByTagName("ul")[0];
 		var d = Browser.document.createAnchorElement();
@@ -79,10 +85,8 @@ class Settings {
 		var h = Browser.document.createElement("h1");
 		h.innerHTML = "Reditn settings";
 		e.appendChild(h);
-		e.appendChild(createForm());
 		Reditn.fullPopUp(e);
-	}
-	static function createForm():FormElement {
+
 		var form = Browser.document.createFormElement();
 		form.id = "reditn-config";
 		form.action = "javascript:void(0);";
@@ -106,11 +110,18 @@ class Settings {
 		delb.type = "button";
 		delb.value = "Restore default settings";
 		delb.onclick = function(_) {
-			for(k in DEFAULTS.keys())
-				data.set(k, DEFAULTS.get(k));
+			fixMissing(true);
 			settingsPopUp();
 		}
 		form.appendChild(delb);
+		var export = makeButton("Export settings to text", function() Browser.window.alert(Browser.window.btoa(optimisedData())));
+		form.appendChild(export);
+		var importbtn = makeButton("Import settings", function() {
+			data = haxe.Unserializer.run(Browser.window.atob(Browser.window.prompt("Settings to import", Browser.window.btoa(optimisedData()))));
+			fixMissing();
+			settingsPopUp();
+		});
+		form.appendChild(importbtn);
 		form.appendChild(Browser.document.createBRElement());
 		for(k in data.keys()) {
 			var d = data.get(k);
@@ -148,6 +159,18 @@ class Settings {
 		note.style.fontWeight = "bold";
 		note.innerHTML = NOTE_TEXT;
 		form.appendChild(note);
-		return form;
+		e.appendChild(form);
+	}
+	static function makeButton(t:String, ?fn:Void->Void) {
+		var b = Browser.document.createInputElement();
+		b.type = "button";
+		b.value = t;
+		b.onclick = untyped fn;
+		return b;
+	}
+	static function fixMissing(all:Bool=false) {
+		for(k in DEFAULTS.keys())
+			if(all || !data.exists(k))
+				data.set(k, DEFAULTS.get(k));
 	}
 }
