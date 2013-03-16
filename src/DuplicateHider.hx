@@ -9,7 +9,7 @@ class DuplicateHider {
 			if(link.nodeName.toLowerCase() != "a")
 				continue;
 			if(seen.has(link.href))
-				Reditn.hide(cast link.parentNode);
+				Reditn.show(cast link.parentNode, false);
 			seen.push(link.href);
 		}
 	}

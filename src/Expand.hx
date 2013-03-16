@@ -31,23 +31,21 @@ class Expand {
 			var urltype = Reditn.getLinkType(l.href);
 			if(urltype==LinkType.IMAGE) {
 				getImageLink(l.href, l, function(url, l) {
-					preload(url);
-					var e = getEntry(l);
+					var e = l.parentNode.parentNode;
 					var img = loadImage(url);
 					var div = Browser.document.createElement("div");
+					Reditn.show(div, toggled);
+					e.appendChild(div);
 					div.appendChild(img);
-					var show = showButton(div);
-					expandButtons.push(show);
 					var li = Browser.document.createElement("li");
-					li.appendChild(show);
+					var show = showButton(div, li);
+					expandButtons.push(show);
 					var btns = untyped e.getElementsByClassName("buttons")[0];
 					if(btns != null)
 						btns.insertBefore(li, btns.childNodes[0]);
 					else {
 						throw "Bad DOM";
 					}
-					if(toggled)
-						show.onclick(null);
 					refresh();
 				});
 			} else {
@@ -72,7 +70,7 @@ class Expand {
 						i.href = i.href.substr(0, i.href.indexOf("#"));
 				}
 		}
-			button.style.visibility = Expand.expandButtons.length == 0 ? "hidden" : "visible";
+			Reditn.show(button, Expand.expandButtons.length != 0);
 		}
 	}
 
@@ -85,32 +83,27 @@ class Expand {
 			button.className = "selected";
 			toggled = !toggled;
 			for(btn in Expand.expandButtons) {
-				untyped btn.toggled = !toggled;
-				btn.onclick(null);
+				if(untyped btn.toggled != toggled)
+					btn.onclick(null);
 			}
 			refresh();
 		};
 		li.appendChild(button);
 		menu.appendChild(li);
 	}
-	static function showButton(el:Element) {
+	static function showButton(el:Element, p:Element) {
 		var e = Browser.document.createAnchorElement();
 		e.style.fontStyle = "italic";
 		e.href = "javascript:void(0);";
-		e.innerHTML = "show";
-		untyped e.toggled = false;
+		e.innerHTML = toggled ? "hide" : "show";
+		untyped e.toggled = toggled;
 		e.onclick = function(ev) {
 			untyped e.toggled = !e.toggled;
 			e.innerHTML = untyped e.toggled ? "hide" : "show";
-			if(untyped e.toggled) {
-				e.parentNode.parentNode.appendChild(el);
-			} else if(el.parentNode != null)
-				el.parentNode.removeChild(el);
+			Reditn.show(el, untyped e.toggled);
 		}
+		p.appendChild(e);
 		return e;
-	}
-	static inline function getEntry(l:Element) {
-		return l.parentNode.parentNode;
 	}
 	static function getImageLink(ourl:String, el:Element, cb:String -> Element->Void) {
 		var url = ourl;

@@ -51,8 +51,8 @@ class Reditn {
 	static inline function plural(n:Int) {
 		return n <= 1 ? "" : "s";
 	}
-	public static inline function hide(e:Element):Void {
-		e.style.display = "none";
+	public static inline function show(e:Element, shown:Bool):Void {
+		e.style.display = shown ? "": "none";
 	}
 	public static inline function remove(e:Element):Void {
 		e.parentNode.removeChild(e);

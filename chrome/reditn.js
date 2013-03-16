@@ -7,7 +7,7 @@
 // @include     reddit.com/*
 // @include		*.reddit.com
 // @include		*.reddit.com/*
-// @version     1.4.8
+// @version     1.4.9
 // @grant		none
 // ==/UserScript==
 (function () { "use strict";
@@ -82,18 +82,17 @@ Expand.init = function() {
 		if(l.nodeName.toLowerCase() != "a") continue;
 		var urltype = Reditn.getLinkType(l.href);
 		if(urltype == LinkType.IMAGE) Expand.getImageLink(l.href,l,function(url,l1) {
-			Expand.preload(url);
 			var e = l1.parentNode.parentNode;
 			var img = Expand.loadImage(url);
 			var div = js.Browser.document.createElement("div");
+			div.style.display = Expand.toggled?"":"none";
+			e.appendChild(div);
 			div.appendChild(img);
-			var show = Expand.showButton(div);
-			Expand.expandButtons.push(show);
 			var li = js.Browser.document.createElement("li");
-			li.appendChild(show);
+			var show = Expand.showButton(div,li);
+			Expand.expandButtons.push(show);
 			var btns = e.getElementsByClassName("buttons")[0];
 			if(btns != null) btns.insertBefore(li,btns.childNodes[0]); else throw "Bad DOM";
-			if(Expand.toggled) show.onclick(null);
 			Expand.refresh();
 		}); else Expand.preload(l.href);
 	}
@@ -114,7 +113,7 @@ Expand.refresh = function() {
 				if(Expand.toggled && i1.href.indexOf("#") == -1) i1.href += "#showall"; else if(!Expand.toggled && i1.href.indexOf("#") != -1) i1.href = HxOverrides.substr(i1.href,0,i1.href.indexOf("#"));
 			}
 		}
-		Expand.button.style.visibility = Expand.expandButtons.length == 0?"hidden":"visible";
+		Expand.button.style.display = Expand.expandButtons.length != 0?"":"none";
 	}
 }
 Expand.initShowAll = function() {
@@ -129,25 +128,25 @@ Expand.initShowAll = function() {
 		while(_g < _g1.length) {
 			var btn = _g1[_g];
 			++_g;
-			btn.toggled = !Expand.toggled;
-			btn.onclick(null);
+			if(btn.toggled != Expand.toggled) btn.onclick(null);
 		}
 		Expand.refresh();
 	};
 	li.appendChild(Expand.button);
 	menu.appendChild(li);
 }
-Expand.showButton = function(el) {
+Expand.showButton = function(el,p) {
 	var e = js.Browser.document.createElement("a");
 	e.style.fontStyle = "italic";
 	e.href = "javascript:void(0);";
-	e.innerHTML = "show";
-	e.toggled = false;
+	e.innerHTML = Expand.toggled?"hide":"show";
+	e.toggled = Expand.toggled;
 	e.onclick = function(ev) {
 		e.toggled = !e.toggled;
 		e.innerHTML = e.toggled?"hide":"show";
-		if(e.toggled) e.parentNode.parentNode.appendChild(el); else if(el.parentNode != null) el.parentNode.removeChild(el);
+		el.style.display = e.toggled?"":"none";
 	};
+	p.appendChild(e);
 	return e;
 }
 Expand.getImageLink = function(ourl,el,cb) {
@@ -2121,7 +2120,7 @@ var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
 Expand.expandButtons = [];
 Expand.toggled = false;
-Markdown.regex = [{ from : new EReg("___([^___]+)___","g"), to : "<b><i>$1</i></b>"},{ from : new EReg("\\*\\*([^\\*\\*|\\*]+)\\*\\*","g"), to : "<b>$1</b>"},{ from : new EReg("__([^__|_]+)__","g"), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*|\\*\\*]+)\\*","g"), to : "<i>$1</i>"},{ from : new EReg("_([^_|__]+)_","g"), to : "<i>$1</i>"},{ from : new EReg("\\[([^\\[]+)\\]\\(([^\\)]+)\\)","g"), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("(.*?)\n\\x3D=*","g"), to : "<h2>$1</h2>"},{ from : new EReg("(.*?)\n\\x2D-*","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h6>$1</h6>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h5>$1</h5>"},{ from : new EReg("\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h4>$1</h4>"},{ from : new EReg("\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23([^\n]+)\n","g"), to : "<h2>$1</h2>"},{ from : new EReg("\\x23([^\n]+)\n","g"), to : "<h1>$1</h1>"},{ from : new EReg("\n?([^\n]+)\n\n","g"), to : "<p>$1</p>"},{ from : new EReg("\n?([^\n]+)\n","g"), to : "$1 "},{ from : new EReg("\\x3E ([^\n]+)","g"), to : "<blockquote>$1</blockquote>"},{ from : new EReg("\n[\\+\\*\\-] ([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\n[0-9]*[.\\):]([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\\x3Cli\\x3E([^\n+]+)\\x3C/li\\x3E",""), to : "<ul><li>$1</li></ul>"}];
+Markdown.regex = [{ from : new EReg("\\x3E ([^\n]+)","g"), to : "<blockquote>$1</blockquote>"},{ from : new EReg("___([^___]+)___","g"), to : "<b><i>$1</i></b>"},{ from : new EReg("\\*\\*([^\\*\\*|\\*]+)\\*\\*","g"), to : "<b>$1</b>"},{ from : new EReg("__([^__|_]+)__","g"), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*|\\*\\*]+)\\*","g"), to : "<i>$1</i>"},{ from : new EReg("_([^_|__]+)_","g"), to : "<i>$1</i>"},{ from : new EReg("\\[([^\\]]+)\\]\\(([^\\)]+)\\)","g"), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("(.*?)\n\\x3D=*","g"), to : "<h2>$1</h2>"},{ from : new EReg("(.*?)\n\\x2D-*","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h6>$1</h6>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h5>$1/h5>"},{ from : new EReg("\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h4>$1</h4>"},{ from : new EReg("\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23([^\n]+)\n","g"), to : "<h2>$1</h2>"},{ from : new EReg("\\x23([^\n]+)\n","g"), to : "<h1>$1</h1>"},{ from : new EReg("\n?([^\n]+)\n\n","g"), to : "<p>$1</p>"},{ from : new EReg("\n?([^\n]+)\n","g"), to : "$1 "},{ from : new EReg("\n[\\+\\*\\-] ([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\n[0-9]*[.\\):]([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\\x3Cli\\x3E([^\n+]+)\\x3C/li\\x3E",""), to : "<ul><li>$1</li></ul>"}];
 Settings.defaults = (function($this) {
 	var $r;
 	var m = new haxe.ds.StringMap();

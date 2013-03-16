@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name        Reditn
-// @namespace   http://userscripts.org/user/tophattedcoder/
-// @description Reddit tweaks and enhancements.
-// @include     reddit.com
-// @include     reddit.com/*
-// @include		*.reddit.com
-// @include		*.reddit.com/*
-// @version     1.4.8
-// @grant		none
+// @name			Reditn
+// @namespace		http://userscripts.org/user/tophattedcoder/
+// @description		Reddit tweaks and enhancements.
+// @include			reddit.com
+// @include			reddit.com/*
+// @include			*.reddit.com
+// @include			*.reddit.com/*
+// @version			1.4.9
+// @grant			none
 // ==/UserScript==
