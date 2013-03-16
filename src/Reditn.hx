@@ -6,6 +6,7 @@ class Reditn {
 	static inline var month = 2629800;
 	static inline var day = 86400;
 	static inline var hour = 3600;
+	public static var links:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("title");
 	static function main() {
 		if(untyped document.readyState=="complete")
 			init();
@@ -14,21 +15,21 @@ class Reditn {
 	}
 	static function init() {
 		Settings.init();
-		if(Settings.data.get(Settings.ADBLOCK_ENABLED))
+		if(Settings.data.get(Settings.ADBLOCK))
 			Adblock.init();
-		if(Settings.data.get(Settings.EXPAND_ENABLED))
+		if(Settings.data.get(Settings.EXPAND))
 			Expand.init();
-		if(Settings.data.get(Settings.USERINFO_ENABLED))
+		if(Settings.data.get(Settings.USERINFO))
 			UserInfo.init();
-		if(Settings.data.get(Settings.SUBINFO_ENABLED))
+		if(Settings.data.get(Settings.SUBINFO))
 			SubredditInfo.init();
-		if(Settings.data.get(Settings.DUPLICATE_HIDER_ENABLED))
+		if(Settings.data.get(Settings.DUPLICATE_HIDER))
 			DuplicateHider.init();
-		if(Settings.data.get(Settings.USER_TAGGER_ENABLED))
+		if(Settings.data.get(Settings.USER_TAGGER))
 			UserTagger.init();
-		if(Settings.data.get(Settings.SUBREDDIT_TAGGER_ENABLED))
+		if(Settings.data.get(Settings.SUBREDDIT_TAGGER))
 			SubredditTagger.init();
-		if(Settings.data.get(Settings.PREVIEW_ENABLED))
+		if(Settings.data.get(Settings.PREVIEW))
 			Preview.init();
 	}
 	public static function formatNumber(n:Int):String {

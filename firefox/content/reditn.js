@@ -7,7 +7,7 @@
 // @include			reddit.com/*
 // @include			*.reddit.com
 // @include			*.reddit.com/*
-// @version			1.4.9
+// @version			1.5.0
 // @grant			none
 // ==/UserScript==
 (function () { "use strict";
@@ -16,44 +16,34 @@ var Adblock = function() { }
 $hxClasses["Adblock"] = Adblock;
 Adblock.__name__ = ["Adblock"];
 Adblock.init = function() {
-	Adblock.removeAll(js.Browser.document.body.getElementsByClassName("promoted"));
-	Adblock.removeAll(js.Browser.document.body.getElementsByClassName("goldvertisement"));
-	Adblock.removeTop();
-	var sidebarAd = js.Browser.document.getElementById("ad-frame");
-	if(sidebarAd != null) {
-		if(sidebarAd != null && sidebarAd.parentNode != null) sidebarAd.parentNode.removeChild(sidebarAd);
-	}
-}
-Adblock.remove = function(e) {
-	if(e != null && e.parentNode != null) e.parentNode.removeChild(e);
-}
-Adblock.removeAll = function(a) {
-	var _g1 = 0, _g = a.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		Adblock.remove(a[i]);
-	}
-}
-Adblock.removeTop = function() {
+	Adblock.hideAll(js.Browser.document.body.getElementsByClassName("promoted"));
+	Adblock.hideAll(js.Browser.document.body.getElementsByClassName("goldvertisement"));
 	var help = js.Browser.document.getElementById("spotlight-help");
 	if(help != null) {
 		var link = help.parentNode.parentNode;
-		if(link != null && link.parentNode != null) link.parentNode.removeChild(link);
+		link.style.display = "none";
+	}
+	var sidebarAd = js.Browser.document.getElementById("ad-frame");
+	if(sidebarAd != null) sidebarAd.style.display = "none";
+}
+Adblock.hideAll = function(a) {
+	var _g1 = 0, _g = a.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		a[i].style.display = "none";
 	}
 }
 var DuplicateHider = function() { }
 $hxClasses["DuplicateHider"] = DuplicateHider;
 DuplicateHider.__name__ = ["DuplicateHider"];
 DuplicateHider.init = function() {
-	var links = js.Browser.document.body.getElementsByClassName("title");
 	var seen = [];
-	var _g = 0;
-	while(_g < links.length) {
-		var link = links[_g];
+	var _g = 0, _g1 = Reditn.links;
+	while(_g < _g1.length) {
+		var link = _g1[_g];
 		++_g;
 		if(link.nodeName.toLowerCase() != "a") continue;
-		if(Lambda.has(seen,link.href)) link.parentNode.style.display = "none";
-		seen.push(link.href);
+		if(Lambda.has(seen,link.href)) link.parentNode.style.display = "none"; else seen.push(link.href);
 	}
 }
 var EReg = function(r,opt) {
@@ -72,13 +62,12 @@ var Expand = function() { }
 $hxClasses["Expand"] = Expand;
 Expand.__name__ = ["Expand"];
 Expand.init = function() {
-	var links = js.Browser.document.body.getElementsByClassName("title");
 	Expand.toggled = js.Browser.window.location.hash == "#showall";
 	Expand.initShowAll();
-	var _g1 = 0, _g = links.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		var l = links[i];
+	var _g = 0, _g1 = Reditn.links;
+	while(_g < _g1.length) {
+		var l = _g1[_g];
+		++_g;
 		if(l.nodeName.toLowerCase() != "a") continue;
 		var urltype = Reditn.getLinkType(l.href);
 		if(urltype == LinkType.IMAGE) Expand.getImageLink(l.href,l,function(url,l1) {
@@ -90,7 +79,7 @@ Expand.init = function() {
 			div.appendChild(img);
 			var li = js.Browser.document.createElement("li");
 			var show = Expand.showButton(div,li);
-			Expand.expandButtons.push(show);
+			Expand.buttons.push(show);
 			var btns = e.getElementsByClassName("buttons")[0];
 			if(btns != null) btns.insertBefore(li,btns.childNodes[0]); else throw "Bad DOM";
 			Expand.refresh();
@@ -99,7 +88,7 @@ Expand.init = function() {
 }
 Expand.refresh = function() {
 	if(Expand.button != null) {
-		Expand.button.innerHTML = Expand.toggled?"hide images (" + Expand.expandButtons.length + ")":"show images (" + Expand.expandButtons.length + ")";
+		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " images (" + Expand.buttons.length + ")";
 		Expand.button.href = Expand.toggled?"#showall":"#";
 		var np = js.Browser.document.body.getElementsByClassName("nextprev");
 		if(np.length > 0) {
@@ -113,7 +102,7 @@ Expand.refresh = function() {
 				if(Expand.toggled && i1.href.indexOf("#") == -1) i1.href += "#showall"; else if(!Expand.toggled && i1.href.indexOf("#") != -1) i1.href = HxOverrides.substr(i1.href,0,i1.href.indexOf("#"));
 			}
 		}
-		Expand.button.style.display = Expand.expandButtons.length != 0?"":"none";
+		Expand.button.style.display = Expand.buttons.length > 0?"":"none";
 	}
 }
 Expand.initShowAll = function() {
@@ -124,7 +113,7 @@ Expand.initShowAll = function() {
 	Expand.button.onclick = function(e) {
 		Expand.button.className = "selected";
 		Expand.toggled = !Expand.toggled;
-		var _g = 0, _g1 = Expand.expandButtons;
+		var _g = 0, _g1 = Expand.buttons;
 		while(_g < _g1.length) {
 			var btn = _g1[_g];
 			++_g;
@@ -200,7 +189,7 @@ Expand.getImageLink = function(ourl,el,cb) {
 Expand.preload = function(url) {
 	var link = js.Browser.document.createElement("link");
 	link.href = url;
-	link.rel = js.Browser.window.navigator.userAgent.toLowerCase().indexOf("chrome") > -1?"prefetch":"preload";
+	link.rel = "preload";
 	js.Browser.document.head.appendChild(link);
 }
 Expand.loadImage = function(url) {
@@ -258,9 +247,7 @@ Expand.initResize = function(e) {
 	};
 }
 Expand.removeSymbols = function(s) {
-	if(s.lastIndexOf("?") != -1) s = HxOverrides.substr(s,0,s.lastIndexOf("?"));
-	if(s.lastIndexOf("/") != -1) s = HxOverrides.substr(s,0,s.lastIndexOf("/"));
-	return s;
+	return s.lastIndexOf("?") != -1?HxOverrides.substr(s,0,s.lastIndexOf("?")):s.lastIndexOf("/") != -1?HxOverrides.substr(s,0,s.lastIndexOf("/")):s;
 }
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
@@ -401,6 +388,15 @@ Preview.preview = function(e) {
 		preview.innerHTML = Markdown.parse(box.value);
 	};
 }
+var js = {}
+js.Browser = function() { }
+$hxClasses["js.Browser"] = js.Browser;
+js.Browser.__name__ = ["js","Browser"];
+js.Browser.createXMLHttpRequest = function() {
+	if(typeof XMLHttpRequest != "undefined") return new XMLHttpRequest();
+	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
+	throw "Unable to create XMLHttpRequest object.";
+}
 var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
 Reditn.__name__ = ["Reditn"];
@@ -411,14 +407,14 @@ Reditn.main = function() {
 }
 Reditn.init = function() {
 	Settings.init();
-	if(Settings.data.get("Block advertisements and sponsors")) Adblock.init();
-	if(Settings.data.get("Show image expansion buttons")) Expand.init();
-	if(Settings.data.get("Show information about a user upon hover")) UserInfo.init();
-	if(Settings.data.get("Show information about a subreddit upon hover")) SubredditInfo.init();
-	if(Settings.data.get("Hide duplicates")) DuplicateHider.init();
-	if(Settings.data.get("Tag nicknames to users")) UserTagger.init();
-	if(Settings.data.get("Tag nicknames to subreddits")) SubredditTagger.init();
-	if(Settings.data.get("Preview any comments or posts I make")) Preview.init();
+	if(Settings.data.get("adblock")) Adblock.init();
+	if(Settings.data.get("expand")) Expand.init();
+	if(Settings.data.get("userinfo")) UserInfo.init();
+	if(Settings.data.get("subinfo")) SubredditInfo.init();
+	if(Settings.data.get("dup-hider")) DuplicateHider.init();
+	if(Settings.data.get("user-tag")) UserTagger.init();
+	if(Settings.data.get("sub-tag")) SubredditTagger.init();
+	if(Settings.data.get("preview")) Preview.init();
 }
 Reditn.formatNumber = function(n) {
 	return !Math.isFinite(n)?Std.string(n):(function($this) {
@@ -616,10 +612,10 @@ Settings.save = function() {
 Settings.init = function() {
 	var dt = js.Browser.window.localStorage.getItem("reditn");
 	if(dt != null) Settings.data = haxe.Unserializer.run(dt);
-	var $it0 = Settings.defaults.keys();
+	var $it0 = Settings.DEFAULTS.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		if(!Settings.data.exists(k)) Settings.data.set(k,Settings.defaults.get(k));
+		if(!Settings.data.exists(k)) Settings.data.set(k,Settings.DEFAULTS.get(k));
 	}
 	var h = js.Browser.document.getElementById("header-bottom-right");
 	var prefs = h.getElementsByTagName("ul")[0];
@@ -684,7 +680,7 @@ Settings.createForm = function() {
 	delb.type = "button";
 	delb.value = "Restore default settings";
 	delb.onclick = function(_) {
-		Settings.restoreDefaults();
+		Settings.restoreDEFAULTS();
 		Settings.settingsPopUp();
 	};
 	form.appendChild(delb);
@@ -692,14 +688,15 @@ Settings.createForm = function() {
 	var $it0 = Settings.data.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
+		var l = Settings.DESC.get(k);
 		var d = Settings.data.get(k);
-		if(!js.Boot.__instanceof(d,haxe.ds.StringMap) && Settings.defaults.exists(k)) {
+		if(!js.Boot.__instanceof(d,haxe.ds.StringMap) && Settings.DEFAULTS.exists(k)) {
 			var label = js.Browser.document.createElement("label");
 			label.setAttribute("for",k);
 			label.style.position = "absolute";
 			label.style.width = "46%";
 			label.style.textAlign = "right";
-			label.innerHTML = k + " ";
+			label.innerHTML = "" + l + " ";
 			form.appendChild(label);
 			var input = js.Browser.document.createElement("input");
 			input.style.position = "absolute";
@@ -715,11 +712,11 @@ Settings.createForm = function() {
 	}
 	return form;
 }
-Settings.restoreDefaults = function() {
-	var $it0 = Settings.defaults.keys();
+Settings.restoreDEFAULTS = function() {
+	var $it0 = Settings.DEFAULTS.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		Settings.data.set(k,Settings.defaults.get(k));
+		Settings.data.set(k,Settings.DEFAULTS.get(k));
 	}
 }
 var Std = function() { }
@@ -829,7 +826,7 @@ SubredditTagger.getTag = function(a) {
 	var tagline = a.parentNode;
 	var tag = js.Browser.document.createElement("span");
 	var sub = StringTools.trim(a.innerHTML);
-	var currentTag = Settings.data.get("Subreddit tags").exists(sub)?Settings.data.get("Subreddit tags").get(sub):null;
+	var currentTag = Settings.data.get("sub-tags").exists(sub)?Settings.data.get("sub-tags").get(sub):null;
 	tag.className = "flair";
 	var tagName = js.Browser.document.createElement("span");
 	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
@@ -849,7 +846,7 @@ SubredditTagger.getTag = function(a) {
 		box.value = currentTag;
 		box.style.width = "100%";
 		box.onchange = function(ev) {
-			Settings.data.get("Subreddit tags").set(sub,box.value);
+			Settings.data.get("sub-tags").set(sub,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
 			Settings.save();
 		};
@@ -993,7 +990,7 @@ UserTagger.getTag = function(a) {
 	var tagline = a.parentNode;
 	var tag = js.Browser.document.createElement("span");
 	var user = StringTools.trim(a.innerHTML);
-	var currentTag = Settings.data.get("User tags").exists(user)?Settings.data.get("User tags").get(user):null;
+	var currentTag = Settings.data.get("user-tags").exists(user)?Settings.data.get("user-tags").get(user):null;
 	tag.className = "flair";
 	var tagName = js.Browser.document.createElement("span");
 	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
@@ -1013,7 +1010,7 @@ UserTagger.getTag = function(a) {
 		box.value = currentTag;
 		box.style.width = "100%";
 		box.onchange = function(ev) {
-			Settings.data.get("User tags").set(user,box.value);
+			Settings.data.get("user-tags").set(user,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
 			Settings.save();
 		};
@@ -1969,7 +1966,6 @@ haxe.io.Bytes.alloc = function(length) {
 haxe.io.Bytes.prototype = {
 	__class__: haxe.io.Bytes
 }
-var js = {}
 js.Boot = function() { }
 $hxClasses["js.Boot"] = js.Boot;
 js.Boot.__name__ = ["js","Boot"];
@@ -2081,14 +2077,6 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 }
-js.Browser = function() { }
-$hxClasses["js.Browser"] = js.Browser;
-js.Browser.__name__ = ["js","Browser"];
-js.Browser.createXMLHttpRequest = function() {
-	if(typeof XMLHttpRequest != "undefined") return new XMLHttpRequest();
-	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
-	throw "Unable to create XMLHttpRequest object.";
-}
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
 var $_;
 function $bind(o,m) { var f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; return f; };
@@ -2118,23 +2106,40 @@ Bool.__ename__ = ["Bool"];
 var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
-Expand.expandButtons = [];
+Expand.buttons = [];
 Expand.toggled = false;
 Markdown.regex = [{ from : new EReg("\\x3E ([^\n]+)","g"), to : "<blockquote>$1</blockquote>"},{ from : new EReg("___([^___]+)___","g"), to : "<b><i>$1</i></b>"},{ from : new EReg("\\*\\*([^\\*\\*|\\*]+)\\*\\*","g"), to : "<b>$1</b>"},{ from : new EReg("__([^__|_]+)__","g"), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*|\\*\\*]+)\\*","g"), to : "<i>$1</i>"},{ from : new EReg("_([^_|__]+)_","g"), to : "<i>$1</i>"},{ from : new EReg("\\[([^\\]]+)\\]\\(([^\\)]+)\\)","g"), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("(.*?)\n\\x3D=*","g"), to : "<h2>$1</h2>"},{ from : new EReg("(.*?)\n\\x2D-*","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h6>$1</h6>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h5>$1/h5>"},{ from : new EReg("\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h4>$1</h4>"},{ from : new EReg("\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23([^\n]+)\n","g"), to : "<h2>$1</h2>"},{ from : new EReg("\\x23([^\n]+)\n","g"), to : "<h1>$1</h1>"},{ from : new EReg("\n?([^\n]+)\n\n","g"), to : "<p>$1</p>"},{ from : new EReg("\n?([^\n]+)\n","g"), to : "$1 "},{ from : new EReg("\n[\\+\\*\\-] ([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\n[0-9]*[.\\):]([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\\x3Cli\\x3E([^\n+]+)\\x3C/li\\x3E",""), to : "<ul><li>$1</li></ul>"}];
-Settings.defaults = (function($this) {
+js.Browser.window = typeof window != "undefined" ? window : null;
+js.Browser.document = typeof window != "undefined" ? window.document : null;
+Reditn.links = js.Browser.document.body.getElementsByClassName("title");
+Settings.DESC = (function($this) {
 	var $r;
-	var m = new haxe.ds.StringMap();
-	m.set("Block advertisements and sponsors",true);
-	m.set("Show information about a user upon hover",true);
-	m.set("Show information about a subreddit upon hover",true);
-	m.set("Show image expansion buttons",true);
-	m.set("Hide duplicates",true);
-	m.set("Tag nicknames to users",true);
-	m.set("Tag nicknames to subreddits",true);
-	m.set("Preview any comments or posts I make",true);
-	m.set("User tags",new haxe.ds.StringMap());
-	m.set("Subreddit tags",new haxe.ds.StringMap());
-	$r = m;
+	var _g = new haxe.ds.StringMap();
+	_g.set("adblock","Block advertisements and sponsors");
+	_g.set("userinfo","Show information about a user upon hover");
+	_g.set("subinfo","Show information about a subreddit upon hover");
+	_g.set("expand","Allow expansion of images");
+	_g.set("dup-hider","Hide duplicate links");
+	_g.set("user-tag","Tag users");
+	_g.set("sub-tag","Tag subreddits");
+	_g.set("preview","Preview comments and posts");
+	$r = _g;
+	return $r;
+}(this));
+Settings.DEFAULTS = (function($this) {
+	var $r;
+	var _g = new haxe.ds.StringMap();
+	_g.set("adblock",true);
+	_g.set("userinfo",true);
+	_g.set("subinfo",true);
+	_g.set("expand",true);
+	_g.set("dup-hider",true);
+	_g.set("user-tag",true);
+	_g.set("sub-tag",true);
+	_g.set("preview",true);
+	_g.set("user-tags",new haxe.ds.StringMap());
+	_g.set("sub-tags",new haxe.ds.StringMap());
+	$r = _g;
 	return $r;
 }(this));
 Settings.data = new haxe.ds.StringMap();
@@ -2144,7 +2149,5 @@ haxe.Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
 haxe.Unserializer.DEFAULT_RESOLVER = Type;
 haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe.ds.ObjectMap.count = 0;
-js.Browser.window = typeof window != "undefined" ? window : null;
-js.Browser.document = typeof window != "undefined" ? window.document : null;
 Reditn.main();
 })();

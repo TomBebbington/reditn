@@ -2,30 +2,38 @@ import js.*;
 import js.html.*;
 import haxe.ds.StringMap;
 class Settings {
-	public static inline var ADBLOCK_ENABLED = "Block advertisements and sponsors";
-	public static inline var USERINFO_ENABLED = "Show information about a user upon hover";
-	public static inline var SUBINFO_ENABLED = "Show information about a subreddit upon hover";
-	public static inline var EXPAND_ENABLED = "Show image expansion buttons";
-	public static inline var DUPLICATE_HIDER_ENABLED = "Hide duplicates";
-	public static inline var USER_TAGGER_ENABLED = "Tag nicknames to users";
-	public static inline var SUBREDDIT_TAGGER_ENABLED = "Tag nicknames to subreddits";
-	public static inline var PREVIEW_ENABLED = "Preview any comments or posts I make";
-	public static inline var USER_TAGS = "User tags";
-	public static inline var SUBREDDIT_TAGS = "Subreddit tags";
-	public static var defaults = {
-		var m = new Map<String, Dynamic>();
-		m.set(ADBLOCK_ENABLED, true);
-		m.set(USERINFO_ENABLED, true);
-		m.set(SUBINFO_ENABLED, true);
-		m.set(EXPAND_ENABLED, true);
-		m.set(DUPLICATE_HIDER_ENABLED, true);
-		m.set(USER_TAGGER_ENABLED, true);
-		m.set(SUBREDDIT_TAGGER_ENABLED, true);
-		m.set(PREVIEW_ENABLED, true);
-		m.set(USER_TAGS, new StringMap<String>());
-		m.set(SUBREDDIT_TAGS, new StringMap<String>());
-		m;
-	};
+	public static inline var ADBLOCK = "adblock";
+	public static inline var USERINFO = "userinfo";
+	public static inline var SUBINFO = "subinfo";
+	public static inline var EXPAND = "expand";
+	public static inline var DUPLICATE_HIDER = "dup-hider";
+	public static inline var USER_TAGGER = "user-tag";
+	public static inline var SUBREDDIT_TAGGER = "sub-tag";
+	public static inline var PREVIEW = "preview";
+	public static inline var USER_TAGS = "user-tags";
+	public static inline var SUBREDDIT_TAGS = "sub-tags";
+	static var DESC = [
+		ADBLOCK => "Block advertisements and sponsors",
+		USERINFO => "Show information about a user upon hover",
+		SUBINFO => "Show information about a subreddit upon hover",
+		EXPAND => "Allow expansion of images",
+		DUPLICATE_HIDER => "Hide duplicate links",
+		USER_TAGGER => "Tag users",
+		SUBREDDIT_TAGGER => "Tag subreddits",
+		PREVIEW => "Preview comments and posts"
+	];
+	public static var DEFAULTS:StringMap<Dynamic> = untyped [
+		ADBLOCK => true,
+		USERINFO => true,
+		SUBINFO => true,
+		EXPAND => true,
+		DUPLICATE_HIDER => true,
+		USER_TAGGER => true,
+		SUBREDDIT_TAGGER => true,
+		PREVIEW => true,
+		USER_TAGS => new StringMap<String>(),
+		SUBREDDIT_TAGS => new StringMap<String>()
+	];
 	public static var data = new StringMap<Dynamic>();
 	public static function save() {
 		haxe.Serializer.USE_CACHE = false;
@@ -35,9 +43,9 @@ class Settings {
 		var dt = Browser.window.localStorage.getItem("reditn");
 		if(dt != null)
 			data = haxe.Unserializer.run(dt);
-		for(k in defaults.keys())
+		for(k in DEFAULTS.keys())
 			if(!data.exists(k))
-				data.set(k, defaults.get(k));
+				data.set(k, DEFAULTS.get(k));
 		var h = Browser.document.getElementById("header-bottom-right");
 		var prefs = untyped h.getElementsByTagName("ul")[0];
 		var d = Browser.document.createAnchorElement();
@@ -90,20 +98,21 @@ class Settings {
 		delb.type = "button";
 		delb.value = "Restore default settings";
 		delb.onclick = function(_) {
-			restoreDefaults();
+			restoreDEFAULTS();
 			settingsPopUp();
 		}
 		form.appendChild(delb);
 		form.appendChild(Browser.document.createBRElement());
 		for(k in data.keys()) {
+			var l = DESC.get(k);
 			var d = data.get(k);
-			if(!Std.is(d, StringMap) && defaults.exists(k)) {
+			if(!Std.is(d, StringMap) && DEFAULTS.exists(k)) {
 				var label = Browser.document.createLabelElement();
 				label.setAttribute("for", k);
 				label.style.position = "absolute";
 				label.style.width = "46%";
 				label.style.textAlign = "right";
-				label.innerHTML = k+" ";
+				label.innerHTML = '$l ';
 				form.appendChild(label);
 				var input = Browser.document.createInputElement();
 				input.style.position = "absolute";
@@ -128,8 +137,8 @@ class Settings {
 		}
 		return form;
 	}
-	static function restoreDefaults() {
-		for(k in defaults.keys())
-			data.set(k, defaults.get(k));
+	static function restoreDEFAULTS() {
+		for(k in DEFAULTS.keys())
+			data.set(k, DEFAULTS.get(k));
 	}
 }

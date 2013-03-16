@@ -8,7 +8,7 @@ class Expand {
 	public static var maxWidth(get, null):Int;
 	public static var maxHeight(get, null):Int;
 	public static var maxArea(get, null):Int;
-	public static var expandButtons:Array<Element> = [];
+	public static var buttons:Array<Element> = [];
 	public static var toggled(default, null):Bool = false;
 	public static var button(default, null):AnchorElement = null;
 	static inline function get_maxWidth():Int {
@@ -21,11 +21,9 @@ class Expand {
 		return maxWidth * maxHeight;
 	}
 	public static function init() {
-		var links = Browser.document.body.getElementsByClassName("title");
 		toggled = Browser.window.location.hash == "#showall";
 		initShowAll();
-		for(i in 0...links.length) {
-			var l:AnchorElement = untyped links[i];
+		for(l in Reditn.links) {
 			if(l.nodeName.toLowerCase()!="a")
 				continue;
 			var urltype = Reditn.getLinkType(l.href);
@@ -39,7 +37,7 @@ class Expand {
 					div.appendChild(img);
 					var li = Browser.document.createElement("li");
 					var show = showButton(div, li);
-					expandButtons.push(show);
+					buttons.push(show);
 					var btns = untyped e.getElementsByClassName("buttons")[0];
 					if(btns != null)
 						btns.insertBefore(li, btns.childNodes[0]);
@@ -55,7 +53,7 @@ class Expand {
 	}
 	public static function refresh() {
 		if(button != null) {
-			button.innerHTML = toggled ? "hide images ("+Expand.expandButtons.length+")" : "show images ("+Expand.expandButtons.length+")";
+			button.innerHTML = '${toggled?"hide":"show"} images (${buttons.length})';
 			button.href = toggled ? "#showall" : "#";
 			var np:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
 			if(np.length > 0) {
@@ -69,8 +67,8 @@ class Expand {
 					else if(!toggled && i.href.indexOf("#")!=-1)
 						i.href = i.href.substr(0, i.href.indexOf("#"));
 				}
-		}
-			Reditn.show(button, Expand.expandButtons.length != 0);
+			}
+			Reditn.show(button, buttons.length > 0);
 		}
 	}
 
@@ -82,7 +80,7 @@ class Expand {
 		button.onclick = function(e) {
 			button.className = "selected";
 			toggled = !toggled;
-			for(btn in Expand.expandButtons) {
+			for(btn in buttons) {
 				if(untyped btn.toggled != toggled)
 					btn.onclick(null);
 			}
@@ -168,7 +166,7 @@ class Expand {
 	public static function preload(url) {
 		var link:LinkElement = Browser.document.createLinkElement();
 		link.href = url;
-		link.rel = Browser.window.navigator.userAgent.toLowerCase().indexOf('chrome') > -1 ? "prefetch" : "preload";
+		link.rel = "preload";
 		Browser.document.head.appendChild(link);
 	}
 	public static function loadImage(url:String):ImageElement {
@@ -226,10 +224,11 @@ class Expand {
 		}
 	}
 	public static function removeSymbols(s:String):String {
-		if(s.lastIndexOf("?") != -1)
-			s = s.substr(0, s.lastIndexOf("?"));
-		if(s.lastIndexOf("/") != -1)
-			s = s.substr(0, s.lastIndexOf("/"));
-		return s;
+		return if(s.lastIndexOf("?") != -1)
+			s.substr(0, s.lastIndexOf("?"));
+		else if(s.lastIndexOf("/") != -1)
+			s.substr(0, s.lastIndexOf("/"));
+		else
+			s;
 	}
 }
