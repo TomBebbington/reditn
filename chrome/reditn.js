@@ -1,14 +1,14 @@
  
 // ==UserScript==
-// @name        Reditn
-// @namespace   http://userscripts.org/user/tophattedcoder/
-// @description Reddit tweaks and enhancements.
-// @include     reddit.com
-// @include     reddit.com/*
-// @include		*.reddit.com
-// @include		*.reddit.com/*
-// @version     1.4.9
-// @grant		none
+// @name			Reditn
+// @namespace		http://userscripts.org/user/tophattedcoder/
+// @description		Reddit tweaks and enhancements.
+// @include			reddit.com
+// @include			reddit.com/*
+// @include			*.reddit.com
+// @include			*.reddit.com/*
+// @version			1.4.9
+// @grant			none
 // ==/UserScript==
 (function () { "use strict";
 var $hxClasses = {},$estr = function() { return js.Boot.__string_rec(this,''); };
