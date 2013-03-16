@@ -314,6 +314,23 @@ Lambda.has = function(it,elt) {
 	}
 	return false;
 }
+Lambda.count = function(it,pred) {
+	var n = 0;
+	if(pred == null) {
+		var $it0 = $iterator(it)();
+		while( $it0.hasNext() ) {
+			var _ = $it0.next();
+			n++;
+		}
+	} else {
+		var $it1 = $iterator(it)();
+		while( $it1.hasNext() ) {
+			var x = $it1.next();
+			if(pred(x)) n++;
+		}
+	}
+	return n;
+}
 var LinkType = $hxClasses["LinkType"] = { __ename__ : ["LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","UNKNOWN"] }
 LinkType.IMAGE = ["IMAGE",0];
 LinkType.IMAGE.toString = $estr;
@@ -607,7 +624,18 @@ $hxClasses["Settings"] = Settings;
 Settings.__name__ = ["Settings"];
 Settings.save = function() {
 	haxe.Serializer.USE_CACHE = false;
-	js.Browser.window.localStorage.setItem("reditn",haxe.Serializer.run(Settings.data));
+	var e = new haxe.ds.StringMap();
+	var $it0 = Settings.data.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		var v = Settings.data.get(k);
+		var d = false;
+		if(Settings.DEFAULTS.get(k) != v && ($iterator(v)?Lambda.count(v) > 0:true)) {
+			var value = v;
+			e.set(k,value);
+		}
+	}
+	js.Browser.window.localStorage.setItem("reditn",haxe.Serializer.run(e));
 }
 Settings.init = function() {
 	var dt = js.Browser.window.localStorage.getItem("reditn");
@@ -680,17 +708,21 @@ Settings.createForm = function() {
 	delb.type = "button";
 	delb.value = "Restore default settings";
 	delb.onclick = function(_) {
-		Settings.restoreDEFAULTS();
+		var $it0 = Settings.DEFAULTS.keys();
+		while( $it0.hasNext() ) {
+			var k = $it0.next();
+			Settings.data.set(k,Settings.DEFAULTS.get(k));
+		}
 		Settings.settingsPopUp();
 	};
 	form.appendChild(delb);
 	form.appendChild(js.Browser.document.createElement("br"));
-	var $it0 = Settings.data.keys();
-	while( $it0.hasNext() ) {
-		var k = $it0.next();
-		var l = Settings.DESC.get(k);
+	var $it1 = Settings.data.keys();
+	while( $it1.hasNext() ) {
+		var k = $it1.next();
 		var d = Settings.data.get(k);
-		if(!js.Boot.__instanceof(d,haxe.ds.StringMap) && Settings.DEFAULTS.exists(k)) {
+		if(!js.Boot.__instanceof(d,haxe.ds.StringMap) && Settings.DESC.exists(k)) {
+			var l = Settings.DESC.get(k);
 			var label = js.Browser.document.createElement("label");
 			label.setAttribute("for",k);
 			label.style.position = "absolute";
@@ -710,14 +742,11 @@ Settings.createForm = function() {
 			if(js.Boot.__instanceof(d,Bool)) input.checked = Settings.data.get(k); else input.value = Settings.data.get(k);
 		}
 	}
+	var note = js.Browser.document.createElement("div");
+	note.style.fontWeight = "bold";
+	note.innerHTML = "Close this dialog and refresh the page to see your changes in effect. Changes will be saved automatically.";
+	form.appendChild(note);
 	return form;
-}
-Settings.restoreDEFAULTS = function() {
-	var $it0 = Settings.DEFAULTS.keys();
-	while( $it0.hasNext() ) {
-		var k = $it0.next();
-		Settings.data.set(k,Settings.DEFAULTS.get(k));
-	}
 }
 var Std = function() { }
 $hxClasses["Std"] = Std;
@@ -2137,8 +2166,14 @@ Settings.DEFAULTS = (function($this) {
 	_g.set("user-tag",true);
 	_g.set("sub-tag",true);
 	_g.set("preview",true);
-	_g.set("user-tags",new haxe.ds.StringMap());
-	_g.set("sub-tags",new haxe.ds.StringMap());
+	_g.set("user-tags",(function($this) {
+		var $r;
+		var _g1 = new haxe.ds.StringMap();
+		_g1.set("TopHattedCoder","Jesus");
+		$r = _g1;
+		return $r;
+	}($this)));
+	_g.set("sub-tags",[]);
 	$r = _g;
 	return $r;
 }(this));

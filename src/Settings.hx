@@ -2,6 +2,7 @@ import js.*;
 import js.html.*;
 import haxe.ds.StringMap;
 class Settings {
+	static inline var NOTE_TEXT = "Close this dialog and refresh the page to see your changes in effect. Changes will be saved automatically.";
 	public static inline var ADBLOCK = "adblock";
 	public static inline var USERINFO = "userinfo";
 	public static inline var SUBINFO = "subinfo";
@@ -31,13 +32,20 @@ class Settings {
 		USER_TAGGER => true,
 		SUBREDDIT_TAGGER => true,
 		PREVIEW => true,
-		USER_TAGS => new StringMap<String>(),
-		SUBREDDIT_TAGS => new StringMap<String>()
+		USER_TAGS => ["TopHattedCoder" => "Jesus"],
+		SUBREDDIT_TAGS => []
 	];
 	public static var data = new StringMap<Dynamic>();
 	public static function save() {
 		haxe.Serializer.USE_CACHE = false;
-		Browser.window.localStorage.setItem("reditn", haxe.Serializer.run(data));
+		var e = new Map<String, Dynamic>();
+		for(k in data.keys()) {
+			var v:Dynamic = data.get(k);
+			var d:Bool = false;
+			if(DEFAULTS.get(k) != v && (untyped v.iterator ? Lambda.count(v) > 0 : true))
+				e.set(k, v);
+		}
+		Browser.window.localStorage.setItem("reditn", haxe.Serializer.run(e));
 	}
 	public static function init() {
 		var dt = Browser.window.localStorage.getItem("reditn");
@@ -98,15 +106,16 @@ class Settings {
 		delb.type = "button";
 		delb.value = "Restore default settings";
 		delb.onclick = function(_) {
-			restoreDEFAULTS();
+			for(k in DEFAULTS.keys())
+				data.set(k, DEFAULTS.get(k));
 			settingsPopUp();
 		}
 		form.appendChild(delb);
 		form.appendChild(Browser.document.createBRElement());
 		for(k in data.keys()) {
-			var l = DESC.get(k);
 			var d = data.get(k);
-			if(!Std.is(d, StringMap) && DEFAULTS.exists(k)) {
+			if(!Std.is(d, StringMap) && DESC.exists(k)) {
+				var l = DESC.get(k);
 				var label = Browser.document.createLabelElement();
 				label.setAttribute("for", k);
 				label.style.position = "absolute";
@@ -135,10 +144,10 @@ class Settings {
 				else input.value = data.get(k);
 			}
 		}
+		var note = Browser.document.createDivElement();
+		note.style.fontWeight = "bold";
+		note.innerHTML = NOTE_TEXT;
+		form.appendChild(note);
 		return form;
-	}
-	static function restoreDEFAULTS() {
-		for(k in DEFAULTS.keys())
-			data.set(k, DEFAULTS.get(k));
 	}
 }
