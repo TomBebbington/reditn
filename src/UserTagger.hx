@@ -41,7 +41,7 @@ class UserTagger {
 				Settings.save();
 			}
 			div.appendChild(box);
-			Reditn.fullPopUp(div, link);
+			Reditn.fullPopUp(div, link.offsetTop + link.offsetHeight);
 			box.focus();
 		}
 		Reditn.insertAfter(tag, a);

@@ -37,16 +37,15 @@ class Settings {
 		SUBREDDIT_TAGGER => true,
 		PREVIEW => true,
 		KEYBOARD => true,
-		USER_TAGS => ["TopHattedCoder" => "Jesus"],
-		SUBREDDIT_TAGS => []
+		USER_TAGS => new Map<String, String>(),
+		SUBREDDIT_TAGS => new Map<String, String>()
 	];
 	public static var data = new StringMap<Dynamic>();
 	static function optimisedData():String {
 		var e = new Map<String, Dynamic>();
 		for(k in data.keys()) {
 			var v:Dynamic = data.get(k);
-			var d:Bool = false;
-			if(DEFAULTS.get(k) != v && (untyped v.iterator ? Lambda.count(v) > 0 : true))
+			if(DEFAULTS.get(k) != v)
 				e.set(k, v);
 		}
 		return haxe.Serializer.run(e);
@@ -58,7 +57,7 @@ class Settings {
 	public static function init() {
 		var dt = Browser.window.localStorage.getItem("reditn");
 		if(dt != null)
-			data = haxe.Unserializer.run(dt);
+			Settings.data = try haxe.Unserializer.run(dt) catch(e:Dynamic) data;
 		fixMissing();
 		var h = Browser.document.getElementById("header-bottom-right");
 		var prefs = untyped h.getElementsByTagName("ul")[0];
@@ -111,6 +110,7 @@ class Settings {
 		delb.value = "Restore default settings";
 		delb.onclick = function(_) {
 			fixMissing(true);
+			save();
 			settingsPopUp();
 		}
 		form.appendChild(delb);
@@ -119,6 +119,7 @@ class Settings {
 		var importbtn = makeButton("Import settings", function() {
 			data = haxe.Unserializer.run(Browser.window.atob(Browser.window.prompt("Settings to import", Browser.window.btoa(optimisedData()))));
 			fixMissing();
+			save();
 			settingsPopUp();
 		});
 		form.appendChild(importbtn);
@@ -169,8 +170,9 @@ class Settings {
 		return b;
 	}
 	static function fixMissing(all:Bool=false) {
-		for(k in DEFAULTS.keys())
+		for(k in DEFAULTS.keys()) {
 			if(all || !data.exists(k))
-				data.set(k, DEFAULTS.get(k));
+				data.set(k, Std.is(DEFAULTS.get(k), StringMap) ? new StringMap() : DEFAULTS.get(k));
+		}
 	}
 }

@@ -5,7 +5,7 @@ using StringTools;
 class SubredditTagger {
 	static var tags(get, null):StringMap<String>;
 	static inline function get_tags() {
-		return Settings.data.get(Settings.SUBREDDIT_TAGS);
+		return cast Settings.data.get(Settings.SUBREDDIT_TAGS);
 	}
 	public static function init() {
 		var d:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("subreddit");
@@ -41,7 +41,7 @@ class SubredditTagger {
 				Settings.save();
 			}
 			div.appendChild(box);
-			Reditn.fullPopUp(div, link);
+			Reditn.fullPopUp(div, link.offsetTop + link.offsetHeight);
 			box.focus();
 		}
 		Reditn.insertAfter(tag, a);

@@ -13,8 +13,14 @@ class Reditn {
 		else
 			untyped window.onload = function(e) init();
 	}
+	public static inline function scroll(x:Int, y:Int):Void {
+		Browser.window.scrollBy(x - Browser.window.scrollX, y - Browser.window.scrollY);
+	}
 	static function init() {
+		if(Browser.window.location.href.indexOf("reddit.") == -1)
+			return;
 		links = cast Browser.document.body.getElementsByClassName("title");
+		links = [for(l in links) if(l.nodeName.toLowerCase() == "a") l];
 		wrap(Settings.init);
 		wrap(Adblock.init, Settings.ADBLOCK);
 		wrap(DuplicateHider.init, Settings.DUPLICATE_HIDER);
@@ -25,15 +31,36 @@ class Reditn {
 		wrap(UserInfo.init, Settings.USERINFO);
 		wrap(UserTagger.init, Settings.USER_TAGGER);
 		wrap(SubredditTagger.init, Settings.SUBREDDIT_TAGGER);
+		Browser.window.history.replaceState(haxe.Serializer.run(state()), null, "/");
+		Browser.window.onpopstate = function(e:Dynamic) {
+			var s:String = e.state;
+			if(s == null)
+				return;
+			var state:State = haxe.Unserializer.run(s);
+			Expand.expanded = state.expanded;
+			if(state.allExpanded != Expand.toggled)
+				Expand.toggle(state.allExpanded);
+		}
+	}
+	static function state():State {
+		return {
+			allExpanded: Expand.toggled,
+			expanded: Expand.expanded
+		};
+	}
+	public static inline function pushState(url:String="/") {
+		Browser.window.history.pushState(haxe.Serializer.run(state()), null, url);
 	}
 	static function wrap(fn:Void->Void, ?id:String) {
-		if(id == null || Settings.data.get(id))
+		var d = id == null ? null : Settings.data.get(id);
+		//trace('${id}: $d');
+		if(id == null || d)
 			try
 				fn()
 			catch(d:Dynamic) {
 				Browser.window.alert('Module $id has failed to load in Reditn due to the following error:\n $d');
 				Settings.data.set(id, false);
-		trace(Settings.data);
+				Settings.save();
 			}
 	}
 	public static function formatNumber(n:Int):String {
@@ -137,12 +164,11 @@ class Reditn {
 		}
 		return el;
 	}
-	public static function fullPopUp(el:Element, ?a:Element) {
+	public static function fullPopUp(el:Element, y:Float=0) {
 		var old:Element = untyped Browser.document.getElementsByClassName("popup")[0];
 		if(old != null)
-			old.parentNode.removeChild(old);
+			Reditn.remove(old);
 		Browser.document.body.appendChild(el);
-		var head = Browser.document.getElementById("header");
 		var close = Browser.document.createAnchorElement();
 		close.style.position = "absolute";
 		close.style.right = close.style.top = "5px";
@@ -153,8 +179,8 @@ class Reditn {
 		}
 		el.appendChild(close);
 		el.className = "popup";
-		el.style.top = if(a == null) "50px" else
-			a.offsetTop +"px";
+		if(y != 0)
+			el.style.top = '${y-Browser.window.scrollY}px';
 		return el;
 	}
 }

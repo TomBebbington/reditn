@@ -9,8 +9,25 @@ class Expand {
 	public static var maxHeight(get, null):Int;
 	public static var maxArea(get, null):Int;
 	public static var buttons:Array<Element> = [];
-	public static var toggled(default, null):Bool = false;
+	public static var toggled(default, null):Bool;
 	public static var button(default, null):AnchorElement = null;
+	public static var expanded(get, set):Array<String>;
+	static function get_expanded() {
+		return toggled ? [] : [for(b in buttons) if(untyped b.toggled()) untyped b.url];
+	}
+	static function set_expanded(e:Array<String>) {
+		if(e.length == buttons.length)
+			toggle(true);
+		else if(e.length <= 0)
+			toggle(false);
+		for(b in buttons) {
+			var t = false;
+			for(u in e)
+				t = t || untyped b.url == u;
+			untyped b.toggle(t, false);
+		}
+		return e;
+	}
 	static inline function get_maxWidth():Int {
 		return Std.int(Browser.window.innerWidth*0.6);
 	}
@@ -22,7 +39,19 @@ class Expand {
 	}
 	public static function init() {
 		toggled = Browser.window.location.hash == "#showall";
-		initShowAll();
+
+		var menu = Browser.document.getElementsByClassName("tabmenu")[0];
+		var li:LIElement = Browser.document.createLIElement();
+		button = Browser.document.createAnchorElement();
+		button.href = "javascript:void(0);";
+		refresh();
+		button.onclick = function(e) {
+			toggle(!toggled);
+			Reditn.pushState(toggled ? "/#showall":"/");
+		}
+		li.appendChild(button);
+		menu.appendChild(li);
+
 		for(l in Reditn.links) {
 			if(l.nodeName.toLowerCase()!="a")
 				continue;
@@ -36,7 +65,8 @@ class Expand {
 					e.appendChild(div);
 					div.appendChild(img);
 					var li = Browser.document.createElement("li");
-					var show = showButton(div, li);
+					li.className = "reditn-expand";
+					var show = showButton(div, li, url);
 					buttons.push(show);
 					var btns = untyped e.getElementsByClassName("buttons")[0];
 					if(btns != null)
@@ -54,7 +84,6 @@ class Expand {
 	public static function refresh() {
 		if(button != null) {
 			button.innerHTML = '${toggled?"hide":"show"} images (${buttons.length})';
-			button.href = toggled ? "#showall" : "#";
 			var np:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
 			if(np.length > 0) {
 				var c:Array<AnchorElement> = cast np[0].childNodes;
@@ -71,35 +100,36 @@ class Expand {
 			Reditn.show(button, buttons.length > 0);
 		}
 	}
-
-	static function initShowAll() {
-		var menu = Browser.document.getElementsByClassName("tabmenu")[0];
-		var li:LIElement = Browser.document.createLIElement();
-		button = Browser.document.createAnchorElement();
+	public static function toggle(t:Bool) {
+		toggled = t;
+		for(btn in buttons)
+			untyped btn.toggle(t, false);
 		refresh();
-		button.onclick = function(e) {
-			button.className = "selected";
-			toggled = !toggled;
-			for(btn in buttons) {
-				if(untyped btn.toggled != toggled)
-					btn.onclick(null);
-			}
-			refresh();
-		};
-		li.appendChild(button);
-		menu.appendChild(li);
 	}
-	static function showButton(el:Element, p:Element) {
+	public static function showImage(url:String, toggled:Bool) {
+		for(l in Reditn.links)
+			if(l.href == url) {
+				var e:Element = cast l.parentNode.parentNode;
+				untyped e.getElementsByClassName("toggle")[0].toggle(null, false);
+			}
+	}
+	static function showButton(el:Element, p:Element, url:String) {
 		var e = Browser.document.createAnchorElement();
 		e.style.fontStyle = "italic";
 		e.href = "javascript:void(0);";
+		e.className="toggle";
+		var toggled = Expand.toggled;
 		e.innerHTML = toggled ? "hide" : "show";
-		untyped e.toggled = toggled;
-		e.onclick = function(ev) {
-			untyped e.toggled = !e.toggled;
-			e.innerHTML = untyped e.toggled ? "hide" : "show";
-			Reditn.show(el, untyped e.toggled);
+		untyped e.toggle = function(?t:Bool, st:Bool=true) {
+			toggled = t == null ? !toggled : t;
+			e.innerHTML = toggled ? "hide" : "show";
+			Reditn.show(el, toggled);
+			if(st)
+				Reditn.pushState();
 		}
+		untyped e.toggled = function() return toggled;
+		untyped e.url = url;
+		e.onclick = function(ev) untyped e.toggle();
 		p.appendChild(e);
 		return e;
 	}

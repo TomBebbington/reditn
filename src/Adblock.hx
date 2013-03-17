@@ -3,6 +3,7 @@ import js.html.*;
 class Adblock {
 	public static function init() {
 		hideAll(Browser.document.body.getElementsByClassName("promoted"));
+		hideAll(Browser.document.body.getElementsByClassName("infobar"));
 		hideAll(Browser.document.body.getElementsByClassName("goldvertisement"));
 		var help = Browser.document.getElementById("spotlight-help");
 		if(help != null) {
