@@ -47,7 +47,7 @@ class Expand {
 		refresh();
 		button.onclick = function(e) {
 			toggle(!toggled);
-			Reditn.pushState(toggled ? "/#showall":"/");
+			Reditn.pushState(toggled ? "#showall":null);
 		}
 		li.appendChild(button);
 		menu.appendChild(li);

@@ -31,7 +31,7 @@ class Reditn {
 		wrap(UserInfo.init, Settings.USERINFO);
 		wrap(UserTagger.init, Settings.USER_TAGGER);
 		wrap(SubredditTagger.init, Settings.SUBREDDIT_TAGGER);
-		Browser.window.history.replaceState(haxe.Serializer.run(state()), null, "/");
+		Browser.window.history.replaceState(haxe.Serializer.run(state()), null, Expand.toggled ? "#showall" : null);
 		Browser.window.onpopstate = function(e:Dynamic) {
 			var s:String = e.state;
 			if(s == null)
@@ -48,7 +48,7 @@ class Reditn {
 			expanded: Expand.expanded
 		};
 	}
-	public static inline function pushState(url:String="/") {
+	public static inline function pushState(?url:String) {
 		Browser.window.history.pushState(haxe.Serializer.run(state()), null, url);
 	}
 	static function wrap(fn:Void->Void, ?id:String) {
@@ -142,14 +142,21 @@ class Reditn {
 	public static inline function getJSON(url:String, func:Dynamic->Void) {
 		func(haxe.Json.parse(haxe.Http.requestUrl(url)));
 	}
-	public static function getJSONP(url:String, func:Dynamic->Void) {
-		var r = Std.int(Math.random()*10000000);
-		var id = "temp" + r;
-		untyped window[id] = func;
+	public static function getJSONP(url:String, fn:Dynamic->Void) {
+		var head = Browser.document.head;
+		var id = "temp" + Std.int(Math.random() * 9999999);
+		trace(id);
 		var sc = Browser.document.createScriptElement();
+		var src = url + id.urlEncode();
+		sc.id = "jsonp";
+		untyped window[id] = fn;
+		trace('window.${id} = ${Std.string(fn)}');
 		sc.type = "text/javascript";
-		sc.src = url + id;
-		Browser.document.head.appendChild(sc);
+		sc.src = src;
+		var old = Browser.document.getElementById("jsonp");
+		if(old != null)
+			remove(old);
+		head.appendChild(sc);
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);

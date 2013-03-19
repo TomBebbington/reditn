@@ -95,15 +95,6 @@ Expand.set_expanded = function(e) {
 	}
 	return e;
 }
-Expand.get_maxWidth = function() {
-	return js.Browser.window.innerWidth * 0.6 | 0;
-}
-Expand.get_maxHeight = function() {
-	return js.Browser.window.innerHeight * 0.7 | 0;
-}
-Expand.get_maxArea = function() {
-	return (js.Browser.window.innerWidth * 0.6 | 0) * (js.Browser.window.innerHeight * 0.7 | 0);
-}
 Expand.init = function() {
 	Expand.toggled = js.Browser.window.location.hash == "#showall";
 	var menu = js.Browser.document.getElementsByClassName("tabmenu")[0];
@@ -113,7 +104,7 @@ Expand.init = function() {
 	Expand.refresh();
 	Expand.button.onclick = function(e) {
 		Expand.toggle(!Expand.toggled);
-		js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"/#showall":"/");
+		js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
 	};
 	li.appendChild(Expand.button);
 	menu.appendChild(li);
@@ -168,17 +159,6 @@ Expand.toggle = function(t) {
 	}
 	Expand.refresh();
 }
-Expand.showImage = function(url,toggled) {
-	var _g = 0, _g1 = Reditn.links;
-	while(_g < _g1.length) {
-		var l = _g1[_g];
-		++_g;
-		if(l.href == url) {
-			var e = l.parentNode.parentNode;
-			e.getElementsByClassName("toggle")[0].toggle(null,false);
-		}
-	}
-}
 Expand.showButton = function(el,p,url) {
 	var e = js.Browser.document.createElement("a");
 	e.style.fontStyle = "italic";
@@ -191,7 +171,7 @@ Expand.showButton = function(el,p,url) {
 		toggled = t == null?!toggled:t;
 		e.innerHTML = toggled?"hide":"show";
 		el.style.display = toggled?"":"none";
-		if(st) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,"/");
+		if(st) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
 	};
 	e.toggled = function() {
 		return toggled;
@@ -518,9 +498,6 @@ Reditn.main = function() {
 		Reditn.init();
 	};
 }
-Reditn.scroll = function(x,y) {
-	js.Browser.window.scrollBy(x - js.Browser.window.scrollX,y - js.Browser.window.scrollY);
-}
 Reditn.init = function() {
 	if(js.Browser.window.location.href.indexOf("reddit.") == -1) return;
 	Reditn.links = js.Browser.document.body.getElementsByClassName("title");
@@ -548,7 +525,7 @@ Reditn.init = function() {
 	Reditn.wrap(UserInfo.init,"userinfo");
 	Reditn.wrap(UserTagger.init,"user-tag");
 	Reditn.wrap(SubredditTagger.init,"sub-tag");
-	js.Browser.window.history.replaceState(haxe.Serializer.run(Reditn.state()),null,"/");
+	js.Browser.window.history.replaceState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
 	js.Browser.window.onpopstate = function(e) {
 		var s = e.state;
 		if(s == null) return;
@@ -559,10 +536,6 @@ Reditn.init = function() {
 }
 Reditn.state = function() {
 	return { allExpanded : Expand.toggled, expanded : Expand.get_expanded()};
-}
-Reditn.pushState = function(url) {
-	if(url == null) url = "/";
-	js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,url);
 }
 Reditn.wrap = function(fn,id) {
 	var d = id == null?null:Settings.data.get(id);
@@ -591,18 +564,6 @@ Reditn.formatNumber = function(n) {
 		$r = n < 0?"-" + s:s;
 		return $r;
 	}(this));
-}
-Reditn.plural = function(n) {
-	return n <= 1?"":"s";
-}
-Reditn.show = function(e,shown) {
-	e.style.display = shown?"":"none";
-}
-Reditn.remove = function(e) {
-	e.parentNode.removeChild(e);
-}
-Reditn.insertAfter = function(ref,after) {
-	after.parentNode.insertBefore(ref,after.nextSibling);
 }
 Reditn.age = function(t) {
 	t = haxe.Timer.stamp() - t;
@@ -644,17 +605,20 @@ Reditn.getLinkType = function(url) {
 	}(this)):StringTools.startsWith(url,"flickr.com/photos/") && url.length > 18 || url.indexOf("deviantart.com/") != -1 || HxOverrides.substr(url,0,10) == "imgur.com/" && HxOverrides.substr(url,10,2) != "a/" || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || StringTools.startsWith(url,"fav.me/")?LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?LinkType.VIDEO:LinkType.UNKNOWN;
 	return t;
 }
-Reditn.getJSON = function(url,func) {
-	func(haxe.Json.parse(haxe.Http.requestUrl(url)));
-}
-Reditn.getJSONP = function(url,func) {
-	var r = Math.random() * 10000000 | 0;
-	var id = "temp" + r;
-	window[id] = func;
+Reditn.getJSONP = function(url,fn) {
+	var head = js.Browser.document.head;
+	var id = "temp" + (Math.random() * 9999999 | 0);
+	console.log(id);
 	var sc = js.Browser.document.createElement("script");
+	var src = url + StringTools.urlEncode(id);
+	sc.id = "jsonp";
+	window[id] = fn;
+	console.log("window." + id + " = " + Std.string(fn));
 	sc.type = "text/javascript";
-	sc.src = url + id;
-	js.Browser.document.head.appendChild(sc);
+	sc.src = src;
+	var old = js.Browser.document.getElementById("jsonp");
+	if(old != null) old.parentNode.removeChild(old);
+	head.appendChild(sc);
 }
 Reditn.popUp = function(bs,el,x,y) {
 	if(y == null) y = 0;
@@ -1024,9 +988,6 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 var SubredditTagger = function() { }
 $hxClasses["SubredditTagger"] = SubredditTagger;
 SubredditTagger.__name__ = ["SubredditTagger"];
-SubredditTagger.get_tags = function() {
-	return Settings.data.get("sub-tags");
-}
 SubredditTagger.init = function() {
 	var d = js.Browser.document.body.getElementsByClassName("subreddit");
 	var _g = 0;
@@ -1191,9 +1152,6 @@ UserInfo._onMouseOverUser = function(e) {
 var UserTagger = function() { }
 $hxClasses["UserTagger"] = UserTagger;
 UserTagger.__name__ = ["UserTagger"];
-UserTagger.get_tags = function() {
-	return Settings.data.get("user-tags");
-}
 UserTagger.init = function() {
 	var authors = js.Browser.document.body.getElementsByClassName("author");
 	var _g = 0;
@@ -2332,26 +2290,8 @@ Bool.__ename__ = ["Bool"];
 var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
-Expand.FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
 Expand.buttons = [];
 Markdown.regex = [{ from : new EReg("\\x3E ([^\n]+)","g"), to : "<blockquote>$1</blockquote>"},{ from : new EReg("___([^___]+)___","g"), to : "<b><i>$1</i></b>"},{ from : new EReg("\\*\\*([^\\*\\*|\\*]+)\\*\\*","g"), to : "<b>$1</b>"},{ from : new EReg("__([^__|_]+)__","g"), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*|\\*\\*]+)\\*","g"), to : "<i>$1</i>"},{ from : new EReg("_([^_|__]+)_","g"), to : "<i>$1</i>"},{ from : new EReg("\\[([^\\]]+)\\]\\(([^\\)]+)\\)","g"), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("(.*?)\n\\x3D=*","g"), to : "<h2>$1</h2>"},{ from : new EReg("(.*?)\n\\x2D-*","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h6>$1</h6>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h5>$1/h5>"},{ from : new EReg("\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h4>$1</h4>"},{ from : new EReg("\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23([^\n]+)\n","g"), to : "<h2>$1</h2>"},{ from : new EReg("\\x23([^\n]+)\n","g"), to : "<h1>$1</h1>"},{ from : new EReg("\n?([^\n]+)\n\n","g"), to : "<p>$1</p>"},{ from : new EReg("\n?([^\n]+)\n","g"), to : "$1 "},{ from : new EReg("\n[\\+\\*\\-] ([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\n[0-9]*[.\\):]([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\\x3Cli\\x3E([^\n+]+)\\x3C/li\\x3E",""), to : "<ul><li>$1</li></ul>"}];
-Reditn.year = 31557600;
-Reditn.month = 2629800;
-Reditn.day = 86400;
-Reditn.hour = 3600;
-Settings.NOTE_TEXT = "Close this dialog and refresh the page to see your changes in effect. Changes will be saved automatically.";
-Settings.ADBLOCK = "adblock";
-Settings.USERINFO = "userinfo";
-Settings.SUBINFO = "subinfo";
-Settings.EXPAND = "expand";
-Settings.DUPLICATE_HIDER = "dup-hider";
-Settings.USER_TAGGER = "user-tag";
-Settings.SUBREDDIT_TAGGER = "sub-tag";
-Settings.PREVIEW = "preview";
-Settings.KEYBOARD = "keys";
-Settings.USER_TAGS = "user-tags";
-Settings.SUBREDDIT_TAGS = "sub-tags";
-Settings.SAVE_BASE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=/";
 Settings.DESC = (function($this) {
 	var $r;
 	var _g = new haxe.ds.StringMap();

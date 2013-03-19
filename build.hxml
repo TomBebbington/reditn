@@ -1,4 +1,4 @@
 -cp src
 -main Reditn
 -js reditn.js
-#-dce full
+-dce full
