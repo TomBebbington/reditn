@@ -500,6 +500,7 @@ Reditn.main = function() {
 }
 Reditn.init = function() {
 	if(js.Browser.window.location.href.indexOf("reddit.") == -1) return;
+	Reditn.fullPage = js.Browser.document.getElementsByClassName("tabmenu").length > 0;
 	Reditn.links = js.Browser.document.body.getElementsByClassName("title");
 	Reditn.links = (function($this) {
 		var $r;
@@ -518,7 +519,7 @@ Reditn.init = function() {
 	Reditn.wrap(Settings.init);
 	Reditn.wrap(Adblock.init,"adblock");
 	Reditn.wrap(DuplicateHider.init,"dup-hider");
-	Reditn.wrap(Expand.init,"expand");
+	if(Reditn.fullPage) Reditn.wrap(Expand.init,"expand");
 	Reditn.wrap(Keyboard.init,"keys");
 	Reditn.wrap(Preview.init,"preview");
 	Reditn.wrap(SubredditInfo.init,"subinfo");
@@ -2292,6 +2293,7 @@ var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
 Expand.buttons = [];
 Markdown.regex = [{ from : new EReg("\\x3E ([^\n]+)","g"), to : "<blockquote>$1</blockquote>"},{ from : new EReg("___([^___]+)___","g"), to : "<b><i>$1</i></b>"},{ from : new EReg("\\*\\*([^\\*\\*|\\*]+)\\*\\*","g"), to : "<b>$1</b>"},{ from : new EReg("__([^__|_]+)__","g"), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*|\\*\\*]+)\\*","g"), to : "<i>$1</i>"},{ from : new EReg("_([^_|__]+)_","g"), to : "<i>$1</i>"},{ from : new EReg("\\[([^\\]]+)\\]\\(([^\\)]+)\\)","g"), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("(.*?)\n\\x3D=*","g"), to : "<h2>$1</h2>"},{ from : new EReg("(.*?)\n\\x2D-*","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h6>$1</h6>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h5>$1/h5>"},{ from : new EReg("\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h4>$1</h4>"},{ from : new EReg("\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23([^\n]+)\n","g"), to : "<h2>$1</h2>"},{ from : new EReg("\\x23([^\n]+)\n","g"), to : "<h1>$1</h1>"},{ from : new EReg("\n?([^\n]+)\n\n","g"), to : "<p>$1</p>"},{ from : new EReg("\n?([^\n]+)\n","g"), to : "$1 "},{ from : new EReg("\n[\\+\\*\\-] ([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\n[0-9]*[.\\):]([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\\x3Cli\\x3E([^\n+]+)\\x3C/li\\x3E",""), to : "<ul><li>$1</li></ul>"}];
+Reditn.fullPage = true;
 Settings.DESC = (function($this) {
 	var $r;
 	var _g = new haxe.ds.StringMap();

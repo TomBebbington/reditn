@@ -51,7 +51,6 @@ class Expand {
 		}
 		li.appendChild(button);
 		menu.appendChild(li);
-
 		for(l in Reditn.links) {
 			if(l.nodeName.toLowerCase()!="a")
 				continue;

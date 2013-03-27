@@ -7,6 +7,7 @@ class Reditn {
 	static inline var day = 86400;
 	static inline var hour = 3600;
 	public static var links:Array<AnchorElement> = null;
+	public static var fullPage:Bool = true;
 	static function main() {
 		if(untyped document.readyState=="complete")
 			init();
@@ -19,12 +20,14 @@ class Reditn {
 	static function init() {
 		if(Browser.window.location.href.indexOf("reddit.") == -1)
 			return;
+		fullPage = Browser.document.getElementsByClassName("tabmenu").length > 0;
 		links = cast Browser.document.body.getElementsByClassName("title");
 		links = [for(l in links) if(l.nodeName.toLowerCase() == "a") l];
 		wrap(Settings.init);
 		wrap(Adblock.init, Settings.ADBLOCK);
 		wrap(DuplicateHider.init, Settings.DUPLICATE_HIDER);
-		wrap(Expand.init, Settings.EXPAND);
+		if(fullPage)
+			wrap(Expand.init, Settings.EXPAND);
 		wrap(Keyboard.init, Settings.KEYBOARD);
 		wrap(Preview.init, Settings.PREVIEW);
 		wrap(SubredditInfo.init, Settings.SUBINFO);
