@@ -7,7 +7,7 @@
 // @include			reddit.com/*
 // @include			*.reddit.com
 // @include			*.reddit.com/*
-// @version			1.5.1
+// @version			1.5.2
 // @grant			none
 // ==/UserScript==
 (function () { "use strict";
