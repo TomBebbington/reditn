@@ -135,15 +135,33 @@ Expand.refresh = function() {
 	if(Expand.button != null) {
 		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " images (" + Expand.buttons.length + ")";
 		var np = js.Browser.document.body.getElementsByClassName("nextprev");
+		console.log(np);
 		if(np.length > 0) {
-			var c = np[0].childNodes;
-			var _g = 0;
-			while(_g < c.length) {
-				var i = c[_g];
-				++_g;
-				if(i.nodeName.toLowerCase() != "a") continue;
-				var i1 = i;
-				if(Expand.toggled && i1.href.indexOf("#") == -1) i1.href += "#showall"; else if(!Expand.toggled && i1.href.indexOf("#") != -1) i1.href = HxOverrides.substr(i1.href,0,i1.href.indexOf("#"));
+			var c = (function($this) {
+				var $r;
+				var _g = [];
+				{
+					var _g1 = 0;
+					while(_g1 < np.length) {
+						var n = np[_g1];
+						++_g1;
+						var _g2 = 0, _g3 = n.getElementsByTagName("a");
+						while(_g2 < _g3.length) {
+							var i = _g3[_g2];
+							++_g2;
+							_g.push(i);
+						}
+					}
+				}
+				$r = _g;
+				return $r;
+			}(this));
+			var _g1 = 0;
+			while(_g1 < c.length) {
+				var i = c[_g1];
+				++_g1;
+				console.log(i);
+				if(Expand.toggled && i.href.indexOf("#") == -1) i.href += "#showall"; else if(!Expand.toggled && i.href.indexOf("#") != -1) i.href = HxOverrides.substr(i.href,0,i.href.indexOf("#"));
 			}
 		}
 		Expand.button.style.display = Expand.buttons.length > 0?"":"none";

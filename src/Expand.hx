@@ -84,12 +84,11 @@ class Expand {
 		if(button != null) {
 			button.innerHTML = '${toggled?"hide":"show"} images (${buttons.length})';
 			var np:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
+			trace(np);
 			if(np.length > 0) {
-				var c:Array<AnchorElement> = cast np[0].childNodes;
+				var c:Array<AnchorElement> = [for(n in np) for(i in n.getElementsByTagName("a")) cast i];
 				for(i in c) {
-					if(i.nodeName.toLowerCase() != "a")
-						continue;
-					var i:AnchorElement = cast i;
+					trace(i);
 					if(toggled && i.href.indexOf("#")==-1)
 						i.href += "#showall";
 					else if(!toggled && i.href.indexOf("#")!=-1)
