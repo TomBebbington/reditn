@@ -22,7 +22,7 @@ class Reditn {
 			return;
 		fullPage = Browser.document.getElementsByClassName("tabmenu").length > 0;
 		links = cast Browser.document.body.getElementsByClassName("title");
-		links = [for(l in links) if(l.nodeName.toLowerCase() == "a") l];
+		links = [for(l in links) if(l.nodeName.toLowerCase() == "a" && untyped l.parentNode.className != "parent") l];
 		wrap(Settings.init);
 		wrap(Adblock.init, Settings.ADBLOCK);
 		wrap(DuplicateHider.init, Settings.DUPLICATE_HIDER);
@@ -34,6 +34,7 @@ class Reditn {
 		wrap(UserInfo.init, Settings.USERINFO);
 		wrap(UserTagger.init, Settings.USER_TAGGER);
 		wrap(SubredditTagger.init, Settings.SUBREDDIT_TAGGER);
+		wrap(NSFWFilter.init, Settings.FILTER_NSFW);
 		Browser.window.history.replaceState(haxe.Serializer.run(state()), null, Expand.toggled ? "#showall" : null);
 		Browser.window.onpopstate = function(e:Dynamic) {
 			var s:String = e.state;

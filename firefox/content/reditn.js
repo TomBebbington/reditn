@@ -468,6 +468,19 @@ Markdown.parse = function(s) {
 	}
 	return StringTools.trim(s);
 }
+var NSFWFilter = function() { }
+$hxClasses["NSFWFilter"] = NSFWFilter;
+NSFWFilter.__name__ = ["NSFWFilter"];
+NSFWFilter.init = function() {
+	var ns = js.Browser.document.body.getElementsByClassName("nsfw-stamp");
+	var _g = 0;
+	while(_g < ns.length) {
+		var n = ns[_g];
+		++_g;
+		if(n.nodeName.toLowerCase() != "li") continue;
+		n.parentNode.parentNode.parentNode.style.display = "none";
+	}
+}
 var Preview = function() { }
 $hxClasses["Preview"] = Preview;
 Preview.__name__ = ["Preview"];
@@ -510,7 +523,7 @@ Reditn.init = function() {
 			while(_g1 < _g2.length) {
 				var l = _g2[_g1];
 				++_g1;
-				if(l.nodeName.toLowerCase() == "a") _g.push(l);
+				if(l.nodeName.toLowerCase() == "a" && l.parentNode.className != "parent") _g.push(l);
 			}
 		}
 		$r = _g;
@@ -526,6 +539,7 @@ Reditn.init = function() {
 	Reditn.wrap(UserInfo.init,"userinfo");
 	Reditn.wrap(UserTagger.init,"user-tag");
 	Reditn.wrap(SubredditTagger.init,"sub-tag");
+	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
 	js.Browser.window.history.replaceState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
 	js.Browser.window.onpopstate = function(e) {
 		var s = e.state;
@@ -2306,6 +2320,7 @@ Settings.DESC = (function($this) {
 	_g.set("sub-tag","Tag subreddits");
 	_g.set("preview","Preview comments and posts");
 	_g.set("keys","Keyboard shortcuts");
+	_g.set("nsfw-filter","Hide NSFW content");
 	$r = _g;
 	return $r;
 }(this));
@@ -2321,6 +2336,7 @@ Settings.DEFAULTS = (function($this) {
 	_g.set("sub-tag",true);
 	_g.set("preview",true);
 	_g.set("keys",true);
+	_g.set("nsfw-filter",true);
 	_g.set("user-tags",new haxe.ds.StringMap());
 	_g.set("sub-tags",new haxe.ds.StringMap());
 	$r = _g;

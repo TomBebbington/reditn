@@ -15,6 +15,7 @@ class Settings {
 	public static inline var KEYBOARD = "keys";
 	public static inline var USER_TAGS = "user-tags";
 	public static inline var SUBREDDIT_TAGS = "sub-tags";
+	public static inline var FILTER_NSFW = "nsfw-filter";
 	static var SAVE_BASE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=/";
 	static var DESC = [
 		ADBLOCK => "Block advertisements and sponsors",
@@ -25,7 +26,8 @@ class Settings {
 		USER_TAGGER => "Tag users",
 		SUBREDDIT_TAGGER => "Tag subreddits",
 		PREVIEW => "Preview comments and posts",
-		KEYBOARD => "Keyboard shortcuts"
+		KEYBOARD => "Keyboard shortcuts",
+		FILTER_NSFW => "Hide NSFW content"
 	];
 	public static var DEFAULTS:StringMap<Dynamic> = untyped [
 		ADBLOCK => true,
@@ -37,6 +39,7 @@ class Settings {
 		SUBREDDIT_TAGGER => true,
 		PREVIEW => true,
 		KEYBOARD => true,
+		FILTER_NSFW => true,
 		USER_TAGS => new Map<String, String>(),
 		SUBREDDIT_TAGS => new Map<String, String>()
 	];
