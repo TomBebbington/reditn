@@ -1,4 +1,3 @@
- 
 // ==UserScript==
 // @name			Reditn
 // @namespace		http://userscripts.org/user/tophattedcoder/
