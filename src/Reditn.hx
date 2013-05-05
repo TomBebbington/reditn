@@ -14,6 +14,9 @@ class Reditn {
 		else
 			untyped window.onload = function(e) init();
 	}
+	public static inline function getLinkContainer(l:Element):Element {
+		return cast l.parentNode.parentNode.parentNode;
+	}
 	public static inline function scroll(x:Int, y:Int):Void {
 		Browser.window.scrollBy(x - Browser.window.scrollX, y - Browser.window.scrollY);
 	}

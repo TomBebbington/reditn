@@ -43,7 +43,7 @@ DuplicateHider.init = function() {
 		var link = _g1[_g];
 		++_g;
 		if(link.nodeName.toLowerCase() != "a") continue;
-		if(Lambda.has(seen,link.href)) link.parentNode.style.display = "none"; else seen.push(link.href);
+		if(Lambda.has(seen,link.href)) link.parentNode.parentNode.parentNode.style.display = "none"; else seen.push(link.href);
 	}
 }
 var EReg = function(r,opt) {
@@ -473,6 +473,9 @@ List.prototype = {
 	}
 	,__class__: List
 }
+var IMap = function() { }
+$hxClasses["IMap"] = IMap;
+IMap.__name__ = ["IMap"];
 var Markdown = function() { }
 $hxClasses["Markdown"] = Markdown;
 Markdown.__name__ = ["Markdown"];
@@ -712,9 +715,9 @@ Reflect.fields = function(o) {
 Reflect.isFunction = function(f) {
 	return typeof(f) == "function" && !(f.__name__ || f.__ename__);
 }
-Reflect.deleteField = function(o,f) {
-	if(!Reflect.hasField(o,f)) return false;
-	delete(o[f]);
+Reflect.deleteField = function(o,field) {
+	if(!Reflect.hasField(o,field)) return false;
+	delete(o[field]);
 	return true;
 }
 var haxe = {}
@@ -724,41 +727,14 @@ haxe.ds.StringMap = function() {
 };
 $hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
 haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
+haxe.ds.StringMap.__interfaces__ = [IMap];
 haxe.ds.StringMap.prototype = {
-	toString: function() {
-		var s = new StringBuf();
-		s.b += "{";
-		var it = this.keys();
-		while( it.hasNext() ) {
-			var i = it.next();
-			s.b += Std.string(i);
-			s.b += " => ";
-			s.b += Std.string(Std.string(this.get(i)));
-			if(it.hasNext()) s.b += ", ";
-		}
-		s.b += "}";
-		return s.b;
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref["$" + i];
-		}};
-	}
-	,keys: function() {
+	keys: function() {
 		var a = [];
 		for( var key in this.h ) {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
 		return HxOverrides.iter(a);
-	}
-	,remove: function(key) {
-		key = "$" + key;
-		if(!this.h.hasOwnProperty(key)) return false;
-		delete(this.h[key]);
-		return true;
 	}
 	,exists: function(key) {
 		return this.h.hasOwnProperty("$" + key);
@@ -2051,43 +2027,14 @@ haxe.ds.IntMap = function() {
 };
 $hxClasses["haxe.ds.IntMap"] = haxe.ds.IntMap;
 haxe.ds.IntMap.__name__ = ["haxe","ds","IntMap"];
+haxe.ds.IntMap.__interfaces__ = [IMap];
 haxe.ds.IntMap.prototype = {
-	toString: function() {
-		var s = new StringBuf();
-		s.b += "{";
-		var it = this.keys();
-		while( it.hasNext() ) {
-			var i = it.next();
-			s.b += Std.string(i);
-			s.b += " => ";
-			s.b += Std.string(Std.string(this.get(i)));
-			if(it.hasNext()) s.b += ", ";
-		}
-		s.b += "}";
-		return s.b;
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref[i];
-		}};
-	}
-	,keys: function() {
+	keys: function() {
 		var a = [];
 		for( var key in this.h ) {
 		if(this.h.hasOwnProperty(key)) a.push(key | 0);
 		}
 		return HxOverrides.iter(a);
-	}
-	,remove: function(key) {
-		if(!this.h.hasOwnProperty(key)) return false;
-		delete(this.h[key]);
-		return true;
-	}
-	,exists: function(key) {
-		return this.h.hasOwnProperty(key);
 	}
 	,get: function(key) {
 		return this.h[key];
@@ -2097,55 +2044,20 @@ haxe.ds.IntMap.prototype = {
 	}
 	,__class__: haxe.ds.IntMap
 }
-haxe.ds.ObjectMap = function(weakKeys) {
-	if(weakKeys == null) weakKeys = false;
+haxe.ds.ObjectMap = function() {
 	this.h = { };
 	this.h.__keys__ = { };
 };
 $hxClasses["haxe.ds.ObjectMap"] = haxe.ds.ObjectMap;
 haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
+haxe.ds.ObjectMap.__interfaces__ = [IMap];
 haxe.ds.ObjectMap.prototype = {
-	toString: function() {
-		var s = new StringBuf();
-		s.b += "{";
-		var it = this.keys();
-		while( it.hasNext() ) {
-			var i = it.next();
-			s.b += Std.string(Std.string(i));
-			s.b += " => ";
-			s.b += Std.string(Std.string(this.h[i.__id__]));
-			if(it.hasNext()) s.b += ", ";
-		}
-		s.b += "}";
-		return s.b;
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref[i.__id__];
-		}};
-	}
-	,keys: function() {
+	keys: function() {
 		var a = [];
 		for( var key in this.h.__keys__ ) {
 		if(this.h.hasOwnProperty(key)) a.push(this.h.__keys__[key]);
 		}
 		return HxOverrides.iter(a);
-	}
-	,remove: function(key) {
-		var id = key.__id__;
-		if(!this.h.hasOwnProperty(id)) return false;
-		delete(this.h[id]);
-		delete(this.h.__keys__[id]);
-		return true;
-	}
-	,exists: function(key) {
-		return this.h.hasOwnProperty(key.__id__);
-	}
-	,get: function(key) {
-		return this.h[key.__id__];
 	}
 	,set: function(key,value) {
 		var id = key.__id__ != null?key.__id__:key.__id__ = ++haxe.ds.ObjectMap.count;
