@@ -1,5 +1,6 @@
 import js.html.*;
 import js.*;
+import data.*;
 class Keyboard {
 	static var current(default, null):Null<Int> = null;
 	public static var highlighted(get, null):Element;

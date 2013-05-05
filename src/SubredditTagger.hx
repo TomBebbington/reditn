@@ -1,6 +1,7 @@
 import js.*;
 import js.html.*;
 import haxe.ds.*;
+import data.*;
 using StringTools;
 class SubredditTagger {
 	static var tags(get, null):StringMap<String>;

@@ -1,5 +1,6 @@
 import js.Browser;
 import js.html.*;
+import data.*;
 class Adblock {
 	public static function init() {
 		hideAll(Browser.document.body.getElementsByClassName("promoted"));

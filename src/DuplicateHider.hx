@@ -1,5 +1,6 @@
 import js.*;
 import js.html.*;
+import data.*;
 using Lambda;
 class DuplicateHider {
 	public static function init() {

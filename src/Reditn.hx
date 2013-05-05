@@ -1,5 +1,7 @@
 import js.html.*;
 import js.Browser;
+import data.*;
+import haxe.Json;
 using StringTools;
 class Reditn {
 	static inline var year = 31557600;
@@ -12,7 +14,7 @@ class Reditn {
 		if(untyped document.readyState=="complete")
 			init();
 		else
-			untyped window.onload = function(e) init();
+			Browser.window.onload = function(_) init();
 	}
 	public static inline function getLinkContainer(l:Element):Element {
 		return cast l.parentNode.parentNode.parentNode;
@@ -60,14 +62,15 @@ class Reditn {
 	}
 	static function wrap(fn:Void->Void, ?id:String) {
 		var d = id == null ? null : Settings.data.get(id);
-		//trace('${id}: $d');
 		if(id == null || d)
 			try
 				fn()
 			catch(d:Dynamic) {
-				Browser.window.alert('Module $id has failed to load in Reditn due to the following error:\n $d');
-				Settings.data.set(id, false);
-				Settings.save();
+				#if debug
+					Browser.window.alert('Module $id has failed to load in Reditn due to the following error:\n $d');
+				#else
+					trace('Module $id has failed to load in Reditn due to the following error:\n $d');
+				#end
 			}
 	}
 	public static function formatNumber(n:Int):String {
@@ -146,18 +149,21 @@ class Reditn {
 		};
 		return t;
 	}
-	public static inline function getJSON(url:String, func:Dynamic->Void) {
-		func(haxe.Json.parse(haxe.Http.requestUrl(url)));
+	static function getData(o:Dynamic):Dynamic {
+		while(o.data != null)
+			o = o.data;
+		return o;
 	}
-	public static function getJSONP(url:String, fn:Dynamic->Void) {
+	public static inline function getJSON<T>(url:String, func:T->Void):Void {
+		func(getData(Json.parse(haxe.Http.requestUrl(url))));
+	}
+	public static function getJSONP<T>(url:String, fn:T->Void):Void {
 		var head = Browser.document.head;
 		var id = "temp" + Std.int(Math.random() * 9999999);
-		trace(id);
 		var sc = Browser.document.createScriptElement();
 		var src = url + id.urlEncode();
 		sc.id = "jsonp";
-		untyped window[id] = fn;
-		trace('window.${id} = ${Std.string(fn)}');
+		untyped window[id] = function(v:T) fn(getData(v));
 		sc.type = "text/javascript";
 		sc.src = src;
 		var old = Browser.document.getElementById("jsonp");

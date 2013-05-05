@@ -113,7 +113,7 @@ Expand.init = function() {
 		++_g;
 		if(l.nodeName.toLowerCase() != "a") continue;
 		var urltype = Reditn.getLinkType(l.href);
-		if(urltype == LinkType.IMAGE) Expand.getImageLink(l.href,l,function(url,l1) {
+		if(urltype == data.LinkType.IMAGE) Expand.getImageLink(l.href,l,function(url,l1) {
 			var e = l1.parentNode.parentNode;
 			var img = Expand.loadImage(url);
 			var div = js.Browser.document.createElement("div");
@@ -433,22 +433,6 @@ Lambda.has = function(it,elt) {
 	}
 	return false;
 }
-var LinkType = $hxClasses["LinkType"] = { __ename__ : ["LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","UNKNOWN"] }
-LinkType.IMAGE = ["IMAGE",0];
-LinkType.IMAGE.toString = $estr;
-LinkType.IMAGE.__enum__ = LinkType;
-LinkType.VIDEO = ["VIDEO",1];
-LinkType.VIDEO.toString = $estr;
-LinkType.VIDEO.__enum__ = LinkType;
-LinkType.AUDIO = ["AUDIO",2];
-LinkType.AUDIO.toString = $estr;
-LinkType.AUDIO.__enum__ = LinkType;
-LinkType.TEXT = ["TEXT",3];
-LinkType.TEXT.toString = $estr;
-LinkType.TEXT.__enum__ = LinkType;
-LinkType.UNKNOWN = ["UNKNOWN",4];
-LinkType.UNKNOWN.toString = $estr;
-LinkType.UNKNOWN.__enum__ = LinkType;
 var List = function() {
 	this.length = 0;
 };
@@ -527,7 +511,7 @@ var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
 Reditn.__name__ = ["Reditn"];
 Reditn.main = function() {
-	if(document.readyState == "complete") Reditn.init(); else window.onload = function(e) {
+	if(document.readyState == "complete") Reditn.init(); else js.Browser.window.onload = function(_) {
 		Reditn.init();
 	};
 }
@@ -577,9 +561,7 @@ Reditn.wrap = function(fn,id) {
 	if(id == null || d) try {
 		fn();
 	} catch( d1 ) {
-		js.Browser.window.alert("Module " + id + " has failed to load in Reditn due to the following error:\n " + Std.string(d1));
-		Settings.data.set(id,false);
-		Settings.save();
+		console.log("Module " + id + " has failed to load in Reditn due to the following error:\n " + Std.string(d1));
 	}
 }
 Reditn.formatNumber = function(n) {
@@ -616,39 +598,43 @@ Reditn.age = function(t) {
 Reditn.getLinkType = function(url) {
 	if(HxOverrides.substr(url,0,7) == "http://") url = HxOverrides.substr(url,7,null); else if(HxOverrides.substr(url,0,8) == "https://") url = HxOverrides.substr(url,8,null);
 	if(HxOverrides.substr(url,0,4) == "www.") url = HxOverrides.substr(url,4,null);
-	var t = HxOverrides.substr(url,0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1?LinkType.TEXT:url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4?(function($this) {
+	var t = HxOverrides.substr(url,0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1?data.LinkType.TEXT:url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4?(function($this) {
 		var $r;
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
 		$r = (function($this) {
 			var $r;
 			switch(ext) {
 			case "gif":case "jpg":case "jpeg":case "bmp":case "png":case "webp":case "svg":case "ico":case "tiff":case "raw":
-				$r = LinkType.IMAGE;
+				$r = data.LinkType.IMAGE;
 				break;
 			case "mpg":case "webm":case "avi":case "mp4":case "flv":case "swf":
-				$r = LinkType.VIDEO;
+				$r = data.LinkType.VIDEO;
 				break;
 			case "mp3":case "wav":case "midi":
-				$r = LinkType.AUDIO;
+				$r = data.LinkType.AUDIO;
 				break;
 			default:
-				$r = LinkType.UNKNOWN;
+				$r = data.LinkType.UNKNOWN;
 			}
 			return $r;
 		}($this));
 		return $r;
-	}(this)):StringTools.startsWith(url,"flickr.com/photos/") && url.length > 18 || url.indexOf("deviantart.com/") != -1 || HxOverrides.substr(url,0,10) == "imgur.com/" && HxOverrides.substr(url,10,2) != "a/" || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || StringTools.startsWith(url,"fav.me/")?LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?LinkType.VIDEO:LinkType.UNKNOWN;
+	}(this)):StringTools.startsWith(url,"flickr.com/photos/") && url.length > 18 || url.indexOf("deviantart.com/") != -1 || HxOverrides.substr(url,0,10) == "imgur.com/" && HxOverrides.substr(url,10,2) != "a/" || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || StringTools.startsWith(url,"fav.me/")?data.LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?data.LinkType.VIDEO:data.LinkType.UNKNOWN;
 	return t;
+}
+Reditn.getData = function(o) {
+	while(o.data != null) o = o.data;
+	return o;
 }
 Reditn.getJSONP = function(url,fn) {
 	var head = js.Browser.document.head;
 	var id = "temp" + (Math.random() * 9999999 | 0);
-	console.log(id);
 	var sc = js.Browser.document.createElement("script");
 	var src = url + StringTools.urlEncode(id);
 	sc.id = "jsonp";
-	window[id] = fn;
-	console.log("window." + id + " = " + Std.string(fn));
+	window[id] = function(v) {
+		fn(Reditn.getData(v));
+	};
 	sc.type = "text/javascript";
 	sc.src = src;
 	var old = js.Browser.document.getElementById("jsonp");
@@ -941,6 +927,9 @@ StringTools.htmlEscape = function(s,quotes) {
 	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
 	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
 }
+StringTools.htmlUnescape = function(s) {
+	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
+}
 StringTools.startsWith = function(s,start) {
 	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
 }
@@ -984,14 +973,14 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 	var div = js.Browser.document.createElement("div");
 	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
 	(function(d) {
-		if(d.data != null) d = d.data;
-		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), desc = Markdown.parse(d.public_description == null?d.description:d.public_description), age = Reditn.age(d.created_utc);
-		var html = "<b>Name:</b> " + name + "<br>";
-		html += "<b>Subscribers:</b> " + subs + "<br>";
-		html += "<b>Description:</b> " + desc + "<br>";
-		html += "<b>Age:</b> " + age + "<br>";
+		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = d.description_html != null?StringTools.htmlUnescape(d.description_html):d.public_description != null?Markdown.parse(d.public_description):Markdown.parse(d.description), age = Reditn.age(d.created_utc);
+		var html = "<b>Name:</b> " + name + " <br>";
+		html += "<b>Subscribers:</b> " + subs + " <br>";
+		html += "<b>Active Users:</b> " + users + " <br>";
+		html += "<b>Description:</b> " + desc + " <br>";
+		html += "<b>Age:</b> " + age + " <br>";
 		div.innerHTML = html;
-	})(haxe.Json.parse(haxe.Http.requestUrl("/r/" + name + "/about.json")));
+	})(Reditn.getData(haxe.Json.parse(haxe.Http.requestUrl("/r/" + name + "/about.json"))));
 }
 var SubredditTagger = function() { }
 $hxClasses["SubredditTagger"] = SubredditTagger;
@@ -1146,16 +1135,15 @@ UserInfo._onMouseOverUser = function(e) {
 	user = HxOverrides.substr(user,user.lastIndexOf("/") + 1,null);
 	var div = js.Browser.document.createElement("div");
 	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
-	(function(d) {
-		if(d.data != null) d = d.data;
-		var html = "<b>User:</b> " + Std.string(d.name) + "<br>";
-		var age = Reditn.age(d.created_utc);
+	(function(i) {
+		var name = i.name, age = Reditn.age(i.created_utc), linkKarma = Reditn.formatNumber(i.link_karma), commentKarma = Reditn.formatNumber(i.comment_karma);
+		var html = "<b>User:</b> " + name + "<br>";
 		html += "<b>Account age:</b> " + age + "<br>";
-		html += "<b>Karma:</b> " + Reditn.formatNumber(d.link_karma) + " link karma, " + Reditn.formatNumber(d.comment_karma) + " comment karma";
-		if(d.is_mod != null && d.is_mod) html += "<br><b>Moderator</b>";
-		if(d.is_gold != null && d.is_gold) html += "<br><b>Gold</b>";
+		html += "<b>Karma:</b> " + linkKarma + " link karma, " + commentKarma + " comment karma";
+		if(i.is_mod) html += "<br><b>Moderator</b>";
+		if(i.is_gold) html += "<br><b>Gold</b>";
 		div.innerHTML = html;
-	})(haxe.Json.parse(haxe.Http.requestUrl("/user/" + user + "/about.json")));
+	})(Reditn.getData(haxe.Json.parse(haxe.Http.requestUrl("/user/" + user + "/about.json"))));
 }
 var UserTagger = function() { }
 $hxClasses["UserTagger"] = UserTagger;
@@ -1203,6 +1191,23 @@ UserTagger.getTag = function(a) {
 	};
 	a.parentNode.insertBefore(tag,a.nextSibling);
 }
+var data = {}
+data.LinkType = $hxClasses["data.LinkType"] = { __ename__ : ["data","LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","UNKNOWN"] }
+data.LinkType.IMAGE = ["IMAGE",0];
+data.LinkType.IMAGE.toString = $estr;
+data.LinkType.IMAGE.__enum__ = data.LinkType;
+data.LinkType.VIDEO = ["VIDEO",1];
+data.LinkType.VIDEO.toString = $estr;
+data.LinkType.VIDEO.__enum__ = data.LinkType;
+data.LinkType.AUDIO = ["AUDIO",2];
+data.LinkType.AUDIO.toString = $estr;
+data.LinkType.AUDIO.__enum__ = data.LinkType;
+data.LinkType.TEXT = ["TEXT",3];
+data.LinkType.TEXT.toString = $estr;
+data.LinkType.TEXT.__enum__ = data.LinkType;
+data.LinkType.UNKNOWN = ["UNKNOWN",4];
+data.LinkType.UNKNOWN.toString = $estr;
+data.LinkType.UNKNOWN.__enum__ = data.LinkType;
 haxe.Http = function(url) {
 	this.url = url;
 	this.headers = new haxe.ds.StringMap();

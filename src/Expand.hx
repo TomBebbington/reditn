@@ -2,6 +2,7 @@ import js.*;
 import js.html.*;
 import haxe.Timer;
 import haxe.*;
+import data.*;
 using StringTools;
 class Expand {
 	static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";

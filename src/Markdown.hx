@@ -1,5 +1,6 @@
 import js.*;
 import js.html.*;
+import data.*;
 using StringTools;
 class Markdown {
 	static var regex:Array<Regex> = [

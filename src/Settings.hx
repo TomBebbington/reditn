@@ -1,5 +1,6 @@
 import js.*;
 import js.html.*;
+import data.*;
 import haxe.ds.StringMap;
 import haxe.crypto.BaseCode;
 class Settings {

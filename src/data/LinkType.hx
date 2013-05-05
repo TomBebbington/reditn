@@ -1,3 +1,4 @@
+package data;
 enum LinkType {
 	IMAGE;
 	VIDEO;

@@ -15,7 +15,7 @@ curl \
 ${code} \
 --data output_format=text \
 --data output_info=compiled_code \
---data compilation_level=ADVANCED_OPTIMIZATIONS \
+--data compilation_level=SIMPLE_OPTIMIZATIONS \
 -o reditn.min.js
 cat info >> temp
 echo " " >> temp

@@ -1,5 +1,6 @@
 import js.*;
 import js.html.*;
+import data.*;
 class Preview {
 	public static function init() {
 		var ts:Array<Element> = cast Browser.document.body.getElementsByClassName("usertext-edit");

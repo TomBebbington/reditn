@@ -1,6 +1,7 @@
 import js.Browser;
 import js.html.*;
 import haxe.ds.StringMap;
+import data.*;
 using StringTools;
 class UserTagger {
 	static var tags(get, null):StringMap<String>;
