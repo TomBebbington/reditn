@@ -31,6 +31,7 @@ class Reditn {
 		wrap(Settings.init);
 		wrap(Adblock.init, Settings.ADBLOCK);
 		wrap(DuplicateHider.init, Settings.DUPLICATE_HIDER);
+		wrap(NSFWFilter.init, Settings.FILTER_NSFW);
 		if(fullPage)
 			wrap(Expand.init, Settings.EXPAND);
 		wrap(Keyboard.init, Settings.KEYBOARD);
@@ -39,7 +40,6 @@ class Reditn {
 		wrap(UserInfo.init, Settings.USERINFO);
 		wrap(UserTagger.init, Settings.USER_TAGGER);
 		wrap(SubredditTagger.init, Settings.SUBREDDIT_TAGGER);
-		wrap(NSFWFilter.init, Settings.FILTER_NSFW);
 		Browser.window.history.replaceState(haxe.Serializer.run(state()), null, Expand.toggled ? "#showall" : null);
 		Browser.window.onpopstate = function(e:Dynamic) {
 			var s:String = e.state;
@@ -95,6 +95,8 @@ class Reditn {
 	}
 	public static inline function show(e:Element, shown:Bool):Void {
 		e.style.display = shown ? "": "none";
+		if(e.className.indexOf("link") != -1)
+			links.remove(untyped e.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
 	}
 	public static inline function remove(e:Element):Void {
 		e.parentNode.removeChild(e);

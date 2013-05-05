@@ -139,8 +139,7 @@ class Expand {
 			button.innerHTML = '${toggled?"hide":"show"} images (${buttons.length})';
 			var np:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
 			if(np.length > 0) {
-				var c:Array<AnchorElement> = [for(n in np) for(i in n.getElementsByTagName("a")) cast i];
-				for(i in c) {
+				for(i in Reditn.links) {
 					if(toggled && i.href.indexOf("#")==-1)
 						i.href += "#showall";
 					else if(!toggled && i.href.indexOf("#")!=-1)
