@@ -140,7 +140,7 @@ class Reditn {
 				default:
 					LinkType.UNKNOWN;
 			}
-		} else if((url.startsWith("flickr.com/photos/") && url.length > 18) || url.indexOf("deviantart.com/") != -1 || (url.substr(0, 10) == "imgur.com/" && url.substr(10,2) != "a/") || url.substr(0, 12) == "i.imgur.com/" || url.substr(0, 8) == "qkme.me/" || url.substr(0,19) == "quickmeme.com/meme/" || url.substr(0, 20) == "memecrunch.com/meme/" || url.substr(0, 27) == "memegenerator.net/instance/" || url.startsWith("fav.me/")) {
+		} else if((url.startsWith("flickr.com/photos/") && url.length > 18) || url.indexOf("deviantart.com/") != -1 || (url.substr(0, 10) == "imgur.com/" && url.indexOf("blog") == -1) || url.substr(0, 12) == "i.imgur.com/" || url.substr(0, 8) == "qkme.me/" || url.substr(0,19) == "quickmeme.com/meme/" || url.substr(0, 20) == "memecrunch.com/meme/" || url.substr(0, 27) == "memegenerator.net/instance/" || url.startsWith("fav.me/")) {
 			LinkType.IMAGE;
 		} else if(url.substr(0, 17) == "youtube.com/watch") {
 			LinkType.VIDEO;
@@ -149,7 +149,7 @@ class Reditn {
 		};
 		return t;
 	}
-	static function getData(o:Dynamic):Dynamic {
+	public static function getData(o:Dynamic):Dynamic {
 		while(o.data != null)
 			o = o.data;
 		return o;

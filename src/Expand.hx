@@ -6,6 +6,7 @@ import data.*;
 using StringTools;
 class Expand {
 	static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
+	static inline var IMGUR_CLIENT_ID = "cc1f254578d6c52";
 	public static var maxWidth(get, null):Int;
 	public static var maxHeight(get, null):Int;
 	public static var maxArea(get, null):Int;
@@ -57,16 +58,68 @@ class Expand {
 				continue;
 			var urltype = Reditn.getLinkType(l.href);
 			if(urltype==LinkType.IMAGE) {
-				getImageLink(l.href, l, function(url, l) {
+				getImageLink(l.href, l, function(a:Album) {
 					var e = l.parentNode.parentNode;
-					var img = loadImage(url);
-					var div = Browser.document.createElement("div");
-					Reditn.show(div, toggled);
+					var div = Browser.document.createDivElement();
+					var imgs = [for(i in a) {
+						var i = loadImage(i.url);
+						div.appendChild(i);
+						Reditn.show(i, false);
+						i;
+					}];
+					var img:ImageElement = null;
+					var caption = Browser.document.createDivElement();
+					caption.style.fontWeight = "bold";
+					div.appendChild(caption);
+					var currentIndex = 0;
+					var prev = null, info = null, next = null;
+					if(a.length > 1) {
+						prev = Browser.document.createButtonElement();
+						prev.innerHTML = "Prev";
+						div.appendChild(prev);
+						info = Browser.document.createSpanElement();
+						div.appendChild(info);
+						next = Browser.document.createButtonElement();
+						next.innerHTML = "Next";
+						div.appendChild(next);
+						div.appendChild(Browser.document.createBRElement());
+					}
+					function switchImage(ind:Int) {
+						if(ind < 0 || ind >= a.length)
+							return;
+						var i = a[ind];
+						var width = null;
+						if(img != null) {
+							Reditn.show(img, false);
+							width = img.width;
+						}
+						img = imgs[ind];
+						Reditn.show(img, true);
+						if(width != null) {
+							var ratio = img.height / img.width;
+							img.width = width;
+							img.height = Std.int(width * ratio);
+						}
+						div.appendChild(img);
+						if(prev != null) {
+							info.innerHTML = ' ${ind+1} of ${a.length} ';
+							prev.disabled = ind <= 0;
+							next.disabled = ind >= a.length-1;
+						}
+						Reditn.show(caption, i.caption != null);
+						if(i.caption != null) 
+							caption.innerHTML = StringTools.htmlEscape(i.caption);
+					}
+					switchImage(0);
+					if(prev != null) {
+						prev.onmousedown = function(_) switchImage(--currentIndex);
+						next.onmousedown = function(_) switchImage(++currentIndex);
+					}
 					e.appendChild(div);
-					div.appendChild(img);
+					Reditn.show(div, toggled);
 					var li = Browser.document.createElement("li");
 					li.className = "reditn-expand";
-					var show = showButton(div, li, url);
+					var show = showButton(div, li);
 					buttons.push(show);
 					var btns = untyped e.getElementsByClassName("buttons")[0];
 					if(btns != null)
@@ -85,11 +138,9 @@ class Expand {
 		if(button != null) {
 			button.innerHTML = '${toggled?"hide":"show"} images (${buttons.length})';
 			var np:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
-			trace(np);
 			if(np.length > 0) {
 				var c:Array<AnchorElement> = [for(n in np) for(i in n.getElementsByTagName("a")) cast i];
 				for(i in c) {
-					trace(i);
 					if(toggled && i.href.indexOf("#")==-1)
 						i.href += "#showall";
 					else if(!toggled && i.href.indexOf("#")!=-1)
@@ -112,7 +163,7 @@ class Expand {
 				untyped e.getElementsByClassName("toggle")[0].toggle(null, false);
 			}
 	}
-	static function showButton(el:Element, p:Element, url:String) {
+	static function showButton(el:Element, p:Element) {
 		var e = Browser.document.createAnchorElement();
 		e.style.fontStyle = "italic";
 		e.href = "javascript:void(0);";
@@ -127,12 +178,17 @@ class Expand {
 				Reditn.pushState();
 		}
 		untyped e.toggled = function() return toggled;
-		untyped e.url = url;
 		e.onclick = function(ev) untyped e.toggle();
 		p.appendChild(e);
 		return e;
 	}
-	static function getImageLink(ourl:String, el:Element, cb:String -> Element->Void) {
+	static inline function image(url:String, ?c:String):Image {
+		return {url: url, caption: c};
+	}
+	static inline function album(url:String, ?c:String):Album {
+		return [image(url, c)];
+	}
+	static function getImageLink(ourl:String, el:Element, cb:Album -> Void) {
 		var url = ourl;
 		if(url.substr(0, 7) == "http://")
 			url = url.substr(7);
@@ -145,27 +201,51 @@ class Expand {
 		if(url.indexOf("?") != -1)
 			url = url.substr(0, url.indexOf("?"));
 		if(url.substr(0, 12) == "i.imgur.com/" && url.split(".").length == 3)
-			cb("http://"+url+".jpg", el);
-		else if(url.substr(0, 10) == "imgur.com/") {
+			cb(album('http://${url}.jpg'));
+		else if(url.startsWith("imgur.com/a/") || url.startsWith("imgur.com/gallery/")) {
+			var id:String = url.split("/")[2];
+			var albumType = url.indexOf("gallery") != -1 ? "gallery/album" : "album";
+			var req = new haxe.Http('https://api.imgur.com/3/${albumType}/${id}');
+			req.setHeader("Authorization", "Client-ID "+IMGUR_CLIENT_ID);
+			req.onData = function(ds:String) {
+				var d:data.imgur.Album = cast Reditn.getData(haxe.Json.parse(ds));
+				var album = [];
+				if(d.images_count <= 0)
+					album.push(image('http://i.imgur.com/${d.id}.jpg', d.title));
+				else
+					for(i in d.images)
+						album.push(image('http://i.imgur.com/${i.id}.jpg', i.title));
+				cb(album);
+			};
+			#if debug
+			req.onError = function(e:String) {
+				trace('Error in request to ${req.url} for album with id ${id}: $e');
+			};
+			#end
+			req.request(false);
+		} else if(url.startsWith("imgur.com/")) {
 			var id = removeSymbols(url.substr(url.indexOf("/")+1));
-			cb("http://i.imgur.com/"+id+".jpg", el);
+			cb(if(id.indexOf(",") != -1)
+				id.split(",").map(function(nid) return image('http://i.imgur.com/${nid}.jpg'));
+			else
+				album('http://i.imgur.com/${id}.jpg'));
 		} else if(url.substr(0, 8) == "qkme.me/") {
 			var id = removeSymbols(url.substr(8));
-			cb("http://i.qkme.me/"+id+".jpg", el);
+			cb(album('http://i.qkme.me/${id}.jpg'));
 		} else if(url.substr(0, 19) == "quickmeme.com/meme/") {
 			var id = removeSymbols(url.substr(19));
-			cb("http://i.qkme.me/"+id+".jpg", el);
+			cb(album('http://i.qkme.me/${id}.jpg'));
 		} else if(url.substr(0, 20) == "memecrunch.com/meme/") {
 			var id = url;
 			if(id.charAt(id.length-1) != "/")
 				id += "/";
-			cb("http://"+id+"image.jpg", el);
+			cb(album('http://${id}image.jpg'));
 		} else if(url.substr(0, 27) == "memegenerator.net/instance/") {
 			var id = removeSymbols(url.substr(27));
-			cb("http://cdn.memegenerator.net/instances/400x/"+id+".jpg", el);
+			cb(album('http://cdn.memegenerator.net/instances/400x/${id}.jpg'));
 		} else if(ourl.indexOf("deviantart.com/") != -1 || ourl.indexOf("fav.me") != -1) {
-			Reditn.getJSONP("http://backend.deviantart.com/oembed?url="+ourl.urlEncode()+"&format=jsonp&callback=", function(d) {
-				cb(d.url, el);
+			Reditn.getJSONP('http://backend.deviantart.com/oembed?url=${ourl.urlEncode()}&format=jsonp&callback=', function(d) {
+				cb(album(d.url, '${d.title} by ${d.author_name}'));
 			});
 		} else if(url.startsWith("flickr.com/photos/")) {
 			var id = url.substr(18);
@@ -186,10 +266,10 @@ class Expand {
 				}
 				if(largest == null)
 					largest = sizes[0].source;
-				cb(largest, el);
+				cb(album(largest));
 			});
 		} else {
-			cb(ourl, el);
+			cb(album(ourl));
 		}
 	}
 	public static function preload(url) {

@@ -6,7 +6,7 @@
 // @include			reddit.com/*
 // @include			*.reddit.com
 // @include			*.reddit.com/*
-// @version			1.5.4
+// @version			1.5.5
 // @grant			none
 // ==/UserScript==
 (function () { "use strict";
@@ -109,32 +109,108 @@ Expand.init = function() {
 	menu.appendChild(li);
 	var _g = 0, _g1 = Reditn.links;
 	while(_g < _g1.length) {
-		var l = _g1[_g];
+		var l = [_g1[_g]];
 		++_g;
-		if(l.nodeName.toLowerCase() != "a") continue;
-		var urltype = Reditn.getLinkType(l.href);
-		if(urltype == data.LinkType.IMAGE) Expand.getImageLink(l.href,l,function(url,l1) {
-			var e = l1.parentNode.parentNode;
-			var img = Expand.loadImage(url);
-			var div = js.Browser.document.createElement("div");
-			div.style.display = Expand.toggled?"":"none";
-			e.appendChild(div);
-			div.appendChild(img);
-			var li1 = js.Browser.document.createElement("li");
-			li1.className = "reditn-expand";
-			var show = Expand.showButton(div,li1,url);
-			Expand.buttons.push(show);
-			var btns = e.getElementsByClassName("buttons")[0];
-			if(btns != null) btns.insertBefore(li1,btns.childNodes[0]); else throw "Bad DOM";
-			Expand.refresh();
-		}); else Expand.preload(l.href);
+		if(l[0].nodeName.toLowerCase() != "a") continue;
+		var urltype = Reditn.getLinkType(l[0].href);
+		if(urltype == data.LinkType.IMAGE) Expand.getImageLink(l[0].href,l[0],(function(l) {
+			return function(a) {
+				var e = l[0].parentNode.parentNode;
+				var div = js.Browser.document.createElement("div");
+				var imgs = (function($this) {
+					var $r;
+					var _g2 = [];
+					{
+						var _g3 = 0;
+						while(_g3 < a.length) {
+							var i = a[_g3];
+							++_g3;
+							_g2.push((function($this) {
+								var $r;
+								var i1 = Expand.loadImage(i.url);
+								div.appendChild(i1);
+								i1.style.display = "none";
+								$r = i1;
+								return $r;
+							}($this)));
+						}
+					}
+					$r = _g2;
+					return $r;
+				}(this));
+				var img = null;
+				var caption = js.Browser.document.createElement("div");
+				caption.style.fontWeight = "bold";
+				div.appendChild(caption);
+				var currentIndex = 0;
+				var prev = null, info = null, next = null;
+				if(a.length > 1) {
+					prev = js.Browser.document.createElement("button");
+					prev.innerHTML = "Prev";
+					div.appendChild(prev);
+					info = js.Browser.document.createElement("span");
+					div.appendChild(info);
+					next = js.Browser.document.createElement("button");
+					next.innerHTML = "Next";
+					div.appendChild(next);
+					div.appendChild(js.Browser.document.createElement("br"));
+				}
+				var switchImage = (function() {
+					return function(ind) {
+						if(ind < 0 || ind >= a.length) return;
+						var i = a[ind];
+						var width = null;
+						if(img != null) {
+							img.style.display = "none";
+							width = img.width;
+						}
+						img = imgs[ind];
+						img.style.display = "";
+						if(width != null) {
+							var ratio = img.height / img.width;
+							img.width = width;
+							img.height = width * ratio | 0;
+						}
+						div.appendChild(img);
+						if(prev != null) {
+							info.innerHTML = " " + (ind + 1) + " of " + a.length + " ";
+							prev.disabled = ind <= 0;
+							next.disabled = ind >= a.length - 1;
+						}
+						caption.style.display = i.caption != null?"":"none";
+						if(i.caption != null) caption.innerHTML = StringTools.htmlEscape(i.caption);
+					};
+				})();
+				switchImage(0);
+				if(prev != null) {
+					prev.onmousedown = (function() {
+						return function(_) {
+							switchImage(--currentIndex);
+						};
+					})();
+					next.onmousedown = (function() {
+						return function(_) {
+							switchImage(++currentIndex);
+						};
+					})();
+				}
+				e.appendChild(div);
+				div.style.display = Expand.toggled?"":"none";
+				var li1 = js.Browser.document.createElement("li");
+				li1.className = "reditn-expand";
+				var show = Expand.showButton(div,li1);
+				Expand.buttons.push(show);
+				var btns = e.getElementsByClassName("buttons")[0];
+				if(btns != null) btns.insertBefore(li1,btns.childNodes[0]); else throw "Bad DOM";
+				Expand.refresh();
+			};
+		})(l)); else Expand.preload(l[0].href);
 	}
 }
 Expand.refresh = function() {
 	if(Expand.button != null) {
 		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " images (" + Expand.buttons.length + ")";
 		var np = js.Browser.document.body.getElementsByClassName("nextprev");
-		console.log(np);
 		if(np.length > 0) {
 			var c = (function($this) {
 				var $r;
@@ -159,7 +235,6 @@ Expand.refresh = function() {
 			while(_g1 < c.length) {
 				var i = c[_g1];
 				++_g1;
-				console.log(i);
 				if(Expand.toggled && i.href.indexOf("#") == -1) i.href += "#showall"; else if(!Expand.toggled && i.href.indexOf("#") != -1) i.href = HxOverrides.substr(i.href,0,i.href.indexOf("#"));
 			}
 		}
@@ -176,7 +251,7 @@ Expand.toggle = function(t) {
 	}
 	Expand.refresh();
 }
-Expand.showButton = function(el,p,url) {
+Expand.showButton = function(el,p) {
 	var e = js.Browser.document.createElement("a");
 	e.style.fontStyle = "italic";
 	e.href = "javascript:void(0);";
@@ -193,7 +268,6 @@ Expand.showButton = function(el,p,url) {
 	e.toggled = function() {
 		return toggled;
 	};
-	e.url = url;
 	e.onclick = function(ev) {
 		e.toggle();
 	};
@@ -206,24 +280,45 @@ Expand.getImageLink = function(ourl,el,cb) {
 	if(HxOverrides.substr(url,0,4) == "www.") url = HxOverrides.substr(url,4,null);
 	if(url.indexOf("&") != -1) url = HxOverrides.substr(url,0,url.indexOf("&"));
 	if(url.indexOf("?") != -1) url = HxOverrides.substr(url,0,url.indexOf("?"));
-	if(HxOverrides.substr(url,0,12) == "i.imgur.com/" && url.split(".").length == 3) cb("http://" + url + ".jpg",el); else if(HxOverrides.substr(url,0,10) == "imgur.com/") {
+	if(HxOverrides.substr(url,0,12) == "i.imgur.com/" && url.split(".").length == 3) cb([{ url : "http://" + url + ".jpg", caption : null}]); else if(StringTools.startsWith(url,"imgur.com/a/") || StringTools.startsWith(url,"imgur.com/gallery/")) {
+		var id = url.split("/")[2];
+		var albumType = url.indexOf("gallery") != -1?"gallery/album":"album";
+		var req = new haxe.Http("https://api.imgur.com/3/" + albumType + "/" + id);
+		req.setHeader("Authorization","Client-ID " + "cc1f254578d6c52");
+		req.onData = function(ds) {
+			var d = Reditn.getData(haxe.Json.parse(ds));
+			var album = [];
+			if(d.images_count <= 0) album.push({ url : "http://i.imgur.com/" + d.id + ".jpg", caption : d.title}); else {
+				var _g = 0, _g1 = d.images;
+				while(_g < _g1.length) {
+					var i = _g1[_g];
+					++_g;
+					album.push({ url : "http://i.imgur.com/" + i.id + ".jpg", caption : i.title});
+				}
+			}
+			cb(album);
+		};
+		req.request(false);
+	} else if(StringTools.startsWith(url,"imgur.com/")) {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,url.indexOf("/") + 1,null));
-		cb("http://i.imgur.com/" + id + ".jpg",el);
+		cb(id.indexOf(",") != -1?id.split(",").map(function(nid) {
+			return { url : "http://i.imgur.com/" + nid + ".jpg", caption : null};
+		}):[{ url : "http://i.imgur.com/" + id + ".jpg", caption : null}]);
 	} else if(HxOverrides.substr(url,0,8) == "qkme.me/") {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,8,null));
-		cb("http://i.qkme.me/" + id + ".jpg",el);
+		cb([{ url : "http://i.qkme.me/" + id + ".jpg", caption : null}]);
 	} else if(HxOverrides.substr(url,0,19) == "quickmeme.com/meme/") {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,19,null));
-		cb("http://i.qkme.me/" + id + ".jpg",el);
+		cb([{ url : "http://i.qkme.me/" + id + ".jpg", caption : null}]);
 	} else if(HxOverrides.substr(url,0,20) == "memecrunch.com/meme/") {
 		var id = url;
 		if(id.charAt(id.length - 1) != "/") id += "/";
-		cb("http://" + id + "image.jpg",el);
+		cb([{ url : "http://" + id + "image.jpg", caption : null}]);
 	} else if(HxOverrides.substr(url,0,27) == "memegenerator.net/instance/") {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,27,null));
-		cb("http://cdn.memegenerator.net/instances/400x/" + id + ".jpg",el);
+		cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + id + ".jpg", caption : null}]);
 	} else if(ourl.indexOf("deviantart.com/") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSONP("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=jsonp&callback=",function(d) {
-		cb(d.url,el);
+		cb([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
 	}); else if(StringTools.startsWith(url,"flickr.com/photos/")) {
 		var id = HxOverrides.substr(url,18,null);
 		id = HxOverrides.substr(id,id.indexOf("/") + 1,null);
@@ -244,9 +339,9 @@ Expand.getImageLink = function(ourl,el,cb) {
 				}
 			}
 			if(largest == null) largest = sizes[0].source;
-			cb(largest,el);
+			cb([{ url : largest, caption : null}]);
 		});
-	} else cb(ourl,el);
+	} else cb([{ url : ourl, caption : null}]);
 }
 Expand.preload = function(url) {
 	var link = js.Browser.document.createElement("link");
@@ -619,7 +714,7 @@ Reditn.getLinkType = function(url) {
 			return $r;
 		}($this));
 		return $r;
-	}(this)):StringTools.startsWith(url,"flickr.com/photos/") && url.length > 18 || url.indexOf("deviantart.com/") != -1 || HxOverrides.substr(url,0,10) == "imgur.com/" && HxOverrides.substr(url,10,2) != "a/" || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || StringTools.startsWith(url,"fav.me/")?data.LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?data.LinkType.VIDEO:data.LinkType.UNKNOWN;
+	}(this)):StringTools.startsWith(url,"flickr.com/photos/") && url.length > 18 || url.indexOf("deviantart.com/") != -1 || HxOverrides.substr(url,0,10) == "imgur.com/" && url.indexOf("blog") == -1 || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || StringTools.startsWith(url,"fav.me/")?data.LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?data.LinkType.VIDEO:data.LinkType.UNKNOWN;
 	return t;
 }
 Reditn.getData = function(o) {
@@ -1293,6 +1388,10 @@ haxe.Http.prototype = {
 		}
 		r.send(uri);
 		if(!this.async) onreadystatechange(null);
+	}
+	,setHeader: function(header,value) {
+		this.headers.set(header,value);
+		return this;
 	}
 	,__class__: haxe.Http
 }
