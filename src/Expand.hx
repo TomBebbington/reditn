@@ -350,6 +350,8 @@ class Expand {
 			s.substr(0, s.lastIndexOf("?"));
 		else if(s.lastIndexOf("/") != -1)
 			s.substr(0, s.lastIndexOf("/"));
+		else if(s.lastIndexOf("#") != -1)
+			s.substr(0, s.lastIndexOf("#"));
 		else
 			s;
 	}

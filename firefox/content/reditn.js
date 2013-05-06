@@ -6,7 +6,7 @@
 // @include			reddit.com/*
 // @include			*.reddit.com
 // @include			*.reddit.com/*
-// @version			1.5.6
+// @version			1.5.7
 // @grant			none
 // ==/UserScript==
 (function () { "use strict";
@@ -416,7 +416,7 @@ Expand.initResize = function(e) {
 	};
 }
 Expand.removeSymbols = function(s) {
-	return s.lastIndexOf("?") != -1?HxOverrides.substr(s,0,s.lastIndexOf("?")):s.lastIndexOf("/") != -1?HxOverrides.substr(s,0,s.lastIndexOf("/")):s;
+	return s.lastIndexOf("?") != -1?HxOverrides.substr(s,0,s.lastIndexOf("?")):s.lastIndexOf("/") != -1?HxOverrides.substr(s,0,s.lastIndexOf("/")):s.lastIndexOf("#") != -1?HxOverrides.substr(s,0,s.lastIndexOf("#")):s;
 }
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
@@ -488,7 +488,7 @@ var Keyboard = function() { }
 $hxClasses["Keyboard"] = Keyboard;
 Keyboard.__name__ = ["Keyboard"];
 Keyboard.get_highlighted = function() {
-	return Keyboard.current == null?null:Reditn.links[Keyboard.current];
+	return Keyboard.current == null?null:Reditn.links[Keyboard.current].parentNode.parentNode.parentNode;
 }
 Keyboard.init = function() {
 	js.Browser.document.onkeydown = function(e) {
@@ -497,33 +497,27 @@ Keyboard.init = function() {
 }
 Keyboard.unhighlight = function() {
 	var h = Keyboard.get_highlighted();
-	if(h) {
-		var he = h.parentNode.parentNode;
-		he.style.border = "";
-	}
+	if(h != null) h.style.border = "";
 }
 Keyboard.highlight = function(dir) {
 	Keyboard.unhighlight();
-	Keyboard.current = Keyboard.current != null && Reditn.links[Keyboard.current + dir]?Keyboard.current += dir:dir = 0;
+	if(Keyboard.current != null && Reditn.links[Keyboard.current + dir]) Keyboard.current += dir; else dir = 0;
 	if(Keyboard.current == null) Keyboard.current = 0;
 	var h = Keyboard.get_highlighted();
-	var he = h.parentNode.parentNode;
-	if(he.offsetLeft == 0 && he.offsetTop == 0) {
-		Keyboard.highlight(dir);
-		return;
-	}
-	he.style.border = "3px solid grey";
-	he.parentNode.scrollIntoView(true);
-	he.focus();
+	h.style.border = "3px solid grey";
+	h.scrollIntoView(true);
+	h.focus();
 }
 Keyboard.show = function(s) {
 	if(s == null) s = true;
 	var h = Keyboard.get_highlighted();
-	var entry = h.parentNode.parentNode;
-	var tg = entry.getElementsByClassName("toggle")[0];
-	tg.toggle(s);
-	entry.scrollIntoView(true);
-	entry.focus();
+	var tg = h.getElementsByClassName("toggle")[0];
+	if(tg.toggle != null) tg.toggle(s); else {
+		var btn = h.getElementsByClassName("expando-button")[0];
+		if(btn != null && (s?btn.className.indexOf("expanded") == -1:btn.className.indexOf("expanded") != -1)) btn.onclick(null);
+	}
+	h.scrollIntoView(true);
+	h.focus();
 }
 Keyboard.keyDown = function(c) {
 	switch(c) {
