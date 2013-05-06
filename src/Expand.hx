@@ -203,17 +203,17 @@ class Expand {
 	}
 	static function getImageLink(ourl:String, el:Element, cb:Album -> Void) {
 		var url = ourl;
-		if(url.substr(0, 7) == "http://")
+		if(url.startsWith("http://"))
 			url = url.substr(7);
-		else if(url.substr(0, 8) == "https://")
+		else if(url.startsWith("https://"))
 			url = url.substr(8);
-		if(url.substr(0, 4) == "www.")
+		if(url.startsWith("www."))
 			url = url.substr(4);
 		if(url.indexOf("&") != -1)
 			url = url.substr(0, url.indexOf("&"));
 		if(url.indexOf("?") != -1)
 			url = url.substr(0, url.indexOf("?"));
-		if(url.substr(0, 12) == "i.imgur.com/" && url.split(".").length == 3)
+		if(url.startsWith("i.imgur.com/") && url.split(".").length == 3)
 			cb(album('http://${url}.jpg'));
 		else if(url.startsWith("imgur.com/a/") || url.startsWith("imgur.com/gallery/")) {
 			var id:String = url.split("/")[2];
@@ -242,20 +242,26 @@ class Expand {
 				id.split(",").map(function(nid) return image('http://i.imgur.com/${nid}.jpg'));
 			else
 				album('http://i.imgur.com/${id}.jpg'));
-		} else if(url.substr(0, 8) == "qkme.me/") {
+		} else if(url.startsWith("qkme.me/")) {
 			var id = removeSymbols(url.substr(8));
 			cb(album('http://i.qkme.me/${id}.jpg'));
-		} else if(url.substr(0, 19) == "quickmeme.com/meme/") {
+		} else if(url.startsWith("quickmeme.com/meme/")) {
 			var id = removeSymbols(url.substr(19));
 			cb(album('http://i.qkme.me/${id}.jpg'));
-		} else if(url.substr(0, 20) == "memecrunch.com/meme/") {
+		} else if(url.startsWith("m.quickmeme.com/meme/")) {
+			var id = removeSymbols(url.substr(21));
+			cb(album('http://i.qkme.me/${id}.jpg'));
+		} else if(url.startsWith("memecrunch.com/meme/")) {
 			var id = url;
 			if(id.charAt(id.length-1) != "/")
 				id += "/";
 			cb(album('http://${id}image.jpg'));
-		} else if(url.substr(0, 27) == "memegenerator.net/instance/") {
+		} else if(url.startsWith("memegenerator.net/instance/")) {
 			var id = removeSymbols(url.substr(27));
 			cb(album('http://cdn.memegenerator.net/instances/400x/${id}.jpg'));
+		} else if(url.startsWith("imgflip.com/i/")) {
+			var id = removeSymbols(url.substr(14));
+			cb(album('http://i.imgflip.com/${id}.jpg'));
 		} else if(ourl.indexOf(".deviantart.com/art/") != -1 || (ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1) || ourl.indexOf("fav.me") != -1) {
 			Reditn.getJSONP('http://backend.deviantart.com/oembed?url=${ourl.urlEncode()}&format=jsonp&callback=', function(d) {
 				cb(album(d.url, '${d.title} by ${d.author_name}'));

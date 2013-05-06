@@ -288,11 +288,11 @@ Expand.showButton = function(el,p) {
 }
 Expand.getImageLink = function(ourl,el,cb) {
 	var url = ourl;
-	if(HxOverrides.substr(url,0,7) == "http://") url = HxOverrides.substr(url,7,null); else if(HxOverrides.substr(url,0,8) == "https://") url = HxOverrides.substr(url,8,null);
-	if(HxOverrides.substr(url,0,4) == "www.") url = HxOverrides.substr(url,4,null);
+	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
+	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null);
 	if(url.indexOf("&") != -1) url = HxOverrides.substr(url,0,url.indexOf("&"));
 	if(url.indexOf("?") != -1) url = HxOverrides.substr(url,0,url.indexOf("?"));
-	if(HxOverrides.substr(url,0,12) == "i.imgur.com/" && url.split(".").length == 3) cb([{ url : "http://" + url + ".jpg", caption : null}]); else if(StringTools.startsWith(url,"imgur.com/a/") || StringTools.startsWith(url,"imgur.com/gallery/")) {
+	if(StringTools.startsWith(url,"i.imgur.com/") && url.split(".").length == 3) cb([{ url : "http://" + url + ".jpg", caption : null}]); else if(StringTools.startsWith(url,"imgur.com/a/") || StringTools.startsWith(url,"imgur.com/gallery/")) {
 		var id = url.split("/")[2];
 		var albumType = url.indexOf("gallery") != -1?"gallery/album":"album";
 		var req = new haxe.Http("https://api.imgur.com/3/" + albumType + "/" + id);
@@ -316,19 +316,25 @@ Expand.getImageLink = function(ourl,el,cb) {
 		cb(id.indexOf(",") != -1?id.split(",").map(function(nid) {
 			return { url : "http://i.imgur.com/" + nid + ".jpg", caption : null};
 		}):[{ url : "http://i.imgur.com/" + id + ".jpg", caption : null}]);
-	} else if(HxOverrides.substr(url,0,8) == "qkme.me/") {
+	} else if(StringTools.startsWith(url,"qkme.me/")) {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,8,null));
 		cb([{ url : "http://i.qkme.me/" + id + ".jpg", caption : null}]);
-	} else if(HxOverrides.substr(url,0,19) == "quickmeme.com/meme/") {
+	} else if(StringTools.startsWith(url,"quickmeme.com/meme/")) {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,19,null));
 		cb([{ url : "http://i.qkme.me/" + id + ".jpg", caption : null}]);
-	} else if(HxOverrides.substr(url,0,20) == "memecrunch.com/meme/") {
+	} else if(StringTools.startsWith(url,"m.quickmeme.com/meme/")) {
+		var id = Expand.removeSymbols(HxOverrides.substr(url,21,null));
+		cb([{ url : "http://i.qkme.me/" + id + ".jpg", caption : null}]);
+	} else if(StringTools.startsWith(url,"memecrunch.com/meme/")) {
 		var id = url;
 		if(id.charAt(id.length - 1) != "/") id += "/";
 		cb([{ url : "http://" + id + "image.jpg", caption : null}]);
-	} else if(HxOverrides.substr(url,0,27) == "memegenerator.net/instance/") {
+	} else if(StringTools.startsWith(url,"memegenerator.net/instance/")) {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,27,null));
 		cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + id + ".jpg", caption : null}]);
+	} else if(StringTools.startsWith(url,"imgflip.com/i/")) {
+		var id = Expand.removeSymbols(HxOverrides.substr(url,14,null));
+		cb([{ url : "http://i.imgflip.com/" + id + ".jpg", caption : null}]);
 	} else if(ourl.indexOf(".deviantart.com/art/") != -1 || ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSONP("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=jsonp&callback=",function(d) {
 		cb([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
 	}); else if(StringTools.startsWith(url,"flickr.com/photos/")) {
@@ -708,13 +714,13 @@ Reditn.age = function(t) {
 	if(years > 0) s += "" + years + " year" + (years <= 1?"":"s");
 	if(months > 0) s += ", " + months + " month" + (months <= 1?"":"s");
 	s += ", " + days + " day" + (days <= 1?"":"s");
-	if(HxOverrides.substr(s,0,2) == ", ") s = HxOverrides.substr(s,2,null);
+	if(StringTools.startsWith(s,", ")) s = HxOverrides.substr(s,2,null);
 	while(s.indexOf(", , ") != -1) s = StringTools.replace(s,", , ",", ");
 	return s;
 }
 Reditn.getLinkType = function(url) {
-	if(HxOverrides.substr(url,0,7) == "http://") url = HxOverrides.substr(url,7,null); else if(HxOverrides.substr(url,0,8) == "https://") url = HxOverrides.substr(url,8,null);
-	if(HxOverrides.substr(url,0,4) == "www.") url = HxOverrides.substr(url,4,null);
+	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
+	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null);
 	var t = HxOverrides.substr(url,0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1?data.LinkType.TEXT:url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4?(function($this) {
 		var $r;
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
@@ -736,7 +742,7 @@ Reditn.getLinkType = function(url) {
 			return $r;
 		}($this));
 		return $r;
-	}(this)):StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"fav.me/")?data.LinkType.IMAGE:StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")?data.LinkType.VIDEO:data.LinkType.UNKNOWN;
+	}(this)):StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/")?data.LinkType.IMAGE:StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")?data.LinkType.VIDEO:data.LinkType.UNKNOWN;
 	return t;
 }
 Reditn.getData = function(o) {

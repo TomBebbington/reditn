@@ -115,18 +115,18 @@ class Reditn {
 		if(months > 0)
 			s += ', $months month' + plural(months);
 		s += ', $days day' + plural(days);
-		if(s.substr(0, 2) == ", ")
+		if(s.startsWith(", "))
 			s = s.substr(2);
 		while(s.indexOf(", , ") != -1)
 			s = s.replace(", , ", ", ");
 		return s;
 	}
 	public static function getLinkType(url:String):LinkType {
-		if(url.substr(0, 7) == "http://")
+		if(url.startsWith("http://"))
 			url = url.substr(7);
-		else if(url.substr(0, 8) == "https://")
+		else if(url.startsWith("https://"))
 			url = url.substr(8);
-		if(url.substr(0, 4) == "www.")
+		if(url.startsWith("www."))
 			url = url.substr(4);
 		var t = if(url.substr(0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1)
 			LinkType.TEXT;
@@ -142,7 +142,7 @@ class Reditn {
 				default:
 					LinkType.UNKNOWN;
 			}
-		} else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("qkme.me/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("fav.me/")) {
+		} else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("qkme.me/") || url.startsWith("m.quickmeme.com/meme/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("imgflip.com/i/") || url.startsWith("fav.me/")) {
 			LinkType.IMAGE;
 		} else if(url.startsWith("youtube.com/watch") || url.startsWith("youtu.be/")) {
 			LinkType.VIDEO;
