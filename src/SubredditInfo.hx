@@ -24,6 +24,9 @@ class SubredditInfo {
 					Markdown.parse(d.description),
 				age:String = Reditn.age(d.created_utc);
 			var html = '<b>Name:</b> $name <br>';
+			var ts = SubredditTagger.tags;
+			if(ts.exists(name))
+				html += '<b>Tag:</b> ${ts.get(name)}<br>';
 			html += '<b>Subscribers:</b> $subs <br>';
 			html += '<b>Active Users:</b> $users <br>';
 			html += '<b>Description:</b> $desc <br>';

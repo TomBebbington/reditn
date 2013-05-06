@@ -17,6 +17,9 @@ class UserInfo {
 		Reditn.getJSON('/user/${user}/about.json', function(i:User){
 			var name = i.name, age = Reditn.age(i.created_utc), linkKarma = Reditn.formatNumber(i.link_karma), commentKarma = Reditn.formatNumber(i.comment_karma);
 			var html = '<b>User:</b> ${name}<br>';
+			var ts = UserTagger.tags;
+			if(ts.exists(name))
+				html += '<b>Tag:</b> ${ts.get(name)}<br>';
 			html += '<b>Account age:</b> $age<br>';
 			html += '<b>Karma:</b> $linkKarma link karma, $commentKarma comment karma';
 			if(i.is_mod)

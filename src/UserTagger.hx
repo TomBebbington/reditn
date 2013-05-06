@@ -4,7 +4,7 @@ import haxe.ds.StringMap;
 import data.*;
 using StringTools;
 class UserTagger {
-	static var tags(get, null):StringMap<String>;
+	public static var tags(get, null):StringMap<String>;
 	static inline function get_tags() {
 		return Settings.data.get(Settings.USER_TAGS);
 	}

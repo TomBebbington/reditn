@@ -1098,6 +1098,8 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 	(function(d) {
 		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = d.description_html != null?StringTools.htmlUnescape(d.description_html):d.public_description != null?Markdown.parse(d.public_description):Markdown.parse(d.description), age = Reditn.age(d.created_utc);
 		var html = "<b>Name:</b> " + name + " <br>";
+		var ts = Settings.data.get("sub-tags");
+		if(ts.exists(name)) html += "<b>Tag:</b> " + ts.get(name) + "<br>";
 		html += "<b>Subscribers:</b> " + subs + " <br>";
 		html += "<b>Active Users:</b> " + users + " <br>";
 		html += "<b>Description:</b> " + desc + " <br>";
@@ -1262,6 +1264,8 @@ UserInfo._onMouseOverUser = function(e) {
 	(function(i) {
 		var name = i.name, age = Reditn.age(i.created_utc), linkKarma = Reditn.formatNumber(i.link_karma), commentKarma = Reditn.formatNumber(i.comment_karma);
 		var html = "<b>User:</b> " + name + "<br>";
+		var ts = Settings.data.get("user-tags");
+		if(ts.exists(name)) html += "<b>Tag:</b> " + ts.get(name) + "<br>";
 		html += "<b>Account age:</b> " + age + "<br>";
 		html += "<b>Karma:</b> " + linkKarma + " link karma, " + commentKarma + " comment karma";
 		if(i.is_mod) html += "<br><b>Moderator</b>";

@@ -4,7 +4,7 @@ import haxe.ds.*;
 import data.*;
 using StringTools;
 class SubredditTagger {
-	static var tags(get, null):StringMap<String>;
+	public static var tags(get, null):StringMap<String>;
 	static inline function get_tags() {
 		return cast Settings.data.get(Settings.SUBREDDIT_TAGS);
 	}
