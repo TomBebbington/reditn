@@ -1144,6 +1144,7 @@ SubredditTagger.getTag = function(a) {
 			Settings.data.get("sub-tags").set(sub,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
 			Settings.save();
+			div.parentNode.removeChild(div);
 		};
 		div.appendChild(box);
 		Reditn.fullPopUp(div,link.offsetTop + link.offsetHeight);
@@ -1307,6 +1308,7 @@ UserTagger.getTag = function(a) {
 			Settings.data.get("user-tags").set(user,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
 			Settings.save();
+			div.parentNode.removeChild(div);
 		};
 		div.appendChild(box);
 		Reditn.fullPopUp(div,link.offsetTop + link.offsetHeight);

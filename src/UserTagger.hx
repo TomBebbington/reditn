@@ -40,6 +40,7 @@ class UserTagger {
 				tags.set(user, box.value);
 				tagName.innerHTML = box.value.htmlEscape()+" ";
 				Settings.save();
+				Reditn.remove(div);
 			}
 			div.appendChild(box);
 			Reditn.fullPopUp(div, link.offsetTop + link.offsetHeight);
