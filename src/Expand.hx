@@ -52,7 +52,8 @@ class Expand {
 			Reditn.pushState(toggled ? "#showall":null);
 		}
 		li.appendChild(button);
-		menu.appendChild(li);
+		if(menu != null)
+			menu.appendChild(li);
 		for(l in Reditn.links) {
 			if(l.nodeName.toLowerCase()!="a")
 				continue;
@@ -137,14 +138,20 @@ class Expand {
 	public static function refresh() {
 		if(button != null) {
 			button.innerHTML = '${toggled?"hide":"show"} images (${buttons.length})';
-			var np:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
-			if(np.length > 0) {
-				for(i in Reditn.links) {
-					if(toggled && i.href.indexOf("#")==-1)
-						i.href += "#showall";
-					else if(!toggled && i.href.indexOf("#")!=-1)
-						i.href = i.href.substr(0, i.href.indexOf("#"));
-				}
+			var np = [];
+			var n:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("next");
+			var p:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("prev");
+			for(nl in n)
+				np.push(nl);
+			for(pl in p)
+				np.push(pl);
+			for(i in np) {
+				if(i.nodeName.toLowerCase() != "a")
+					continue;
+				if(toggled && i.href.indexOf("#")==-1)
+					i.href += "#showall";
+				else if(!toggled && i.href.indexOf("#")!=-1)
+					i.href = i.href.substr(0, i.href.indexOf("#"));
 			}
 			Reditn.show(button, buttons.length > 0);
 		}
@@ -242,7 +249,7 @@ class Expand {
 		} else if(url.substr(0, 27) == "memegenerator.net/instance/") {
 			var id = removeSymbols(url.substr(27));
 			cb(album('http://cdn.memegenerator.net/instances/400x/${id}.jpg'));
-		} else if(ourl.indexOf("deviantart.com/") != -1 || ourl.indexOf("fav.me") != -1) {
+		} else if(ourl.indexOf(".deviantart.com/art/") != -1 || (ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1) || ourl.indexOf("fav.me") != -1) {
 			Reditn.getJSONP('http://backend.deviantart.com/oembed?url=${ourl.urlEncode()}&format=jsonp&callback=', function(d) {
 				cb(album(d.url, '${d.title} by ${d.author_name}'));
 			});

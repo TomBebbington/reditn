@@ -1,14 +1,3 @@
-// ==UserScript==
-// @name			Reditn
-// @namespace		http://userscripts.org/user/tophattedcoder/
-// @description		Reddit tweaks and enhancements.
-// @include			reddit.com
-// @include			reddit.com/*
-// @include			*.reddit.com
-// @include			*.reddit.com/*
-// @version			1.5.5
-// @grant			none
-// ==/UserScript==
 (function () { "use strict";
 var $hxClasses = {},$estr = function() { return js.Boot.__string_rec(this,''); };
 var Adblock = function() { }
@@ -109,7 +98,7 @@ Expand.init = function() {
 		js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
 	};
 	li.appendChild(Expand.button);
-	menu.appendChild(li);
+	if(menu != null) menu.appendChild(li);
 	var _g = 0, _g1 = Reditn.links;
 	while(_g < _g1.length) {
 		var l = [_g1[_g]];
@@ -220,14 +209,27 @@ Expand.init = function() {
 Expand.refresh = function() {
 	if(Expand.button != null) {
 		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " images (" + Expand.buttons.length + ")";
-		var np = js.Browser.document.body.getElementsByClassName("nextprev");
-		if(np.length > 0) {
-			var _g = 0, _g1 = Reditn.links;
-			while(_g < _g1.length) {
-				var i = _g1[_g];
-				++_g;
-				if(Expand.toggled && i.href.indexOf("#") == -1) i.href += "#showall"; else if(!Expand.toggled && i.href.indexOf("#") != -1) i.href = HxOverrides.substr(i.href,0,i.href.indexOf("#"));
-			}
+		var np = [];
+		var n = js.Browser.document.body.getElementsByClassName("next");
+		var p = js.Browser.document.body.getElementsByClassName("prev");
+		var _g = 0;
+		while(_g < n.length) {
+			var nl = n[_g];
+			++_g;
+			np.push(nl);
+		}
+		var _g = 0;
+		while(_g < p.length) {
+			var pl = p[_g];
+			++_g;
+			np.push(pl);
+		}
+		var _g = 0;
+		while(_g < np.length) {
+			var i = np[_g];
+			++_g;
+			if(i.nodeName.toLowerCase() != "a") continue;
+			if(Expand.toggled && i.href.indexOf("#") == -1) i.href += "#showall"; else if(!Expand.toggled && i.href.indexOf("#") != -1) i.href = HxOverrides.substr(i.href,0,i.href.indexOf("#"));
 		}
 		Reditn.show(Expand.button,Expand.buttons.length > 0);
 	}
@@ -309,7 +311,7 @@ Expand.getImageLink = function(ourl,el,cb) {
 	} else if(HxOverrides.substr(url,0,27) == "memegenerator.net/instance/") {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,27,null));
 		cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + id + ".jpg", caption : null}]);
-	} else if(ourl.indexOf("deviantart.com/") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSONP("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=jsonp&callback=",function(d) {
+	} else if(ourl.indexOf(".deviantart.com/art/") != -1 || ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSONP("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=jsonp&callback=",function(d) {
 		cb([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
 	}); else if(StringTools.startsWith(url,"flickr.com/photos/")) {
 		var id = HxOverrides.substr(url,18,null);
@@ -636,7 +638,7 @@ Reditn.init = function() {
 	Reditn.wrap(Adblock.init,"adblock");
 	Reditn.wrap(DuplicateHider.init,"dup-hider");
 	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
-	if(Reditn.fullPage) Reditn.wrap(Expand.init,"expand");
+	Reditn.wrap(Expand.init,"expand");
 	Reditn.wrap(Keyboard.init,"keys");
 	Reditn.wrap(Preview.init,"preview");
 	Reditn.wrap(SubredditInfo.init,"subinfo");
@@ -722,7 +724,7 @@ Reditn.getLinkType = function(url) {
 			return $r;
 		}($this));
 		return $r;
-	}(this)):StringTools.startsWith(url,"flickr.com/photos/") && url.length > 18 || url.indexOf("deviantart.com/") != -1 || HxOverrides.substr(url,0,10) == "imgur.com/" && url.indexOf("blog") == -1 || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || StringTools.startsWith(url,"fav.me/")?data.LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?data.LinkType.VIDEO:data.LinkType.UNKNOWN;
+	}(this)):StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || HxOverrides.substr(url,0,10) == "imgur.com/" && url.indexOf("blog") == -1 || HxOverrides.substr(url,0,12) == "i.imgur.com/" || HxOverrides.substr(url,0,8) == "qkme.me/" || HxOverrides.substr(url,0,19) == "quickmeme.com/meme/" || HxOverrides.substr(url,0,20) == "memecrunch.com/meme/" || HxOverrides.substr(url,0,27) == "memegenerator.net/instance/" || StringTools.startsWith(url,"fav.me/")?data.LinkType.IMAGE:HxOverrides.substr(url,0,17) == "youtube.com/watch"?data.LinkType.VIDEO:data.LinkType.UNKNOWN;
 	return t;
 }
 Reditn.getData = function(o) {

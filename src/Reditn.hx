@@ -32,8 +32,8 @@ class Reditn {
 		wrap(Adblock.init, Settings.ADBLOCK);
 		wrap(DuplicateHider.init, Settings.DUPLICATE_HIDER);
 		wrap(NSFWFilter.init, Settings.FILTER_NSFW);
-		if(fullPage)
-			wrap(Expand.init, Settings.EXPAND);
+		
+		wrap(Expand.init, Settings.EXPAND);
 		wrap(Keyboard.init, Settings.KEYBOARD);
 		wrap(Preview.init, Settings.PREVIEW);
 		wrap(SubredditInfo.init, Settings.SUBINFO);
@@ -142,7 +142,7 @@ class Reditn {
 				default:
 					LinkType.UNKNOWN;
 			}
-		} else if((url.startsWith("flickr.com/photos/") && url.length > 18) || url.indexOf("deviantart.com/") != -1 || (url.substr(0, 10) == "imgur.com/" && url.indexOf("blog") == -1) || url.substr(0, 12) == "i.imgur.com/" || url.substr(0, 8) == "qkme.me/" || url.substr(0,19) == "quickmeme.com/meme/" || url.substr(0, 20) == "memecrunch.com/meme/" || url.substr(0, 27) == "memegenerator.net/instance/" || url.startsWith("fav.me/")) {
+		} else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.substr(0, 10) == "imgur.com/" && url.indexOf("blog") == -1) || url.substr(0, 12) == "i.imgur.com/" || url.substr(0, 8) == "qkme.me/" || url.substr(0,19) == "quickmeme.com/meme/" || url.substr(0, 20) == "memecrunch.com/meme/" || url.substr(0, 27) == "memegenerator.net/instance/" || url.startsWith("fav.me/")) {
 			LinkType.IMAGE;
 		} else if(url.substr(0, 17) == "youtube.com/watch") {
 			LinkType.VIDEO;
