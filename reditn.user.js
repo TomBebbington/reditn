@@ -9,6 +9,7 @@
 // @version			1.5.7
 // @grant			none
 // ==/UserScript==
+
 (function () { "use strict";
 var $hxClasses = {},$estr = function() { return js.Boot.__string_rec(this,''); };
 var Adblock = function() { }
@@ -335,13 +336,13 @@ Expand.getImageLink = function(ourl,el,cb) {
 	} else if(StringTools.startsWith(url,"imgflip.com/i/")) {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,14,null));
 		cb([{ url : "http://i.imgflip.com/" + id + ".jpg", caption : null}]);
-	} else if(ourl.indexOf(".deviantart.com/art/") != -1 || ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSONP("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=jsonp&callback=",function(d) {
+	} else if(ourl.indexOf(".deviantart.com/art/") != -1 || ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=json",function(d) {
 		cb([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
 	}); else if(StringTools.startsWith(url,"flickr.com/photos/")) {
 		var id = HxOverrides.substr(url,18,null);
 		id = HxOverrides.substr(id,id.indexOf("/") + 1,null);
 		id = HxOverrides.substr(id,0,id.indexOf("/"));
-		Reditn.getJSONP("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + "99dcc3e77bcd8fb489f17e58191f32f7" + "&photo_id=" + id + "&format=json&jsoncallback=",function(d) {
+		Reditn.getJSON("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + "99dcc3e77bcd8fb489f17e58191f32f7" + "&photo_id=" + id + "&format=json",function(d) {
 			if(d.sizes == null || d.sizes.size == null) return;
 			var sizes = d.sizes.size;
 			var largest = null;
@@ -424,6 +425,9 @@ Expand.initResize = function(e) {
 Expand.removeSymbols = function(s) {
 	return s.lastIndexOf("?") != -1?HxOverrides.substr(s,0,s.lastIndexOf("?")):s.lastIndexOf("/") != -1?HxOverrides.substr(s,0,s.lastIndexOf("/")):s.lastIndexOf("#") != -1?HxOverrides.substr(s,0,s.lastIndexOf("#")):s;
 }
+var GM = function() { }
+$hxClasses["GM"] = GM;
+GM.__name__ = ["GM"];
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
 HxOverrides.__name__ = ["HxOverrides"];
@@ -749,20 +753,10 @@ Reditn.getData = function(o) {
 	while(o.data != null) o = o.data;
 	return o;
 }
-Reditn.getJSONP = function(url,fn) {
-	var head = js.Browser.document.head;
-	var id = "temp" + (Math.random() * 9999999 | 0);
-	var sc = js.Browser.document.createElement("script");
-	var src = url + StringTools.urlEncode(id);
-	sc.id = "jsonp";
-	window[id] = function(v) {
-		fn(Reditn.getData(v));
-	};
-	sc.type = "text/javascript";
-	sc.src = src;
-	var old = js.Browser.document.getElementById("jsonp");
-	if(old != null) old.parentNode.removeChild(old);
-	head.appendChild(sc);
+Reditn.getJSON = function(url,func) {
+	GM.request({ method : "GET", url : url, onload : function(rsp) {
+		func(Reditn.getData(haxe.Json.parse(rsp.responseText)));
+	}});
 }
 Reditn.popUp = function(bs,el,x,y) {
 	if(y == null) y = 0;
@@ -1095,7 +1089,7 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 	var name = e1.innerHTML;
 	var div = js.Browser.document.createElement("div");
 	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
-	(function(d) {
+	Reditn.getJSON("/r/" + name + "/about.json",function(d) {
 		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = d.description_html != null?StringTools.htmlUnescape(d.description_html):d.public_description != null?Markdown.parse(d.public_description):Markdown.parse(d.description), age = Reditn.age(d.created_utc);
 		var html = "<b>Name:</b> " + name + " <br>";
 		var ts = Settings.data.get("sub-tags");
@@ -1105,7 +1099,7 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 		html += "<b>Description:</b> " + desc + " <br>";
 		html += "<b>Age:</b> " + age + " <br>";
 		div.innerHTML = html;
-	})(Reditn.getData(haxe.Json.parse(haxe.Http.requestUrl("/r/" + name + "/about.json"))));
+	});
 }
 var SubredditTagger = function() { }
 $hxClasses["SubredditTagger"] = SubredditTagger;
@@ -1261,7 +1255,7 @@ UserInfo._onMouseOverUser = function(e) {
 	user = HxOverrides.substr(user,user.lastIndexOf("/") + 1,null);
 	var div = js.Browser.document.createElement("div");
 	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
-	(function(i) {
+	Reditn.getJSON("/user/" + user + "/about.json",function(i) {
 		var name = i.name, age = Reditn.age(i.created_utc), linkKarma = Reditn.formatNumber(i.link_karma), commentKarma = Reditn.formatNumber(i.comment_karma);
 		var html = "<b>User:</b> " + name + "<br>";
 		var ts = Settings.data.get("user-tags");
@@ -1271,7 +1265,7 @@ UserInfo._onMouseOverUser = function(e) {
 		if(i.is_mod) html += "<br><b>Moderator</b>";
 		if(i.is_gold) html += "<br><b>Gold</b>";
 		div.innerHTML = html;
-	})(Reditn.getData(haxe.Json.parse(haxe.Http.requestUrl("/user/" + user + "/about.json"))));
+	});
 }
 var UserTagger = function() { }
 $hxClasses["UserTagger"] = UserTagger;
@@ -1345,19 +1339,6 @@ haxe.Http = function(url) {
 };
 $hxClasses["haxe.Http"] = haxe.Http;
 haxe.Http.__name__ = ["haxe","Http"];
-haxe.Http.requestUrl = function(url) {
-	var h = new haxe.Http(url);
-	h.async = false;
-	var r = null;
-	h.onData = function(d) {
-		r = d;
-	};
-	h.onError = function(e) {
-		throw e;
-	};
-	h.request(false);
-	return r;
-}
 haxe.Http.prototype = {
 	onStatus: function(status) {
 	}

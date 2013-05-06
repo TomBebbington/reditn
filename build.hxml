@@ -1,4 +1,11 @@
 -cp src
 -main Reditn
--js reditn.js
+-js reditn.user.js
 -dce full
+--next
+--macro Script.generate()
+-cp src
+-main Reditn
+-js reditn.plugin.js
+-dce full
+-D plugin

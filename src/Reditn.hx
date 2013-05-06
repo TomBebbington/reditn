@@ -157,21 +157,17 @@ class Reditn {
 		return o;
 	}
 	public static inline function getJSON<T>(url:String, func:T->Void):Void {
-		func(getData(Json.parse(haxe.Http.requestUrl(url))));
-	}
-	public static function getJSONP<T>(url:String, fn:T->Void):Void {
-		var head = Browser.document.head;
-		var id = "temp" + Std.int(Math.random() * 9999999);
-		var sc = Browser.document.createScriptElement();
-		var src = url + id.urlEncode();
-		sc.id = "jsonp";
-		untyped window[id] = function(v:T) fn(getData(v));
-		sc.type = "text/javascript";
-		sc.src = src;
-		var old = Browser.document.getElementById("jsonp");
-		if(old != null)
-			remove(old);
-		head.appendChild(sc);
+		#if plugin
+			func(getData(Json.parse(haxe.Http.requestUrl(url))));
+		#else
+			GM.request({
+				method: "GET",
+				url: url,
+				onload: function(rsp:Dynamic) {
+					func(getData(Json.parse(rsp.responseText)));
+				}
+			});
+		#end
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);

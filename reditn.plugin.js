@@ -1,14 +1,3 @@
-// ==UserScript==
-// @name			Reditn
-// @namespace		http://userscripts.org/user/tophattedcoder/
-// @description		Reddit tweaks and enhancements.
-// @include			reddit.com
-// @include			reddit.com/*
-// @include			*.reddit.com
-// @include			*.reddit.com/*
-// @version			1.5.7
-// @grant			none
-// ==/UserScript==
 (function () { "use strict";
 var $hxClasses = {},$estr = function() { return js.Boot.__string_rec(this,''); };
 var Adblock = function() { }
@@ -335,13 +324,13 @@ Expand.getImageLink = function(ourl,el,cb) {
 	} else if(StringTools.startsWith(url,"imgflip.com/i/")) {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,14,null));
 		cb([{ url : "http://i.imgflip.com/" + id + ".jpg", caption : null}]);
-	} else if(ourl.indexOf(".deviantart.com/art/") != -1 || ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSONP("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=jsonp&callback=",function(d) {
+	} else if(ourl.indexOf(".deviantart.com/art/") != -1 || ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1 || ourl.indexOf("fav.me") != -1) (function(d) {
 		cb([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
-	}); else if(StringTools.startsWith(url,"flickr.com/photos/")) {
+	})(Reditn.getData(haxe.Json.parse(haxe.Http.requestUrl("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=json")))); else if(StringTools.startsWith(url,"flickr.com/photos/")) {
 		var id = HxOverrides.substr(url,18,null);
 		id = HxOverrides.substr(id,id.indexOf("/") + 1,null);
 		id = HxOverrides.substr(id,0,id.indexOf("/"));
-		Reditn.getJSONP("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + "99dcc3e77bcd8fb489f17e58191f32f7" + "&photo_id=" + id + "&format=json&jsoncallback=",function(d) {
+		(function(d) {
 			if(d.sizes == null || d.sizes.size == null) return;
 			var sizes = d.sizes.size;
 			var largest = null;
@@ -358,7 +347,7 @@ Expand.getImageLink = function(ourl,el,cb) {
 			}
 			if(largest == null) largest = sizes[0].source;
 			cb([{ url : largest, caption : null}]);
-		});
+		})(Reditn.getData(haxe.Json.parse(haxe.Http.requestUrl("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + "99dcc3e77bcd8fb489f17e58191f32f7" + "&photo_id=" + id + "&format=json"))));
 	} else cb([{ url : ourl, caption : null}]);
 }
 Expand.preload = function(url) {
@@ -748,21 +737,6 @@ Reditn.getLinkType = function(url) {
 Reditn.getData = function(o) {
 	while(o.data != null) o = o.data;
 	return o;
-}
-Reditn.getJSONP = function(url,fn) {
-	var head = js.Browser.document.head;
-	var id = "temp" + (Math.random() * 9999999 | 0);
-	var sc = js.Browser.document.createElement("script");
-	var src = url + StringTools.urlEncode(id);
-	sc.id = "jsonp";
-	window[id] = function(v) {
-		fn(Reditn.getData(v));
-	};
-	sc.type = "text/javascript";
-	sc.src = src;
-	var old = js.Browser.document.getElementById("jsonp");
-	if(old != null) old.parentNode.removeChild(old);
-	head.appendChild(sc);
 }
 Reditn.popUp = function(bs,el,x,y) {
 	if(y == null) y = 0;

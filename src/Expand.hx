@@ -263,14 +263,14 @@ class Expand {
 			var id = removeSymbols(url.substr(14));
 			cb(album('http://i.imgflip.com/${id}.jpg'));
 		} else if(ourl.indexOf(".deviantart.com/art/") != -1 || (ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1) || ourl.indexOf("fav.me") != -1) {
-			Reditn.getJSONP('http://backend.deviantart.com/oembed?url=${ourl.urlEncode()}&format=jsonp&callback=', function(d) {
+			Reditn.getJSON('http://backend.deviantart.com/oembed?url=${ourl.urlEncode()}&format=json', function(d) {
 				cb(album(d.url, '${d.title} by ${d.author_name}'));
 			});
 		} else if(url.startsWith("flickr.com/photos/")) {
 			var id = url.substr(18);
 			id = id.substr(id.indexOf("/")+1);
 			id = id.substr(0, id.indexOf("/"));
-			Reditn.getJSONP('http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=${FLICKR_KEY}&photo_id=${id}&format=json&jsoncallback=', function(d) {
+			Reditn.getJSON('http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=${FLICKR_KEY}&photo_id=${id}&format=json', function(d) {
 				if(d.sizes == null || d.sizes.size == null)
 					return;
 				var sizes:Array<Dynamic> = d.sizes.size;
