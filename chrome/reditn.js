@@ -345,7 +345,7 @@ Expand.getImageLink = function(ourl,el,cb) {
 				var s = sizes[_g];
 				++_g;
 				var size = Std.parseInt(s.width) * Std.parseInt(s.height);
-				if(largest == null || size >= largestSize && size <= (js.Browser.window.innerWidth * 0.6 | 0) * (js.Browser.window.innerHeight * 0.7 | 0)) {
+				if(largest == null || size >= largestSize && size <= (js.Browser.window.innerWidth * 0.7 | 0) * (js.Browser.window.innerHeight * 0.6 | 0)) {
 					largest = s.source;
 					largestSize = size;
 				}
@@ -367,14 +367,14 @@ Expand.loadImage = function(url) {
 	img.className = "resize";
 	Expand.initResize(img);
 	var autosize = function() {
-		if(img.width > (js.Browser.window.innerWidth * 0.6 | 0)) {
+		if(img.width > (js.Browser.window.innerWidth * 0.7 | 0)) {
 			var rt = img.height / img.width;
-			img.width = js.Browser.window.innerWidth * 0.6 | 0;
+			img.width = js.Browser.window.innerWidth * 0.7 | 0;
 			img.height = img.width * rt | 0;
 		}
-		if(img.height > (js.Browser.window.innerHeight * 0.7 | 0)) {
+		if(img.height > (js.Browser.window.innerHeight * 0.6 | 0)) {
 			var rt = img.width / img.height;
-			img.height = js.Browser.window.innerHeight * 0.7 | 0;
+			img.height = js.Browser.window.innerHeight * 0.6 | 0;
 			img.width = img.height * rt | 0;
 		}
 	};

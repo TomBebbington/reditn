@@ -31,10 +31,10 @@ class Expand {
 		return e;
 	}
 	static inline function get_maxWidth():Int {
-		return Std.int(Browser.window.innerWidth*0.6);
+		return Std.int(Browser.window.innerWidth*0.7);
 	}
 	static inline function get_maxHeight():Int {
-		return Std.int(Browser.window.innerHeight*0.7);
+		return Std.int(Browser.window.innerHeight*0.6);
 	}
 	static inline function get_maxArea():Int {
 		return maxWidth * maxHeight;
