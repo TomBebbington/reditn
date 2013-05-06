@@ -142,9 +142,9 @@ class Reditn {
 				default:
 					LinkType.UNKNOWN;
 			}
-		} else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.substr(0, 10) == "imgur.com/" && url.indexOf("blog") == -1) || url.substr(0, 12) == "i.imgur.com/" || url.substr(0, 8) == "qkme.me/" || url.substr(0,19) == "quickmeme.com/meme/" || url.substr(0, 20) == "memecrunch.com/meme/" || url.substr(0, 27) == "memegenerator.net/instance/" || url.startsWith("fav.me/")) {
+		} else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("qkme.me/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("fav.me/")) {
 			LinkType.IMAGE;
-		} else if(url.substr(0, 17) == "youtube.com/watch") {
+		} else if(url.startsWith("youtube.com/watch") || url.startsWith("youtu.be/")) {
 			LinkType.VIDEO;
 		} else {
 			LinkType.UNKNOWN;

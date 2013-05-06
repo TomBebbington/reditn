@@ -69,9 +69,9 @@ class Expand {
 						i;
 					}];
 					var img:ImageElement = null;
-					var caption = Browser.document.createDivElement();
+					var caption = Browser.document.createSpanElement();
 					caption.style.fontWeight = "bold";
-					div.appendChild(caption);
+					caption.style.marginLeft = "10px";
 					var currentIndex = 0;
 					var prev = null, info = null, next = null;
 					if(a.length > 1) {
@@ -79,31 +79,38 @@ class Expand {
 						prev.innerHTML = "Prev";
 						div.appendChild(prev);
 						info = Browser.document.createSpanElement();
+						info.style.textAlign = "center";
+						info.style.paddingLeft = info.style.paddingRight = "5px";
 						div.appendChild(info);
 						next = Browser.document.createButtonElement();
 						next.innerHTML = "Next";
 						div.appendChild(next);
+					}
+					if(a.length > 1 || (a[0].caption != null && a[0].caption.length > 0)) {
+						div.appendChild(caption);
 						div.appendChild(Browser.document.createBRElement());
 					}
 					function switchImage(ind:Int) {
 						if(ind < 0 || ind >= a.length)
 							return;
 						var i = a[ind];
-						var width = null;
+						var height = null;
 						if(img != null) {
 							Reditn.show(img, false);
-							width = img.width;
+							height = img.height;
 						}
 						img = imgs[ind];
 						Reditn.show(img, true);
-						if(width != null) {
-							var ratio = img.height / img.width;
-							img.width = width;
-							img.height = Std.int(width * ratio);
+						if(height != null) {
+							var ratio = img.width / img.height;
+							img.height = height;
+							img.width = Std.int(height * ratio);
 						}
 						div.appendChild(img);
 						if(prev != null) {
-							info.innerHTML = ' ${ind+1} of ${a.length} ';
+							var len = Reditn.formatNumber(a.length);
+							var curr = Reditn.formatNumber(ind+1);
+							info.innerHTML = '$curr of $len';
 							prev.disabled = ind <= 0;
 							next.disabled = ind >= a.length-1;
 						}
