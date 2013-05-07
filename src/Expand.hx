@@ -74,7 +74,7 @@ class Expand {
 						contentBlock.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)}</h3><br>' : "") + a.content;
 						contentBlock.className = "md";
 						div.appendChild(contentBlock);
-						var s = makeSelfButton(e);
+						var s = makeSelfButton(e, "article");
 						var pn:Element = cast s.parentNode;
 						for(exp in pn.getElementsByClassName("expando")) {
 							pn.removeChild(exp);
@@ -149,7 +149,7 @@ class Expand {
 						}
 						e.appendChild(div);
 						Reditn.show(div, toggled);
-						var s = makeSelfButton(e);
+						var s = makeSelfButton(e, "image");
 						var pn:Element = cast s.parentNode;
 						for(exp in pn.getElementsByClassName("expando")) {
 							pn.removeChild(exp);
@@ -161,13 +161,17 @@ class Expand {
 			}
 		}
 	}
-	static function makeSelfButton(e:Element):DivElement {
+	static function makeSelfButton(e:Element, ?extra:String):DivElement {
 		var d = js.Browser.document.createDivElement();
 		d.className = "expando-button collapsed selftext";
+		if(extra != null)
+			d.className += ' ${extra}';
 		var toggled = false;
 		d.onclick = function(_) {
 			toggled = !toggled;
 			d.className = toggled ? "expando-button expanded selftext" : "expando-button collapsed selftext";
+			if(extra != null)
+				d.className += ' ${extra}';
 			var entry:Element = cast d.parentNode;
 			var expando:Element = cast entry.getElementsByClassName("expando")[0];
 			expando.style.display = toggled ? "block" : "none";

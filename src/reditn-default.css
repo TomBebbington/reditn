@@ -1,22 +1,22 @@
 .expando-button.image.collapsed{
-	background-image:url(sprite-reddit.XJpb_z7IEhY.png);
+	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
 	background-position:-24px -0px;
 	background-repeat:no-repeat
 }
 .expando-button.image.collapsed:hover {
-	background-image:url(sprite-reddit.XJpb_z7IEhY.png);
+	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
 	background-position:-0px -0px;
 	background-repeat:no-repeat
 }
 
 .expando-button.image.expanded {
-	background-image:url(sprite-reddit.XJpb_z7IEhY.png);
+	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
 	background-position:-72px -0px;
 	background-repeat:no-repeat
 }
 
 .expando-button.image.expanded:hover {
-	background-image:url(sprite-reddit.XJpb_z7IEhY.png);
+	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
 	background-position:-48px -0px;
 	background-repeat:no-repeat
 }

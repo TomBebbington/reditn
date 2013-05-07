@@ -134,7 +134,7 @@ Expand.init = function() {
 					contentBlock.innerHTML = (a.title != null?"<h3>" + StringTools.htmlEscape(a.title) + "</h3><br>":"") + a.content;
 					contentBlock.className = "md";
 					div.appendChild(contentBlock);
-					var s = Expand.makeSelfButton(e);
+					var s = Expand.makeSelfButton(e,"article");
 					var pn = s.parentNode;
 					var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
 					while(_g2 < _g3.length) {
@@ -245,7 +245,7 @@ Expand.init = function() {
 					e.appendChild(div1);
 					div1.style.display = Expand.toggled?"":"none";
 					if(div1.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div1.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-					var s = Expand.makeSelfButton(e);
+					var s = Expand.makeSelfButton(e,"image");
 					var pn = s.parentNode;
 					var _g3 = 0, _g4 = pn.getElementsByClassName("expando");
 					while(_g3 < _g4.length) {
@@ -263,13 +263,15 @@ Expand.init = function() {
 		}
 	}
 }
-Expand.makeSelfButton = function(e) {
+Expand.makeSelfButton = function(e,extra) {
 	var d = js.Browser.document.createElement("div");
 	d.className = "expando-button collapsed selftext";
+	if(extra != null) d.className += " " + extra;
 	var toggled = false;
 	d.onclick = function(_) {
 		toggled = !toggled;
 		d.className = toggled?"expando-button expanded selftext":"expando-button collapsed selftext";
+		if(extra != null) d.className += " " + extra;
 		var entry = d.parentNode;
 		var expando = entry.getElementsByClassName("expando")[0];
 		expando.style.display = toggled?"block":"none";
@@ -1189,7 +1191,7 @@ $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
 	var s = js.Browser.document.createElement("style");
-	s.innerHTML = "";
+	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}";
 	js.Browser.document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
