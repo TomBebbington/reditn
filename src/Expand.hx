@@ -224,7 +224,27 @@ class Expand {
 	}
 	static function getArticle(ourl:String, el:Element, cb:Article -> Void) {
 		var url = trimURL(ourl);
-		if(url.startsWith("twitter.com/") && url.indexOf("/status/") != -1) {
+		if(url.startsWith("cracked.com/")) {
+			var authorx = ~/<a[^>]*?class="[^"]*?byline"[^>]*?>([a-zA-Z ]*)<\/a>/;
+			Reditn.getText(ourl, function(data:String) {
+				if(data.indexOf("<section>") != -1) {
+					var body = data.substr(data.indexOf("<section>") + 9);
+					body = body.substr(0, body.indexOf("</section>"));
+					var title = data.substr(data.indexOf("<title>") + 7);
+					title = title.substr(0, title.indexOf("|"));
+					if(data.indexOf("rel=\"next\" href=\"") != -1) {
+						var temp = data.substr(17 + data.indexOf("rel=\"next\" href=\""));
+						temp = temp.substr(0, temp.indexOf("\""));
+						Reditn.getText(temp, function(odata:String) {
+							var nbody = odata.substr(odata.indexOf("<section>")+9);
+							nbody = nbody.substr(0, nbody.indexOf("</section"));
+							cb({title: title, content: body + "<br>" + nbody, author: (!authorx.match(data) ? null : authorx.matched(1))});
+						});
+					} else
+						cb({title: title, content: body, author: (!authorx.match(data) ? null : authorx.matched(1))});
+				}
+			});
+		} else if(url.startsWith("twitter.com/") && url.indexOf("/status/") != -1) {
 			var username = removeSymbols(url.substr(12));
 			var id = removeSymbols(url.substr(url.indexOf("/status/") + 8));
 			Reditn.getJSON('https://api.twitter.com/1.1/statuses/show.json?id=${id}', function(data) {

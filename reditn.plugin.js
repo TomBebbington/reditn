@@ -48,6 +48,19 @@ EReg.prototype = {
 	replace: function(s,by) {
 		return s.replace(this.r,by);
 	}
+	,matched: function(n) {
+		return this.r.m != null && n >= 0 && n < this.r.m.length?this.r.m[n]:(function($this) {
+			var $r;
+			throw "EReg::matched";
+			return $r;
+		}(this));
+	}
+	,match: function(s) {
+		if(this.r.global) this.r.lastIndex = 0;
+		this.r.m = this.r.exec(s);
+		this.r.s = s;
+		return this.r.m != null;
+	}
 	,__class__: EReg
 }
 var Expand = function() { }
@@ -297,7 +310,26 @@ Expand.trimURL = function(url) {
 }
 Expand.getArticle = function(ourl,el,cb) {
 	var url = Expand.trimURL(ourl);
-	if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1) {
+	if(StringTools.startsWith(url,"cracked.com/")) {
+		var authorx = new EReg("<a[^>]*?class=\"[^\"]*?byline\"[^>]*?>([a-zA-Z ]*)</a>","");
+		(function(data) {
+			if(data.indexOf("<section>") != -1) {
+				var body = HxOverrides.substr(data,data.indexOf("<section>") + 9,null);
+				body = HxOverrides.substr(body,0,body.indexOf("</section>"));
+				var title = HxOverrides.substr(data,data.indexOf("<title>") + 7,null);
+				title = HxOverrides.substr(title,0,title.indexOf("|"));
+				if(data.indexOf("rel=\"next\" href=\"") != -1) {
+					var temp = HxOverrides.substr(data,17 + data.indexOf("rel=\"next\" href=\""),null);
+					temp = HxOverrides.substr(temp,0,temp.indexOf("\""));
+					(function(odata) {
+						var nbody = HxOverrides.substr(odata,odata.indexOf("<section>") + 9,null);
+						nbody = HxOverrides.substr(nbody,0,nbody.indexOf("</section"));
+						cb({ title : title, content : body + "<br>" + nbody, author : !authorx.match(data)?null:authorx.matched(1)});
+					})(haxe.Http.requestUrl(temp));
+				} else cb({ title : title, content : body, author : !authorx.match(data)?null:authorx.matched(1)});
+			}
+		})(haxe.Http.requestUrl(ourl));
+	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1) {
 		var username = Expand.removeSymbols(HxOverrides.substr(url,12,null));
 		var id = Expand.removeSymbols(HxOverrides.substr(url,url.indexOf("/status/") + 8,null));
 		Reditn.getJSON("https://api.twitter.com/1.1/statuses/show.json?id=" + id,function(data) {
@@ -794,7 +826,7 @@ Reditn.age = function(t) {
 Reditn.getLinkType = function(url) {
 	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
 	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null);
-	var t = HxOverrides.substr(url,0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1?data.LinkType.TEXT:url.indexOf(".tumblr.com/post/") != -1 || StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1?data.LinkType.ARTICLE:StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1?data.LinkType.IMAGE:StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")?data.LinkType.VIDEO:url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1?(function($this) {
+	var t = HxOverrides.substr(url,0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1?data.LinkType.TEXT:url.indexOf(".tumblr.com/post/") != -1 || (StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_")) || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes/")?data.LinkType.ARTICLE:StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1?data.LinkType.IMAGE:StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")?data.LinkType.VIDEO:url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1?(function($this) {
 		var $r;
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
 		$r = (function($this) {
