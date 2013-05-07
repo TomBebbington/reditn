@@ -2,6 +2,7 @@
 // @name			Reditn
 // @namespace		http://userscripts.org/user/tophattedcoder/
 // @description		Reddit tweaks and enhancements.
+// @downloadURL		https://github.com/TopHattedCoder/reditn/raw/master/reditn.user.js
 // @include			reddit.com
 // @include			reddit.com/*
 // @include			*.reddit.com
@@ -287,6 +288,9 @@ Expand.showButton = function(el,p) {
 	p.appendChild(e);
 	return e;
 }
+Expand.album = function(url,c) {
+	return [{ url : url, caption : c}];
+}
 Expand.getImageLink = function(ourl,el,cb) {
 	var url = ourl;
 	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
@@ -336,6 +340,11 @@ Expand.getImageLink = function(ourl,el,cb) {
 	} else if(StringTools.startsWith(url,"imgflip.com/i/")) {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,14,null));
 		cb([{ url : "http://i.imgflip.com/" + id + ".jpg", caption : null}]);
+	} else if(StringTools.startsWith(url,"xkcd.com/")) {
+		var id = Expand.removeSymbols(HxOverrides.substr(url,9,null));
+		Reditn.getJSON("http://xkcd.com/" + id + "/info.0.json",function(data) {
+			cb(Expand.album(data.img,data.title));
+		});
 	} else if(ourl.indexOf(".deviantart.com/art/") != -1 || ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=json",function(d) {
 		cb([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
 	}); else if(StringTools.startsWith(url,"flickr.com/photos/")) {
@@ -427,7 +436,11 @@ Expand.removeSymbols = function(s) {
 }
 var GM = function() { }
 $hxClasses["GM"] = GM;
+$hxExpose(GM, "GM");
 GM.__name__ = ["GM"];
+GM.request = function(data) {
+	GM_xmlhttpRequest(data);
+}
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
 HxOverrides.__name__ = ["HxOverrides"];
@@ -2406,4 +2419,14 @@ haxe.ds.ObjectMap.count = 0;
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 Reditn.main();
+function $hxExpose(src, path) {
+	var o = typeof window != "undefined" ? window : exports;
+	var parts = path.split(".");
+	for(var ii = 0; ii < parts.length-1; ++ii) {
+		var p = parts[ii];
+		if(typeof o[p] == "undefined") o[p] = {};
+		o = o[p];
+	}
+	o[parts[parts.length-1]] = src;
+}
 })();

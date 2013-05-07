@@ -275,6 +275,9 @@ Expand.showButton = function(el,p) {
 	p.appendChild(e);
 	return e;
 }
+Expand.album = function(url,c) {
+	return [{ url : url, caption : c}];
+}
 Expand.getImageLink = function(ourl,el,cb) {
 	var url = ourl;
 	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
@@ -324,6 +327,11 @@ Expand.getImageLink = function(ourl,el,cb) {
 	} else if(StringTools.startsWith(url,"imgflip.com/i/")) {
 		var id = Expand.removeSymbols(HxOverrides.substr(url,14,null));
 		cb([{ url : "http://i.imgflip.com/" + id + ".jpg", caption : null}]);
+	} else if(StringTools.startsWith(url,"xkcd.com/")) {
+		var id = Expand.removeSymbols(HxOverrides.substr(url,9,null));
+		(function(data) {
+			cb(Expand.album(data.img,data.title));
+		})(Reditn.getData(haxe.Json.parse(haxe.Http.requestUrl("http://xkcd.com/" + id + "/info.0.json"))));
 	} else if(ourl.indexOf(".deviantart.com/art/") != -1 || ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1 || ourl.indexOf("fav.me") != -1) (function(d) {
 		cb([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
 	})(Reditn.getData(haxe.Json.parse(haxe.Http.requestUrl("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=json")))); else if(StringTools.startsWith(url,"flickr.com/photos/")) {

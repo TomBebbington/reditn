@@ -2,6 +2,7 @@
 // @name			Reditn
 // @namespace		http://userscripts.org/user/tophattedcoder/
 // @description		Reddit tweaks and enhancements.
+// @downloadURL		https://github.com/TopHattedCoder/reditn/raw/master/reditn.user.js
 // @include			reddit.com
 // @include			reddit.com/*
 // @include			*.reddit.com
