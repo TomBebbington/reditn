@@ -129,9 +129,9 @@ class Reditn {
 			url = url.substr(4);
 		var t = if(url.substr(0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1)
 			LinkType.TEXT;
-		else if(url.indexOf(".tumblr.com/post/") != -1)
+		else if(url.indexOf(".tumblr.com/post/") != -1 || (url.startsWith("twitter.com/") && url.indexOf("/status/") != -1))
 			LinkType.ARTICLE;
-		else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("imgur.com/gallery/") || url.startsWith("qkme.me/") || url.startsWith("m.quickmeme.com/meme/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("imgflip.com/i/") || url.startsWith("fav.me/") || url.startsWith("livememe.com/") || url.startsWith("explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) {
+		else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || url.startsWith("deviantart.com/art/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("imgur.com/gallery/") || url.startsWith("qkme.me/") || url.startsWith("m.quickmeme.com/meme/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("imgflip.com/i/") || url.startsWith("fav.me/") || url.startsWith("livememe.com/") || url.startsWith("explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) {
 			LinkType.IMAGE;
 		} else if(url.startsWith("youtube.com/watch") || url.startsWith("youtu.be/")) {
 			LinkType.VIDEO;
@@ -175,7 +175,11 @@ class Reditn {
 	}
 	public static inline function getJSON<T>(url:String, func:T->Void):Void {
 		getText(url, function(data:String) {
-			func(getData(haxe.Json.parse(data)));
+			try {
+				func(getData(haxe.Json.parse(data)));
+			} catch(e:Dynamic) {
+				trace('Error: $e whilst processing $data for $url');
+			}
 		});
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {

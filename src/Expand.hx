@@ -224,11 +224,17 @@ class Expand {
 	}
 	static function getArticle(ourl:String, el:Element, cb:Article -> Void) {
 		var url = trimURL(ourl);
-		if(url.indexOf(".tumblr.com/post/") != -1) {
+		if(url.startsWith("twitter.com/") && url.indexOf("/status/") != -1) {
+			var username = removeSymbols(url.substr(12));
+			var id = removeSymbols(url.substr(url.indexOf("/status/") + 8));
+			Reditn.getJSON('https://api.twitter.com/1.1/statuses/show.json?id=${id}', function(data) {
+				data.text;
+				cb({title: null, content: StringTools.htmlEscape(data.text), author:'@${username}'});
+			});
+		} else if(url.indexOf(".tumblr.com/post/") != -1) {
 			var author = url.substr(0, url.indexOf("."));
 			var id = removeSymbols(url.substr(url.indexOf(".")+17));
 			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
-				trace(data);
 				var post = data.posts[0];
 				cb(if(post.type == "text")
 					{title: post.title, content: post.body, author: data.blog.name};
@@ -309,7 +315,7 @@ class Expand {
 		} else if(url.startsWith("livememe.com/")) {
 			var id = removeSymbols(url.substr(13));
 			cb(album('http://livememe.com/${id}.jpg'));
-		} else if(ourl.indexOf(".deviantart.com/art/") != -1 || (ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1) || ourl.indexOf("fav.me") != -1) {
+		} else if(url.startsWith("deviantart.com/art/") || ourl.indexOf(".deviantart.com/art/") != -1 || (ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1) || ourl.indexOf("fav.me") != -1) {
 			Reditn.getJSON('http://backend.deviantart.com/oembed?url=${ourl.urlEncode()}&format=json', function(d) {
 				cb(album(d.url, '${d.title} by ${d.author_name}'));
 			});
