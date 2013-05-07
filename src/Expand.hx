@@ -267,6 +267,9 @@ class Expand {
 			Reditn.getJSON('http://xkcd.com/${id}/info.0.json', function(data:Dynamic) {
 				cb(album(data.img, data.title));
 			});
+		} else if(url.startsWith("livememe.com/")) {
+			var id = removeSymbols(url.substr(13));
+			cb(album('http://livememe.com/${id}.jpg'));
 		} else if(ourl.indexOf(".deviantart.com/art/") != -1 || (ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1) || ourl.indexOf("fav.me") != -1) {
 			Reditn.getJSON('http://backend.deviantart.com/oembed?url=${ourl.urlEncode()}&format=json', function(d) {
 				cb(album(d.url, '${d.title} by ${d.author_name}'));
