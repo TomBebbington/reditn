@@ -6,6 +6,7 @@ import data.*;
 using StringTools;
 class Expand {
 	static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
+	static inline var TUMBLR_KEY = "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE";
 	static inline var IMGUR_CLIENT_ID = "cc1f254578d6c52";
 	public static var maxWidth(get, null):Int;
 	public static var maxHeight(get, null):Int;
@@ -58,89 +59,130 @@ class Expand {
 			if(l.nodeName.toLowerCase()!="a")
 				continue;
 			var urltype = Reditn.getLinkType(l.href);
-			if(urltype==LinkType.IMAGE) {
-				getImageLink(l.href, l, function(a:Album) {
-					var e = l.parentNode.parentNode;
-					var div = Browser.document.createDivElement();
-					var imgs = [for(i in a) {
-						var i = loadImage(i.url);
-						div.appendChild(i);
-						Reditn.show(i, false);
-						i;
-					}];
-					var img:ImageElement = null;
-					var caption = Browser.document.createSpanElement();
-					caption.style.fontWeight = "bold";
-					caption.style.marginLeft = "10px";
-					var currentIndex = 0;
-					var prev = null, info = null, next = null;
-					if(a.length > 1) {
-						prev = Browser.document.createButtonElement();
-						prev.innerHTML = "Prev";
-						div.appendChild(prev);
-						info = Browser.document.createSpanElement();
-						info.style.textAlign = "center";
-						info.style.paddingLeft = info.style.paddingRight = "5px";
-						div.appendChild(info);
-						next = Browser.document.createButtonElement();
-						next.innerHTML = "Next";
-						div.appendChild(next);
-					}
-					if(a.length > 1 || (a[0].caption != null && a[0].caption.length > 0)) {
-						div.appendChild(caption);
-						div.appendChild(Browser.document.createBRElement());
-					}
-					function switchImage(ind:Int) {
-						if(ind < 0 || ind >= a.length)
-							return;
-						var i = a[ind];
-						var height = null;
-						if(img != null) {
-							Reditn.show(img, false);
-							height = img.height;
+			switch(urltype) {
+				case ARTICLE:
+					getArticle(l.href, l, function(a:Article) {
+						var e = Reditn.getLinkContainer(l);
+						var expando = Browser.document.createDivElement();
+						expando.className = "expando";
+						expando.style.display = "none";
+						var div = Browser.document.createDivElement();
+						div.className = "usertext";
+						expando.appendChild(div);
+						/*
+						var head = null;
+						if(a.title != null) {
+							head = Browser.document.createElement("h1");
+							head.innerHTML = StringTools.htmlEscape(a.title);
+							div.appendChild(head);
+						} */
+						var contentBlock = Browser.document.createDivElement();
+						contentBlock.innerHTML = a.content;
+						contentBlock.className = "md";
+						div.appendChild(contentBlock);
+						var self = Expand.makeSelfButton();
+						var tagline:Element = untyped e.getElementsByClassName("tagline")[0];
+						tagline.parentNode.insertBefore(self, tagline);
+						tagline.parentNode.appendChild(expando);
+						for(exp in cast(tagline.parentNode, js.html.Element).getElementsByClassName("expando")) {
+							exp.parentNode.removeChild(exp);
 						}
-						img = imgs[ind];
-						Reditn.show(img, true);
-						if(height != null) {
-							var ratio = img.width / img.height;
-							img.height = height;
-							img.width = Std.int(height * ratio);
+					});
+				case IMAGE:
+					getImageLink(l.href, l, function(a:Album) {
+						var e = l.parentNode.parentNode;
+						var div = Browser.document.createDivElement();
+						var imgs = [for(i in a) {
+							var i = loadImage(i.url);
+							div.appendChild(i);
+							Reditn.show(i, false);
+							i;
+						}];
+						var img:ImageElement = null;
+						var caption = Browser.document.createSpanElement();
+						caption.style.fontWeight = "bold";
+						caption.style.marginLeft = "10px";
+						var currentIndex = 0;
+						var prev = null, info = null, next = null;
+						if(a.length > 1) {
+							prev = Browser.document.createButtonElement();
+							prev.innerHTML = "Prev";
+							div.appendChild(prev);
+							info = Browser.document.createSpanElement();
+							info.style.textAlign = "center";
+							info.style.paddingLeft = info.style.paddingRight = "5px";
+							div.appendChild(info);
+							next = Browser.document.createButtonElement();
+							next.innerHTML = "Next";
+							div.appendChild(next);
 						}
-						div.appendChild(img);
+						if(a.length > 1 || (a[0].caption != null && a[0].caption.length > 0)) {
+							div.appendChild(caption);
+							div.appendChild(Browser.document.createBRElement());
+						}
+						function switchImage(ind:Int) {
+							if(ind < 0 || ind >= a.length)
+								return;
+							var i = a[ind];
+							var height = null;
+							if(img != null) {
+								Reditn.show(img, false);
+								height = img.height;
+							}
+							img = imgs[ind];
+							Reditn.show(img, true);
+							if(height != null) {
+								var ratio = img.width / img.height;
+								img.height = height;
+								img.width = Std.int(height * ratio);
+							}
+							div.appendChild(img);
+							if(prev != null) {
+								var len = Reditn.formatNumber(a.length);
+								var curr = Reditn.formatNumber(ind+1);
+								info.innerHTML = '$curr of $len';
+								prev.disabled = ind <= 0;
+								next.disabled = ind >= a.length-1;
+							}
+							Reditn.show(caption, i.caption != null);
+							if(i.caption != null) 
+								caption.innerHTML = StringTools.htmlEscape(i.caption);
+						}
+						switchImage(0);
 						if(prev != null) {
-							var len = Reditn.formatNumber(a.length);
-							var curr = Reditn.formatNumber(ind+1);
-							info.innerHTML = '$curr of $len';
-							prev.disabled = ind <= 0;
-							next.disabled = ind >= a.length-1;
+							prev.onmousedown = function(_) switchImage(--currentIndex);
+							next.onmousedown = function(_) switchImage(++currentIndex);
 						}
-						Reditn.show(caption, i.caption != null);
-						if(i.caption != null) 
-							caption.innerHTML = StringTools.htmlEscape(i.caption);
-					}
-					switchImage(0);
-					if(prev != null) {
-						prev.onmousedown = function(_) switchImage(--currentIndex);
-						next.onmousedown = function(_) switchImage(++currentIndex);
-					}
-					e.appendChild(div);
-					Reditn.show(div, toggled);
-					var li = Browser.document.createElement("li");
-					li.className = "reditn-expand";
-					var show = showButton(div, li);
-					buttons.push(show);
-					var btns = untyped e.getElementsByClassName("buttons")[0];
-					if(btns != null)
-						btns.insertBefore(li, btns.childNodes[0]);
-					else {
-						throw "Bad DOM";
-					}
-					refresh();
-				});
-			} else {
-				preload(l.href);
+						e.appendChild(div);
+						Reditn.show(div, toggled);
+						var li = Browser.document.createElement("div");
+						li.className = "reditn-expand";
+						var show = showButton(div, li);
+						buttons.push(show);
+						var btns = untyped e.getElementsByClassName("buttons")[0];
+						if(btns != null)
+							btns.insertBefore(li, btns.childNodes[0]);
+						else {
+							throw "Bad DOM";
+						}
+						refresh();
+					});
+				default: preload(l.href);
 			}
 		}
+	}
+	static function makeSelfButton():DivElement {
+		var d = js.Browser.document.createDivElement();
+		d.className = "expando-button collapsed selftext";
+		var toggled = false;
+		d.onclick = function(_) {
+			toggled = !toggled;
+			d.className = toggled ? "expando-button expanded selftext" : "expando-button collapsed selftext";
+			var entry:Element = cast d.parentNode;
+			var expando:Element = cast entry.getElementsByClassName("expando")[0];
+			expando.style.display = toggled ? "block" : "none";
+		}
+		return d;
 	}
 	public static function refresh() {
 		if(button != null) {
@@ -201,8 +243,7 @@ class Expand {
 	static inline function album(url:String, ?c:String):Album {
 		return [image(url, c)];
 	}
-	static function getImageLink(ourl:String, el:Element, cb:Album -> Void) {
-		var url = ourl;
+	static function trimURL(url:String) {
 		if(url.startsWith("http://"))
 			url = url.substr(7);
 		else if(url.startsWith("https://"))
@@ -213,6 +254,27 @@ class Expand {
 			url = url.substr(0, url.indexOf("&"));
 		if(url.indexOf("?") != -1)
 			url = url.substr(0, url.indexOf("?"));
+		return url;
+	}
+	static function getArticle(ourl:String, el:Element, cb:Article -> Void) {
+		var url = trimURL(ourl);
+		if(url.indexOf(".tumblr.com/post/") != -1) {
+			var author = url.substr(0, url.indexOf("."));
+			var id = removeSymbols(url.substr(url.indexOf(".")+17));
+			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
+				trace(data);
+				var post = data.posts[0];
+				cb(if(post.type == "text")
+					{title: post.title, content: post.body};
+				else if(data.type == "quote")
+					{title: null, content: '${post.text}<br/><b>${post.source}</b>'};
+				else if(data.type == "link")
+					{title: post.title, content: '<a href="${post.url}">${post.description}</a>'});
+			});
+		}
+	}
+	static function getImageLink(ourl:String, el:Element, cb:Album -> Void) {
+		var url = trimURL(ourl);
 		if(url.startsWith("i.imgur.com/") && url.split(".").length == 3)
 			cb(album('http://${url}.jpg'));
 		else if(url.startsWith("imgur.com/a/") || url.startsWith("imgur.com/gallery/")) {
@@ -284,6 +346,21 @@ class Expand {
 		} else if(ourl.indexOf(".deviantart.com/art/") != -1 || (ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1) || ourl.indexOf("fav.me") != -1) {
 			Reditn.getJSON('http://backend.deviantart.com/oembed?url=${ourl.urlEncode()}&format=json', function(d) {
 				cb(album(d.url, '${d.title} by ${d.author_name}'));
+			});
+		} else if(url.indexOf(".tumblr.com/image/") != -1) {
+			var author = url.substr(0, url.indexOf("."));
+			var id = removeSymbols(url.substr(author.length + 18));
+			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
+				var post = data.posts[0];
+				switch(post.type) {
+					case "photo": 
+						var ps:Array<Dynamic> = post.photos;
+						cb([for(p in ps) {
+							image(p.original_size.url, p.caption);
+						}]);
+					default:
+						throw 'Unknown datatype ${post.type}';
+				}
 			});
 		} else if(url.startsWith("flickr.com/photos/")) {
 			var id = url.substr(18);

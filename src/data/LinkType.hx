@@ -4,5 +4,6 @@ enum LinkType {
 	VIDEO;
 	AUDIO;
 	TEXT;
+	ARTICLE;
 	UNKNOWN;
 }
