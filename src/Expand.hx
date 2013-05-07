@@ -11,26 +11,9 @@ class Expand {
 	public static var maxWidth(get, null):Int;
 	public static var maxHeight(get, null):Int;
 	public static var maxArea(get, null):Int;
-	public static var buttons:Array<Element> = [];
+	public static var buttons:Array<Button> = [];
 	public static var toggled(default, null):Bool;
 	public static var button(default, null):AnchorElement = null;
-	public static var expanded(get, set):Array<String>;
-	static function get_expanded() {
-		return toggled ? [] : [for(b in buttons) if(untyped b.toggled()) untyped b.url];
-	}
-	static function set_expanded(e:Array<String>) {
-		if(e.length == buttons.length)
-			toggle(true);
-		else if(e.length <= 0)
-			toggle(false);
-		for(b in buttons) {
-			var t = false;
-			for(u in e)
-				t = t || untyped b.url == u;
-			untyped b.toggle(t, false);
-		}
-		return e;
-	}
 	static inline function get_maxWidth():Int {
 		return Std.int(Browser.window.innerWidth*0.7);
 	}
@@ -71,10 +54,10 @@ class Expand {
 						expando.appendChild(div);
 						var head = null;
 						var contentBlock = Browser.document.createDivElement();
-						contentBlock.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)}</h3><br>' : "") + a.content;
+						contentBlock.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)} <em>by ${a.author}</em></h3><br>' : "") + a.content;
 						contentBlock.className = "md";
 						div.appendChild(contentBlock);
-						var s = makeSelfButton(e, "article");
+						var s = makeSelfButton(e, "selftext", l.href);
 						var pn:Element = cast s.parentNode;
 						for(exp in pn.getElementsByClassName("expando")) {
 							pn.removeChild(exp);
@@ -149,7 +132,7 @@ class Expand {
 						}
 						e.appendChild(div);
 						Reditn.show(div, toggled);
-						var s = makeSelfButton(e, "image");
+						var s = makeSelfButton(e, "image", l.href);
 						var pn:Element = cast s.parentNode;
 						for(exp in pn.getElementsByClassName("expando")) {
 							pn.removeChild(exp);
@@ -161,28 +144,40 @@ class Expand {
 			}
 		}
 	}
-	static function makeSelfButton(e:Element, ?extra:String):DivElement {
+	static function makeSelfButton(e:Element, extra:String, url:String):DivElement {
 		var d = js.Browser.document.createDivElement();
-		d.className = "expando-button collapsed selftext";
-		if(extra != null)
-			d.className += ' ${extra}';
-		var toggled = false;
+		var cn = 'expando-button $extra ';
+		d.className = '$cn collapsed';
+		var isToggled = false;
+		var btn = {
+			toggled: function():Bool {
+				return isToggled;
+			},
+			toggle: function(v) {
+				isToggled = v;
+				d.className = cn + (isToggled ? "expanded" : "collapsed");
+				var entry:Element = cast d.parentNode;
+				var expando:Element = cast entry.getElementsByClassName("expando")[0];
+				Reditn.show(expando, v);
+			},
+			url: url,
+			element: d
+		};
 		d.onclick = function(_) {
-			toggled = !toggled;
-			d.className = toggled ? "expando-button expanded selftext" : "expando-button collapsed selftext";
-			if(extra != null)
-				d.className += ' ${extra}';
-			var entry:Element = cast d.parentNode;
-			var expando:Element = cast entry.getElementsByClassName("expando")[0];
-			expando.style.display = toggled ? "block" : "none";
+			btn.toggle(!isToggled);
 		}
 		var tagline:Element = untyped e.getElementsByClassName("tagline")[0];
 		tagline.parentNode.insertBefore(d, tagline);
+		buttons.push(btn);
+
+		if(Expand.toggled)
+			btn.toggle(true);
+		refresh();
 		return d;
 	}
 	public static function refresh() {
 		if(button != null) {
-			button.innerHTML = '${toggled?"hide":"show"} images (${buttons.length})';
+			button.innerHTML = '${toggled?"hide":"show"} all (${buttons.length})';
 			var np = [];
 			var n:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("next");
 			var p:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("prev");
@@ -204,34 +199,8 @@ class Expand {
 	public static function toggle(t:Bool) {
 		toggled = t;
 		for(btn in buttons)
-			untyped btn.toggle(t, false);
+			btn.toggle(t);
 		refresh();
-	}
-	public static function showImage(url:String, toggled:Bool) {
-		for(l in Reditn.links)
-			if(l.href == url) {
-				var e:Element = cast l.parentNode.parentNode;
-				untyped e.getElementsByClassName("toggle")[0].toggle(null, false);
-			}
-	}
-	static function showButton(el:Element, p:Element) {
-		var e = Browser.document.createAnchorElement();
-		e.style.fontStyle = "italic";
-		e.href = "javascript:void(0);";
-		e.className="toggle";
-		var toggled = Expand.toggled;
-		e.innerHTML = toggled ? "hide" : "show";
-		untyped e.toggle = function(?t:Bool, st:Bool=true) {
-			toggled = t == null ? !toggled : t;
-			e.innerHTML = toggled ? "hide" : "show";
-			Reditn.show(el, toggled);
-			if(st)
-				Reditn.pushState();
-		}
-		untyped e.toggled = function() return toggled;
-		e.onclick = function(ev) untyped e.toggle();
-		p.appendChild(e);
-		return e;
 	}
 	static inline function image(url:String, ?c:String):Image {
 		return {url: url, caption: c};
@@ -261,11 +230,11 @@ class Expand {
 				trace(data);
 				var post = data.posts[0];
 				cb(if(post.type == "text")
-					{title: post.title, content: post.body};
+					{title: post.title, content: post.body, author: data.blog.name};
 				else if(data.type == "quote")
-					{title: null, content: '${post.text}<br/><b>${post.source}</b>'};
+					{title: null, content: '${post.text}<br/><b>${post.source}</b>', author: data.blog.name};
 				else if(data.type == "link")
-					{title: post.title, content: '<a href="${post.url}">${post.description}</a>'});
+					{title: post.title, content: '<a href="${post.url}">${post.description}</a>', author: data.blog.name});
 			});
 		}
 	}

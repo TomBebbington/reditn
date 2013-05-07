@@ -47,15 +47,13 @@ class Reditn {
 			if(s == null)
 				return;
 			var state:State = haxe.Unserializer.run(s);
-			Expand.expanded = state.expanded;
 			if(state.allExpanded != Expand.toggled)
 				Expand.toggle(state.allExpanded);
 		}
 	}
 	static function state():State {
 		return {
-			allExpanded: Expand.toggled,
-			expanded: Expand.expanded
+			allExpanded: Expand.toggled
 		};
 	}
 	public static inline function pushState(?url:String) {

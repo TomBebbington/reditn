@@ -53,39 +53,6 @@ EReg.prototype = {
 var Expand = function() { }
 $hxClasses["Expand"] = Expand;
 Expand.__name__ = ["Expand"];
-Expand.get_expanded = function() {
-	return Expand.toggled?[]:(function($this) {
-		var $r;
-		var _g = [];
-		{
-			var _g1 = 0, _g2 = Expand.buttons;
-			while(_g1 < _g2.length) {
-				var b = _g2[_g1];
-				++_g1;
-				if(b.toggled()) _g.push(b.url);
-			}
-		}
-		$r = _g;
-		return $r;
-	}(this));
-}
-Expand.set_expanded = function(e) {
-	if(e.length == Expand.buttons.length) Expand.toggle(true); else if(e.length <= 0) Expand.toggle(false);
-	var _g = 0, _g1 = Expand.buttons;
-	while(_g < _g1.length) {
-		var b = _g1[_g];
-		++_g;
-		var t = false;
-		var _g2 = 0;
-		while(_g2 < e.length) {
-			var u = e[_g2];
-			++_g2;
-			t = t || b.url == u;
-		}
-		b.toggle(t,false);
-	}
-	return e;
-}
 Expand.init = function() {
 	Expand.toggled = js.Browser.window.location.hash == "#showall";
 	var menu = js.Browser.document.getElementsByClassName("tabmenu")[0];
@@ -118,10 +85,10 @@ Expand.init = function() {
 					expando.appendChild(div);
 					var head = null;
 					var contentBlock = js.Browser.document.createElement("div");
-					contentBlock.innerHTML = (a.title != null?"<h3>" + StringTools.htmlEscape(a.title) + "</h3><br>":"") + a.content;
+					contentBlock.innerHTML = (a.title != null?"<h3>" + StringTools.htmlEscape(a.title) + " <em>by " + a.author + "</em></h3><br>":"") + a.content;
 					contentBlock.className = "md";
 					div.appendChild(contentBlock);
-					var s = Expand.makeSelfButton(e,"article");
+					var s = Expand.makeSelfButton(e,"selftext",l[0].href);
 					var pn = s.parentNode;
 					var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
 					while(_g2 < _g3.length) {
@@ -232,7 +199,7 @@ Expand.init = function() {
 					e.appendChild(div1);
 					div1.style.display = Expand.toggled?"":"none";
 					if(div1.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div1.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-					var s = Expand.makeSelfButton(e,"image");
+					var s = Expand.makeSelfButton(e,"image",l[0].href);
 					var pn = s.parentNode;
 					var _g3 = 0, _g4 = pn.getElementsByClassName("expando");
 					while(_g3 < _g4.length) {
@@ -250,26 +217,34 @@ Expand.init = function() {
 		}
 	}
 }
-Expand.makeSelfButton = function(e,extra) {
+Expand.makeSelfButton = function(e,extra,url) {
 	var d = js.Browser.document.createElement("div");
-	d.className = "expando-button collapsed selftext";
-	if(extra != null) d.className += " " + extra;
-	var toggled = false;
-	d.onclick = function(_) {
-		toggled = !toggled;
-		d.className = toggled?"expando-button expanded selftext":"expando-button collapsed selftext";
-		if(extra != null) d.className += " " + extra;
+	var cn = "expando-button " + extra + " ";
+	d.className = "" + cn + " collapsed";
+	var isToggled = false;
+	var btn = { toggled : function() {
+		return isToggled;
+	}, toggle : function(v) {
+		isToggled = v;
+		d.className = cn + (isToggled?"expanded":"collapsed");
 		var entry = d.parentNode;
 		var expando = entry.getElementsByClassName("expando")[0];
-		expando.style.display = toggled?"block":"none";
+		expando.style.display = v?"":"none";
+		if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+	}, url : url, element : d};
+	d.onclick = function(_) {
+		btn.toggle(!isToggled);
 	};
 	var tagline = e.getElementsByClassName("tagline")[0];
 	tagline.parentNode.insertBefore(d,tagline);
+	Expand.buttons.push(btn);
+	if(Expand.toggled) btn.toggle(true);
+	Expand.refresh();
 	return d;
 }
 Expand.refresh = function() {
 	if(Expand.button != null) {
-		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " images (" + Expand.buttons.length + ")";
+		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " all (" + Expand.buttons.length + ")";
 		var np = [];
 		var n = js.Browser.document.body.getElementsByClassName("next");
 		var p = js.Browser.document.body.getElementsByClassName("prev");
@@ -301,7 +276,7 @@ Expand.toggle = function(t) {
 	while(_g < _g1.length) {
 		var btn = _g1[_g];
 		++_g;
-		btn.toggle(t,false);
+		btn.toggle(t);
 	}
 	Expand.refresh();
 }
@@ -326,7 +301,7 @@ Expand.getArticle = function(ourl,el,cb) {
 		Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 			console.log(data);
 			var post = data.posts[0];
-			cb(post.type == "text"?{ title : post.title, content : post.body}:data.type == "quote"?{ title : null, content : "" + post.text + "<br/><b>" + post.source + "</b>"}:data.type == "link"?{ title : post.title, content : "<a href=\"" + post.url + "\">" + post.description + "</a>"}:null);
+			cb(post.type == "text"?{ title : post.title, content : post.body, author : data.blog.name}:data.type == "quote"?{ title : null, content : "" + post.text + "<br/><b>" + post.source + "</b>", author : data.blog.name}:data.type == "link"?{ title : post.title, content : "<a href=\"" + post.url + "\">" + post.description + "</a>", author : data.blog.name}:null);
 		});
 	}
 }
@@ -759,12 +734,11 @@ Reditn.init = function() {
 		var s = e.state;
 		if(s == null) return;
 		var state = haxe.Unserializer.run(s);
-		Expand.set_expanded(state.expanded);
 		if(state.allExpanded != Expand.toggled) Expand.toggle(state.allExpanded);
 	};
 }
 Reditn.state = function() {
-	return { allExpanded : Expand.toggled, expanded : Expand.get_expanded()};
+	return { allExpanded : Expand.toggled};
 }
 Reditn.wrap = function(fn,id) {
 	var d = id == null?null:Settings.data.get(id);
