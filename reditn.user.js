@@ -129,28 +129,29 @@ Expand.init = function() {
 					var div = js.Browser.document.createElement("div");
 					div.className = "usertext";
 					expando.appendChild(div);
+					var head = null;
 					var contentBlock = js.Browser.document.createElement("div");
-					contentBlock.innerHTML = a.content;
+					contentBlock.innerHTML = (a.title != null?"<h3>" + StringTools.htmlEscape(a.title) + "</h3><br>":"") + a.content;
 					contentBlock.className = "md";
 					div.appendChild(contentBlock);
-					var self = Expand.makeSelfButton();
-					var tagline = e.getElementsByClassName("tagline")[0];
-					tagline.parentNode.insertBefore(self,tagline);
-					tagline.parentNode.appendChild(expando);
-					var _g2 = 0, _g3 = (js.Boot.__cast(tagline.parentNode , Element)).getElementsByClassName("expando");
+					var s = Expand.makeSelfButton(e);
+					var pn = s.parentNode;
+					var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
 					while(_g2 < _g3.length) {
 						var exp = _g3[_g2];
 						++_g2;
-						exp.parentNode.removeChild(exp);
+						pn.removeChild(exp);
 					}
+					pn.appendChild(expando);
 				};
 			})(l));
 			break;
 		case 0:
 			Expand.getImageLink(l[0].href,l[0],(function(l) {
 				return function(a1) {
-					var e = l[0].parentNode.parentNode;
+					var e = l[0].parentNode.parentNode.parentNode;
 					var div1 = js.Browser.document.createElement("div");
+					div1.className = "expando";
 					var imgs = (function($this) {
 						var $r;
 						var _g2 = [];
@@ -244,12 +245,15 @@ Expand.init = function() {
 					e.appendChild(div1);
 					div1.style.display = Expand.toggled?"":"none";
 					if(div1.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div1.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-					var li1 = js.Browser.document.createElement("div");
-					li1.className = "reditn-expand";
-					var show = Expand.showButton(div1,li1);
-					Expand.buttons.push(show);
-					var btns = e.getElementsByClassName("buttons")[0];
-					if(btns != null) btns.insertBefore(li1,btns.childNodes[0]); else throw "Bad DOM";
+					var s = Expand.makeSelfButton(e);
+					var pn = s.parentNode;
+					var _g3 = 0, _g4 = pn.getElementsByClassName("expando");
+					while(_g3 < _g4.length) {
+						var exp = _g4[_g3];
+						++_g3;
+						pn.removeChild(exp);
+					}
+					pn.appendChild(div1);
 					Expand.refresh();
 				};
 			})(l));
@@ -259,7 +263,7 @@ Expand.init = function() {
 		}
 	}
 }
-Expand.makeSelfButton = function() {
+Expand.makeSelfButton = function(e) {
 	var d = js.Browser.document.createElement("div");
 	d.className = "expando-button collapsed selftext";
 	var toggled = false;
@@ -270,6 +274,8 @@ Expand.makeSelfButton = function() {
 		var expando = entry.getElementsByClassName("expando")[0];
 		expando.style.display = toggled?"block":"none";
 	};
+	var tagline = e.getElementsByClassName("tagline")[0];
+	tagline.parentNode.insertBefore(d,tagline);
 	return d;
 }
 Expand.refresh = function() {
@@ -309,30 +315,6 @@ Expand.toggle = function(t) {
 		btn.toggle(t,false);
 	}
 	Expand.refresh();
-}
-Expand.showButton = function(el,p) {
-	var e = js.Browser.document.createElement("a");
-	e.style.fontStyle = "italic";
-	e.href = "javascript:void(0);";
-	e.className = "toggle";
-	var toggled = Expand.toggled;
-	e.innerHTML = toggled?"hide":"show";
-	e.toggle = function(t,st) {
-		if(st == null) st = true;
-		toggled = t == null?!toggled:t;
-		e.innerHTML = toggled?"hide":"show";
-		el.style.display = toggled?"":"none";
-		if(el.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,el.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-		if(st) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
-	};
-	e.toggled = function() {
-		return toggled;
-	};
-	e.onclick = function(ev) {
-		e.toggle();
-	};
-	p.appendChild(e);
-	return e;
 }
 Expand.image = function(url,c) {
 	return { url : url, caption : c};
@@ -782,6 +764,7 @@ Reditn.init = function() {
 	Reditn.wrap(Adblock.init,"adblock");
 	Reditn.wrap(DuplicateHider.init,"dup-hider");
 	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
+	Style.init();
 	Reditn.wrap(Expand.init,"expand");
 	Reditn.wrap(Keyboard.init,"keys");
 	Reditn.wrap(Preview.init,"preview");
@@ -1200,6 +1183,14 @@ StringTools.trim = function(s) {
 }
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
+}
+var Style = function() { }
+$hxClasses["Style"] = Style;
+Style.__name__ = ["Style"];
+Style.init = function() {
+	var s = js.Browser.document.createElement("style");
+	s.innerHTML = "";
+	js.Browser.document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
 $hxClasses["SubredditInfo"] = SubredditInfo;
@@ -2447,9 +2438,6 @@ js.Boot.__instanceof = function(o,cl) {
 		if(cl == Enum && o.__ename__ != null) return true; else null;
 		return o.__enum__ == cl;
 	}
-}
-js.Boot.__cast = function(o,t) {
-	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
 }
 js.Browser = function() { }
 $hxClasses["js.Browser"] = js.Browser;

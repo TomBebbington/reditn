@@ -32,6 +32,7 @@ class Reditn {
 		wrap(Adblock.init, Settings.ADBLOCK);
 		wrap(DuplicateHider.init, Settings.DUPLICATE_HIDER);
 		wrap(NSFWFilter.init, Settings.FILTER_NSFW);
+		Style.init();
 		
 		wrap(Expand.init, Settings.EXPAND);
 		wrap(Keyboard.init, Settings.KEYBOARD);

@@ -69,29 +69,23 @@ class Expand {
 						var div = Browser.document.createDivElement();
 						div.className = "usertext";
 						expando.appendChild(div);
-						/*
 						var head = null;
-						if(a.title != null) {
-							head = Browser.document.createElement("h1");
-							head.innerHTML = StringTools.htmlEscape(a.title);
-							div.appendChild(head);
-						} */
 						var contentBlock = Browser.document.createDivElement();
-						contentBlock.innerHTML = a.content;
+						contentBlock.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)}</h3><br>' : "") + a.content;
 						contentBlock.className = "md";
 						div.appendChild(contentBlock);
-						var self = Expand.makeSelfButton();
-						var tagline:Element = untyped e.getElementsByClassName("tagline")[0];
-						tagline.parentNode.insertBefore(self, tagline);
-						tagline.parentNode.appendChild(expando);
-						for(exp in cast(tagline.parentNode, js.html.Element).getElementsByClassName("expando")) {
-							exp.parentNode.removeChild(exp);
+						var s = makeSelfButton(e);
+						var pn:Element = cast s.parentNode;
+						for(exp in pn.getElementsByClassName("expando")) {
+							pn.removeChild(exp);
 						}
+						pn.appendChild(expando);
 					});
 				case IMAGE:
 					getImageLink(l.href, l, function(a:Album) {
-						var e = l.parentNode.parentNode;
+						var e = Reditn.getLinkContainer(l);
 						var div = Browser.document.createDivElement();
+						div.className = "expando";
 						var imgs = [for(i in a) {
 							var i = loadImage(i.url);
 							div.appendChild(i);
@@ -155,23 +149,19 @@ class Expand {
 						}
 						e.appendChild(div);
 						Reditn.show(div, toggled);
-						var li = Browser.document.createElement("div");
-						li.className = "reditn-expand";
-						var show = showButton(div, li);
-						buttons.push(show);
-						var btns = untyped e.getElementsByClassName("buttons")[0];
-						if(btns != null)
-							btns.insertBefore(li, btns.childNodes[0]);
-						else {
-							throw "Bad DOM";
+						var s = makeSelfButton(e);
+						var pn:Element = cast s.parentNode;
+						for(exp in pn.getElementsByClassName("expando")) {
+							pn.removeChild(exp);
 						}
+						pn.appendChild(div);
 						refresh();
 					});
 				default: preload(l.href);
 			}
 		}
 	}
-	static function makeSelfButton():DivElement {
+	static function makeSelfButton(e:Element):DivElement {
 		var d = js.Browser.document.createDivElement();
 		d.className = "expando-button collapsed selftext";
 		var toggled = false;
@@ -182,6 +172,8 @@ class Expand {
 			var expando:Element = cast entry.getElementsByClassName("expando")[0];
 			expando.style.display = toggled ? "block" : "none";
 		}
+		var tagline:Element = untyped e.getElementsByClassName("tagline")[0];
+		tagline.parentNode.insertBefore(d, tagline);
 		return d;
 	}
 	public static function refresh() {
