@@ -97,6 +97,8 @@ Expand.init = function() {
 						pn.removeChild(exp);
 					}
 					pn.appendChild(expando);
+					expando.style.display = Expand.toggled?"":"none";
+					if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
 				};
 			})(l));
 			break;
@@ -786,7 +788,7 @@ Reditn.age = function(t) {
 Reditn.getLinkType = function(url) {
 	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
 	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null);
-	var t = HxOverrides.substr(url,0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1?data.LinkType.TEXT:url.indexOf(".tumblr.com/post/") != -1?data.LinkType.ARTICLE:StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1?data.LinkType.IMAGE:StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")?data.LinkType.VIDEO:url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1?(function($this) {
+	var t = HxOverrides.substr(url,0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1?data.LinkType.TEXT:url.indexOf(".tumblr.com/post/") != -1?data.LinkType.ARTICLE:StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1?data.LinkType.IMAGE:StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")?data.LinkType.VIDEO:url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1?(function($this) {
 		var $r;
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
 		$r = (function($this) {

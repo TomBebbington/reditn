@@ -63,6 +63,7 @@ class Expand {
 							pn.removeChild(exp);
 						}
 						pn.appendChild(expando);
+						Reditn.show(expando, toggled);
 					});
 				case IMAGE:
 					getImageLink(l.href, l, function(a:Album) {
