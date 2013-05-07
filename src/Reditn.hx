@@ -130,7 +130,11 @@ class Reditn {
 			url = url.substr(4);
 		var t = if(url.substr(0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1)
 			LinkType.TEXT;
-		else if(url.lastIndexOf(".") != url.indexOf(".") && url.substr(url.lastIndexOf(".")).length <= 4) {
+		else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("qkme.me/") || url.startsWith("m.quickmeme.com/meme/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("imgflip.com/i/") || url.startsWith("fav.me/") || url.startsWith("livememe.com/") || url.startsWith("explosm.net/comics/")) {
+			LinkType.IMAGE;
+		} else if(url.startsWith("youtube.com/watch") || url.startsWith("youtu.be/")) {
+			LinkType.VIDEO;
+		} else if(url.lastIndexOf(".") != url.indexOf(".") && url.substr(url.lastIndexOf(".")).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
 			var ext = url.substr(url.lastIndexOf(".")+1).toLowerCase();
 			switch(ext) {
 				case "gif", "jpg", "jpeg", "bmp", "png", "webp", "svg", "ico", "tiff", "raw":
@@ -142,10 +146,6 @@ class Reditn {
 				default:
 					LinkType.UNKNOWN;
 			}
-		} else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("qkme.me/") || url.startsWith("m.quickmeme.com/meme/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("imgflip.com/i/") || url.startsWith("fav.me/") || url.startsWith("livememe.com/")) {
-			LinkType.IMAGE;
-		} else if(url.startsWith("youtube.com/watch") || url.startsWith("youtu.be/")) {
-			LinkType.VIDEO;
 		} else {
 			LinkType.UNKNOWN;
 		};
@@ -156,18 +156,23 @@ class Reditn {
 			o = o.data;
 		return o;
 	}
-	public static inline function getJSON<T>(url:String, func:T->Void):Void {
+	public static inline function getText(url:String, func:String->Void):Void {
 		#if plugin
-			func(getData(Json.parse(haxe.Http.requestUrl(url))));
+			func(haxe.Http.requestUrl(url));
 		#else
 			GM.request({
 				method: "GET",
 				url: url,
 				onload: function(rsp:Dynamic) {
-					func(getData(Json.parse(rsp.responseText)));
+					func(rsp.responseText);
 				}
 			});
 		#end
+	}
+	public static inline function getJSON<T>(url:String, func:T->Void):Void {
+		getText(url, function(data:String) {
+			func(getData(haxe.Json.parse(data)));
+		});
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);

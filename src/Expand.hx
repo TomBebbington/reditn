@@ -267,6 +267,17 @@ class Expand {
 			Reditn.getJSON('http://xkcd.com/${id}/info.0.json', function(data:Dynamic) {
 				cb(album(data.img, data.title));
 			});
+		} else if(url.startsWith("explosm.net/comics/")) {
+			var id = removeSymbols(url.substr(19));
+			Reditn.getText('http://explosm.net/comics/${id}/', function(text:String) {
+				var mt = "\"http://www.explosm.net/db/files/Comics/";
+				var i = text.indexOf(mt);
+				if(i != -1) {
+					var id = text.substr(i + mt.length);
+					id = id.substr(0, id.indexOf("\""));
+					cb(album(mt.substr(1) + id));
+				}
+			});
 		} else if(url.startsWith("livememe.com/")) {
 			var id = removeSymbols(url.substr(13));
 			cb(album('http://livememe.com/${id}.jpg'));
@@ -360,13 +371,14 @@ class Expand {
 		}
 	}
 	public static function removeSymbols(s:String):String {
-		return if(s.lastIndexOf("?") != -1)
-			s.substr(0, s.lastIndexOf("?"));
-		else if(s.lastIndexOf("/") != -1)
-			s.substr(0, s.lastIndexOf("/"));
-		else if(s.lastIndexOf("#") != -1)
-			s.substr(0, s.lastIndexOf("#"));
-		else
-			s;
+		if(s.lastIndexOf("?") != -1)
+			s = s.substr(0, s.indexOf("?"));
+		if(s.lastIndexOf("/") != -1)
+			s = s.substr(0, s.indexOf("/"));
+		if(s.lastIndexOf("#") != -1)
+			s = s.substr(0, s.indexOf("#"));
+		if(s.lastIndexOf(".") != -1)
+			s = s.substr(0, s.indexOf("."));
+		return s;
 	}
 }
