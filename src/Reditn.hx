@@ -4,6 +4,9 @@ import data.*;
 import haxe.Json;
 using StringTools;
 class Reditn {
+	public static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
+	public static inline var TUMBLR_KEY = "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE";
+	public static inline var IMGUR_CLIENT_ID = "cc1f254578d6c52";
 	static inline var year = 31557600;
 	static inline var month = 2629800;
 	static inline var day = 86400;
@@ -120,38 +123,66 @@ class Reditn {
 			s = s.replace(", , ", ", ");
 		return s;
 	}
-	public static function getLinkType(url:String):LinkType {
+	public static function removeSymbols(s:String):String {
+		if(s.lastIndexOf("?") != -1)
+			s = s.substr(0, s.indexOf("?"));
+		if(s.lastIndexOf("/") != -1)
+			s = s.substr(0, s.indexOf("/"));
+		if(s.lastIndexOf("#") != -1)
+			s = s.substr(0, s.indexOf("#"));
+		if(s.lastIndexOf(".") != -1)
+			s = s.substr(0, s.indexOf("."));
+		return s;
+	}
+	public static function trimURL(url:String) {
 		if(url.startsWith("http://"))
 			url = url.substr(7);
 		else if(url.startsWith("https://"))
 			url = url.substr(8);
 		if(url.startsWith("www."))
 			url = url.substr(4);
-		var t = if(url.substr(0,13) == "reddit.com/r/" && url.indexOf("/comments/") != -1)
-			LinkType.TEXT;
-		else if(url.indexOf(".tumblr.com/post/") != -1 || (url.startsWith("twitter.com/") && url.indexOf("/status/") != -1|| url.startsWith("cracked.com/article_")) || url.startsWith("cracked.com/blog/") || url.startsWith("cracked.com/quick-fixes/"))
-			LinkType.ARTICLE;
+		if(url.indexOf("&") != -1)
+			url = url.substr(0, url.indexOf("&"));
+		if(url.indexOf("?") != -1)
+			url = url.substr(0, url.indexOf("?"));
+		return url;
+	}
+	public static function getLinkType(ourl:String, cb:LinkType -> Void):Void {
+		var url = trimURL(ourl);
+		if(url.startsWith("reddit.com/r/") && url.indexOf("/comments/") != -1)
+			cb(LinkType.TEXT);
+		else if(url.indexOf(".tumblr.com/post/") != -1) {
+			var author = url.substr(0, url.indexOf("."));
+			var id = removeSymbols(url.substr(url.indexOf(".")+17));
+			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
+				var post = data.posts[0];
+				cb(switch(post.type) {
+					case "photo": LinkType.IMAGE;
+					case "video": LinkType.VIDEO;
+					case _: LinkType.ARTICLE;
+				});
+			});
+		} else if((url.startsWith("twitter.com/") && url.indexOf("/status/") != -1|| url.startsWith("cracked.com/article_")) || url.startsWith("cracked.com/blog/") || url.startsWith("cracked.com/quick-fixes
+			/"))
+			cb(LinkType.ARTICLE);
 		else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || url.startsWith("deviantart.com/art/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("imgur.com/gallery/") || url.startsWith("qkme.me/") || url.startsWith("m.quickmeme.com/meme/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("imgflip.com/i/") || url.startsWith("fav.me/") || url.startsWith("livememe.com/") || url.startsWith("explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) {
-			LinkType.IMAGE;
+			cb(LinkType.IMAGE);
 		} else if(url.startsWith("youtube.com/watch") || url.startsWith("youtu.be/")) {
-			LinkType.VIDEO;
+			cb(LinkType.VIDEO);
 		} else if(url.lastIndexOf(".") != url.indexOf(".") && url.substr(url.lastIndexOf(".")).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
 			var ext = url.substr(url.lastIndexOf(".")+1).toLowerCase();
 			switch(ext) {
 				case "gif", "jpg", "jpeg", "bmp", "png", "webp", "svg", "ico", "tiff", "raw":
-					LinkType.IMAGE;
+					cb(LinkType.IMAGE);
 				case "mpg", "webm", "avi", "mp4", "flv", "swf":
-					LinkType.VIDEO;
+					cb(LinkType.VIDEO);
 				case "mp3", "wav", "midi":
-					LinkType.AUDIO;
+					cb(LinkType.AUDIO);
 				default:
-					LinkType.UNKNOWN;
 			}
 		} else {
-			LinkType.UNKNOWN;
-		};
-		trace('$url -> $t');
-		return t;
+			cb(LinkType.UNKNOWN);
+		}
 	}
 	public static function getData(o:Dynamic):Dynamic {
 		while(o.data != null)

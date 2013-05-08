@@ -5,9 +5,6 @@ import haxe.*;
 import data.*;
 using StringTools;
 class Expand {
-	static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
-	static inline var TUMBLR_KEY = "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE";
-	static inline var IMGUR_CLIENT_ID = "cc1f254578d6c52";
 	public static var maxWidth(get, null):Int;
 	public static var maxHeight(get, null):Int;
 	public static var maxArea(get, null):Int;
@@ -41,108 +38,109 @@ class Expand {
 		for(l in Reditn.links) {
 			if(l.nodeName.toLowerCase()!="a")
 				continue;
-			var urltype = Reditn.getLinkType(l.href);
-			switch(urltype) {
-				case ARTICLE:
-					getArticle(l.href, l, function(a:Article) {
-						var e = Reditn.getLinkContainer(l);
-						var expando = Browser.document.createDivElement();
-						expando.className = "expando";
-						expando.style.display = "none";
-						var div = Browser.document.createDivElement();
-						div.className = "usertext";
-						expando.appendChild(div);
-						var head = null;
-						var contentBlock = Browser.document.createDivElement();
-						contentBlock.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)} <em>by ${a.author}</em></h3><br>' : "") + a.content;
-						contentBlock.className = "md";
-						div.appendChild(contentBlock);
-						var s = makeSelfButton(e, "selftext", l.href);
-						var pn:Element = cast s.parentNode;
-						for(exp in pn.getElementsByClassName("expando")) {
-							pn.removeChild(exp);
-						}
-						pn.appendChild(expando);
-						Reditn.show(expando, toggled);
-					});
-				case IMAGE:
-					getImageLink(l.href, l, function(a:Album) {
-						var e = Reditn.getLinkContainer(l);
-						var div = Browser.document.createDivElement();
-						div.className = "expando";
-						var imgs = [for(i in a) {
-							var i = loadImage(i.url);
-							div.appendChild(i);
-							Reditn.show(i, false);
-							i;
-						}];
-						var img:ImageElement = null;
-						var caption = Browser.document.createSpanElement();
-						caption.style.fontWeight = "bold";
-						caption.style.marginLeft = "10px";
-						var currentIndex = 0;
-						var prev = null, info = null, next = null;
-						if(a.length > 1) {
-							prev = Browser.document.createButtonElement();
-							prev.innerHTML = "Prev";
-							div.appendChild(prev);
-							info = Browser.document.createSpanElement();
-							info.style.textAlign = "center";
-							info.style.paddingLeft = info.style.paddingRight = "5px";
-							div.appendChild(info);
-							next = Browser.document.createButtonElement();
-							next.innerHTML = "Next";
-							div.appendChild(next);
-						}
-						if(a.length > 1 || (a[0].caption != null && a[0].caption.length > 0)) {
-							div.appendChild(caption);
-							div.appendChild(Browser.document.createBRElement());
-						}
-						function switchImage(ind:Int) {
-							if(ind < 0 || ind >= a.length)
-								return;
-							var i = a[ind];
-							var height = null;
-							if(img != null) {
-								Reditn.show(img, false);
-								height = img.height;
+			Reditn.getLinkType(l.href, function(urltype) {
+				switch(urltype) {
+					case ARTICLE:
+						getArticle(l.href, l, function(a:Article) {
+							var e = Reditn.getLinkContainer(l);
+							var expando = Browser.document.createDivElement();
+							expando.className = "expando";
+							expando.style.display = "none";
+							var div = Browser.document.createDivElement();
+							div.className = "usertext";
+							expando.appendChild(div);
+							var head = null;
+							var contentBlock = Browser.document.createDivElement();
+							contentBlock.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)} <em>by ${a.author}</em></h3><br>' : "") + a.content;
+							contentBlock.className = "md";
+							div.appendChild(contentBlock);
+							var s = makeSelfButton(e, "selftext", l.href);
+							var pn:Element = cast s.parentNode;
+							for(exp in pn.getElementsByClassName("expando")) {
+								pn.removeChild(exp);
 							}
-							img = imgs[ind];
-							Reditn.show(img, true);
-							if(height != null) {
-								var ratio = img.width / img.height;
-								img.height = height;
-								img.width = Std.int(height * ratio);
+							pn.appendChild(expando);
+							Reditn.show(expando, toggled);
+						});
+					case IMAGE:
+						getImageLink(l.href, l, function(a:Album) {
+							var e = Reditn.getLinkContainer(l);
+							var div = Browser.document.createDivElement();
+							div.className = "expando";
+							var imgs = [for(i in a) {
+								var i = loadImage(i.url);
+								div.appendChild(i);
+								Reditn.show(i, false);
+								i;
+							}];
+							var img:ImageElement = null;
+							var caption = Browser.document.createSpanElement();
+							caption.style.fontWeight = "bold";
+							caption.style.marginLeft = "10px";
+							var currentIndex = 0;
+							var prev = null, info = null, next = null;
+							if(a.length > 1) {
+								prev = Browser.document.createButtonElement();
+								prev.innerHTML = "Prev";
+								div.appendChild(prev);
+								info = Browser.document.createSpanElement();
+								info.style.textAlign = "center";
+								info.style.paddingLeft = info.style.paddingRight = "5px";
+								div.appendChild(info);
+								next = Browser.document.createButtonElement();
+								next.innerHTML = "Next";
+								div.appendChild(next);
 							}
-							div.appendChild(img);
+							if(a.length > 1 || (a[0].caption != null && a[0].caption.length > 0)) {
+								div.appendChild(caption);
+								div.appendChild(Browser.document.createBRElement());
+							}
+							function switchImage(ind:Int) {
+								if(ind < 0 || ind >= a.length)
+									return;
+								var i = a[ind];
+								var height = null;
+								if(img != null) {
+									Reditn.show(img, false);
+									height = img.height;
+								}
+								img = imgs[ind];
+								Reditn.show(img, true);
+								if(height != null) {
+									var ratio = img.width / img.height;
+									img.height = height;
+									img.width = Std.int(height * ratio);
+								}
+								div.appendChild(img);
+								if(prev != null) {
+									var len = Reditn.formatNumber(a.length);
+									var curr = Reditn.formatNumber(ind+1);
+									info.innerHTML = '$curr of $len';
+									prev.disabled = ind <= 0;
+									next.disabled = ind >= a.length-1;
+								}
+								Reditn.show(caption, i.caption != null);
+								if(i.caption != null) 
+									caption.innerHTML = StringTools.htmlEscape(i.caption);
+							}
+							switchImage(0);
 							if(prev != null) {
-								var len = Reditn.formatNumber(a.length);
-								var curr = Reditn.formatNumber(ind+1);
-								info.innerHTML = '$curr of $len';
-								prev.disabled = ind <= 0;
-								next.disabled = ind >= a.length-1;
+								prev.onmousedown = function(_) switchImage(--currentIndex);
+								next.onmousedown = function(_) switchImage(++currentIndex);
 							}
-							Reditn.show(caption, i.caption != null);
-							if(i.caption != null) 
-								caption.innerHTML = StringTools.htmlEscape(i.caption);
-						}
-						switchImage(0);
-						if(prev != null) {
-							prev.onmousedown = function(_) switchImage(--currentIndex);
-							next.onmousedown = function(_) switchImage(++currentIndex);
-						}
-						e.appendChild(div);
-						Reditn.show(div, toggled);
-						var s = makeSelfButton(e, "image", l.href);
-						var pn:Element = cast s.parentNode;
-						for(exp in pn.getElementsByClassName("expando")) {
-							pn.removeChild(exp);
-						}
-						pn.appendChild(div);
-						refresh();
-					});
-				default: preload(l.href);
-			}
+							e.appendChild(div);
+							Reditn.show(div, toggled);
+							var s = makeSelfButton(e, "image", l.href);
+							var pn:Element = cast s.parentNode;
+							for(exp in pn.getElementsByClassName("expando")) {
+								pn.removeChild(exp);
+							}
+							pn.appendChild(div);
+							refresh();
+						});
+					default: preload(l.href);
+				}
+			});
 		}
 	}
 	static function makeSelfButton(e:Element, extra:String, url:String):DivElement {
@@ -209,21 +207,8 @@ class Expand {
 	static inline function album(url:String, ?c:String):Album {
 		return [image(url, c)];
 	}
-	static function trimURL(url:String) {
-		if(url.startsWith("http://"))
-			url = url.substr(7);
-		else if(url.startsWith("https://"))
-			url = url.substr(8);
-		if(url.startsWith("www."))
-			url = url.substr(4);
-		if(url.indexOf("&") != -1)
-			url = url.substr(0, url.indexOf("&"));
-		if(url.indexOf("?") != -1)
-			url = url.substr(0, url.indexOf("?"));
-		return url;
-	}
 	static function getArticle(ourl:String, el:Element, cb:Article -> Void) {
-		var url = trimURL(ourl);
+		var url = Reditn.trimURL(ourl);
 		if(url.startsWith("cracked.com/")) {
 			var authorx = ~/<a[^>]*?class="[^"]*?byline"[^>]*?>([a-zA-Z ]*)<\/a>/;
 			Reditn.getText(ourl, function(data:String) {
@@ -244,36 +229,47 @@ class Expand {
 						cb({title: title, content: body, author: (!authorx.match(data) ? null : authorx.matched(1))});
 				}
 			});
+		} else if(url.indexOf(".blogspot.com/") != -1) {
+			var blogId = null;
+			var id = null;
+			Reditn.getJSON('https://www.googleapis.com/blogger/v2/blogs/${blogId}/posts/${id}&key=', function(data) {
+				cb({title: data.title, content: data.content, author: data.author.displayName});
+			});
 		} else if(url.startsWith("twitter.com/") && url.indexOf("/status/") != -1) {
-			var username = removeSymbols(url.substr(12));
-			var id = removeSymbols(url.substr(url.indexOf("/status/") + 8));
+			var username = Reditn.removeSymbols(url.substr(12));
+			var id = Reditn.removeSymbols(url.substr(url.indexOf("/status/") + 8));
 			Reditn.getJSON('https://api.twitter.com/1.1/statuses/show.json?id=${id}', function(data) {
 				data.text;
 				cb({title: null, content: StringTools.htmlEscape(data.text), author:'@${username}'});
 			});
 		} else if(url.indexOf(".tumblr.com/post/") != -1) {
 			var author = url.substr(0, url.indexOf("."));
-			var id = removeSymbols(url.substr(url.indexOf(".")+17));
-			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
+			var id = Reditn.removeSymbols(url.substr(url.indexOf(".")+17));
+			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${Reditn.TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
 				var post = data.posts[0];
+				trace('Tumblr data:');
+				trace(post);
 				cb(if(post.type == "text")
 					{title: post.title, content: post.body, author: data.blog.name};
 				else if(data.type == "quote")
 					{title: null, content: '${post.text}<br/><b>${post.source}</b>', author: data.blog.name};
 				else if(data.type == "link")
-					{title: post.title, content: '<a href="${post.url}">${post.description}</a>', author: data.blog.name});
+					{title: post.title, content: '<a href="${post.url}">${post.description}</a>', author: data.blog.name}
+				else
+					null
+				);
 			});
 		}
 	}
 	static function getImageLink(ourl:String, el:Element, cb:Album -> Void) {
-		var url = trimURL(ourl);
+		var url = Reditn.trimURL(ourl);
 		if(url.startsWith("i.imgur.com/") && url.split(".").length == 3)
 			cb(album('http://${url}.jpg'));
 		else if(url.startsWith("imgur.com/a/") || url.startsWith("imgur.com/gallery/")) {
 			var id:String = url.split("/")[2];
 			var albumType = url.indexOf("gallery") != -1 ? "gallery/album" : "album";
 			var req = new haxe.Http('https://api.imgur.com/3/${albumType}/${id}');
-			req.setHeader("Authorization", "Client-ID "+IMGUR_CLIENT_ID);
+			req.setHeader("Authorization", 'Client-ID ${Reditn.IMGUR_CLIENT_ID}');
 			req.onData = function(ds:String) {
 				var d:data.imgur.Album = cast Reditn.getData(haxe.Json.parse(ds));
 				var album = [];
@@ -291,19 +287,19 @@ class Expand {
 			#end
 			req.request(false);
 		} else if(url.startsWith("imgur.com/")) {
-			var id = removeSymbols(url.substr(url.indexOf("/")+1));
+			var id = Reditn.removeSymbols(url.substr(url.indexOf("/")+1));
 			cb(if(id.indexOf(",") != -1)
 				id.split(",").map(function(nid) return image('http://i.imgur.com/${nid}.jpg'));
 			else
 				album('http://i.imgur.com/${id}.jpg'));
 		} else if(url.startsWith("qkme.me/")) {
-			var id = removeSymbols(url.substr(8));
+			var id = Reditn.removeSymbols(url.substr(8));
 			cb(album('http://i.qkme.me/${id}.jpg'));
 		} else if(url.startsWith("quickmeme.com/meme/")) {
-			var id = removeSymbols(url.substr(19));
+			var id = Reditn.removeSymbols(url.substr(19));
 			cb(album('http://i.qkme.me/${id}.jpg'));
 		} else if(url.startsWith("m.quickmeme.com/meme/")) {
-			var id = removeSymbols(url.substr(21));
+			var id = Reditn.removeSymbols(url.substr(21));
 			cb(album('http://i.qkme.me/${id}.jpg'));
 		} else if(url.startsWith("memecrunch.com/meme/")) {
 			var id = url;
@@ -311,18 +307,18 @@ class Expand {
 				id += "/";
 			cb(album('http://${id}image.jpg'));
 		} else if(url.startsWith("memegenerator.net/instance/")) {
-			var id = removeSymbols(url.substr(27));
+			var id = Reditn.removeSymbols(url.substr(27));
 			cb(album('http://cdn.memegenerator.net/instances/400x/${id}.jpg'));
 		} else if(url.startsWith("imgflip.com/i/")) {
-			var id = removeSymbols(url.substr(14));
+			var id = Reditn.removeSymbols(url.substr(14));
 			cb(album('http://i.imgflip.com/${id}.jpg'));
 		} else if(url.startsWith("xkcd.com/")) {
-			var id = removeSymbols(url.substr(9));
+			var id = Reditn.removeSymbols(url.substr(9));
 			Reditn.getJSON('http://xkcd.com/${id}/info.0.json', function(data:Dynamic) {
 				cb(album(data.img, data.title));
 			});
 		} else if(url.startsWith("explosm.net/comics/")) {
-			var id = removeSymbols(url.substr(19));
+			var id = Reditn.removeSymbols(url.substr(19));
 			Reditn.getText('http://explosm.net/comics/${id}/', function(text:String) {
 				var mt = "\"http://www.explosm.net/db/files/Comics/";
 				var i = text.indexOf(mt);
@@ -333,16 +329,18 @@ class Expand {
 				}
 			});
 		} else if(url.startsWith("livememe.com/")) {
-			var id = removeSymbols(url.substr(13));
+			var id = Reditn.removeSymbols(url.substr(13));
 			cb(album('http://livememe.com/${id}.jpg'));
 		} else if(url.startsWith("deviantart.com/art/") || ourl.indexOf(".deviantart.com/art/") != -1 || (ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1) || ourl.indexOf("fav.me") != -1) {
 			Reditn.getJSON('http://backend.deviantart.com/oembed?url=${ourl.urlEncode()}&format=json', function(d) {
 				cb(album(d.url, '${d.title} by ${d.author_name}'));
 			});
-		} else if(url.indexOf(".tumblr.com/image/") != -1) {
+		} else if(url.indexOf(".tumblr.com/") != -1) {
 			var author = url.substr(0, url.indexOf("."));
-			var id = removeSymbols(url.substr(author.length + 18));
-			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
+			var parts = url.substr(author.length+12).split("/");
+			var id = Reditn.removeSymbols(parts[1]);
+			trace('Author: $author, id: $id');
+			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${Reditn.TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
 				var post = data.posts[0];
 				switch(post.type) {
 					case "photo": 
@@ -358,7 +356,7 @@ class Expand {
 			var id = url.substr(18);
 			id = id.substr(id.indexOf("/")+1);
 			id = id.substr(0, id.indexOf("/"));
-			Reditn.getJSON('http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=${FLICKR_KEY}&photo_id=${id}&format=json', function(d) {
+			Reditn.getJSON('http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=${Reditn.FLICKR_KEY}&photo_id=${id}&format=json', function(d) {
 				if(d.sizes == null || d.sizes.size == null)
 					return;
 				var sizes:Array<Dynamic> = d.sizes.size;
@@ -438,16 +436,5 @@ class Expand {
 			drag = false;
 			ev.preventDefault();
 		}
-	}
-	public static function removeSymbols(s:String):String {
-		if(s.lastIndexOf("?") != -1)
-			s = s.substr(0, s.indexOf("?"));
-		if(s.lastIndexOf("/") != -1)
-			s = s.substr(0, s.indexOf("/"));
-		if(s.lastIndexOf("#") != -1)
-			s = s.substr(0, s.indexOf("#"));
-		if(s.lastIndexOf(".") != -1)
-			s = s.substr(0, s.indexOf("."));
-		return s;
 	}
 }
