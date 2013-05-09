@@ -263,8 +263,8 @@ class Expand {
 	}
 	static function getImageLink(ourl:String, el:Element, cb:Album -> Void) {
 		var url = Reditn.trimURL(ourl);
-		if(url.startsWith("i.imgur.com/") && url.split(".").length == 3)
-			cb(album('http://${url}.jpg'));
+		if((url.startsWith("i.imgur.com/") && url.split(".").length == 3) || url.indexOf("media.tumblr.com/") != -1)
+			cb(album(ourl));
 		else if(url.startsWith("imgur.com/a/") || url.startsWith("imgur.com/gallery/")) {
 			var id:String = url.split("/")[2];
 			var albumType = url.indexOf("gallery") != -1 ? "gallery/album" : "album";

@@ -151,6 +151,8 @@ class Reditn {
 		var url = trimURL(ourl);
 		if(url.startsWith("reddit.com/r/") && url.indexOf("/comments/") != -1)
 			cb(LinkType.TEXT);
+		else if(url.indexOf(".media.tumblr.com/") != -1)
+			cb(LinkType.IMAGE);
 		else if(url.indexOf(".tumblr.com/post/") != -1) {
 			var author = url.substr(0, url.indexOf("."));
 			var id = removeSymbols(url.substr(url.indexOf(".")+17));
@@ -171,6 +173,7 @@ class Reditn {
 			cb(LinkType.VIDEO);
 		} else if(url.lastIndexOf(".") != url.indexOf(".") && url.substr(url.lastIndexOf(".")).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
 			var ext = url.substr(url.lastIndexOf(".")+1).toLowerCase();
+			trace(ext);
 			switch(ext) {
 				case "gif", "jpg", "jpeg", "bmp", "png", "webp", "svg", "ico", "tiff", "raw":
 					cb(LinkType.IMAGE);

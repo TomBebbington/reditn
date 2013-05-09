@@ -351,7 +351,7 @@ Expand.getArticle = function(ourl,el,cb) {
 }
 Expand.getImageLink = function(ourl,el,cb) {
 	var url = Reditn.trimURL(ourl);
-	if(StringTools.startsWith(url,"i.imgur.com/") && url.split(".").length == 3) cb([{ url : "http://" + url + ".jpg", caption : null}]); else if(StringTools.startsWith(url,"imgur.com/a/") || StringTools.startsWith(url,"imgur.com/gallery/")) {
+	if(StringTools.startsWith(url,"i.imgur.com/") && url.split(".").length == 3 || url.indexOf("media.tumblr.com/") != -1) cb([{ url : ourl, caption : null}]); else if(StringTools.startsWith(url,"imgur.com/a/") || StringTools.startsWith(url,"imgur.com/gallery/")) {
 		var id = url.split("/")[2];
 		var albumType = url.indexOf("gallery") != -1?"gallery/album":"album";
 		var req = new haxe.Http("https://api.imgur.com/3/" + albumType + "/" + id);
@@ -838,7 +838,7 @@ Reditn.trimURL = function(url) {
 }
 Reditn.getLinkType = function(ourl,cb) {
 	var url = Reditn.trimURL(ourl);
-	if(StringTools.startsWith(url,"reddit.com/r/") && url.indexOf("/comments/") != -1) cb(data.LinkType.TEXT); else if(url.indexOf(".tumblr.com/post/") != -1) {
+	if(StringTools.startsWith(url,"reddit.com/r/") && url.indexOf("/comments/") != -1) cb(data.LinkType.TEXT); else if(url.indexOf(".media.tumblr.com/") != -1) cb(data.LinkType.IMAGE); else if(url.indexOf(".tumblr.com/post/") != -1) {
 		var author = HxOverrides.substr(url,0,url.indexOf("."));
 		var id = Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf(".") + 17,null));
 		Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data1) {
@@ -860,6 +860,7 @@ Reditn.getLinkType = function(ourl,cb) {
 		});
 	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_") || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes\n\t\t\t/")) cb(data.LinkType.ARTICLE); else if(StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")) cb(data.LinkType.VIDEO); else if(url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
+		console.log(ext);
 		switch(ext) {
 		case "gif":case "jpg":case "jpeg":case "bmp":case "png":case "webp":case "svg":case "ico":case "tiff":case "raw":
 			cb(data.LinkType.IMAGE);
