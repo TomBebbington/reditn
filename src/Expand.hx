@@ -85,7 +85,11 @@ class Expand {
 								expando.appendChild(div);
 								var head = null;
 								var contentBlock = Browser.document.createDivElement();
-								contentBlock.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)} <em>by ${a.author}</em></h3><br>' : "") + a.content;
+								var inner = Browser.document.createSpanElement();
+								inner.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)} <em>by ${a.author}</em></h3><br>' : "") + a.content;
+								contentBlock.appendChild(inner);
+								if(a.images.length > 0)
+									contentBlock.appendChild(Reditn.embedAlbum(a.images));
 								contentBlock.className = "md";
 								div.appendChild(contentBlock);
 								var s = makeSelfButton(e, "selftext", l.href);
@@ -198,10 +202,10 @@ class Expand {
 						Reditn.getText(temp, function(odata:String) {
 							var nbody = odata.substr(odata.indexOf("<section>")+9);
 							nbody = nbody.substr(0, nbody.indexOf("</section"));
-							cb({title: title, content: body + "<br>" + nbody, author: (!authorx.match(data) ? null : authorx.matched(1))});
+							cb({images: [], title: title, content: body + "<br>" + nbody, author: (!authorx.match(data) ? null : authorx.matched(1))});
 						});
 					} else
-						cb({title: title, content: body, author: (!authorx.match(data) ? null : authorx.matched(1))});
+						cb({title: title, content: body, author: (!authorx.match(data) ? null : authorx.matched(1)), images: []});
 				}
 			});
 		} else if(url.startsWith("twitter.com/") && url.indexOf("/status/") != -1) {
@@ -209,7 +213,7 @@ class Expand {
 			var id = Reditn.removeSymbols(url.substr(url.indexOf("/status/") + 8));
 			Reditn.getJSON('https://api.twitter.com/1.1/statuses/show.json?id=${id}', function(data) {
 				data.text;
-				cb({title: null, content: StringTools.htmlEscape(data.text), author:'@${username}'});
+				cb({title: null, content: StringTools.htmlEscape(data.text), author:'@${username}', images: []});
 			});
 		} else if(url.indexOf(".tumblr.com/post/") != -1) {
 			var author = url.substr(0, url.indexOf("."));
@@ -217,11 +221,11 @@ class Expand {
 			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${Reditn.TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
 				var post = data.posts[0];
 				cb(if(post.type == "text")
-					{title: post.title, content: post.body, author: data.blog.name};
+					{title: post.title, content: post.body, author: data.blog.name, images: []};
 				else if(data.type == "quote")
-					{title: null, content: '${post.text}<br/><b>${post.source}</b>', author: data.blog.name};
+					{title: null, content: '${post.text}<br/><b>${post.source}</b>', author: data.blog.name, images: []};
 				else if(data.type == "link")
-					{title: post.title, content: '<a href="${post.url}">${post.description}</a>', author: data.blog.name}
+					{title: post.title, content: '<a href="${post.url}">${post.description}</a>', author: data.blog.name, images: []}
 				else
 					null
 				);
@@ -235,7 +239,14 @@ class Expand {
 			slug = StringTools.htmlEscape(Reditn.removeSymbols(slug));
 			var url = 'http://public-api.wordpress.com/rest/v1/sites/${site}/posts/slug:${slug}';
 			Reditn.getJSON(url, function(data) {
-				cb({title: data.title, content: data.content, author: data.author.name});
+				var att = data.attachments;
+				cb({title: StringTools.htmlUnescape(data.title), content: data.content, author: data.author.name, images: [
+					for(f in Reflect.fields(att)) {
+						var img = Reflect.field(att, f);
+						if(img.mime_type.startsWith("image/"))
+							image(img.URL);
+					}
+				]});
 			});
 		} else if(url.indexOf(".blogger.") != -1 || url.indexOf(".blogspot.") != -1) {
 			var site = StringTools.htmlEscape(url.substr(0, url.indexOf("/")));
@@ -248,7 +259,7 @@ class Expand {
 				slug = slug.substr(0, slug.length-5);
 			var url = 'https://www.googleapis.com/blogger/v2/blogs/${site}/posts/${slug}&key=${Reditn.GOOGLE_API_KEY}';
 			Reditn.getJSON(url, function(data) {
-				cb({title: data.title, content: data.content, author: data.author.displayName});
+				cb({title: data.title, content: data.content, author: data.author.displayName, images: []});
 			});
 		}
 	}
