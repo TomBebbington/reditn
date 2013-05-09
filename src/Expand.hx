@@ -60,11 +60,7 @@ class Expand {
 								'<p>${StringTools.htmlEscape(i.description)}</p>';
 								contentBlock.appendChild(inner);
 								contentBlock.className = "md";
-								if(i.images != null && i.images.length > 0) {
-									var album = Reditn.embedAlbum(i.images);
-									album.style.float = "right";
-									contentBlock.appendChild(album);
-								}
+								contentBlock.appendChild(Reditn.embedAlbum(i.images));
 								div.appendChild(contentBlock);
 								var s = makeSelfButton(e, "item", l.href);
 								var pn:Element = cast s.parentNode;

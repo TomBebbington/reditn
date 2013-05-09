@@ -105,11 +105,7 @@ Expand.init = function() {
 									inner.innerHTML = "<h3>" + StringTools.htmlEscape(i.title) + "</h3><br>" + ("<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>") + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + StringTools.htmlEscape(i.description) + "</p>");
 									contentBlock.appendChild(inner);
 									contentBlock.className = "md";
-									if(i.images != null && i.images.length > 0) {
-										var album = Reditn.embedAlbum(i.images);
-										album.style["float"] = "right";
-										contentBlock.appendChild(album);
-									}
+									contentBlock.appendChild(Reditn.embedAlbum(i.images));
 									div.appendChild(contentBlock);
 									var s = Expand.makeSelfButton(e,"item",l[0].href);
 									var pn = s.parentNode;
