@@ -20,21 +20,21 @@
 }
 .expando-button.item.collapsed{
 	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
-	background-position:-24px -24px;
+	background-position:-24px -23px;
 	background-repeat:no-repeat
 }
 .expando-button.item.collapsed:hover {
 	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
-	background-position:-0px -24px;
+	background-position:-0px -23px;
 	background-repeat:no-repeat
 }
 .expando-button.item.expanded {
 	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
-	background-position:-72px -24px;
+	background-position:-72px -23px;
 	background-repeat:no-repeat
 }
 .expando-button.item.expanded:hover {
 	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
-	background-position:-48px -24px;
+	background-position:-48px -23px;
 	background-repeat:no-repeat
 }
