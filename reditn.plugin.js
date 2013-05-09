@@ -158,7 +158,7 @@ Expand.init = function() {
 							Expand.getImage(l[0].href,(function(l) {
 								return function(a) {
 									var e = l[0].parentNode.parentNode.parentNode;
-									var div = js.Browser.document.createElement("div");
+									var div = Reditn.embedAlbum(a);
 									e.appendChild(div);
 									div.style.display = Expand.toggled?"":"none";
 									if(div.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
@@ -196,9 +196,14 @@ Expand.makeSelfButton = function(e,extra,url) {
 		isToggled = v;
 		d.className = cn + (isToggled?"expanded":"collapsed");
 		var entry = d.parentNode;
-		var expando = entry.getElementsByClassName("expando")[0];
-		expando.style.display = v?"":"none";
-		if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+		var expandos = entry.getElementsByClassName("expando");
+		var _g = 0;
+		while(_g < expandos.length) {
+			var e1 = expandos[_g];
+			++_g;
+			e1.style.display = v?"":"none";
+			if(e1.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,e1.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+		}
 	}, url : url, element : d};
 	d.onclick = function(_) {
 		btn.toggle(!isToggled);

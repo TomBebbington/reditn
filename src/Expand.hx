@@ -99,8 +99,7 @@ class Expand {
 						case IMAGE:
 							getImage(l.href, function(a:Album) {
 								var e = Reditn.getLinkContainer(l);
-								var div = Browser.document.createDivElement();
-
+								var div = Reditn.embedAlbum(a);
 								e.appendChild(div);
 								Reditn.show(div, toggled);
 								var s = makeSelfButton(e, "image", l.href);
@@ -131,8 +130,9 @@ class Expand {
 				isToggled = v;
 				d.className = cn + (isToggled ? "expanded" : "collapsed");
 				var entry:Element = cast d.parentNode;
-				var expando:Element = cast entry.getElementsByClassName("expando")[0];
-				Reditn.show(expando, v);
+				var expandos:Array<Element> = cast entry.getElementsByClassName("expando");
+				for(e in expandos)
+					Reditn.show(e, v);
 			},
 			url: url,
 			element: d
