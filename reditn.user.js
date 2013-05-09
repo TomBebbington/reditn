@@ -2,7 +2,7 @@
 // @name			Reditn
 // @namespace		http://userscripts.org/user/tophattedcoder/
 // @description		Reddit tweaks and enhancements.
-// @downloadURL		https://github.com/TopHattedCoder/reditn/raw/master/reditn.user.js
+// @downloadURL		http://userscripts.org/scripts/source/150976.user.js
 // @include			reddit.com
 // @include			reddit.com/*
 // @include			*.reddit.com
@@ -303,6 +303,7 @@ Expand.getArticle = function(ourl,cb) {
 		var author = HxOverrides.substr(url,0,url.indexOf("."));
 		var id = Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf(".") + 17,null));
 		Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
+			console.log(data.posts);
 			var post = data.posts[0];
 			cb(post.type == "text"?{ title : post.title, content : post.body, author : data.blog.name, images : []}:data.type == "quote"?{ title : null, content : "" + post.text + "<br/><b>" + post.source + "</b>", author : data.blog.name, images : []}:data.type == "link"?{ title : post.title, content : "<a href=\"" + post.url + "\">" + post.description + "</a>", author : data.blog.name, images : []}:null);
 		});
@@ -912,7 +913,7 @@ Reditn.getLinkType = function(ourl,cb) {
 				return $r;
 			}(this)));
 		});
-	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_") || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes\n\t\t\t/") || url.indexOf(".wordpress.com/") != -1 && url.indexOf("files.wordpress.com") == -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/")) cb(data.LinkType.ARTICLE); else if(StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")) cb(data.LinkType.VIDEO); else if(url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
+	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_") || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes\n\t\t\t/") || url.indexOf(".wordpress.com/") != -1 && url.indexOf("files.wordpress.com") == -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/") && url.indexOf(".bp.blogspot.com") == -1) cb(data.LinkType.ARTICLE); else if(StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")) cb(data.LinkType.VIDEO); else if(url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
 		switch(ext) {
 		case "gif":case "jpg":case "jpeg":case "bmp":case "png":case "webp":case "svg":case "ico":case "tiff":case "raw":
@@ -1056,7 +1057,7 @@ Reditn.popUp = function(bs,el,x,y) {
 	el.style.position = "absolute";
 	el.style.width = (js.Browser.window.innerWidth * 0.25 | 0) + "px";
 	el.style.left = "" + x + "px";
-	el.style.top = "" + y + "px";
+	el.style.top = "" + (y - 30) + "px";
 	bs.onmouseout = el.onblur = function(e) {
 		el.parentNode.removeChild(el);
 		bs.mouseover = false;
@@ -1393,7 +1394,7 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 	var div = js.Browser.document.createElement("div");
 	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
 	Reditn.getJSON("/r/" + name + "/about.json",function(d) {
-		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = d.description_html != null?StringTools.htmlUnescape(d.description_html):d.public_description != null?Markdown.parse(d.public_description):Markdown.parse(d.description), age = Reditn.age(d.created_utc);
+		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = Markdown.parse(d.public_description != null?d.public_description:d.description), age = Reditn.age(d.created_utc);
 		var html = "<b>Name:</b> " + name + " <br>";
 		var ts = Settings.data.get("sub-tags");
 		if(ts.exists(name)) html += "<b>Tag:</b> " + ts.get(name) + "<br>";

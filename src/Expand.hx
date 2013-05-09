@@ -215,6 +215,7 @@ class Expand {
 			var author = url.substr(0, url.indexOf("."));
 			var id = Reditn.removeSymbols(url.substr(url.indexOf(".")+17));
 			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${Reditn.TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
+				trace(data.posts);
 				var post = data.posts[0];
 				cb(if(post.type == "text")
 					{title: post.title, content: post.body, author: data.blog.name, images: []};
