@@ -66,7 +66,7 @@ class Expand {
 									contentBlock.appendChild(album);
 								}
 								div.appendChild(contentBlock);
-								var s = makeSelfButton(e, "selftext", l.href);
+								var s = makeSelfButton(e, "item", l.href);
 								var pn:Element = cast s.parentNode;
 								for(exp in pn.getElementsByClassName("expando")) {
 									pn.removeChild(exp);

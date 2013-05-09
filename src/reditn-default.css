@@ -8,15 +8,33 @@
 	background-position:-0px -0px;
 	background-repeat:no-repeat
 }
-
 .expando-button.image.expanded {
 	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
 	background-position:-72px -0px;
 	background-repeat:no-repeat
 }
-
 .expando-button.image.expanded:hover {
 	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
 	background-position:-48px -0px;
+	background-repeat:no-repeat
+}
+.expando-button.item.collapsed{
+	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
+	background-position:-24px -24px;
+	background-repeat:no-repeat
+}
+.expando-button.item.collapsed:hover {
+	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
+	background-position:-0px -24px;
+	background-repeat:no-repeat
+}
+.expando-button.item.expanded {
+	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
+	background-position:-72px -24px;
+	background-repeat:no-repeat
+}
+.expando-button.item.expanded:hover {
+	background-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");
+	background-position:-48px -24px;
 	background-repeat:no-repeat
 }
