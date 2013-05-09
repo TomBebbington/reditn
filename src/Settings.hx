@@ -22,7 +22,7 @@ class Settings {
 		ADBLOCK => "Block advertisements and sponsors",
 		USERINFO => "Show information about a user upon hover",
 		SUBINFO => "Show information about a subreddit upon hover",
-		EXPAND => "Allow expansion of images",
+		EXPAND => "Allow expansion of images, articles, etc",
 		DUPLICATE_HIDER => "Hide duplicate links",
 		USER_TAGGER => "Tag users",
 		SUBREDDIT_TAGGER => "Tag subreddits",

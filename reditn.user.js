@@ -147,7 +147,7 @@ Expand.init = function() {
 									var head = null;
 									var contentBlock = js.Browser.document.createElement("div");
 									var inner = js.Browser.document.createElement("span");
-									inner.innerHTML = (a.title != null?"<h3>" + StringTools.htmlEscape(a.title) + " <em>by " + a.author + "</em></h3><br>":"") + a.content;
+									inner.innerHTML = (a.title != null?"<h3>" + a.title + " <em>by " + a.author + "</em></h3><br>":"") + a.content;
 									contentBlock.appendChild(inner);
 									if(a.images.length > 0) contentBlock.appendChild(Reditn.embedAlbum(a.images));
 									contentBlock.className = "md";
@@ -2677,7 +2677,7 @@ Settings.DESC = (function($this) {
 	_g.set("adblock","Block advertisements and sponsors");
 	_g.set("userinfo","Show information about a user upon hover");
 	_g.set("subinfo","Show information about a subreddit upon hover");
-	_g.set("expand","Allow expansion of images");
+	_g.set("expand","Allow expansion of images, articles, etc");
 	_g.set("dup-hider","Hide duplicate links");
 	_g.set("user-tag","Tag users");
 	_g.set("sub-tag","Tag subreddits");

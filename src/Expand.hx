@@ -82,7 +82,7 @@ class Expand {
 								var head = null;
 								var contentBlock = Browser.document.createDivElement();
 								var inner = Browser.document.createSpanElement();
-								inner.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)} <em>by ${a.author}</em></h3><br>' : "") + a.content;
+								inner.innerHTML = (a.title != null ? '<h3>${a.title} <em>by ${a.author}</em></h3><br>' : "") + a.content;
 								contentBlock.appendChild(inner);
 								if(a.images.length > 0)
 									contentBlock.appendChild(Reditn.embedAlbum(a.images));
