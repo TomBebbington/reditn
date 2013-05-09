@@ -5,5 +5,6 @@ enum LinkType {
 	AUDIO;
 	TEXT;
 	ARTICLE;
+	SHOP_ITEM;
 	UNKNOWN;
 }

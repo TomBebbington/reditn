@@ -38,109 +38,84 @@ class Expand {
 		for(l in Reditn.links) {
 			if(l.nodeName.toLowerCase()!="a")
 				continue;
-			Reditn.getLinkType(l.href, function(urltype) {
-				switch(urltype) {
-					case ARTICLE:
-						getArticle(l.href, l, function(a:Article) {
-							var e = Reditn.getLinkContainer(l);
-							var expando = Browser.document.createDivElement();
-							expando.className = "expando";
-							expando.style.display = "none";
-							var div = Browser.document.createDivElement();
-							div.className = "usertext";
-							expando.appendChild(div);
-							var head = null;
-							var contentBlock = Browser.document.createDivElement();
-							contentBlock.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)} <em>by ${a.author}</em></h3><br>' : "") + a.content;
-							contentBlock.className = "md";
-							div.appendChild(contentBlock);
-							var s = makeSelfButton(e, "selftext", l.href);
-							var pn:Element = cast s.parentNode;
-							for(exp in pn.getElementsByClassName("expando")) {
-								pn.removeChild(exp);
-							}
-							pn.appendChild(expando);
-							Reditn.show(expando, toggled);
-						});
-					case IMAGE:
-						getImageLink(l.href, l, function(a:Album) {
-							var e = Reditn.getLinkContainer(l);
-							var div = Browser.document.createDivElement();
-							div.className = "expando";
-							var imgs = [for(i in a) {
-								var i = loadImage(i.url);
-								div.appendChild(i);
-								Reditn.show(i, false);
-								i;
-							}];
-							var img:ImageElement = null;
-							var caption = Browser.document.createSpanElement();
-							caption.style.fontWeight = "bold";
-							caption.style.marginLeft = "10px";
-							var currentIndex = 0;
-							var prev = null, info = null, next = null;
-							if(a.length > 1) {
-								prev = Browser.document.createButtonElement();
-								prev.innerHTML = "Prev";
-								div.appendChild(prev);
-								info = Browser.document.createSpanElement();
-								info.style.textAlign = "center";
-								info.style.paddingLeft = info.style.paddingRight = "5px";
-								div.appendChild(info);
-								next = Browser.document.createButtonElement();
-								next.innerHTML = "Next";
-								div.appendChild(next);
-							}
-							if(a.length > 1 || (a[0].caption != null && a[0].caption.length > 0)) {
-								div.appendChild(caption);
-								div.appendChild(Browser.document.createBRElement());
-							}
-							function switchImage(ind:Int) {
-								if(ind < 0 || ind >= a.length)
-									return;
-								var i = a[ind];
-								var height = null;
-								if(img != null) {
-									Reditn.show(img, false);
-									height = img.height;
+			l.onchange = function(_) {
+				Reditn.getLinkType(l.href, function(urltype) {
+					switch(urltype) {
+						case SHOP_ITEM:
+							getItem(l.href, function(i:ShopItem) {
+								var e = Reditn.getLinkContainer(l);
+								var expando = Browser.document.createDivElement();
+								expando.className = "expando";
+								expando.style.display = "none";
+								var div = Browser.document.createDivElement();
+								div.className = "usertext";
+								expando.appendChild(div);
+								var head = null;
+								var contentBlock = Browser.document.createDivElement();
+								var inner = Browser.document.createSpanElement();
+								inner.innerHTML = '<h3>${StringTools.htmlEscape(i.title)}</h3><br>' + 
+								'<b>Category:</b> ${StringTools.htmlEscape(i.category)}<br>' + 
+								'<b>Location:</b> ${StringTools.htmlEscape(i.location)}<br>' + 
+								'<b>Price:</b> ${StringTools.htmlEscape(i.price)}<br>' +
+								'<p>${StringTools.htmlEscape(i.description)}</p>';
+								contentBlock.appendChild(inner);
+								contentBlock.className = "md";
+								if(i.images != null && i.images.length > 0) {
+									var album = Reditn.embedAlbum(i.images);
+									album.style.float = "right";
+									contentBlock.appendChild(album);
 								}
-								img = imgs[ind];
-								Reditn.show(img, true);
-								if(height != null) {
-									var ratio = img.width / img.height;
-									img.height = height;
-									img.width = Std.int(height * ratio);
+								div.appendChild(contentBlock);
+								var s = makeSelfButton(e, "selftext", l.href);
+								var pn:Element = cast s.parentNode;
+								for(exp in pn.getElementsByClassName("expando")) {
+									pn.removeChild(exp);
 								}
-								div.appendChild(img);
-								if(prev != null) {
-									var len = Reditn.formatNumber(a.length);
-									var curr = Reditn.formatNumber(ind+1);
-									info.innerHTML = '$curr of $len';
-									prev.disabled = ind <= 0;
-									next.disabled = ind >= a.length-1;
+								pn.appendChild(expando);
+								Reditn.show(expando, toggled);
+							});
+						case ARTICLE:
+							getArticle(l.href, function(a:Article) {
+								var e = Reditn.getLinkContainer(l);
+								var expando = Browser.document.createDivElement();
+								expando.className = "expando";
+								expando.style.display = "none";
+								var div = Browser.document.createDivElement();
+								div.className = "usertext";
+								expando.appendChild(div);
+								var head = null;
+								var contentBlock = Browser.document.createDivElement();
+								contentBlock.innerHTML = (a.title != null ? '<h3>${StringTools.htmlEscape(a.title)} <em>by ${a.author}</em></h3><br>' : "") + a.content;
+								contentBlock.className = "md";
+								div.appendChild(contentBlock);
+								var s = makeSelfButton(e, "selftext", l.href);
+								var pn:Element = cast s.parentNode;
+								for(exp in pn.getElementsByClassName("expando")) {
+									pn.removeChild(exp);
 								}
-								Reditn.show(caption, i.caption != null);
-								if(i.caption != null) 
-									caption.innerHTML = StringTools.htmlEscape(i.caption);
-							}
-							switchImage(0);
-							if(prev != null) {
-								prev.onmousedown = function(_) switchImage(--currentIndex);
-								next.onmousedown = function(_) switchImage(++currentIndex);
-							}
-							e.appendChild(div);
-							Reditn.show(div, toggled);
-							var s = makeSelfButton(e, "image", l.href);
-							var pn:Element = cast s.parentNode;
-							for(exp in pn.getElementsByClassName("expando")) {
-								pn.removeChild(exp);
-							}
-							pn.appendChild(div);
-							refresh();
-						});
-					default: preload(l.href);
-				}
-			});
+								pn.appendChild(expando);
+								Reditn.show(expando, toggled);
+							});
+						case IMAGE:
+							getImage(l.href, function(a:Album) {
+								var e = Reditn.getLinkContainer(l);
+								var div = Browser.document.createDivElement();
+
+								e.appendChild(div);
+								Reditn.show(div, toggled);
+								var s = makeSelfButton(e, "image", l.href);
+								var pn:Element = cast s.parentNode;
+								for(exp in pn.getElementsByClassName("expando")) {
+									pn.removeChild(exp);
+								}
+								pn.appendChild(div);
+								refresh();
+							});
+						default: preload(l.href);
+					}
+				});
+			};
+			l.onchange(null);
 		}
 	}
 	static function makeSelfButton(e:Element, extra:String, url:String):DivElement {
@@ -207,7 +182,7 @@ class Expand {
 	static inline function album(url:String, ?c:String):Album {
 		return [image(url, c)];
 	}
-	static function getArticle(ourl:String, el:Element, cb:Article -> Void) {
+	static function getArticle(ourl:String, cb:Article -> Void) {
 		var url = Reditn.trimURL(ourl);
 		if(url.startsWith("cracked.com/")) {
 			var authorx = ~/<a[^>]*?class="[^"]*?byline"[^>]*?>([a-zA-Z ]*)<\/a>/;
@@ -256,7 +231,8 @@ class Expand {
 			var slug = url.substr(url.indexOf("/")+1);
 			if(slug.charAt(slug.length-1) == "/")
 				slug = slug.substr(0, slug.length-1);
-			slug = StringTools.htmlEscape(slug.substr(slug.lastIndexOf("/")+1));
+			slug = slug.substr(slug.lastIndexOf("/")+1);
+			slug = StringTools.htmlEscape(Reditn.removeSymbols(slug));
 			var url = 'http://public-api.wordpress.com/rest/v1/sites/${site}/posts/slug:${slug}';
 			Reditn.getJSON(url, function(data) {
 				cb({title: data.title, content: data.content, author: data.author.name});
@@ -266,17 +242,42 @@ class Expand {
 			var slug = url.substr(url.indexOf("/")+1);
 			if(slug.charAt(slug.length-1) == "/")
 				slug = slug.substr(0, slug.length-1);
-			slug = StringTools.htmlEscape(slug.substr(slug.lastIndexOf("/")+1));
+			slug = slug.substr(slug.lastIndexOf("/")+1);
+			slug = StringTools.htmlEscape(Reditn.removeSymbols(slug));
 			if(slug.endsWith(".html"))
 				slug = slug.substr(0, slug.length-5);
 			var url = 'https://www.googleapis.com/blogger/v2/blogs/${site}/posts/${slug}&key=${Reditn.GOOGLE_API_KEY}';
-			trace(url);
 			Reditn.getJSON(url, function(data) {
 				cb({title: data.title, content: data.content, author: data.author.displayName});
 			});
 		}
 	}
-	static function getImageLink(ourl:String, el:Element, cb:Album -> Void) {
+	static function getItem(url:String, cb:ShopItem -> Void) {
+		var url = Reditn.trimURL(url);
+		if(url.indexOf("ebay.com/") != -1) {
+			var id = if(url.indexOf("item=") != -1)
+				Reditn.removeSymbols(url.substr(url.indexOf("item=") + 5));
+			else {
+				var chopped = url.split("/");
+				var nid = null;
+				for(c in chopped) {
+					var rsc = Reditn.removeSymbols(c);
+					if(Std.string(Std.parseInt(rsc)) == rsc) {
+						nid = rsc;
+						break;
+					}
+				}
+				nid;
+			};
+			var url = 'http://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=${Reditn.EBAY_API_KEY}&siteid=0&version=515&ItemID=${id}&IncludeSelector=TextDescription';
+			Reditn.getJSON(url, function(data) {
+				var imgs:Array<String> = data.Item.PictureURL;
+				var nalbum = imgs.map(function(i) return image(i));
+				cb({title: data.Item.Title, category: data.Item.PrimaryCategoryName, location: data.Item.Location + ", " + data.Item.Country, description: data.Item.Description, images: nalbum, price: Reditn.formatNumber(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
+			});
+		}
+	}
+	static function getImage(ourl:String, cb:Album -> Void) {
 		var url = Reditn.trimURL(ourl);
 		if((url.startsWith("i.imgur.com/") && url.split(".").length == 3) || url.indexOf("media.tumblr.com/") != -1)
 			cb(album(ourl));
@@ -295,11 +296,6 @@ class Expand {
 						album.push(image('http://i.imgur.com/${i.id}.jpg', i.title));
 				cb(album);
 			};
-			#if debug
-			req.onError = function(e:String) {
-				trace('Error in request to ${req.url} for album with id ${id}: $e');
-			};
-			#end
 			req.request(false);
 		} else if(url.startsWith("imgur.com/")) {
 			var id = Reditn.removeSymbols(url.substr(url.indexOf("/")+1));
@@ -354,7 +350,6 @@ class Expand {
 			var author = url.substr(0, url.indexOf("."));
 			var parts = url.substr(author.length+12).split("/");
 			var id = Reditn.removeSymbols(parts[1]);
-			trace('Author: $author, id: $id');
 			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${Reditn.TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
 				var post = data.posts[0];
 				switch(post.type) {

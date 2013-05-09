@@ -97,155 +97,105 @@ Expand.init = function() {
 		var l = [_g1[_g]];
 		++_g;
 		if(l[0].nodeName.toLowerCase() != "a") continue;
-		Reditn.getLinkType(l[0].href,(function(l) {
-			return function(urltype) {
-				switch( (urltype)[1] ) {
-				case 4:
-					Expand.getArticle(l[0].href,l[0],(function(l) {
-						return function(a) {
-							var e = l[0].parentNode.parentNode.parentNode;
-							var expando = js.Browser.document.createElement("div");
-							expando.className = "expando";
-							expando.style.display = "none";
-							var div = js.Browser.document.createElement("div");
-							div.className = "usertext";
-							expando.appendChild(div);
-							var head = null;
-							var contentBlock = js.Browser.document.createElement("div");
-							contentBlock.innerHTML = (a.title != null?"<h3>" + StringTools.htmlEscape(a.title) + " <em>by " + a.author + "</em></h3><br>":"") + a.content;
-							contentBlock.className = "md";
-							div.appendChild(contentBlock);
-							var s = Expand.makeSelfButton(e,"selftext",l[0].href);
-							var pn = s.parentNode;
-							var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
-							while(_g2 < _g3.length) {
-								var exp = _g3[_g2];
-								++_g2;
-								pn.removeChild(exp);
-							}
-							pn.appendChild(expando);
-							expando.style.display = Expand.toggled?"":"none";
-							if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-						};
-					})(l));
-					break;
-				case 0:
-					Expand.getImageLink(l[0].href,l[0],(function(l) {
-						return function(a1) {
-							var e = l[0].parentNode.parentNode.parentNode;
-							var div1 = js.Browser.document.createElement("div");
-							div1.className = "expando";
-							var imgs = (function($this) {
-								var $r;
-								var _g2 = [];
-								{
-									var _g3 = 0;
-									while(_g3 < a1.length) {
-										var i = a1[_g3];
-										++_g3;
-										_g2.push((function($this) {
-											var $r;
-											var i1 = Expand.loadImage(i.url);
-											div1.appendChild(i1);
-											{
-												i1.style.display = "none";
-												if(i1.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,i1.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-											}
-											$r = i1;
-											return $r;
-										}($this)));
+		l[0].onchange = (function(l) {
+			return function(_) {
+				Reditn.getLinkType(l[0].href,(function(l) {
+					return function(urltype) {
+						switch( (urltype)[1] ) {
+						case 5:
+							Expand.getItem(l[0].href,(function(l) {
+								return function(i) {
+									var e = l[0].parentNode.parentNode.parentNode;
+									var expando = js.Browser.document.createElement("div");
+									expando.className = "expando";
+									expando.style.display = "none";
+									var div = js.Browser.document.createElement("div");
+									div.className = "usertext";
+									expando.appendChild(div);
+									var head = null;
+									var contentBlock = js.Browser.document.createElement("div");
+									var inner = js.Browser.document.createElement("span");
+									inner.innerHTML = "<h3>" + StringTools.htmlEscape(i.title) + "</h3><br>" + ("<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>") + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + StringTools.htmlEscape(i.description) + "</p>");
+									contentBlock.appendChild(inner);
+									contentBlock.className = "md";
+									if(i.images != null && i.images.length > 0) {
+										var album = Reditn.embedAlbum(i.images);
+										album.style["float"] = "right";
+										contentBlock.appendChild(album);
 									}
-								}
-								$r = _g2;
-								return $r;
-							}(this));
-							var img = null;
-							var caption = js.Browser.document.createElement("span");
-							caption.style.fontWeight = "bold";
-							caption.style.marginLeft = "10px";
-							var currentIndex = 0;
-							var prev = null, info = null, next = null;
-							if(a1.length > 1) {
-								prev = js.Browser.document.createElement("button");
-								prev.innerHTML = "Prev";
-								div1.appendChild(prev);
-								info = js.Browser.document.createElement("span");
-								info.style.textAlign = "center";
-								info.style.paddingLeft = info.style.paddingRight = "5px";
-								div1.appendChild(info);
-								next = js.Browser.document.createElement("button");
-								next.innerHTML = "Next";
-								div1.appendChild(next);
-							}
-							if(a1.length > 1 || a1[0].caption != null && a1[0].caption.length > 0) {
-								div1.appendChild(caption);
-								div1.appendChild(js.Browser.document.createElement("br"));
-							}
-							var switchImage = (function() {
-								return function(ind) {
-									if(ind < 0 || ind >= a1.length) return;
-									var i = a1[ind];
-									var height = null;
-									if(img != null) {
-										img.style.display = "none";
-										if(img.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,img.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-										height = img.height;
+									div.appendChild(contentBlock);
+									var s = Expand.makeSelfButton(e,"selftext",l[0].href);
+									var pn = s.parentNode;
+									var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
+									while(_g2 < _g3.length) {
+										var exp = _g3[_g2];
+										++_g2;
+										pn.removeChild(exp);
 									}
-									img = imgs[ind];
-									img.style.display = "";
-									if(img.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,img.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-									if(height != null) {
-										var ratio = img.width / img.height;
-										img.height = height;
-										img.width = height * ratio | 0;
-									}
-									div1.appendChild(img);
-									if(prev != null) {
-										var len = Reditn.formatNumber(a1.length);
-										var curr = Reditn.formatNumber(ind + 1);
-										info.innerHTML = "" + curr + " of " + len;
-										prev.disabled = ind <= 0;
-										next.disabled = ind >= a1.length - 1;
-									}
-									caption.style.display = i.caption != null?"":"none";
-									if(caption.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,caption.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-									if(i.caption != null) caption.innerHTML = StringTools.htmlEscape(i.caption);
+									pn.appendChild(expando);
+									expando.style.display = Expand.toggled?"":"none";
+									if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
 								};
-							})();
-							switchImage(0);
-							if(prev != null) {
-								prev.onmousedown = (function() {
-									return function(_) {
-										switchImage(--currentIndex);
-									};
-								})();
-								next.onmousedown = (function() {
-									return function(_) {
-										switchImage(++currentIndex);
-									};
-								})();
-							}
-							e.appendChild(div1);
-							div1.style.display = Expand.toggled?"":"none";
-							if(div1.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div1.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-							var s = Expand.makeSelfButton(e,"image",l[0].href);
-							var pn = s.parentNode;
-							var _g3 = 0, _g4 = pn.getElementsByClassName("expando");
-							while(_g3 < _g4.length) {
-								var exp = _g4[_g3];
-								++_g3;
-								pn.removeChild(exp);
-							}
-							pn.appendChild(div1);
-							Expand.refresh();
-						};
-					})(l));
-					break;
-				default:
-					Expand.preload(l[0].href);
-				}
+							})(l));
+							break;
+						case 4:
+							Expand.getArticle(l[0].href,(function(l) {
+								return function(a) {
+									var e = l[0].parentNode.parentNode.parentNode;
+									var expando = js.Browser.document.createElement("div");
+									expando.className = "expando";
+									expando.style.display = "none";
+									var div = js.Browser.document.createElement("div");
+									div.className = "usertext";
+									expando.appendChild(div);
+									var head = null;
+									var contentBlock = js.Browser.document.createElement("div");
+									contentBlock.innerHTML = (a.title != null?"<h3>" + StringTools.htmlEscape(a.title) + " <em>by " + a.author + "</em></h3><br>":"") + a.content;
+									contentBlock.className = "md";
+									div.appendChild(contentBlock);
+									var s = Expand.makeSelfButton(e,"selftext",l[0].href);
+									var pn = s.parentNode;
+									var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
+									while(_g2 < _g3.length) {
+										var exp = _g3[_g2];
+										++_g2;
+										pn.removeChild(exp);
+									}
+									pn.appendChild(expando);
+									expando.style.display = Expand.toggled?"":"none";
+									if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+								};
+							})(l));
+							break;
+						case 0:
+							Expand.getImage(l[0].href,(function(l) {
+								return function(a) {
+									var e = l[0].parentNode.parentNode.parentNode;
+									var div = js.Browser.document.createElement("div");
+									e.appendChild(div);
+									div.style.display = Expand.toggled?"":"none";
+									if(div.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+									var s = Expand.makeSelfButton(e,"image",l[0].href);
+									var pn = s.parentNode;
+									var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
+									while(_g2 < _g3.length) {
+										var exp = _g3[_g2];
+										++_g2;
+										pn.removeChild(exp);
+									}
+									pn.appendChild(div);
+									Expand.refresh();
+								};
+							})(l));
+							break;
+						default:
+							Expand.preload(l[0].href);
+						}
+					};
+				})(l));
 			};
-		})(l));
+		})(l);
+		l[0].onchange(null);
 	}
 }
 Expand.makeSelfButton = function(e,extra,url) {
@@ -317,7 +267,7 @@ Expand.image = function(url,c) {
 Expand.album = function(url,c) {
 	return [{ url : url, caption : c}];
 }
-Expand.getArticle = function(ourl,el,cb) {
+Expand.getArticle = function(ourl,cb) {
 	var url = Reditn.trimURL(ourl);
 	if(StringTools.startsWith(url,"cracked.com/")) {
 		var authorx = new EReg("<a[^>]*?class=\"[^\"]*?byline\"[^>]*?>([a-zA-Z ]*)</a>","");
@@ -356,7 +306,8 @@ Expand.getArticle = function(ourl,el,cb) {
 		var site = StringTools.htmlEscape(HxOverrides.substr(url,0,url.indexOf("/")));
 		var slug = HxOverrides.substr(url,url.indexOf("/") + 1,null);
 		if(slug.charAt(slug.length - 1) == "/") slug = HxOverrides.substr(slug,0,slug.length - 1);
-		slug = StringTools.htmlEscape(HxOverrides.substr(slug,slug.lastIndexOf("/") + 1,null));
+		slug = HxOverrides.substr(slug,slug.lastIndexOf("/") + 1,null);
+		slug = StringTools.htmlEscape(Reditn.removeSymbols(slug));
 		var url1 = "http://public-api.wordpress.com/rest/v1/sites/" + site + "/posts/slug:" + slug;
 		Reditn.getJSON(url1,function(data) {
 			cb({ title : data.title, content : data.content, author : data.author.name});
@@ -365,16 +316,48 @@ Expand.getArticle = function(ourl,el,cb) {
 		var site = StringTools.htmlEscape(HxOverrides.substr(url,0,url.indexOf("/")));
 		var slug = HxOverrides.substr(url,url.indexOf("/") + 1,null);
 		if(slug.charAt(slug.length - 1) == "/") slug = HxOverrides.substr(slug,0,slug.length - 1);
-		slug = StringTools.htmlEscape(HxOverrides.substr(slug,slug.lastIndexOf("/") + 1,null));
+		slug = HxOverrides.substr(slug,slug.lastIndexOf("/") + 1,null);
+		slug = StringTools.htmlEscape(Reditn.removeSymbols(slug));
 		if(StringTools.endsWith(slug,".html")) slug = HxOverrides.substr(slug,0,slug.length - 5);
 		var url1 = "https://www.googleapis.com/blogger/v2/blogs/" + site + "/posts/" + slug + "&key=" + "95f055321ea256d1d8828674c62105ea3931ae08";
-		console.log(url1);
 		Reditn.getJSON(url1,function(data) {
 			cb({ title : data.title, content : data.content, author : data.author.displayName});
 		});
 	}
 }
-Expand.getImageLink = function(ourl,el,cb) {
+Expand.getItem = function(url,cb) {
+	var url1 = Reditn.trimURL(url);
+	if(url1.indexOf("ebay.com/") != -1) {
+		var id = url1.indexOf("item=") != -1?Reditn.removeSymbols(HxOverrides.substr(url1,url1.indexOf("item=") + 5,null)):(function($this) {
+			var $r;
+			var chopped = url1.split("/");
+			var nid = null;
+			{
+				var _g = 0;
+				while(_g < chopped.length) {
+					var c = chopped[_g];
+					++_g;
+					var rsc = Reditn.removeSymbols(c);
+					if(Std.string(Std.parseInt(rsc)) == rsc) {
+						nid = rsc;
+						break;
+					}
+				}
+			}
+			$r = nid;
+			return $r;
+		}(this));
+		var url2 = "http://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=" + "ThomasDa-1e6c-4d29-a156-85557acee70b" + "&siteid=0&version=515&ItemID=" + id + "&IncludeSelector=TextDescription";
+		Reditn.getJSON(url2,function(data) {
+			var imgs = data.Item.PictureURL;
+			var nalbum = imgs.map(function(i) {
+				return { url : i, caption : null};
+			});
+			cb({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : data.Item.Description, images : nalbum, price : Reditn.formatNumber(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
+		});
+	}
+}
+Expand.getImage = function(ourl,cb) {
 	var url = Reditn.trimURL(ourl);
 	if(StringTools.startsWith(url,"i.imgur.com/") && url.split(".").length == 3 || url.indexOf("media.tumblr.com/") != -1) cb([{ url : ourl, caption : null}]); else if(StringTools.startsWith(url,"imgur.com/a/") || StringTools.startsWith(url,"imgur.com/gallery/")) {
 		var id = url.split("/")[2];
@@ -444,7 +427,6 @@ Expand.getImageLink = function(ourl,el,cb) {
 		var author = HxOverrides.substr(url,0,url.indexOf("."));
 		var parts = HxOverrides.substr(url,author.length + 12,null).split("/");
 		var id = Reditn.removeSymbols(parts[1]);
-		console.log("Author: " + author + ", id: " + id);
 		Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 			var post = data.posts[0];
 			switch(post.type) {
@@ -780,9 +762,19 @@ Reditn.init = function() {
 		{
 			var _g1 = 0, _g2 = Reditn.links;
 			while(_g1 < _g2.length) {
-				var l = _g2[_g1];
+				var l = [_g2[_g1]];
 				++_g1;
-				if(l.nodeName.toLowerCase() == "a" && l.parentNode.className != "parent") _g.push(l);
+				if(l[0].nodeName.toLowerCase() == "a" && l[0].parentNode.className != "parent") _g.push((function($this) {
+					var $r;
+					Reditn.expandURL(l[0].href,(function(l) {
+						return function(url) {
+							l[0].href = url;
+							if(l[0].onchange != null) l[0].onchange(null);
+						};
+					})(l));
+					$r = l[0];
+					return $r;
+				}($this)));
 			}
 		}
 		$r = _g;
@@ -823,6 +815,13 @@ Reditn.formatNumber = function(n) {
 	return !Math.isFinite(n)?Std.string(n):(function($this) {
 		var $r;
 		var s = Std.string(Math.abs(n));
+		var ad = s.indexOf(".") != -1?(function($this) {
+			var $r;
+			var t = HxOverrides.substr(s,s.indexOf("."),null);
+			s = HxOverrides.substr(s,0,s.indexOf("."));
+			$r = t;
+			return $r;
+		}($this)):"";
 		if(s.length >= 3) {
 			var ns = "";
 			var _g1 = 0, _g = s.length;
@@ -833,7 +832,7 @@ Reditn.formatNumber = function(n) {
 			}
 			s = ns;
 		}
-		$r = n < 0?"-" + s:s;
+		$r = (n < 0?"-" + s:s) + ad;
 		return $r;
 	}(this));
 }
@@ -870,7 +869,7 @@ Reditn.trimURL = function(url) {
 }
 Reditn.getLinkType = function(ourl,cb) {
 	var url = Reditn.trimURL(ourl);
-	if(StringTools.startsWith(url,"reddit.com/r/") && url.indexOf("/comments/") != -1) cb(data.LinkType.TEXT); else if(url.indexOf(".media.tumblr.com/") != -1) cb(data.LinkType.IMAGE); else if(url.indexOf(".tumblr.com/post/") != -1) {
+	if(StringTools.startsWith(url,"reddit.com/r/") && url.indexOf("/comments/") != -1) cb(data.LinkType.TEXT); else if(url.indexOf(".media.tumblr.com/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"ebay.") && url.indexOf("/itm/") != -1 || StringTools.startsWith(url,"cgi.ebay.com/ws/eBayISAPI.dll?ViewItem&item=")) cb(data.LinkType.SHOP_ITEM); else if(url.indexOf(".tumblr.com/post/") != -1) {
 		var author = HxOverrides.substr(url,0,url.indexOf("."));
 		var id = Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf(".") + 17,null));
 		Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data1) {
@@ -892,7 +891,6 @@ Reditn.getLinkType = function(ourl,cb) {
 		});
 	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_") || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes\n\t\t\t/") || url.indexOf(".wordpress.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/")) cb(data.LinkType.ARTICLE); else if(StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")) cb(data.LinkType.VIDEO); else if(url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
-		console.log(ext);
 		switch(ext) {
 		case "gif":case "jpg":case "jpeg":case "bmp":case "png":case "webp":case "svg":case "ico":case "tiff":case "raw":
 			cb(data.LinkType.IMAGE);
@@ -906,6 +904,107 @@ Reditn.getLinkType = function(ourl,cb) {
 		default:
 		}
 	} else cb(data.LinkType.UNKNOWN);
+}
+Reditn.expandURL = function(ourl,cb) {
+	var url = Reditn.trimURL(ourl);
+	if(url.indexOf("/") == -1) cb(ourl); else {
+		url = HxOverrides.substr(url,0,url.indexOf("/"));
+		switch(url) {
+		case "0rz.tw":case "1link.in":case "1url.com":case "2.gp":case "2big.at":case "2tu.us":case "3.ly":case "307.to":case "4ms.me":case "4sq.com":case "4url.cc":case "6url.com":case "7.ly":case "a.gg":case "a.nf":case "aa.cx":case "abcurl.net":case "ad.vu":case "adf.ly":case "adjix.com":case "afx.cc":case "all.fuseurl.com":case "alturl.com":case "amzn.to":case "ar.gy":case "arst.ch":case "atu.ca":case "azc.cc":case "b23.ru":case "b2l.me":case "bacn.me":case "bcool.bz":case "binged.it":case "bit.ly":case "bizj.us":case "bloat.me":case "bravo.ly":case "bsa.ly":case "budurl.com":case "canurl.com":case "chilp.it":case "chzb.gr":case "cl.lk":case "cl.ly":case "clck.ru":case "cli.gs":case "cliccami.info":case "clickthru.ca":case "clop.in":case "conta.cc":case "cort.as":case "cot.ag":case "crks.me":case "ctvr.us":case "cutt.us":case "dai.ly":case "decenturl.com":case "dfl8.me":case "digbig.com":case "digg.com":case "disq.us":case "dld.bz":case "dlvr.it":case "do.my":case "doiop.com":case "dopen.us":case "easyuri.com":case "easyurl.net":case "eepurl.com":case "eweri.com":case "fa.by":case "fav.me":case "fb.me":case "fbshare.me":case "ff.im":case "fff.to":case "fire.to":case "firsturl.de":case "firsturl.net":case "flic.kr":case "flq.us":case "fly2.ws":case "fon.gs":case "freak.to":case "fuseurl.com":case "fuzzy.to":case "fwd4.me":case "fwib.net":case "g.ro.lt":case "gizmo.do":case "gl.am":case "go.9nl.com":case "go.ign.com":case "go.usa.gov":case "goo.gl":case "goshrink.com":case "gurl.es":case "hex.io":case "hiderefer.com":case "hmm.ph":case "href.in":case "hsblinks.com":case "htxt.it":case "huff.to":case "hulu.com":case "hurl.me":case "hurl.ws":case "icanhaz.com":case "idek.net":case "ilix.in":case "is.gd":case "its.my":case "ix.lt":case "j.mp":case "jijr.com":case "kl.am":case "klck.me":case "korta.nu":case "krunchd.com":case "l9k.net":case "lat.ms":case "liip.to":case "liltext.com":case "linkbee.com":case "linkbun.ch":case "liurl.cn":case "ln-s.net":case "ln-s.ru":case "lnk.gd":case "lnk.ms":case "lnkd.in":case "lnkurl.com":case "lru.jp":case "lt.tl":case "lurl.no":case "macte.ch":case "mash.to":case "merky.de":case "migre.me":case "miniurl.com":case "minurl.fr":case "mke.me":case "moby.to":case "moourl.com":case "mrte.ch":case "myloc.me":case "myurl.in":case "n.pr":case "nbc.co":case "nblo.gs":case "nn.nf":case "not.my":case "notlong.com":case "nsfw.in":case "nutshellurl.com":case "nxy.in":case "nyti.ms":case "o-x.fr":case "oc1.us":case "om.ly":case "omf.gd":case "omoikane.net":case "on.cnn.com":case "on.mktw.net":case "onforb.es":case "orz.se":case "ow.ly":case "ping.fm":case "pli.gs":case "pnt.me":case "politi.co":case "post.ly":case "pp.gg":case "profile.to":case "ptiturl.com":case "pub.vitrue.com":case "qlnk.net":case "qte.me":case "qu.tc":case "qy.fi":case "r.im":case "rb6.me":case "read.bi":case "readthis.ca":case "reallytinyurl.com":case "redir.ec":case "redirects.ca":case "redirx.com":case "retwt.me":case "ri.ms":case "rickroll.it":case "riz.gd":case "rt.nu":case "ru.ly":case "rubyurl.com":case "rurl.org":case "rww.tw":case "s4c.in":case "s7y.us":case "safe.mn":case "sameurl.com":case "sdut.us":case "shar.es":case "shink.de":case "shorl.com":case "short.ie":case "short.to":case "shortlinks.co.uk":case "shorturl.com":case "shout.to":case "show.my":case "shrinkify.com":case "shrinkr.com":case "shrt.fr":case "shrt.st":case "shrten.com":case "shrunkin.com":case "simurl.com":case "slate.me":case "smallr.com":case "smsh.me":case "smurl.name":case "sn.im":case "snipr.com":case "snipurl.com":case "snurl.com":case "sp2.ro":case "spedr.com":case "srnk.net":case "srs.li":case "starturl.com":case "su.pr":case "surl.co.uk":case "surl.hu":case "t.cn":case "t.co":case "t.lh.com":case "ta.gd":case "tbd.ly":case "tcrn.ch":case "tgr.me":case "tgr.ph":case "tighturl.com":case "tiniuri.com":case "tiny.cc":case "tiny.ly":case "tiny.pl":case "tinylink.in":case "tinyuri.ca":case "tinyurl.com":case "tk.":case "tl.gd":case "tmi.me":case "tnij.org":case "tnw.to":case "tny.com":case "to.":case "to.ly":case "togoto.us":case "totc.us":case "toysr.us":case "tpm.ly":case "tr.im":case "tra.kz":case "trunc.it":case "twhub.com":case "twirl.at":case "twitclicks.com":case "twitterurl.net":case "twitterurl.org":case "twiturl.de":case "twurl.cc":case "twurl.nl":case "u.mavrev.com":case "u.nu":case "u76.org":case "ub0.cc":case "ulu.lu":case "updating.me":case "ur1.ca":case "url.az":case "url.co.uk":case "url.ie":case "url360.me":case "url4.eu":case "urlborg.com":case "urlbrief.com":case "urlcover.com":case "urlcut.com":case "urlenco.de":case "urli.nl":case "urls.im":case "urlshorteningservicefortwitter.com":case "urlx.ie":case "urlzen.com":case "usat.ly":case "use.my":case "vb.ly":case "vgn.am":case "vl.am":case "vm.lc":case "w55.de":case "wapo.st":case "wapurl.co.uk":case "wipi.es":case "wp.me":case "x.vu":case "xr.com":case "xrl.in":case "xrl.us":case "xurl.es":case "xurl.jp":case "y.ahoo.it":case "yatuc.com":case "ye.pe":case "yep.it":case "yfrog.com":case "yhoo.it":case "yiyd.com":case "youtu.be":case "yuarel.com":case "z0p.de":case "zi.ma":case "zi.mu":case "zipmyurl.com":case "zud.me":case "zurl.ws":case "zz.gd":case "zzang.kr":case "r.ebay.com":
+			var surl = StringTools.urlEncode(ourl);
+			Reditn.getJSON("http://api.longurl.org/v2/expand?url=" + surl + "&format=json&User-Agent=Reditn",function(data) {
+				cb(Reflect.field(data,"long-url"));
+			});
+			break;
+		default:
+			cb(ourl);
+		}
+	}
+}
+Reditn.embedAlbum = function(a) {
+	var div = js.Browser.document.createElement("div");
+	div.className = "expando";
+	var imgs = (function($this) {
+		var $r;
+		var _g = [];
+		{
+			var _g1 = 0;
+			while(_g1 < a.length) {
+				var i = a[_g1];
+				++_g1;
+				_g.push((function($this) {
+					var $r;
+					var i1 = Expand.loadImage(i.url);
+					div.appendChild(i1);
+					Reditn.show(i1,false);
+					$r = i1;
+					return $r;
+				}($this)));
+			}
+		}
+		$r = _g;
+		return $r;
+	}(this));
+	var img = null;
+	var caption = js.Browser.document.createElement("span");
+	caption.style.fontWeight = "bold";
+	caption.style.marginLeft = "10px";
+	var currentIndex = 0;
+	var prev = null, info = null, next = null;
+	if(a.length > 1) {
+		prev = js.Browser.document.createElement("button");
+		prev.innerHTML = "Prev";
+		div.appendChild(prev);
+		info = js.Browser.document.createElement("span");
+		info.style.textAlign = "center";
+		info.style.paddingLeft = info.style.paddingRight = "5px";
+		div.appendChild(info);
+		next = js.Browser.document.createElement("button");
+		next.innerHTML = "Next";
+		div.appendChild(next);
+	}
+	if(a.length > 1 || a[0].caption != null && a[0].caption.length > 0) {
+		div.appendChild(caption);
+		div.appendChild(js.Browser.document.createElement("br"));
+	}
+	var switchImage = function(ind) {
+		if(ind < 0 || ind >= a.length) return;
+		var i = a[ind];
+		var height = null;
+		if(img != null) {
+			img.style.display = "none";
+			if(img.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,img.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+			height = img.height;
+		}
+		img = imgs[ind];
+		img.style.display = "block";
+		if(height != null) {
+			var ratio = img.width / img.height;
+			img.height = height;
+			img.width = height * ratio | 0;
+		}
+		div.appendChild(img);
+		if(prev != null) {
+			var len = Reditn.formatNumber(a.length);
+			var curr = Reditn.formatNumber(ind + 1);
+			info.innerHTML = "" + curr + " of " + len;
+			prev.disabled = ind <= 0;
+			next.disabled = ind >= a.length - 1;
+		}
+		caption.style.display = i.caption != null?"":"none";
+		if(caption.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,caption.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+		if(i.caption != null) caption.innerHTML = StringTools.htmlEscape(i.caption);
+	};
+	switchImage(0);
+	if(prev != null) {
+		prev.onmousedown = function(_) {
+			switchImage(--currentIndex);
+		};
+		next.onmousedown = function(_) {
+			switchImage(++currentIndex);
+		};
+	}
+	return div;
 }
 Reditn.getData = function(o) {
 	while(o.data != null) o = o.data;
@@ -1496,7 +1595,7 @@ UserTagger.getTag = function(a) {
 	a.parentNode.insertBefore(tag,a.nextSibling);
 }
 var data = {}
-data.LinkType = $hxClasses["data.LinkType"] = { __ename__ : ["data","LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","ARTICLE","UNKNOWN"] }
+data.LinkType = $hxClasses["data.LinkType"] = { __ename__ : ["data","LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","ARTICLE","SHOP_ITEM","UNKNOWN"] }
 data.LinkType.IMAGE = ["IMAGE",0];
 data.LinkType.IMAGE.toString = $estr;
 data.LinkType.IMAGE.__enum__ = data.LinkType;
@@ -1512,7 +1611,10 @@ data.LinkType.TEXT.__enum__ = data.LinkType;
 data.LinkType.ARTICLE = ["ARTICLE",4];
 data.LinkType.ARTICLE.toString = $estr;
 data.LinkType.ARTICLE.__enum__ = data.LinkType;
-data.LinkType.UNKNOWN = ["UNKNOWN",5];
+data.LinkType.SHOP_ITEM = ["SHOP_ITEM",5];
+data.LinkType.SHOP_ITEM.toString = $estr;
+data.LinkType.SHOP_ITEM.__enum__ = data.LinkType;
+data.LinkType.UNKNOWN = ["UNKNOWN",6];
 data.LinkType.UNKNOWN.toString = $estr;
 data.LinkType.UNKNOWN.__enum__ = data.LinkType;
 haxe.Http = function(url) {
