@@ -247,8 +247,6 @@ class Expand {
 			var id = Reditn.removeSymbols(url.substr(url.indexOf(".")+17));
 			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${Reditn.TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
 				var post = data.posts[0];
-				trace('Tumblr data:');
-				trace(post);
 				cb(if(post.type == "text")
 					{title: post.title, content: post.body, author: data.blog.name};
 				else if(data.type == "quote")
@@ -258,6 +256,18 @@ class Expand {
 				else
 					null
 				);
+			});
+		} else if(url.indexOf(".wordpress.com/") != -1) {
+			var site = StringTools.htmlEscape(url.substr(0, url.indexOf("/")));
+			var slug = url.substr(url.indexOf("/")+1);
+			if(slug.charAt(slug.length-1) == "/")
+				slug = slug.substr(0, slug.length-1);
+			slug = StringTools.htmlEscape(slug.substr(slug.lastIndexOf("/")+1));
+			var url = 'http://public-api.wordpress.com/rest/v1/sites/${site}/posts/slug:${slug}';
+			trace(url);
+			Reditn.getJSON(url, function(data) {
+				trace(data);
+				cb({title: data.title, content: data.content, author: data.author.name});
 			});
 		}
 	}
