@@ -325,12 +325,6 @@ Expand.getArticle = function(ourl,el,cb) {
 				} else cb({ title : title, content : body, author : !authorx.match(data)?null:authorx.matched(1)});
 			}
 		})(haxe.Http.requestUrl(ourl));
-	} else if(url.indexOf(".blogspot.com/") != -1) {
-		var blogId = null;
-		var id = null;
-		Reditn.getJSON("https://www.googleapis.com/blogger/v2/blogs/" + blogId + "/posts/" + id + "&key=",function(data) {
-			cb({ title : data.title, content : data.content, author : data.author.displayName});
-		});
 	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1) {
 		var username = Reditn.removeSymbols(HxOverrides.substr(url,12,null));
 		var id = Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf("/status/") + 8,null));
@@ -345,16 +339,25 @@ Expand.getArticle = function(ourl,el,cb) {
 			var post = data.posts[0];
 			cb(post.type == "text"?{ title : post.title, content : post.body, author : data.blog.name}:data.type == "quote"?{ title : null, content : "" + post.text + "<br/><b>" + post.source + "</b>", author : data.blog.name}:data.type == "link"?{ title : post.title, content : "<a href=\"" + post.url + "\">" + post.description + "</a>", author : data.blog.name}:null);
 		});
-	} else if(url.indexOf(".wordpress.com/") != -1) {
+	} else if(url.indexOf(".wordpress.com/") != -1 || url.indexOf("/wordpress/") != -1) {
 		var site = StringTools.htmlEscape(HxOverrides.substr(url,0,url.indexOf("/")));
 		var slug = HxOverrides.substr(url,url.indexOf("/") + 1,null);
 		if(slug.charAt(slug.length - 1) == "/") slug = HxOverrides.substr(slug,0,slug.length - 1);
 		slug = StringTools.htmlEscape(HxOverrides.substr(slug,slug.lastIndexOf("/") + 1,null));
 		var url1 = "http://public-api.wordpress.com/rest/v1/sites/" + site + "/posts/slug:" + slug;
+		Reditn.getJSON(url1,function(data) {
+			cb({ title : data.title, content : data.content, author : data.author.name});
+		});
+	} else if(url.indexOf(".blogger.") != -1 || url.indexOf(".blogspot.") != -1) {
+		var site = StringTools.htmlEscape(HxOverrides.substr(url,0,url.indexOf("/")));
+		var slug = HxOverrides.substr(url,url.indexOf("/") + 1,null);
+		if(slug.charAt(slug.length - 1) == "/") slug = HxOverrides.substr(slug,0,slug.length - 1);
+		slug = StringTools.htmlEscape(HxOverrides.substr(slug,slug.lastIndexOf("/") + 1,null));
+		if(StringTools.endsWith(slug,".html")) slug = HxOverrides.substr(slug,0,slug.length - 5);
+		var url1 = "https://www.googleapis.com/blogger/v2/blogs/" + site + "/posts/" + slug + "&key=" + "95f055321ea256d1d8828674c62105ea3931ae08";
 		console.log(url1);
 		Reditn.getJSON(url1,function(data) {
-			console.log(data);
-			cb({ title : data.title, content : data.content, author : data.author.name});
+			cb({ title : data.title, content : data.content, author : data.author.displayName});
 		});
 	}
 }
@@ -867,7 +870,7 @@ Reditn.getLinkType = function(ourl,cb) {
 				return $r;
 			}(this)));
 		});
-	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_") || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes\n\t\t\t/") || url.indexOf(".wordpress.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/")) cb(data.LinkType.ARTICLE); else if(StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")) cb(data.LinkType.VIDEO); else if(url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
+	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_") || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes\n\t\t\t/") || url.indexOf(".wordpress.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/")) cb(data.LinkType.ARTICLE); else if(StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")) cb(data.LinkType.VIDEO); else if(url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
 		console.log(ext);
 		switch(ext) {
@@ -1189,6 +1192,11 @@ StringTools.htmlUnescape = function(s) {
 }
 StringTools.startsWith = function(s,start) {
 	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
+}
+StringTools.endsWith = function(s,end) {
+	var elen = end.length;
+	var slen = s.length;
+	return slen >= elen && HxOverrides.substr(s,slen - elen,elen) == end;
 }
 StringTools.isSpace = function(s,pos) {
 	var c = HxOverrides.cca(s,pos);

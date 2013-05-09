@@ -229,12 +229,6 @@ class Expand {
 						cb({title: title, content: body, author: (!authorx.match(data) ? null : authorx.matched(1))});
 				}
 			});
-		} else if(url.indexOf(".blogspot.com/") != -1) {
-			var blogId = null;
-			var id = null;
-			Reditn.getJSON('https://www.googleapis.com/blogger/v2/blogs/${blogId}/posts/${id}&key=', function(data) {
-				cb({title: data.title, content: data.content, author: data.author.displayName});
-			});
 		} else if(url.startsWith("twitter.com/") && url.indexOf("/status/") != -1) {
 			var username = Reditn.removeSymbols(url.substr(12));
 			var id = Reditn.removeSymbols(url.substr(url.indexOf("/status/") + 8));
@@ -257,17 +251,28 @@ class Expand {
 					null
 				);
 			});
-		} else if(url.indexOf(".wordpress.com/") != -1) {
+		} else if(url.indexOf(".wordpress.com/") != -1 || url.indexOf("/wordpress/") != -1) {
 			var site = StringTools.htmlEscape(url.substr(0, url.indexOf("/")));
 			var slug = url.substr(url.indexOf("/")+1);
 			if(slug.charAt(slug.length-1) == "/")
 				slug = slug.substr(0, slug.length-1);
 			slug = StringTools.htmlEscape(slug.substr(slug.lastIndexOf("/")+1));
 			var url = 'http://public-api.wordpress.com/rest/v1/sites/${site}/posts/slug:${slug}';
+			Reditn.getJSON(url, function(data) {
+				cb({title: data.title, content: data.content, author: data.author.name});
+			});
+		} else if(url.indexOf(".blogger.") != -1 || url.indexOf(".blogspot.") != -1) {
+			var site = StringTools.htmlEscape(url.substr(0, url.indexOf("/")));
+			var slug = url.substr(url.indexOf("/")+1);
+			if(slug.charAt(slug.length-1) == "/")
+				slug = slug.substr(0, slug.length-1);
+			slug = StringTools.htmlEscape(slug.substr(slug.lastIndexOf("/")+1));
+			if(slug.endsWith(".html"))
+				slug = slug.substr(0, slug.length-5);
+			var url = 'https://www.googleapis.com/blogger/v2/blogs/${site}/posts/${slug}&key=${Reditn.GOOGLE_API_KEY}';
 			trace(url);
 			Reditn.getJSON(url, function(data) {
-				trace(data);
-				cb({title: data.title, content: data.content, author: data.author.name});
+				cb({title: data.title, content: data.content, author: data.author.displayName});
 			});
 		}
 	}

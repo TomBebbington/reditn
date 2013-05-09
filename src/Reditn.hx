@@ -7,6 +7,7 @@ class Reditn {
 	public static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
 	public static inline var TUMBLR_KEY = "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE";
 	public static inline var IMGUR_CLIENT_ID = "cc1f254578d6c52";
+	public static inline var GOOGLE_API_KEY = "95f055321ea256d1d8828674c62105ea3931ae08";
 	static inline var year = 31557600;
 	static inline var month = 2629800;
 	static inline var day = 86400;
@@ -165,7 +166,7 @@ class Reditn {
 				});
 			});
 		} else if((url.startsWith("twitter.com/") && url.indexOf("/status/") != -1|| url.startsWith("cracked.com/article_")) || url.startsWith("cracked.com/blog/") || url.startsWith("cracked.com/quick-fixes
-			/") || (url.indexOf(".wordpress.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/")))
+			/") || (url.indexOf(".wordpress.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/")) || (url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/")) || (url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/")))
 			cb(LinkType.ARTICLE);
 		else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || url.startsWith("deviantart.com/art/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("imgur.com/gallery/") || url.startsWith("qkme.me/") || url.startsWith("m.quickmeme.com/meme/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("imgflip.com/i/") || url.startsWith("fav.me/") || url.startsWith("livememe.com/") || url.startsWith("explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) {
 			cb(LinkType.IMAGE);
