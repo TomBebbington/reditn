@@ -13,11 +13,11 @@ class MediaWiki {
 		{ from: ~/\[([^ \[\]]*) ([^\[\]]*)\]/, to: "" },
 		{ from: ~/'''([^']*)'''/, to: "<b>$1</b>" },
 		{ from: ~/''([^']*)''/, to: "<em>$1</em>" },
-		{ from: ~/======([^=]*)======/, to: "<h6>$1</h6>" },
-		{ from: ~/=====([^=]*)=====/, to: "<h5>$1</h5>" },
-		{ from: ~/====([^=]*)====/, to: "<h4>$1</h4>" },
-		{ from: ~/===([^=]*)===/, to: "<h3>$1</h3>" },
-		{ from: ~/==([^=]*)==/, to: "<h2>$1</h2>" },
+		{ from: ~/^======([^=]*)======/m, to: "<h6>$1</h6>" },
+		{ from: ~/^=====([^=]*)=====/m, to: "<h5>$1</h5>" },
+		{ from: ~/^====([^=]*)====/m, to: "<h4>$1</h4>" },
+		{ from: ~/^===([^=]*)===/m, to: "<h3>$1</h3>" },
+		{ from: ~/^==([^=]*)==/m, to: "<h2>$1</h2>" },
 		{ from: ~/\n\* ?([^\n]*)/, to: "<li>$1</li>" },
 		{ from: ~/<ref>[^<>]*<\/ref>/, to: "" },
 		{ from: ~/\n/, to: "" },
@@ -25,11 +25,10 @@ class MediaWiki {
 		{ from: ~/<!--Interwiki links-->.*/, to: "" }
 	];
 	public static function parse(s:String, base:String):String {
-		trace('Parsing $s with base $base');
 		for(r in regex)
 			while(r.from.match(s))
 				s = r.from.replace(s, r.to);
-		s = s.replace(base, "$BASE");
+		s = s.replace("$BASE", base);
 		return s;
 	}
 }

@@ -15,8 +15,14 @@ class Preview {
 		var preview = Browser.document.createDivElement();
 		e.appendChild(preview);
 		preview.className = "md";
-		box.onchange = function(e) {
-			preview.innerHTML = Markdown.parse(box.value);
+		var t = null;
+		box.onfocus = function(_) {
+			t = new haxe.Timer(100);
+			t.run = function() preview.innerHTML = Markdown.parse(box.value);
+		}
+		box.onblur = function(_) {
+			t.stop();
+			t = null;
 		}
 	}
 }

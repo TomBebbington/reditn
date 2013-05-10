@@ -18,16 +18,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
-			regex: ~/imgur\.com\/([a-zA-Z0-9]*)/,
-			method: function(e, cb) {
-				cb([{
-					url: 'http://i.imgur.com/${e.matched(1)}.jpg',
-					caption: null
-				}]);
-			}
-		},
-		{
 			type: data.LinkType.IMAGE,
 			regex: ~/imgur.com\/(a|gallery|gallery\/album)\/([^\/]*)/,
 			method: function(e, cb) {
@@ -52,6 +42,16 @@ class Link {
 					cb(album);
 				};
 				req.request(false);
+			}
+		},
+		{
+			type: LinkType.IMAGE,
+			regex: ~/imgur\.com\/([a-zA-Z0-9]*)/,
+			method: function(e, cb) {
+				cb([{
+					url: 'http://i.imgur.com/${e.matched(1)}.jpg',
+					caption: null
+				}]);
 			}
 		},
 		{

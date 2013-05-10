@@ -1239,14 +1239,13 @@ parser.MediaWiki = function() { }
 $hxClasses["parser.MediaWiki"] = parser.MediaWiki;
 parser.MediaWiki.__name__ = ["parser","MediaWiki"];
 parser.MediaWiki.parse = function(s,base) {
-	console.log("Parsing " + s + " with base " + base);
 	var _g = 0, _g1 = parser.MediaWiki.regex;
 	while(_g < _g1.length) {
 		var r = _g1[_g];
 		++_g;
 		while(r.from.match(s)) s = r.from.replace(s,r.to);
 	}
-	s = StringTools.replace(s,base,"$BASE");
+	s = StringTools.replace(s,"$BASE",base);
 	return s;
 }
 var Link = function() { }
@@ -1325,8 +1324,16 @@ Preview.preview = function(e) {
 	var preview = js.Browser.document.createElement("div");
 	e.appendChild(preview);
 	preview.className = "md";
-	box.onchange = function(e1) {
-		preview.innerHTML = parser.Markdown.parse(box.value);
+	var t = null;
+	box.onfocus = function(_) {
+		t = new haxe.Timer(100);
+		t.run = function() {
+			preview.innerHTML = parser.Markdown.parse(box.value);
+		};
+	};
+	box.onblur = function(_) {
+		t.stop();
+		t = null;
 	};
 }
 var Settings = function() { }
@@ -2364,11 +2371,14 @@ parser.Markdown = function() { }
 $hxClasses["parser.Markdown"] = parser.Markdown;
 parser.Markdown.__name__ = ["parser","Markdown"];
 parser.Markdown.parse = function(s) {
-	var $it0 = parser.Markdown.regex.keys();
-	while( $it0.hasNext() ) {
-		var r = $it0.next();
-		while(r.match(s)) s = r.replace(s,parser.Markdown.regex.h[r.__id__]);
+	console.log("Parsing " + s);
+	var _g = 0, _g1 = parser.Markdown.regex;
+	while(_g < _g1.length) {
+		var r = _g1[_g];
+		++_g;
+		while(r.from.match(s)) s = r.from.replace(s,r.to);
 	}
+	console.log("Parsed " + s);
 	return s;
 }
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
@@ -2408,11 +2418,9 @@ Math.isNaN = function(i) {
 };
 Expand.buttons = [];
 Reditn.fullPage = true;
-parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("{{([^{}]*)}}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
+parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("{{([^{}]*)}}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("^======([^=]*)======","m"), to : "<h6>$1</h6>"},{ from : new EReg("^=====([^=]*)=====","m"), to : "<h5>$1</h5>"},{ from : new EReg("^====([^=]*)====","m"), to : "<h4>$1</h4>"},{ from : new EReg("^===([^=]*)===","m"), to : "<h3>$1</h3>"},{ from : new EReg("^==([^=]*)==","m"), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
 Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null}]);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("imgur\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
-	cb([{ url : "http://i.imgur.com/" + e.matched(1) + ".jpg", caption : null}]);
 }},{ type : data.LinkType.IMAGE, regex : new EReg("imgur.com/(a|gallery|gallery/album)/([^/]*)",""), method : function(e,cb1) {
 	var id = e.matched(2);
 	var albumType = e.matched(1);
@@ -2432,6 +2440,8 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		cb1(album);
 	};
 	req.request(false);
+}},{ type : data.LinkType.IMAGE, regex : new EReg("imgur\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
+	cb([{ url : "http://i.imgur.com/" + e.matched(1) + ".jpg", caption : null}]);
 }},{ type : data.LinkType.IMAGE, regex : new EReg("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", caption : null}]);
 }},{ type : data.LinkType.IMAGE, regex : new EReg("memecrunch.com/meme/([^/]*)/([^/]*)",""), method : function(e,cb) {
@@ -2657,15 +2667,6 @@ haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 haxe.ds.ObjectMap.count = 0;
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
-parser.Markdown.regex = (function($this) {
-	var $r;
-	var _g = new haxe.ds.ObjectMap();
-	_g.set(new EReg("\\*\\*([^\\*]*)\\*\\*",""),"<b>$1</b>");
-	_g.set(new EReg("\\*([^\\*]*)\\*",""),"<em>$1</em>");
-	_g.set(new EReg("~~([^~]*)~~",""),"<del>$1</del>");
-	_g.set(new EReg("\\^([^\\^]*)",""),"<sup>$1</sup>");
-	$r = _g;
-	return $r;
-}(this));
+parser.Markdown.regex = [{ from : new EReg("\\*\\*([^\\*]*)\\*\\*",""), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*]*)\\*",""), to : "<em>$1</em>"},{ from : new EReg("~~([^~]*)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]*)",""), to : "<sup>$1</sup>"},{ from : new EReg("\\[([^\\]]*)\\]\\(([^\\)]*)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("\n\n",""), to : "<br>"},{ from : new EReg("^#####([^#\n]*)(#####)?","m"), to : "<h5>$1</h5>"},{ from : new EReg("^####([^#\n]*)(####)?","m"), to : "<h4>$1</h4>"},{ from : new EReg("^###([^#\n]*)(###)?","m"), to : "<h3>$1</h3>"},{ from : new EReg("^##([^#\n]*)(##)?","m"), to : "<h2>$1</h2>"},{ from : new EReg("^#([^#\n]*)(#)?","m"), to : "<h1>$1</h1>"}];
 Reditn.main();
 })();
