@@ -1239,6 +1239,21 @@ Reflect.deleteField = function(o,field) {
 	delete(o[field]);
 	return true;
 }
+var parser = {}
+parser.MediaWiki = function() { }
+$hxClasses["parser.MediaWiki"] = parser.MediaWiki;
+parser.MediaWiki.__name__ = ["parser","MediaWiki"];
+parser.MediaWiki.parse = function(s,base) {
+	console.log("Parsing " + s + " with base " + base);
+	var _g = 0, _g1 = parser.MediaWiki.regex;
+	while(_g < _g1.length) {
+		var r = _g1[_g];
+		++_g;
+		while(r.from.match(s)) s = r.from.replace(s,r.to);
+	}
+	s = StringTools.replace(s,base,"$BASE");
+	return s;
+}
 var Link = function() { }
 $hxClasses["Link"] = Link;
 Link.__name__ = ["Link"];
@@ -2350,7 +2365,6 @@ js.Browser.createXMLHttpRequest = function() {
 	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
 	throw "Unable to create XMLHttpRequest object.";
 }
-var parser = {}
 parser.Markdown = function() { }
 $hxClasses["parser.Markdown"] = parser.Markdown;
 parser.Markdown.__name__ = ["parser","Markdown"];
@@ -2399,6 +2413,7 @@ Math.isNaN = function(i) {
 };
 Expand.buttons = [];
 Reditn.fullPage = true;
+parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("{{([^{}]*)}}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
 Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null}]);
 }},{ type : data.LinkType.IMAGE, regex : new EReg("imgur\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
@@ -2488,11 +2503,76 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 			return $r;
 		}(this))});
 	});
-}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/post/([0-9]*)",""), method : function(e,cb8) {
+}},{ type : data.LinkType.ARTICLE, regex : new EReg("(.*)/wiki/(.*)",""), method : function(e,cb8) {
+	var urlroot = e.matched(1), title = e.matched(2);
+	if(urlroot.indexOf(".wikia.com/") != -1) urlroot += "/w";
+	var getWikiPage = (function($this) {
+		var $r;
+		var getWikiPage1 = null;
+		getWikiPage1 = function(name) {
+			Reditn.getJSON("http://" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(data4) {
+				console.log(data4);
+				var pages = data4.query.pages;
+				var _g = 0, _g1 = Reflect.fields(pages);
+				while(_g < _g1.length) {
+					var p = _g1[_g];
+					++_g;
+					var page = Reflect.field(pages,p);
+					var cont = [Reflect.field(page.revisions[0],"*")];
+					if(StringTools.startsWith(cont[0],"#REDIRECT [[")) {
+						getWikiPage1(cont[0].substring(12,cont[0].lastIndexOf("]]")));
+						return;
+					}
+					cont[0] = parser.MediaWiki.parse(cont[0],urlroot);
+					Reditn.getJSON("http://" + urlroot + "/api.php?format=json&action=query&prop=images&titles=" + StringTools.htmlEscape(name),(function(cont) {
+						return function(data1) {
+							var pages1 = data1.query.pages;
+							var _g2 = 0, _g3 = Reflect.fields(pages1);
+							while(_g2 < _g3.length) {
+								var p1 = _g3[_g2];
+								++_g2;
+								var page1 = [Reflect.field(pages1,p1)];
+								var images = page1[0].images;
+								var album1 = [[]];
+								var left = [images.length];
+								if(images != null) {
+									var _g4 = 0;
+									while(_g4 < images.length) {
+										var img = images[_g4];
+										++_g4;
+										Reditn.getJSON("http://" + urlroot + "/api.php?action=query&titles=" + StringTools.urlEncode(img.title) + "&prop=imageinfo&iiprop=url&format=json",(function(left,album1,page1,cont) {
+											return function(data2) {
+												var pages2 = data2.query.pages;
+												var _g5 = 0, _g6 = Reflect.fields(pages2);
+												while(_g5 < _g6.length) {
+													var p2 = _g6[_g5];
+													++_g5;
+													var page2 = Reflect.field(pages2,p2);
+													if(page2 != null && page2.imageinfo.length >= 1) {
+														var url = page2.imageinfo[0].url;
+														album1[0].push({ url : url, caption : null});
+													}
+												}
+												if(--left[0] <= 0) cb8({ title : page1[0].title, content : cont[0], author : null, images : album1[0]});
+											};
+										})(left,album1,page1,cont));
+									}
+								}
+							}
+						};
+					})(cont));
+				}
+			});
+		};
+		$r = getWikiPage1;
+		return $r;
+	}(this));
+	getWikiPage(title);
+}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/post/([0-9]*)",""), method : function(e,cb9) {
 	var author = e.matched(1), id = e.matched(2);
 	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 		var post = data.posts[0];
-		cb8((function($this) {
+		cb9((function($this) {
 			var $r;
 			switch(post.type) {
 			case "text":

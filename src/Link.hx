@@ -190,6 +190,55 @@ class Link {
 			}
 		},
 		{
+			type: LinkType.ARTICLE,
+			regex: ~/(.*)\/wiki\/(.*)/,
+			method: function(e, cb) {
+				var urlroot = e.matched(1), title = e.matched(2);
+				if(urlroot.indexOf(".wikia.com/") != -1)
+					urlroot += "/w";
+				function getWikiPage(name:String) {
+					Reditn.getJSON('http://${urlroot}/api.php?format=json&prop=revisions&action=query&titles=${name}&rvprop=content', function(data) {
+						trace(data);
+						var pages:Dynamic = data.query.pages;
+						for(p in Reflect.fields(pages)) {
+							var page = Reflect.field(pages, p);
+							var cont:String = Reflect.field(untyped page.revisions[0], "*");
+							if(cont.startsWith("#REDIRECT [[")) {
+								getWikiPage(cont.substring(12, cont.lastIndexOf("]]")));
+								return;
+							}
+							cont = parser.MediaWiki.parse(cont, urlroot);
+							Reditn.getJSON('http://${urlroot}/api.php?format=json&action=query&prop=images&titles=${StringTools.htmlEscape(name)}', function(data) {
+								var pages = data.query.pages;
+								for(p in Reflect.fields(pages)) {
+									var page = Reflect.field(pages, p);
+									var images:Array<Dynamic> = page.images;
+									var album:Album = [];
+									var left:Int = images.length;
+									if(images != null)
+										for(img in images) {
+											Reditn.getJSON('http://${urlroot}/api.php?action=query&titles=${StringTools.urlEncode(img.title)}&prop=imageinfo&iiprop=url&format=json', function(data) {
+												var pages:Dynamic = data.query.pages;
+												for(p in Reflect.fields(pages)) {
+													var page = Reflect.field(pages, p);
+													if(page != null && page.imageinfo.length >= 1) {
+														var url = untyped page.imageinfo[0].url;
+														album.push({url: url, caption: null});
+													}
+												}
+												if(--left <= 0)
+													cb({title: page.title, content: cont, author: null, images: album});
+											});
+										}
+								}
+							});
+						}
+					});
+				}
+				getWikiPage(title);
+			}
+		},
+		{
 			type: LinkType.UNKNOWN,
 			regex: ~/([^\.]*)\.tumblr\.com\/post\/([0-9]*)/,
 			method: function(e, cb) {
