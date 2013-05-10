@@ -147,7 +147,10 @@ Expand.init = function() {
 									var head = null;
 									var contentBlock = js.Browser.document.createElement("div");
 									var inner = js.Browser.document.createElement("span");
-									inner.innerHTML = (a.title != null?"<h3>" + a.title + " <em>by " + a.author + "</em></h3><br>":"") + a.content;
+									inner.innerHTML = a.title != null?"<h2>" + a.title + "</h2>":"";
+									inner.innerHTML += a.author != null?"<em>by " + a.author + "</em>":"";
+									if(a.title != null || a.author != null) inner.innerHTML += "<br>";
+									inner.innerHTML += a.content;
 									contentBlock.appendChild(inner);
 									if(a.images.length > 0) contentBlock.appendChild(Reditn.embedAlbum(a.images));
 									contentBlock.className = "md";
@@ -303,7 +306,6 @@ Expand.getArticle = function(ourl,cb) {
 		var author = HxOverrides.substr(url,0,url.indexOf("."));
 		var id = Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf(".") + 17,null));
 		Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
-			console.log(data.posts);
 			var post = data.posts[0];
 			cb(post.type == "text"?{ title : post.title, content : post.body, author : data.blog.name, images : []}:data.type == "quote"?{ title : null, content : "" + post.text + "<br/><b>" + post.source + "</b>", author : data.blog.name, images : []}:data.type == "link"?{ title : post.title, content : "<a href=\"" + post.url + "\">" + post.description + "</a>", author : data.blog.name, images : []}:null);
 		});
@@ -347,6 +349,69 @@ Expand.getArticle = function(ourl,cb) {
 		Reditn.getJSON(url1,function(data) {
 			cb({ title : data.title, content : data.content, author : data.author.displayName, images : []});
 		});
+	} else if(url.indexOf("/wiki/") != -1) {
+		var title = StringTools.htmlEscape(Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf("/wiki/") + 6,null)));
+		var urlroot = HxOverrides.substr(ourl,0,ourl.indexOf("/wiki/"));
+		var getWikiPage = (function($this) {
+			var $r;
+			var getWikiPage1 = null;
+			getWikiPage1 = function(name) {
+				console.log("Getting wiki page: " + name);
+				Reditn.getJSON("" + urlroot + "/w/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(data) {
+					var pages = data.query.pages;
+					var _g = 0, _g1 = Reflect.fields(pages);
+					while(_g < _g1.length) {
+						var p = _g1[_g];
+						++_g;
+						var page = Reflect.field(pages,p);
+						var cont = [Reflect.field(page.revisions[0],"*")];
+						if(StringTools.startsWith(cont[0],"#REDIRECT [[")) {
+							getWikiPage1(cont[0].substring(12,cont[0].lastIndexOf("]]")));
+							return;
+						}
+						cont[0] = Reditn.parseWiki(cont[0],urlroot);
+						Reditn.getJSON("http://en.wikipedia.org/w/api.php?format=json&action=query&prop=images&titles=" + StringTools.htmlEscape(name),(function(cont) {
+							return function(data1) {
+								var pages1 = data1.query.pages;
+								var _g2 = 0, _g3 = Reflect.fields(pages1);
+								while(_g2 < _g3.length) {
+									var p1 = _g3[_g2];
+									++_g2;
+									var page1 = [Reflect.field(pages1,p1)];
+									var images = page1[0].images;
+									var album = [[]];
+									var left = [images.length];
+									if(images != null) {
+										var _g4 = 0;
+										while(_g4 < images.length) {
+											var img = images[_g4];
+											++_g4;
+											Reditn.getJSON("http://en.wikipedia.org/w/api.php?action=query&titles=" + StringTools.urlEncode(img.title) + "&prop=imageinfo&iiprop=url&format=json",(function(left,album,page1,cont) {
+												return function(data2) {
+													var pages2 = data2.query.pages;
+													var _g5 = 0, _g6 = Reflect.fields(pages2);
+													while(_g5 < _g6.length) {
+														var p2 = _g6[_g5];
+														++_g5;
+														var page2 = Reflect.field(pages2,p2);
+														var url1 = page2.imageinfo[0].url;
+														album[0].push({ url : url1, caption : null});
+													}
+													if(--left[0] <= 0) cb({ title : page1[0].title, content : cont[0], author : null, images : album[0]});
+												};
+											})(left,album,page1,cont));
+										}
+									}
+								}
+							};
+						})(cont));
+					}
+				});
+			};
+			$r = getWikiPage1;
+			return $r;
+		}(this));
+		getWikiPage(title);
 	}
 }
 Expand.getItem = function(url,cb) {
@@ -725,13 +790,17 @@ var Markdown = function() { }
 $hxClasses["Markdown"] = Markdown;
 Markdown.__name__ = ["Markdown"];
 Markdown.parse = function(s) {
-	var _g = 0, _g1 = Markdown.regex;
-	while(_g < _g1.length) {
-		var r = _g1[_g];
-		++_g;
-		s = r.from.replace(s,r.to);
+	var $it0 = Markdown.regex.keys();
+	while( $it0.hasNext() ) {
+		var r = $it0.next();
+		console.log("" + Std.string(r) + " does " + (!r.match(s)?"not ":"") + "match " + s);
+		while(r.match(s)) {
+			var t = s;
+			s = r.replace(s,Markdown.regex.h[r.__id__]);
+			console.log("" + t + " after " + Std.string(r) + " => " + s);
+		}
 	}
-	return StringTools.trim(s);
+	return s;
 }
 var NSFWFilter = function() { }
 $hxClasses["NSFWFilter"] = NSFWFilter;
@@ -913,7 +982,7 @@ Reditn.getLinkType = function(ourl,cb) {
 				return $r;
 			}(this)));
 		});
-	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_") || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes\n\t\t\t/") || url.indexOf(".wordpress.com/") != -1 && url.indexOf("files.wordpress.com") == -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/") && url.indexOf(".bp.blogspot.com") == -1) cb(data.LinkType.ARTICLE); else if(StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")) cb(data.LinkType.VIDEO); else if(url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
+	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_") || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes\n\t\t\t/") || url.indexOf(".wordpress.com/") != -1 && url.indexOf("files.wordpress.com") == -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/") && url.indexOf(".bp.blogspot.com") == -1 || url.indexOf("/wiki/") != -1) cb(data.LinkType.ARTICLE); else if(StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")) cb(data.LinkType.VIDEO); else if(url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
 		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
 		switch(ext) {
 		case "gif":case "jpg":case "jpeg":case "bmp":case "png":case "webp":case "svg":case "ico":case "tiff":case "raw":
@@ -928,6 +997,41 @@ Reditn.getLinkType = function(ourl,cb) {
 		default:
 		}
 	} else cb(data.LinkType.UNKNOWN);
+}
+Reditn.parseWiki = function(w,base) {
+	var wiki = (function($this) {
+		var $r;
+		var _g = new haxe.ds.ObjectMap();
+		_g.set(new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""),"<a href=\"" + base + "/wiki/$" + "1\">$" + "1</a>");
+		_g.set(new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""),"<a href=\"" + base + "/wiki/$" + "1\">$" + "2</a>");
+		_g.set(new EReg("\\[\\[File:([^\\]]*)\\]\\]",""),"");
+		_g.set(new EReg("{{spaced ndash}}","")," - ");
+		_g.set(new EReg("{{([^{}]*)}}",""),"");
+		_g.set(new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""),"");
+		_g.set(new EReg("'''([^']*)'''",""),"<b>$1</b>");
+		_g.set(new EReg("''([^']*)''",""),"<em>$1</em>");
+		_g.set(new EReg("======([^=]*)======",""),"<h6>$1</h6>");
+		_g.set(new EReg("=====([^=]*)=====",""),"<h5>$1</h5>");
+		_g.set(new EReg("====([^=]*)====",""),"<h4>$1</h4>");
+		_g.set(new EReg("===([^=]*)===",""),"<h3>$1</h3>");
+		_g.set(new EReg("==([^=]*)==",""),"<h2>$1</h2>");
+		_g.set(new EReg("\n\\* ?([^\n]*)",""),"<li>$1</li>");
+		_g.set(new EReg("<ref>[^<>]*</ref>",""),"");
+		_g.set(new EReg("\n",""),"");
+		_g.set(new EReg("<br><br>",""),"<br>");
+		$r = _g;
+		return $r;
+	}(this));
+	var $it0 = wiki.keys();
+	while( $it0.hasNext() ) {
+		var r = $it0.next();
+		try {
+			while(r.match(w)) w = r.replace(w,wiki.h[r.__id__]);
+		} catch( e ) {
+			console.log("Error whilst processing " + Std.string(r));
+		}
+	}
+	return w;
 }
 Reditn.expandURL = function(ourl,cb) {
 	var url = Reditn.trimURL(ourl);
@@ -2670,7 +2774,14 @@ var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
 Expand.buttons = [];
-Markdown.regex = [{ from : new EReg("\\x3E ([^\n]+)","g"), to : "<blockquote>$1</blockquote>"},{ from : new EReg("___([^___]+)___","g"), to : "<b><i>$1</i></b>"},{ from : new EReg("\\*\\*([^\\*\\*|\\*]+)\\*\\*","g"), to : "<b>$1</b>"},{ from : new EReg("__([^__|_]+)__","g"), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*|\\*\\*]+)\\*","g"), to : "<i>$1</i>"},{ from : new EReg("_([^_|__]+)_","g"), to : "<i>$1</i>"},{ from : new EReg("\\[([^\\]]+)\\]\\(([^\\)]+)\\)","g"), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("(.*?)\n\\x3D=*","g"), to : "<h2>$1</h2>"},{ from : new EReg("(.*?)\n\\x2D-*","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h6>$1</h6>"},{ from : new EReg("\\x23\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h5>$1/h5>"},{ from : new EReg("\\x23\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h4>$1</h4>"},{ from : new EReg("\\x23\\x23\\x23([^\n]+)\n","g"), to : "<h3>$1</h3>"},{ from : new EReg("\\x23\\x23([^\n]+)\n","g"), to : "<h2>$1</h2>"},{ from : new EReg("\\x23([^\n]+)\n","g"), to : "<h1>$1</h1>"},{ from : new EReg("\n?([^\n]+)\n\n","g"), to : "<p>$1</p>"},{ from : new EReg("\n?([^\n]+)\n","g"), to : "$1 "},{ from : new EReg("\n[\\+\\*\\-] ([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\n[0-9]*[.\\):]([^\n]+)","g"), to : "<li><p>$1</p></li>"},{ from : new EReg("\\x3Cli\\x3E([^\n+]+)\\x3C/li\\x3E",""), to : "<ul><li>$1</li></ul>"}];
+Markdown.regex = (function($this) {
+	var $r;
+	var _g = new haxe.ds.ObjectMap();
+	_g.set(new EReg("\\*\\*([^\\*]*)\\*\\*",""),"<b>$1</b>");
+	_g.set(new EReg("\\*([^\\*]*)\\*",""),"<em>$1</em>");
+	$r = _g;
+	return $r;
+}(this));
 Reditn.fullPage = true;
 Settings.DESC = (function($this) {
 	var $r;

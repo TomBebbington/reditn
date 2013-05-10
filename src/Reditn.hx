@@ -181,7 +181,7 @@ class Reditn {
 				});
 			});
 		} else if((url.startsWith("twitter.com/") && url.indexOf("/status/") != -1|| url.startsWith("cracked.com/article_")) || url.startsWith("cracked.com/blog/") || url.startsWith("cracked.com/quick-fixes
-			/") || ((url.indexOf(".wordpress.com/") != -1 && url.indexOf("files.wordpress.com") == -1) && url.lastIndexOf("/") != url.indexOf("/")) || (url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/")) || (url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/") && url.indexOf(".bp.blogspot.com") == -1))
+			/") || ((url.indexOf(".wordpress.com/") != -1 && url.indexOf("files.wordpress.com") == -1) && url.lastIndexOf("/") != url.indexOf("/")) || (url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/")) || (url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/") && url.indexOf(".bp.blogspot.com") == -1) || url.indexOf("/wiki/") != -1)
 			cb(LinkType.ARTICLE);
 		else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || url.startsWith("deviantart.com/art/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("imgur.com/gallery/") || url.startsWith("qkme.me/") || url.startsWith("m.quickmeme.com/meme/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("imgflip.com/i/") || url.startsWith("fav.me/") || url.startsWith("livememe.com/") || url.startsWith("explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) {
 			cb(LinkType.IMAGE);
@@ -201,6 +201,35 @@ class Reditn {
 		} else {
 			cb(LinkType.UNKNOWN);
 		}
+	}
+	public static function parseWiki(w:String, base:String):String {
+		var wiki = [
+			~/\[\[([^\]\|]*)\]\]/ => '<a href="${base}/wiki/$$1">$$1</a>',
+			~/\[\[([^\]\|]*)\|([^\]\|]*)\]\]/ => '<a href="${base}/wiki/$$1">$$2</a>',
+			~/\[\[File:([^\]]*)\]\]/ => "",
+			~/{{spaced ndash}}/ => " - ",
+			~/{{([^{}]*)}}/ => "",
+			~/\[([^ \[\]]*) ([^\[\]]*)\]/ => "",
+			~/'''([^']*)'''/ => "<b>$1</b>",
+			~/''([^']*)''/ => "<em>$1</em>",
+			~/======([^=]*)======/ => "<h6>$1</h6>",
+			~/=====([^=]*)=====/ => "<h5>$1</h5>",
+			~/====([^=]*)====/ => "<h4>$1</h4>",
+			~/===([^=]*)===/ => "<h3>$1</h3>",
+			~/==([^=]*)==/ => "<h2>$1</h2>",
+			~/\n\* ?([^\n]*)/ => "<li>$1</li>",
+			~/<ref>[^<>]*<\/ref>/ => "",
+			~/\n/ => "",
+			~/<br><br>/ => "<br>"
+		];
+		for(r in wiki.keys())
+			try {
+				while(r.match(w))
+					w = r.replace(w, wiki.get(r));
+			} catch(e:Dynamic) {
+				trace('Error whilst processing $r');
+			}
+		return w;
 	}
 	static function expandURL(ourl:String, cb:String->Void):Void {
 		var url = trimURL(ourl);

@@ -82,7 +82,11 @@ class Expand {
 								var head = null;
 								var contentBlock = Browser.document.createDivElement();
 								var inner = Browser.document.createSpanElement();
-								inner.innerHTML = (a.title != null ? '<h3>${a.title} <em>by ${a.author}</em></h3><br>' : "") + a.content;
+								inner.innerHTML = (a.title != null ? '<h2>${a.title}</h2>' : "");
+								inner.innerHTML += (a.author != null ? '<em>by ${a.author}</em>' : "");
+								if(a.title != null || a.author != null)
+									inner.innerHTML += "<br>";
+								inner.innerHTML += a.content;
 								contentBlock.appendChild(inner);
 								if(a.images.length > 0)
 									contentBlock.appendChild(Reditn.embedAlbum(a.images));
@@ -215,7 +219,6 @@ class Expand {
 			var author = url.substr(0, url.indexOf("."));
 			var id = Reditn.removeSymbols(url.substr(url.indexOf(".")+17));
 			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${Reditn.TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
-				trace(data.posts);
 				var post = data.posts[0];
 				cb(if(post.type == "text")
 					{title: post.title, content: post.body, author: data.blog.name, images: []};
@@ -258,6 +261,47 @@ class Expand {
 			Reditn.getJSON(url, function(data) {
 				cb({title: data.title, content: data.content, author: data.author.displayName, images: []});
 			});
+		} else if(url.indexOf("/wiki/") != -1) {
+			var title = StringTools.htmlEscape(Reditn.removeSymbols(url.substr(url.indexOf("/wiki/")+6)));
+			var urlroot = ourl.substr(0, ourl.indexOf("/wiki/"));
+			function getWikiPage(name:String) {
+				trace('Getting wiki page: $name');
+				Reditn.getJSON('${urlroot}/w/api.php?format=json&prop=revisions&action=query&titles=${name}&rvprop=content', function(data) {
+					var pages:Dynamic = data.query.pages;
+					for(p in Reflect.fields(pages)) {
+						var page = Reflect.field(pages, p);
+						var cont:String = Reflect.field(untyped page.revisions[0], "*");
+						if(cont.startsWith("#REDIRECT [[")) {
+							getWikiPage(cont.substring(12, cont.lastIndexOf("]]")));
+							return;
+						}
+						cont = Reditn.parseWiki(cont, urlroot);
+						Reditn.getJSON('http://en.wikipedia.org/w/api.php?format=json&action=query&prop=images&titles=${StringTools.htmlEscape(name)}', function(data) {
+							var pages = data.query.pages;
+							for(p in Reflect.fields(pages)) {
+								var page = Reflect.field(pages, p);
+								var images:Array<Dynamic> = page.images;
+								var album:Album = [];
+								var left:Int = images.length;
+								if(images != null)
+									for(img in images) {
+										Reditn.getJSON('http://en.wikipedia.org/w/api.php?action=query&titles=${StringTools.urlEncode(img.title)}&prop=imageinfo&iiprop=url&format=json', function(data) {
+											var pages:Dynamic = data.query.pages;
+											for(p in Reflect.fields(pages)) {
+												var page = Reflect.field(pages, p);
+												var url = untyped page.imageinfo[0].url;
+												album.push(image(url));
+											}
+											if(--left <= 0)
+												cb({title: page.title, content: cont, author: null, images: album});
+										});
+									}
+							}
+						});
+					}
+				});
+			}
+			getWikiPage(title);
 		}
 	}
 	static function getItem(url:String, cb:ShopItem -> Void) {
