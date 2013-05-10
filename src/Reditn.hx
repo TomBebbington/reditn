@@ -4,11 +4,6 @@ import data.*;
 import haxe.Json;
 using StringTools;
 class Reditn {
-	public static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
-	public static inline var TUMBLR_KEY = "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE";
-	public static inline var IMGUR_CLIENT_ID = "cc1f254578d6c52";
-	public static inline var GOOGLE_API_KEY = "95f055321ea256d1d8828674c62105ea3931ae08";
-	public static inline var EBAY_API_KEY = "ThomasDa-1e6c-4d29-a156-85557acee70b";
 	static inline var year = 31557600;
 	static inline var month = 2629800;
 	static inline var day = 86400;
@@ -148,91 +143,8 @@ class Reditn {
 			s = s.substr(0, s.indexOf("."));
 		return s;
 	}
-	public static function trimURL(url:String) {
-		if(url.startsWith("http://"))
-			url = url.substr(7);
-		else if(url.startsWith("https://"))
-			url = url.substr(8);
-		if(url.startsWith("www."))
-			url = url.substr(4);
-		if(url.indexOf("&") != -1)
-			url = url.substr(0, url.indexOf("&"));
-		if(url.indexOf("?") != -1)
-			url = url.substr(0, url.indexOf("?"));
-		return url;
-	}
-	public static function getLinkType(ourl:String, cb:LinkType -> Void):Void {
-		var url = trimURL(ourl);
-		if(url.startsWith("reddit.com/r/") && url.indexOf("/comments/") != -1)
-			cb(LinkType.TEXT);
-		else if(url.indexOf(".media.tumblr.com/") != -1)
-			cb(LinkType.IMAGE);
-		else if((url.startsWith("ebay.") && url.indexOf("/itm/") != -1) || url.startsWith("cgi.ebay.com/ws/eBayISAPI.dll?ViewItem&item="))
-			cb(LinkType.SHOP_ITEM);
-		else if(url.indexOf(".tumblr.com/post/") != -1) {
-			var author = url.substr(0, url.indexOf("."));
-			var id = removeSymbols(url.substr(url.indexOf(".")+17));
-			Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data:Dynamic) {
-				var post = data.posts[0];
-				cb(switch(post.type) {
-					case "photo": LinkType.IMAGE;
-					case "video": LinkType.VIDEO;
-					case _: LinkType.ARTICLE;
-				});
-			});
-		} else if((url.startsWith("twitter.com/") && url.indexOf("/status/") != -1|| url.startsWith("cracked.com/article_")) || url.startsWith("cracked.com/blog/") || url.startsWith("cracked.com/quick-fixes
-			/") || ((url.indexOf(".wordpress.com/") != -1 && url.indexOf("files.wordpress.com") == -1) && url.lastIndexOf("/") != url.indexOf("/")) || (url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/")) || (url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/") && url.indexOf(".bp.blogspot.com") == -1) || url.indexOf("/wiki/") != -1)
-			cb(LinkType.ARTICLE);
-		else if(url.startsWith("xkcd.com/") || url.startsWith("flickr.com/photos/") || url.startsWith("deviantart.com/art/") || (url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1) || url.indexOf(".deviantart.com/art") != -1 || (url.startsWith("imgur.com/") && url.indexOf("/blog/") == -1) || url.startsWith("i.imgur.com/") || url.startsWith("imgur.com/gallery/") || url.startsWith("qkme.me/") || url.startsWith("m.quickmeme.com/meme/") || url.startsWith("quickmeme.com/meme/") || url.startsWith("memecrunch.com/meme/") || url.startsWith("memegenerator.net/instance/") || url.startsWith("imgflip.com/i/") || url.startsWith("fav.me/") || url.startsWith("livememe.com/") || url.startsWith("explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) {
-			cb(LinkType.IMAGE);
-		} else if(url.startsWith("youtube.com/watch") || url.startsWith("youtu.be/")) {
-			cb(LinkType.VIDEO);
-		} else if(url.lastIndexOf(".") != url.indexOf(".") && url.substr(url.lastIndexOf(".")).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
-			var ext = url.substr(url.lastIndexOf(".")+1).toLowerCase();
-			switch(ext) {
-				case "gif", "jpg", "jpeg", "bmp", "png", "webp", "svg", "ico", "tiff", "raw":
-					cb(LinkType.IMAGE);
-				case "mpg", "webm", "avi", "mp4", "flv", "swf":
-					cb(LinkType.VIDEO);
-				case "mp3", "wav", "midi":
-					cb(LinkType.AUDIO);
-				default:
-			}
-		} else {
-			cb(LinkType.UNKNOWN);
-		}
-	}
-	public static function parseWiki(w:String, base:String):String {
-		var wiki = [
-			~/\[\[([^\]\|]*)\]\]/ => '<a href="${base}/wiki/$$1">$$1</a>',
-			~/\[\[([^\]\|]*)\|([^\]\|]*)\]\]/ => '<a href="${base}/wiki/$$1">$$2</a>',
-			~/\[\[File:([^\]]*)\]\]/ => "",
-			~/{{spaced ndash}}/ => " - ",
-			~/{{([^{}]*)}}/ => "",
-			~/\[([^ \[\]]*) ([^\[\]]*)\]/ => "",
-			~/'''([^']*)'''/ => "<b>$1</b>",
-			~/''([^']*)''/ => "<em>$1</em>",
-			~/======([^=]*)======/ => "<h6>$1</h6>",
-			~/=====([^=]*)=====/ => "<h5>$1</h5>",
-			~/====([^=]*)====/ => "<h4>$1</h4>",
-			~/===([^=]*)===/ => "<h3>$1</h3>",
-			~/==([^=]*)==/ => "<h2>$1</h2>",
-			~/\n\* ?([^\n]*)/ => "<li>$1</li>",
-			~/<ref>[^<>]*<\/ref>/ => "",
-			~/\n/ => "",
-			~/<br><br>/ => "<br>"
-		];
-		for(r in wiki.keys())
-			try {
-				while(r.match(w))
-					w = r.replace(w, wiki.get(r));
-			} catch(e:Dynamic) {
-				trace('Error whilst processing $r');
-			}
-		return w;
-	}
 	static function expandURL(ourl:String, cb:String->Void):Void {
-		var url = trimURL(ourl);
+		var url = Link.trimURL(ourl);
 		if (url.indexOf("/") == -1)
 			cb(ourl);
 		else {
@@ -324,7 +236,7 @@ class Reditn {
 		#if plugin
 			func(haxe.Http.requestUrl(url));
 		#else
-			GM.request({
+			untyped GM_xmlhttpRequest({
 				method: "GET",
 				url: url,
 				onload: function(rsp:Dynamic) {
@@ -335,6 +247,8 @@ class Reditn {
 	}
 	public static inline function getJSON<T>(url:String, func:T->Void):Void {
 		getText(url, function(data:String) {
+			if(data.startsWith("jsonFlickrApi(") && data.endsWith(")"))
+				data = data.substring(14, data.length - 1);
 			try {
 				func(getData(haxe.Json.parse(data)));
 			} catch(e:Dynamic) {

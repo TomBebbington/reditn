@@ -1,6 +1,7 @@
 import js.*;
 import js.html.*;
 import data.*;
+import parser.*;
 class SubredditInfo {
 	public static function init() {
 		var subs:Array<Element> = cast Browser.document.body.getElementsByClassName("subreddit");

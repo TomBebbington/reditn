@@ -99,96 +99,89 @@ Expand.init = function() {
 		if(l[0].nodeName.toLowerCase() != "a") continue;
 		l[0].onchange = (function(l) {
 			return function(_) {
-				Reditn.getLinkType(l[0].href,(function(l) {
-					return function(urltype) {
-						switch( (urltype)[1] ) {
+				var site = Link.resolve(l[0].href);
+				if(site == null) return;
+				site.method(site.regex,(function(l) {
+					return function(data) {
+						switch( (site.type)[1] ) {
 						case 5:
-							Expand.getItem(l[0].href,(function(l) {
-								return function(i) {
-									var e = l[0].parentNode.parentNode.parentNode;
-									var expando = js.Browser.document.createElement("div");
-									expando.className = "expando";
-									expando.style.display = "none";
-									var div = js.Browser.document.createElement("div");
-									div.className = "usertext";
-									expando.appendChild(div);
-									var head = null;
-									var contentBlock = js.Browser.document.createElement("div");
-									var inner = js.Browser.document.createElement("span");
-									inner.innerHTML = "<h3>" + StringTools.htmlEscape(i.title) + "</h3><br>" + ("<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>") + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + StringTools.htmlEscape(i.description) + "</p>");
-									contentBlock.appendChild(inner);
-									contentBlock.className = "md";
-									contentBlock.appendChild(Reditn.embedAlbum(i.images));
-									div.appendChild(contentBlock);
-									var s = Expand.makeSelfButton(e,"item",l[0].href);
-									var pn = s.parentNode;
-									var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
-									while(_g2 < _g3.length) {
-										var exp = _g3[_g2];
-										++_g2;
-										pn.removeChild(exp);
-									}
-									pn.appendChild(expando);
-									expando.style.display = Expand.toggled?"":"none";
-									if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-								};
-							})(l));
+							var i = data;
+							var e = l[0].parentNode.parentNode.parentNode;
+							var expando = js.Browser.document.createElement("div");
+							expando.className = "expando";
+							expando.style.display = "none";
+							var div = js.Browser.document.createElement("div");
+							div.className = "usertext";
+							expando.appendChild(div);
+							var head = null;
+							var contentBlock = js.Browser.document.createElement("div");
+							var inner = js.Browser.document.createElement("span");
+							inner.innerHTML = "<h3>" + StringTools.htmlEscape(i.title) + "</h3><br>" + ("<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>") + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + StringTools.htmlEscape(i.description) + "</p>");
+							contentBlock.appendChild(inner);
+							contentBlock.className = "md";
+							contentBlock.appendChild(Reditn.embedAlbum(i.images));
+							div.appendChild(contentBlock);
+							var s = Expand.makeSelfButton(e,"item",l[0].href);
+							var pn = s.parentNode;
+							var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
+							while(_g2 < _g3.length) {
+								var exp = _g3[_g2];
+								++_g2;
+								pn.removeChild(exp);
+							}
+							pn.appendChild(expando);
+							expando.style.display = Expand.toggled?"":"none";
+							if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
 							break;
 						case 4:
-							Expand.getArticle(l[0].href,(function(l) {
-								return function(a) {
-									var e = l[0].parentNode.parentNode.parentNode;
-									var expando = js.Browser.document.createElement("div");
-									expando.className = "expando";
-									expando.style.display = "none";
-									var div = js.Browser.document.createElement("div");
-									div.className = "usertext";
-									expando.appendChild(div);
-									var head = null;
-									var contentBlock = js.Browser.document.createElement("div");
-									var inner = js.Browser.document.createElement("span");
-									inner.innerHTML = a.title != null?"<h2>" + a.title + "</h2>":"";
-									inner.innerHTML += a.author != null?"<em>by " + a.author + "</em>":"";
-									if(a.title != null || a.author != null) inner.innerHTML += "<br>";
-									inner.innerHTML += a.content;
-									contentBlock.appendChild(inner);
-									if(a.images.length > 0) contentBlock.appendChild(Reditn.embedAlbum(a.images));
-									contentBlock.className = "md";
-									div.appendChild(contentBlock);
-									var s = Expand.makeSelfButton(e,"selftext",l[0].href);
-									var pn = s.parentNode;
-									var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
-									while(_g2 < _g3.length) {
-										var exp = _g3[_g2];
-										++_g2;
-										pn.removeChild(exp);
-									}
-									pn.appendChild(expando);
-									expando.style.display = Expand.toggled?"":"none";
-									if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-								};
-							})(l));
+							var a = data;
+							var e = l[0].parentNode.parentNode.parentNode;
+							var expando = js.Browser.document.createElement("div");
+							expando.className = "expando";
+							expando.style.display = "none";
+							var div = js.Browser.document.createElement("div");
+							div.className = "usertext";
+							expando.appendChild(div);
+							var head = null;
+							var contentBlock = js.Browser.document.createElement("div");
+							var inner = js.Browser.document.createElement("span");
+							inner.innerHTML = a.title != null?"<h2>" + a.title + "</h2>":"";
+							inner.innerHTML += a.author != null?"<em>by " + a.author + "</em>":"";
+							if(a.title != null || a.author != null) inner.innerHTML += "<br>";
+							inner.innerHTML += a.content;
+							contentBlock.appendChild(inner);
+							if(a.images.length > 0) contentBlock.appendChild(Reditn.embedAlbum(a.images));
+							contentBlock.className = "md";
+							div.appendChild(contentBlock);
+							var s = Expand.makeSelfButton(e,"selftext",l[0].href);
+							var pn = s.parentNode;
+							var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
+							while(_g2 < _g3.length) {
+								var exp = _g3[_g2];
+								++_g2;
+								pn.removeChild(exp);
+							}
+							pn.appendChild(expando);
+							expando.style.display = Expand.toggled?"":"none";
+							if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
 							break;
 						case 0:
-							Expand.getImage(l[0].href,(function(l) {
-								return function(a) {
-									var e = l[0].parentNode.parentNode.parentNode;
-									var div = Reditn.embedAlbum(a);
-									e.appendChild(div);
-									div.style.display = Expand.toggled?"":"none";
-									if(div.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-									var s = Expand.makeSelfButton(e,"image",l[0].href);
-									var pn = s.parentNode;
-									var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
-									while(_g2 < _g3.length) {
-										var exp = _g3[_g2];
-										++_g2;
-										pn.removeChild(exp);
-									}
-									pn.appendChild(div);
-									Expand.refresh();
-								};
-							})(l));
+							var a = data;
+							var e = l[0].parentNode.parentNode.parentNode;
+							var div = Reditn.embedAlbum(a);
+							e.appendChild(div);
+							div.style.display = Expand.toggled?"":"none";
+							if(div.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+							var s = Expand.makeSelfButton(e,"image",l[0].href);
+							var pn = s.parentNode;
+							var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
+							while(_g2 < _g3.length) {
+								var exp = _g3[_g2];
+								++_g2;
+								pn.removeChild(exp);
+							}
+							pn.appendChild(div);
+							Expand.refresh();
 							break;
 						default:
 							Expand.preload(l[0].href);
@@ -268,302 +261,6 @@ Expand.toggle = function(t) {
 	}
 	Expand.refresh();
 }
-Expand.image = function(url,c) {
-	return { url : url, caption : c};
-}
-Expand.album = function(url,c) {
-	return [{ url : url, caption : c}];
-}
-Expand.getArticle = function(ourl,cb) {
-	var url = Reditn.trimURL(ourl);
-	if(StringTools.startsWith(url,"cracked.com/")) {
-		var authorx = new EReg("<a[^>]*?class=\"[^\"]*?byline\"[^>]*?>([a-zA-Z ]*)</a>","");
-		Reditn.getText(ourl,function(data) {
-			if(data.indexOf("<section>") != -1) {
-				var body = HxOverrides.substr(data,data.indexOf("<section>") + 9,null);
-				body = HxOverrides.substr(body,0,body.indexOf("</section>"));
-				var title = HxOverrides.substr(data,data.indexOf("<title>") + 7,null);
-				title = HxOverrides.substr(title,0,title.indexOf("|"));
-				if(data.indexOf("rel=\"next\" href=\"") != -1) {
-					var temp = HxOverrides.substr(data,17 + data.indexOf("rel=\"next\" href=\""),null);
-					temp = HxOverrides.substr(temp,0,temp.indexOf("\""));
-					Reditn.getText(temp,function(odata) {
-						var nbody = HxOverrides.substr(odata,odata.indexOf("<section>") + 9,null);
-						nbody = HxOverrides.substr(nbody,0,nbody.indexOf("</section"));
-						cb({ images : [], title : title, content : body + "<br>" + nbody, author : !authorx.match(data)?null:authorx.matched(1)});
-					});
-				} else cb({ title : title, content : body, author : !authorx.match(data)?null:authorx.matched(1), images : []});
-			}
-		});
-	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1) {
-		var username = Reditn.removeSymbols(HxOverrides.substr(url,12,null));
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf("/status/") + 8,null));
-		Reditn.getJSON("https://api.twitter.com/1.1/statuses/show.json?id=" + id,function(data) {
-			data.text;
-			cb({ title : null, content : StringTools.htmlEscape(data.text), author : "@" + username, images : []});
-		});
-	} else if(url.indexOf(".tumblr.com/post/") != -1) {
-		var author = HxOverrides.substr(url,0,url.indexOf("."));
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf(".") + 17,null));
-		Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
-			var post = data.posts[0];
-			cb(post.type == "text"?{ title : post.title, content : post.body, author : data.blog.name, images : []}:data.type == "quote"?{ title : null, content : "" + post.text + "<br/><b>" + post.source + "</b>", author : data.blog.name, images : []}:data.type == "link"?{ title : post.title, content : "<a href=\"" + post.url + "\">" + post.description + "</a>", author : data.blog.name, images : []}:null);
-		});
-	} else if(url.indexOf(".wordpress.com/") != -1 || url.indexOf("/wordpress/") != -1) {
-		var site = StringTools.htmlEscape(HxOverrides.substr(url,0,url.indexOf("/")));
-		var slug = HxOverrides.substr(url,url.indexOf("/") + 1,null);
-		if(slug.charAt(slug.length - 1) == "/") slug = HxOverrides.substr(slug,0,slug.length - 1);
-		slug = HxOverrides.substr(slug,slug.lastIndexOf("/") + 1,null);
-		slug = StringTools.htmlEscape(Reditn.removeSymbols(slug));
-		var url1 = "http://public-api.wordpress.com/rest/v1/sites/" + site + "/posts/slug:" + slug;
-		Reditn.getJSON(url1,function(data) {
-			var att = data.attachments;
-			cb({ title : StringTools.htmlUnescape(data.title), content : data.content, author : data.author.name, images : (function($this) {
-				var $r;
-				var _g = [];
-				{
-					var _g1 = 0, _g2 = Reflect.fields(att);
-					while(_g1 < _g2.length) {
-						var f = _g2[_g1];
-						++_g1;
-						_g.push((function($this) {
-							var $r;
-							var img = Reflect.field(att,f);
-							$r = img.mime_type.startsWith("image/")?{ url : img.URL, caption : null}:null;
-							return $r;
-						}($this)));
-					}
-				}
-				$r = _g;
-				return $r;
-			}(this))});
-		});
-	} else if(url.indexOf(".blogger.") != -1 || url.indexOf(".blogspot.") != -1) {
-		var site = StringTools.htmlEscape(HxOverrides.substr(url,0,url.indexOf("/")));
-		var slug = HxOverrides.substr(url,url.indexOf("/") + 1,null);
-		if(slug.charAt(slug.length - 1) == "/") slug = HxOverrides.substr(slug,0,slug.length - 1);
-		slug = HxOverrides.substr(slug,slug.lastIndexOf("/") + 1,null);
-		slug = StringTools.htmlEscape(Reditn.removeSymbols(slug));
-		if(StringTools.endsWith(slug,".html")) slug = HxOverrides.substr(slug,0,slug.length - 5);
-		var url1 = "https://www.googleapis.com/blogger/v2/blogs/" + site + "/posts/" + slug + "&key=" + "95f055321ea256d1d8828674c62105ea3931ae08";
-		Reditn.getJSON(url1,function(data) {
-			cb({ title : data.title, content : data.content, author : data.author.displayName, images : []});
-		});
-	} else if(url.indexOf("/wiki/") != -1) {
-		var title = StringTools.htmlEscape(Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf("/wiki/") + 6,null)));
-		var urlroot = HxOverrides.substr(ourl,0,ourl.indexOf("/wiki/"));
-		var getWikiPage = (function($this) {
-			var $r;
-			var getWikiPage1 = null;
-			getWikiPage1 = function(name) {
-				console.log("Getting wiki page: " + name);
-				Reditn.getJSON("" + urlroot + "/w/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(data) {
-					var pages = data.query.pages;
-					var _g = 0, _g1 = Reflect.fields(pages);
-					while(_g < _g1.length) {
-						var p = _g1[_g];
-						++_g;
-						var page = Reflect.field(pages,p);
-						var cont = [Reflect.field(page.revisions[0],"*")];
-						if(StringTools.startsWith(cont[0],"#REDIRECT [[")) {
-							getWikiPage1(cont[0].substring(12,cont[0].lastIndexOf("]]")));
-							return;
-						}
-						cont[0] = Reditn.parseWiki(cont[0],urlroot);
-						Reditn.getJSON("http://en.wikipedia.org/w/api.php?format=json&action=query&prop=images&titles=" + StringTools.htmlEscape(name),(function(cont) {
-							return function(data1) {
-								var pages1 = data1.query.pages;
-								var _g2 = 0, _g3 = Reflect.fields(pages1);
-								while(_g2 < _g3.length) {
-									var p1 = _g3[_g2];
-									++_g2;
-									var page1 = [Reflect.field(pages1,p1)];
-									var images = page1[0].images;
-									var album = [[]];
-									var left = [images.length];
-									if(images != null) {
-										var _g4 = 0;
-										while(_g4 < images.length) {
-											var img = images[_g4];
-											++_g4;
-											Reditn.getJSON("http://en.wikipedia.org/w/api.php?action=query&titles=" + StringTools.urlEncode(img.title) + "&prop=imageinfo&iiprop=url&format=json",(function(left,album,page1,cont) {
-												return function(data2) {
-													var pages2 = data2.query.pages;
-													var _g5 = 0, _g6 = Reflect.fields(pages2);
-													while(_g5 < _g6.length) {
-														var p2 = _g6[_g5];
-														++_g5;
-														var page2 = Reflect.field(pages2,p2);
-														var url1 = page2.imageinfo[0].url;
-														album[0].push({ url : url1, caption : null});
-													}
-													if(--left[0] <= 0) cb({ title : page1[0].title, content : cont[0], author : null, images : album[0]});
-												};
-											})(left,album,page1,cont));
-										}
-									}
-								}
-							};
-						})(cont));
-					}
-				});
-			};
-			$r = getWikiPage1;
-			return $r;
-		}(this));
-		getWikiPage(title);
-	}
-}
-Expand.getItem = function(url,cb) {
-	var url1 = Reditn.trimURL(url);
-	if(url1.indexOf("ebay.com/") != -1) {
-		var id = url1.indexOf("item=") != -1?Reditn.removeSymbols(HxOverrides.substr(url1,url1.indexOf("item=") + 5,null)):(function($this) {
-			var $r;
-			var chopped = url1.split("/");
-			var nid = null;
-			{
-				var _g = 0;
-				while(_g < chopped.length) {
-					var c = chopped[_g];
-					++_g;
-					var rsc = Reditn.removeSymbols(c);
-					if(Std.string(Std.parseInt(rsc)) == rsc) {
-						nid = rsc;
-						break;
-					}
-				}
-			}
-			$r = nid;
-			return $r;
-		}(this));
-		var url2 = "http://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=" + "ThomasDa-1e6c-4d29-a156-85557acee70b" + "&siteid=0&version=515&ItemID=" + id + "&IncludeSelector=TextDescription";
-		Reditn.getJSON(url2,function(data) {
-			var imgs = data.Item.PictureURL;
-			var nalbum = imgs.map(function(i) {
-				return { url : i, caption : null};
-			});
-			cb({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : data.Item.Description, images : nalbum, price : Reditn.formatNumber(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
-		});
-	}
-}
-Expand.getImage = function(ourl,cb) {
-	var url = Reditn.trimURL(ourl);
-	if(StringTools.startsWith(url,"i.imgur.com/") && url.split(".").length == 3 || url.indexOf("media.tumblr.com/") != -1) cb([{ url : ourl, caption : null}]); else if(StringTools.startsWith(url,"imgur.com/a/") || StringTools.startsWith(url,"imgur.com/gallery/")) {
-		var id = url.split("/")[2];
-		var albumType = url.indexOf("gallery") != -1?"gallery/album":"album";
-		var req = new haxe.Http("https://api.imgur.com/3/" + albumType + "/" + id);
-		req.setHeader("Authorization","Client-ID " + "cc1f254578d6c52");
-		req.onData = function(ds) {
-			var d = Reditn.getData(haxe.Json.parse(ds));
-			var album = [];
-			if(d.images_count <= 0) album.push({ url : "http://i.imgur.com/" + d.id + ".jpg", caption : d.title}); else {
-				var _g = 0, _g1 = d.images;
-				while(_g < _g1.length) {
-					var i = _g1[_g];
-					++_g;
-					album.push({ url : "http://i.imgur.com/" + i.id + ".jpg", caption : i.title});
-				}
-			}
-			cb(album);
-		};
-		req.request(false);
-	} else if(StringTools.startsWith(url,"imgur.com/")) {
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf("/") + 1,null));
-		cb(id.indexOf(",") != -1?id.split(",").map(function(nid) {
-			return { url : "http://i.imgur.com/" + nid + ".jpg", caption : null};
-		}):[{ url : "http://i.imgur.com/" + id + ".jpg", caption : null}]);
-	} else if(StringTools.startsWith(url,"qkme.me/")) {
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,8,null));
-		cb([{ url : "http://i.qkme.me/" + id + ".jpg", caption : null}]);
-	} else if(StringTools.startsWith(url,"quickmeme.com/meme/")) {
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,19,null));
-		cb([{ url : "http://i.qkme.me/" + id + ".jpg", caption : null}]);
-	} else if(StringTools.startsWith(url,"m.quickmeme.com/meme/")) {
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,21,null));
-		cb([{ url : "http://i.qkme.me/" + id + ".jpg", caption : null}]);
-	} else if(StringTools.startsWith(url,"memecrunch.com/meme/")) {
-		var id = url;
-		if(id.charAt(id.length - 1) != "/") id += "/";
-		cb([{ url : "http://" + id + "image.jpg", caption : null}]);
-	} else if(StringTools.startsWith(url,"memegenerator.net/instance/")) {
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,27,null));
-		cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + id + ".jpg", caption : null}]);
-	} else if(StringTools.startsWith(url,"imgflip.com/i/")) {
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,14,null));
-		cb([{ url : "http://i.imgflip.com/" + id + ".jpg", caption : null}]);
-	} else if(StringTools.startsWith(url,"xkcd.com/")) {
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,9,null));
-		Reditn.getJSON("http://xkcd.com/" + id + "/info.0.json",function(data) {
-			cb(Expand.album(data.img,data.title));
-		});
-	} else if(StringTools.startsWith(url,"explosm.net/comics/")) {
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,19,null));
-		Reditn.getText("http://explosm.net/comics/" + id + "/",function(text) {
-			var mt = "\"http://www.explosm.net/db/files/Comics/";
-			var i = text.indexOf(mt);
-			if(i != -1) {
-				var id1 = HxOverrides.substr(text,i + mt.length,null);
-				id1 = HxOverrides.substr(id1,0,id1.indexOf("\""));
-				cb([{ url : HxOverrides.substr(mt,1,null) + id1, caption : null}]);
-			}
-		});
-	} else if(StringTools.startsWith(url,"livememe.com/")) {
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,13,null));
-		cb([{ url : "http://livememe.com/" + id + ".jpg", caption : null}]);
-	} else if(StringTools.startsWith(url,"deviantart.com/art/") || ourl.indexOf(".deviantart.com/art/") != -1 || ourl.indexOf(".deviantart.com/") != -1 && ourl.indexOf("#/d") != -1 || ourl.indexOf("fav.me") != -1) Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(ourl) + "&format=json",function(d) {
-		cb([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
-	}); else if(url.indexOf(".tumblr.com/") != -1) {
-		var author = HxOverrides.substr(url,0,url.indexOf("."));
-		var parts = HxOverrides.substr(url,author.length + 12,null).split("/");
-		var id = Reditn.removeSymbols(parts[1]);
-		Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
-			var post = data.posts[0];
-			switch(post.type) {
-			case "photo":
-				var ps = post.photos;
-				cb((function($this) {
-					var $r;
-					var _g = [];
-					{
-						var _g1 = 0;
-						while(_g1 < ps.length) {
-							var p = ps[_g1];
-							++_g1;
-							_g.push(Expand.image(p.original_size.url,p.caption));
-						}
-					}
-					$r = _g;
-					return $r;
-				}(this)));
-				break;
-			default:
-				throw "Unknown datatype " + post.type;
-			}
-		});
-	} else if(StringTools.startsWith(url,"flickr.com/photos/")) {
-		var id = HxOverrides.substr(url,18,null);
-		id = HxOverrides.substr(id,id.indexOf("/") + 1,null);
-		id = HxOverrides.substr(id,0,id.indexOf("/"));
-		Reditn.getJSON("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + "99dcc3e77bcd8fb489f17e58191f32f7" + "&photo_id=" + id + "&format=json",function(d) {
-			if(d.sizes == null || d.sizes.size == null) return;
-			var sizes = d.sizes.size;
-			var largest = null;
-			var largestSize = 0;
-			var _g = 0;
-			while(_g < sizes.length) {
-				var s = sizes[_g];
-				++_g;
-				var size = Std.parseInt(s.width) * Std.parseInt(s.height);
-				if(largest == null || size >= largestSize && size <= (js.Browser.window.innerWidth * 0.7 | 0) * (js.Browser.window.innerHeight * 0.6 | 0)) {
-					largest = s.source;
-					largestSize = size;
-				}
-			}
-			if(largest == null) largest = sizes[0].source;
-			cb([{ url : largest, caption : null}]);
-		});
-	} else cb([{ url : ourl, caption : null}]);
-}
 Expand.preload = function(url) {
 	var link = js.Browser.document.createElement("link");
 	link.href = url;
@@ -623,13 +320,6 @@ Expand.initResize = function(e) {
 		drag = false;
 		ev.preventDefault();
 	};
-}
-var GM = function() { }
-$hxClasses["GM"] = GM;
-$hxExpose(GM, "GM");
-GM.__name__ = ["GM"];
-GM.request = function(data) {
-	GM_xmlhttpRequest(data);
 }
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
@@ -759,83 +449,137 @@ Lambda.has = function(it,elt) {
 	}
 	return false;
 }
-var List = function() {
-	this.length = 0;
+var data = {}
+data.LinkType = $hxClasses["data.LinkType"] = { __ename__ : ["data","LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","ARTICLE","SHOP_ITEM","UNKNOWN"] }
+data.LinkType.IMAGE = ["IMAGE",0];
+data.LinkType.IMAGE.toString = $estr;
+data.LinkType.IMAGE.__enum__ = data.LinkType;
+data.LinkType.VIDEO = ["VIDEO",1];
+data.LinkType.VIDEO.toString = $estr;
+data.LinkType.VIDEO.__enum__ = data.LinkType;
+data.LinkType.AUDIO = ["AUDIO",2];
+data.LinkType.AUDIO.toString = $estr;
+data.LinkType.AUDIO.__enum__ = data.LinkType;
+data.LinkType.TEXT = ["TEXT",3];
+data.LinkType.TEXT.toString = $estr;
+data.LinkType.TEXT.__enum__ = data.LinkType;
+data.LinkType.ARTICLE = ["ARTICLE",4];
+data.LinkType.ARTICLE.toString = $estr;
+data.LinkType.ARTICLE.__enum__ = data.LinkType;
+data.LinkType.SHOP_ITEM = ["SHOP_ITEM",5];
+data.LinkType.SHOP_ITEM.toString = $estr;
+data.LinkType.SHOP_ITEM.__enum__ = data.LinkType;
+data.LinkType.UNKNOWN = ["UNKNOWN",6];
+data.LinkType.UNKNOWN.toString = $estr;
+data.LinkType.UNKNOWN.__enum__ = data.LinkType;
+var haxe = {}
+haxe.Http = function(url) {
+	this.url = url;
+	this.headers = new haxe.ds.StringMap();
+	this.params = new haxe.ds.StringMap();
+	this.async = true;
 };
-$hxClasses["List"] = List;
-List.__name__ = ["List"];
-List.prototype = {
-	iterator: function() {
-		return { h : this.h, hasNext : function() {
-			return this.h != null;
-		}, next : function() {
-			if(this.h == null) return null;
-			var x = this.h[0];
-			this.h = this.h[1];
-			return x;
-		}};
+$hxClasses["haxe.Http"] = haxe.Http;
+haxe.Http.__name__ = ["haxe","Http"];
+haxe.Http.prototype = {
+	onStatus: function(status) {
 	}
-	,add: function(item) {
-		var x = [item];
-		if(this.h == null) this.h = x; else this.q[1] = x;
-		this.q = x;
-		this.length++;
+	,onError: function(msg) {
 	}
-	,__class__: List
+	,onData: function(data) {
+	}
+	,request: function(post) {
+		var me = this;
+		me.responseData = null;
+		var r = js.Browser.createXMLHttpRequest();
+		var onreadystatechange = function(_) {
+			if(r.readyState != 4) return;
+			var s = (function($this) {
+				var $r;
+				try {
+					$r = r.status;
+				} catch( e ) {
+					$r = null;
+				}
+				return $r;
+			}(this));
+			if(s == undefined) s = null;
+			if(s != null) me.onStatus(s);
+			if(s != null && s >= 200 && s < 400) me.onData(me.responseData = r.responseText); else if(s == null) me.onError("Failed to connect or resolve host"); else switch(s) {
+			case 12029:
+				me.onError("Failed to connect to host");
+				break;
+			case 12007:
+				me.onError("Unknown host");
+				break;
+			default:
+				me.responseData = r.responseText;
+				me.onError("Http Error #" + r.status);
+			}
+		};
+		if(this.async) r.onreadystatechange = onreadystatechange;
+		var uri = this.postData;
+		if(uri != null) post = true; else {
+			var $it0 = this.params.keys();
+			while( $it0.hasNext() ) {
+				var p = $it0.next();
+				if(uri == null) uri = ""; else uri += "&";
+				uri += StringTools.urlEncode(p) + "=" + StringTools.urlEncode(this.params.get(p));
+			}
+		}
+		try {
+			if(post) r.open("POST",this.url,this.async); else if(uri != null) {
+				var question = this.url.split("?").length <= 1;
+				r.open("GET",this.url + (question?"?":"&") + uri,this.async);
+				uri = null;
+			} else r.open("GET",this.url,this.async);
+		} catch( e ) {
+			this.onError(e.toString());
+			return;
+		}
+		if(this.headers.get("Content-Type") == null && post && this.postData == null) r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+		var $it1 = this.headers.keys();
+		while( $it1.hasNext() ) {
+			var h = $it1.next();
+			r.setRequestHeader(h,this.headers.get(h));
+		}
+		r.send(uri);
+		if(!this.async) onreadystatechange(null);
+	}
+	,setHeader: function(header,value) {
+		this.headers.set(header,value);
+		return this;
+	}
+	,__class__: haxe.Http
 }
 var IMap = function() { }
 $hxClasses["IMap"] = IMap;
 IMap.__name__ = ["IMap"];
-var Markdown = function() { }
-$hxClasses["Markdown"] = Markdown;
-Markdown.__name__ = ["Markdown"];
-Markdown.parse = function(s) {
-	var $it0 = Markdown.regex.keys();
-	while( $it0.hasNext() ) {
-		var r = $it0.next();
-		console.log("" + Std.string(r) + " does " + (!r.match(s)?"not ":"") + "match " + s);
-		while(r.match(s)) {
-			var t = s;
-			s = r.replace(s,Markdown.regex.h[r.__id__]);
-			console.log("" + t + " after " + Std.string(r) + " => " + s);
+haxe.ds = {}
+haxe.ds.StringMap = function() {
+	this.h = { };
+};
+$hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
+haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
+haxe.ds.StringMap.__interfaces__ = [IMap];
+haxe.ds.StringMap.prototype = {
+	keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
+		return HxOverrides.iter(a);
 	}
-	return s;
-}
-var NSFWFilter = function() { }
-$hxClasses["NSFWFilter"] = NSFWFilter;
-NSFWFilter.__name__ = ["NSFWFilter"];
-NSFWFilter.init = function() {
-	var ns = js.Browser.document.body.getElementsByClassName("nsfw-stamp");
-	var _g = 0;
-	while(_g < ns.length) {
-		var n = ns[_g];
-		++_g;
-		if(n.nodeName.toLowerCase() != "li") continue;
-		Reditn.show(n.parentNode.parentNode.parentNode,false);
+	,exists: function(key) {
+		return this.h.hasOwnProperty("$" + key);
 	}
-}
-var Preview = function() { }
-$hxClasses["Preview"] = Preview;
-Preview.__name__ = ["Preview"];
-Preview.init = function() {
-	var ts = js.Browser.document.body.getElementsByClassName("usertext-edit");
-	var _g = 0;
-	while(_g < ts.length) {
-		var t = ts[_g];
-		++_g;
-		Preview.preview(t);
+	,get: function(key) {
+		return this.h["$" + key];
 	}
-}
-Preview.preview = function(e) {
-	var box = e.getElementsByTagName("textarea")[0];
-	if(box == null) return;
-	var preview = js.Browser.document.createElement("div");
-	e.appendChild(preview);
-	preview.className = "md";
-	box.onchange = function(e1) {
-		preview.innerHTML = Markdown.parse(box.value);
-	};
+	,set: function(key,value) {
+		this.h["$" + key] = value;
+	}
+	,__class__: haxe.ds.StringMap
 }
 var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
@@ -946,95 +690,8 @@ Reditn.age = function(t) {
 	while(s.indexOf(", , ") != -1) s = StringTools.replace(s,", , ",", ");
 	return s;
 }
-Reditn.removeSymbols = function(s) {
-	if(s.lastIndexOf("?") != -1) s = HxOverrides.substr(s,0,s.indexOf("?"));
-	if(s.lastIndexOf("/") != -1) s = HxOverrides.substr(s,0,s.indexOf("/"));
-	if(s.lastIndexOf("#") != -1) s = HxOverrides.substr(s,0,s.indexOf("#"));
-	if(s.lastIndexOf(".") != -1) s = HxOverrides.substr(s,0,s.indexOf("."));
-	return s;
-}
-Reditn.trimURL = function(url) {
-	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
-	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null);
-	if(url.indexOf("&") != -1) url = HxOverrides.substr(url,0,url.indexOf("&"));
-	if(url.indexOf("?") != -1) url = HxOverrides.substr(url,0,url.indexOf("?"));
-	return url;
-}
-Reditn.getLinkType = function(ourl,cb) {
-	var url = Reditn.trimURL(ourl);
-	if(StringTools.startsWith(url,"reddit.com/r/") && url.indexOf("/comments/") != -1) cb(data.LinkType.TEXT); else if(url.indexOf(".media.tumblr.com/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"ebay.") && url.indexOf("/itm/") != -1 || StringTools.startsWith(url,"cgi.ebay.com/ws/eBayISAPI.dll?ViewItem&item=")) cb(data.LinkType.SHOP_ITEM); else if(url.indexOf(".tumblr.com/post/") != -1) {
-		var author = HxOverrides.substr(url,0,url.indexOf("."));
-		var id = Reditn.removeSymbols(HxOverrides.substr(url,url.indexOf(".") + 17,null));
-		Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data1) {
-			var post = data1.posts[0];
-			cb((function($this) {
-				var $r;
-				switch(post.type) {
-				case "photo":
-					$r = data.LinkType.IMAGE;
-					break;
-				case "video":
-					$r = data.LinkType.VIDEO;
-					break;
-				default:
-					$r = data.LinkType.ARTICLE;
-				}
-				return $r;
-			}(this)));
-		});
-	} else if(StringTools.startsWith(url,"twitter.com/") && url.indexOf("/status/") != -1 || StringTools.startsWith(url,"cracked.com/article_") || StringTools.startsWith(url,"cracked.com/blog/") || StringTools.startsWith(url,"cracked.com/quick-fixes\n\t\t\t/") || url.indexOf(".wordpress.com/") != -1 && url.indexOf("files.wordpress.com") == -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogger.com/") != -1 && url.lastIndexOf("/") != url.indexOf("/") || url.indexOf(".blogspot.") != -1 && url.lastIndexOf("/") != url.indexOf("/") && url.indexOf(".bp.blogspot.com") == -1 || url.indexOf("/wiki/") != -1) cb(data.LinkType.ARTICLE); else if(StringTools.startsWith(url,"xkcd.com/") || StringTools.startsWith(url,"flickr.com/photos/") || StringTools.startsWith(url,"deviantart.com/art/") || url.indexOf(".deviantart.com/") != -1 && url.indexOf("#/d") != -1 || url.indexOf(".deviantart.com/art") != -1 || StringTools.startsWith(url,"imgur.com/") && url.indexOf("/blog/") == -1 || StringTools.startsWith(url,"i.imgur.com/") || StringTools.startsWith(url,"imgur.com/gallery/") || StringTools.startsWith(url,"qkme.me/") || StringTools.startsWith(url,"m.quickmeme.com/meme/") || StringTools.startsWith(url,"quickmeme.com/meme/") || StringTools.startsWith(url,"memecrunch.com/meme/") || StringTools.startsWith(url,"memegenerator.net/instance/") || StringTools.startsWith(url,"imgflip.com/i/") || StringTools.startsWith(url,"fav.me/") || StringTools.startsWith(url,"livememe.com/") || StringTools.startsWith(url,"explosm.net/comics/") || url.indexOf(".tumblr.com/image/") != -1) cb(data.LinkType.IMAGE); else if(StringTools.startsWith(url,"youtube.com/watch") || StringTools.startsWith(url,"youtu.be/")) cb(data.LinkType.VIDEO); else if(url.lastIndexOf(".") != url.indexOf(".") && HxOverrides.substr(url,url.lastIndexOf("."),null).length <= 4 && url.indexOf("/wiki/index.php?title=") == -1) {
-		var ext = HxOverrides.substr(url,url.lastIndexOf(".") + 1,null).toLowerCase();
-		switch(ext) {
-		case "gif":case "jpg":case "jpeg":case "bmp":case "png":case "webp":case "svg":case "ico":case "tiff":case "raw":
-			cb(data.LinkType.IMAGE);
-			break;
-		case "mpg":case "webm":case "avi":case "mp4":case "flv":case "swf":
-			cb(data.LinkType.VIDEO);
-			break;
-		case "mp3":case "wav":case "midi":
-			cb(data.LinkType.AUDIO);
-			break;
-		default:
-		}
-	} else cb(data.LinkType.UNKNOWN);
-}
-Reditn.parseWiki = function(w,base) {
-	var wiki = (function($this) {
-		var $r;
-		var _g = new haxe.ds.ObjectMap();
-		_g.set(new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""),"<a href=\"" + base + "/wiki/$" + "1\">$" + "1</a>");
-		_g.set(new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""),"<a href=\"" + base + "/wiki/$" + "1\">$" + "2</a>");
-		_g.set(new EReg("\\[\\[File:([^\\]]*)\\]\\]",""),"");
-		_g.set(new EReg("{{spaced ndash}}","")," - ");
-		_g.set(new EReg("{{([^{}]*)}}",""),"");
-		_g.set(new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""),"");
-		_g.set(new EReg("'''([^']*)'''",""),"<b>$1</b>");
-		_g.set(new EReg("''([^']*)''",""),"<em>$1</em>");
-		_g.set(new EReg("======([^=]*)======",""),"<h6>$1</h6>");
-		_g.set(new EReg("=====([^=]*)=====",""),"<h5>$1</h5>");
-		_g.set(new EReg("====([^=]*)====",""),"<h4>$1</h4>");
-		_g.set(new EReg("===([^=]*)===",""),"<h3>$1</h3>");
-		_g.set(new EReg("==([^=]*)==",""),"<h2>$1</h2>");
-		_g.set(new EReg("\n\\* ?([^\n]*)",""),"<li>$1</li>");
-		_g.set(new EReg("<ref>[^<>]*</ref>",""),"");
-		_g.set(new EReg("\n",""),"");
-		_g.set(new EReg("<br><br>",""),"<br>");
-		$r = _g;
-		return $r;
-	}(this));
-	var $it0 = wiki.keys();
-	while( $it0.hasNext() ) {
-		var r = $it0.next();
-		try {
-			while(r.match(w)) w = r.replace(w,wiki.h[r.__id__]);
-		} catch( e ) {
-			console.log("Error whilst processing " + Std.string(r));
-		}
-	}
-	return w;
-}
 Reditn.expandURL = function(ourl,cb) {
-	var url = Reditn.trimURL(ourl);
+	var url = Link.trimURL(ourl);
 	if(url.indexOf("/") == -1) cb(ourl); else {
 		url = HxOverrides.substr(url,0,url.indexOf("/"));
 		switch(url) {
@@ -1140,12 +797,13 @@ Reditn.getData = function(o) {
 	return o;
 }
 Reditn.getText = function(url,func) {
-	GM.request({ method : "GET", url : url, onload : function(rsp) {
+	GM_xmlhttpRequest({ method : "GET", url : url, onload : function(rsp) {
 		func(rsp.responseText);
 	}});
 }
 Reditn.getJSON = function(url,func) {
 	Reditn.getText(url,function(data) {
+		if(StringTools.startsWith(data,"jsonFlickrApi(") && StringTools.endsWith(data,")")) data = data.substring(14,data.length - 1);
 		try {
 			func(Reditn.getData(haxe.Json.parse(data)));
 		} catch( e ) {
@@ -1186,6 +844,375 @@ Reditn.fullPopUp = function(el,y) {
 	if(y != 0) el.style.top = "" + (y - js.Browser.window.scrollY) + "px";
 	return el;
 }
+haxe.Json = function() {
+};
+$hxClasses["haxe.Json"] = haxe.Json;
+haxe.Json.__name__ = ["haxe","Json"];
+haxe.Json.parse = function(text) {
+	return new haxe.Json().doParse(text);
+}
+haxe.Json.prototype = {
+	parseNumber: function(c) {
+		var start = this.pos - 1;
+		var minus = c == 45, digit = !minus, zero = c == 48;
+		var point = false, e = false, pm = false, end = false;
+		while(true) {
+			c = this.str.charCodeAt(this.pos++);
+			switch(c) {
+			case 48:
+				if(zero && !point) this.invalidNumber(start);
+				if(minus) {
+					minus = false;
+					zero = true;
+				}
+				digit = true;
+				break;
+			case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:
+				if(zero && !point) this.invalidNumber(start);
+				if(minus) minus = false;
+				digit = true;
+				zero = false;
+				break;
+			case 46:
+				if(minus || point) this.invalidNumber(start);
+				digit = false;
+				point = true;
+				break;
+			case 101:case 69:
+				if(minus || zero || e) this.invalidNumber(start);
+				digit = false;
+				e = true;
+				break;
+			case 43:case 45:
+				if(!e || pm) this.invalidNumber(start);
+				digit = false;
+				pm = true;
+				break;
+			default:
+				if(!digit) this.invalidNumber(start);
+				this.pos--;
+				end = true;
+			}
+			if(end) break;
+		}
+		var f = Std.parseFloat(HxOverrides.substr(this.str,start,this.pos - start));
+		var i = f | 0;
+		return i == f?i:f;
+	}
+	,invalidNumber: function(start) {
+		throw "Invalid number at position " + start + ": " + HxOverrides.substr(this.str,start,this.pos - start);
+	}
+	,parseString: function() {
+		var start = this.pos;
+		var buf = new StringBuf();
+		while(true) {
+			var c = this.str.charCodeAt(this.pos++);
+			if(c == 34) break;
+			if(c == 92) {
+				buf.addSub(this.str,start,this.pos - start - 1);
+				c = this.str.charCodeAt(this.pos++);
+				switch(c) {
+				case 114:
+					buf.b += "\r";
+					break;
+				case 110:
+					buf.b += "\n";
+					break;
+				case 116:
+					buf.b += "\t";
+					break;
+				case 98:
+					buf.b += "";
+					break;
+				case 102:
+					buf.b += "";
+					break;
+				case 47:case 92:case 34:
+					buf.b += String.fromCharCode(c);
+					break;
+				case 117:
+					var uc = Std.parseInt("0x" + HxOverrides.substr(this.str,this.pos,4));
+					this.pos += 4;
+					buf.b += String.fromCharCode(uc);
+					break;
+				default:
+					throw "Invalid escape sequence \\" + String.fromCharCode(c) + " at position " + (this.pos - 1);
+				}
+				start = this.pos;
+			} else if(c != c) throw "Unclosed string";
+		}
+		buf.addSub(this.str,start,this.pos - start - 1);
+		return buf.b;
+	}
+	,parseRec: function() {
+		while(true) {
+			var c = this.str.charCodeAt(this.pos++);
+			switch(c) {
+			case 32:case 13:case 10:case 9:
+				break;
+			case 123:
+				var obj = { }, field = null, comma = null;
+				while(true) {
+					var c1 = this.str.charCodeAt(this.pos++);
+					switch(c1) {
+					case 32:case 13:case 10:case 9:
+						break;
+					case 125:
+						if(field != null || comma == false) this.invalidChar();
+						return obj;
+					case 58:
+						if(field == null) this.invalidChar();
+						obj[field] = this.parseRec();
+						field = null;
+						comma = true;
+						break;
+					case 44:
+						if(comma) comma = false; else this.invalidChar();
+						break;
+					case 34:
+						if(comma) this.invalidChar();
+						field = this.parseString();
+						break;
+					default:
+						this.invalidChar();
+					}
+				}
+				break;
+			case 91:
+				var arr = [], comma = null;
+				while(true) {
+					var c1 = this.str.charCodeAt(this.pos++);
+					switch(c1) {
+					case 32:case 13:case 10:case 9:
+						break;
+					case 93:
+						if(comma == false) this.invalidChar();
+						return arr;
+					case 44:
+						if(comma) comma = false; else this.invalidChar();
+						break;
+					default:
+						if(comma) this.invalidChar();
+						this.pos--;
+						arr.push(this.parseRec());
+						comma = true;
+					}
+				}
+				break;
+			case 116:
+				var save = this.pos;
+				if(this.str.charCodeAt(this.pos++) != 114 || this.str.charCodeAt(this.pos++) != 117 || this.str.charCodeAt(this.pos++) != 101) {
+					this.pos = save;
+					this.invalidChar();
+				}
+				return true;
+			case 102:
+				var save = this.pos;
+				if(this.str.charCodeAt(this.pos++) != 97 || this.str.charCodeAt(this.pos++) != 108 || this.str.charCodeAt(this.pos++) != 115 || this.str.charCodeAt(this.pos++) != 101) {
+					this.pos = save;
+					this.invalidChar();
+				}
+				return false;
+			case 110:
+				var save = this.pos;
+				if(this.str.charCodeAt(this.pos++) != 117 || this.str.charCodeAt(this.pos++) != 108 || this.str.charCodeAt(this.pos++) != 108) {
+					this.pos = save;
+					this.invalidChar();
+				}
+				return null;
+			case 34:
+				return this.parseString();
+			case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:case 45:
+				return this.parseNumber(c);
+			default:
+				this.invalidChar();
+			}
+		}
+	}
+	,invalidChar: function() {
+		this.pos--;
+		throw "Invalid char " + this.str.charCodeAt(this.pos) + " at position " + this.pos;
+	}
+	,doParse: function(str) {
+		this.str = str;
+		this.pos = 0;
+		return this.parseRec();
+	}
+	,__class__: haxe.Json
+}
+var StringTools = function() { }
+$hxClasses["StringTools"] = StringTools;
+StringTools.__name__ = ["StringTools"];
+StringTools.urlEncode = function(s) {
+	return encodeURIComponent(s);
+}
+StringTools.urlDecode = function(s) {
+	return decodeURIComponent(s.split("+").join(" "));
+}
+StringTools.htmlEscape = function(s,quotes) {
+	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
+}
+StringTools.htmlUnescape = function(s) {
+	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
+}
+StringTools.startsWith = function(s,start) {
+	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
+}
+StringTools.endsWith = function(s,end) {
+	var elen = end.length;
+	var slen = s.length;
+	return slen >= elen && HxOverrides.substr(s,slen - elen,elen) == end;
+}
+StringTools.isSpace = function(s,pos) {
+	var c = HxOverrides.cca(s,pos);
+	return c > 8 && c < 14 || c == 32;
+}
+StringTools.ltrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,r)) r++;
+	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
+}
+StringTools.rtrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
+	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
+}
+StringTools.trim = function(s) {
+	return StringTools.ltrim(StringTools.rtrim(s));
+}
+StringTools.replace = function(s,sub,by) {
+	return s.split(sub).join(by);
+}
+var Std = function() { }
+$hxClasses["Std"] = Std;
+Std.__name__ = ["Std"];
+Std.string = function(s) {
+	return js.Boot.__string_rec(s,"");
+}
+Std.parseInt = function(x) {
+	var v = parseInt(x,10);
+	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
+	if(isNaN(v)) return null;
+	return v;
+}
+Std.parseFloat = function(x) {
+	return parseFloat(x);
+}
+var js = {}
+js.Boot = function() { }
+$hxClasses["js.Boot"] = js.Boot;
+js.Boot.__name__ = ["js","Boot"];
+js.Boot.__string_rec = function(o,s) {
+	if(o == null) return "null";
+	if(s.length >= 5) return "<...>";
+	var t = typeof(o);
+	if(t == "function" && (o.__name__ || o.__ename__)) t = "object";
+	switch(t) {
+	case "object":
+		if(o instanceof Array) {
+			if(o.__enum__) {
+				if(o.length == 2) return o[0];
+				var str = o[0] + "(";
+				s += "\t";
+				var _g1 = 2, _g = o.length;
+				while(_g1 < _g) {
+					var i = _g1++;
+					if(i != 2) str += "," + js.Boot.__string_rec(o[i],s); else str += js.Boot.__string_rec(o[i],s);
+				}
+				return str + ")";
+			}
+			var l = o.length;
+			var i;
+			var str = "[";
+			s += "\t";
+			var _g = 0;
+			while(_g < l) {
+				var i1 = _g++;
+				str += (i1 > 0?",":"") + js.Boot.__string_rec(o[i1],s);
+			}
+			str += "]";
+			return str;
+		}
+		var tostr;
+		try {
+			tostr = o.toString;
+		} catch( e ) {
+			return "???";
+		}
+		if(tostr != null && tostr != Object.toString) {
+			var s2 = o.toString();
+			if(s2 != "[object Object]") return s2;
+		}
+		var k = null;
+		var str = "{\n";
+		s += "\t";
+		var hasp = o.hasOwnProperty != null;
+		for( var k in o ) { ;
+		if(hasp && !o.hasOwnProperty(k)) {
+			continue;
+		}
+		if(k == "prototype" || k == "__class__" || k == "__super__" || k == "__interfaces__" || k == "__properties__") {
+			continue;
+		}
+		if(str.length != 2) str += ", \n";
+		str += s + k + " : " + js.Boot.__string_rec(o[k],s);
+		}
+		s = s.substring(1);
+		str += "\n" + s + "}";
+		return str;
+	case "function":
+		return "<function>";
+	case "string":
+		return o;
+	default:
+		return String(o);
+	}
+}
+js.Boot.__interfLoop = function(cc,cl) {
+	if(cc == null) return false;
+	if(cc == cl) return true;
+	var intf = cc.__interfaces__;
+	if(intf != null) {
+		var _g1 = 0, _g = intf.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var i1 = intf[i];
+			if(i1 == cl || js.Boot.__interfLoop(i1,cl)) return true;
+		}
+	}
+	return js.Boot.__interfLoop(cc.__super__,cl);
+}
+js.Boot.__instanceof = function(o,cl) {
+	try {
+		if(o instanceof cl) {
+			if(cl == Array) return o.__enum__ == null;
+			return true;
+		}
+		if(js.Boot.__interfLoop(o.__class__,cl)) return true;
+	} catch( e ) {
+		if(cl == null) return false;
+	}
+	switch(cl) {
+	case Int:
+		return Math.ceil(o%2147483648.0) === o;
+	case Float:
+		return typeof(o) == "number";
+	case Bool:
+		return o === true || o === false;
+	case String:
+		return typeof(o) == "string";
+	case Dynamic:
+		return true;
+	default:
+		if(o == null) return false;
+		if(cl == Class && o.__name__ != null) return true; else null;
+		if(cl == Enum && o.__ename__ != null) return true; else null;
+		return o.__enum__ == cl;
+	}
+}
 var Reflect = function() { }
 $hxClasses["Reflect"] = Reflect;
 Reflect.__name__ = ["Reflect"];
@@ -1218,32 +1245,88 @@ Reflect.deleteField = function(o,field) {
 	delete(o[field]);
 	return true;
 }
-var haxe = {}
-haxe.ds = {}
-haxe.ds.StringMap = function() {
-	this.h = { };
-};
-$hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
-haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
-haxe.ds.StringMap.__interfaces__ = [IMap];
-haxe.ds.StringMap.prototype = {
-	keys: function() {
-		var a = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
+var Link = function() { }
+$hxClasses["Link"] = Link;
+Link.__name__ = ["Link"];
+Link.resolve = function(url) {
+	url = Link.trimURL(url);
+	var _g = 0, _g1 = Link.sites;
+	while(_g < _g1.length) {
+		var s = _g1[_g];
+		++_g;
+		if(s.regex.match(url)) {
+			console.log("" + url + " matches " + Std.string(s.regex) + " with " + s.regex.matched(0) + " and " + s.regex.matched(1));
+			return s;
 		}
-		return HxOverrides.iter(a);
 	}
-	,exists: function(key) {
-		return this.h.hasOwnProperty("$" + key);
+	return null;
+}
+Link.trimURL = function(url) {
+	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
+	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null);
+	if(url.indexOf("&") != -1) url = HxOverrides.substr(url,0,url.indexOf("&"));
+	if(url.indexOf("?") != -1) url = HxOverrides.substr(url,0,url.indexOf("?"));
+	if(url.indexOf("#") != -1) url = HxOverrides.substr(url,0,url.indexOf("#"));
+	return url;
+}
+var List = function() {
+	this.length = 0;
+};
+$hxClasses["List"] = List;
+List.__name__ = ["List"];
+List.prototype = {
+	iterator: function() {
+		return { h : this.h, hasNext : function() {
+			return this.h != null;
+		}, next : function() {
+			if(this.h == null) return null;
+			var x = this.h[0];
+			this.h = this.h[1];
+			return x;
+		}};
 	}
-	,get: function(key) {
-		return this.h["$" + key];
+	,add: function(item) {
+		var x = [item];
+		if(this.h == null) this.h = x; else this.q[1] = x;
+		this.q = x;
+		this.length++;
 	}
-	,set: function(key,value) {
-		this.h["$" + key] = value;
+	,__class__: List
+}
+var NSFWFilter = function() { }
+$hxClasses["NSFWFilter"] = NSFWFilter;
+NSFWFilter.__name__ = ["NSFWFilter"];
+NSFWFilter.init = function() {
+	var ns = js.Browser.document.body.getElementsByClassName("nsfw-stamp");
+	var _g = 0;
+	while(_g < ns.length) {
+		var n = ns[_g];
+		++_g;
+		if(n.nodeName.toLowerCase() != "li") continue;
+		Reditn.show(n.parentNode.parentNode.parentNode,false);
 	}
-	,__class__: haxe.ds.StringMap
+}
+var Preview = function() { }
+$hxClasses["Preview"] = Preview;
+Preview.__name__ = ["Preview"];
+Preview.init = function() {
+	var ts = js.Browser.document.body.getElementsByClassName("usertext-edit");
+	var _g = 0;
+	while(_g < ts.length) {
+		var t = ts[_g];
+		++_g;
+		Preview.preview(t);
+	}
+}
+Preview.preview = function(e) {
+	var box = e.getElementsByTagName("textarea")[0];
+	if(box == null) return;
+	var preview = js.Browser.document.createElement("div");
+	e.appendChild(preview);
+	preview.className = "md";
+	box.onchange = function(e1) {
+		preview.innerHTML = parser.Markdown.parse(box.value);
+	};
 }
 var Settings = function() { }
 $hxClasses["Settings"] = Settings;
@@ -1263,10 +1346,10 @@ Settings.optimisedData = function() {
 }
 Settings.save = function() {
 	haxe.Serializer.USE_CACHE = false;
-	js.Browser.window.localStorage.setItem("reditn",Settings.optimisedData());
+	js.Browser.getLocalStorage().setItem("reditn",Settings.optimisedData());
 }
 Settings.init = function() {
-	var dt = js.Browser.window.localStorage.getItem("reditn");
+	var dt = js.Browser.getLocalStorage().getItem("reditn");
 	if(dt != null) Settings.data = (function($this) {
 		var $r;
 		try {
@@ -1400,21 +1483,6 @@ Settings.fixMissing = function(all) {
 		if(all || !Settings.data.exists(k)) Settings.data.set(k,js.Boot.__instanceof(Settings.DEFAULTS.get(k),haxe.ds.StringMap)?new haxe.ds.StringMap():Settings.DEFAULTS.get(k));
 	}
 }
-var Std = function() { }
-$hxClasses["Std"] = Std;
-Std.__name__ = ["Std"];
-Std.string = function(s) {
-	return js.Boot.__string_rec(s,"");
-}
-Std.parseInt = function(x) {
-	var v = parseInt(x,10);
-	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
-	if(isNaN(v)) return null;
-	return v;
-}
-Std.parseFloat = function(x) {
-	return parseFloat(x);
-}
 var StringBuf = function() {
 	this.b = "";
 };
@@ -1425,52 +1493,6 @@ StringBuf.prototype = {
 		this.b += len == null?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len);
 	}
 	,__class__: StringBuf
-}
-var StringTools = function() { }
-$hxClasses["StringTools"] = StringTools;
-StringTools.__name__ = ["StringTools"];
-StringTools.urlEncode = function(s) {
-	return encodeURIComponent(s);
-}
-StringTools.urlDecode = function(s) {
-	return decodeURIComponent(s.split("+").join(" "));
-}
-StringTools.htmlEscape = function(s,quotes) {
-	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
-}
-StringTools.htmlUnescape = function(s) {
-	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
-}
-StringTools.startsWith = function(s,start) {
-	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
-}
-StringTools.endsWith = function(s,end) {
-	var elen = end.length;
-	var slen = s.length;
-	return slen >= elen && HxOverrides.substr(s,slen - elen,elen) == end;
-}
-StringTools.isSpace = function(s,pos) {
-	var c = HxOverrides.cca(s,pos);
-	return c > 8 && c < 14 || c == 32;
-}
-StringTools.ltrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,r)) r++;
-	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
-}
-StringTools.rtrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
-	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
-}
-StringTools.trim = function(s) {
-	return StringTools.ltrim(StringTools.rtrim(s));
-}
-StringTools.replace = function(s,sub,by) {
-	return s.split(sub).join(by);
 }
 var Style = function() { }
 $hxClasses["Style"] = Style;
@@ -1498,7 +1520,7 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 	var div = js.Browser.document.createElement("div");
 	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
 	Reditn.getJSON("/r/" + name + "/about.json",function(d) {
-		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = Markdown.parse(d.public_description != null?d.public_description:d.description), age = Reditn.age(d.created_utc);
+		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = parser.Markdown.parse(d.public_description != null?d.public_description:d.description), age = Reditn.age(d.created_utc);
 		var html = "<b>Name:</b> " + name + " <br>";
 		var ts = Settings.data.get("sub-tags");
 		if(ts.exists(name)) html += "<b>Tag:</b> " + ts.get(name) + "<br>";
@@ -1721,304 +1743,6 @@ UserTagger.getTag = function(a) {
 		box.focus();
 	};
 	a.parentNode.insertBefore(tag,a.nextSibling);
-}
-var data = {}
-data.LinkType = $hxClasses["data.LinkType"] = { __ename__ : ["data","LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","ARTICLE","SHOP_ITEM","UNKNOWN"] }
-data.LinkType.IMAGE = ["IMAGE",0];
-data.LinkType.IMAGE.toString = $estr;
-data.LinkType.IMAGE.__enum__ = data.LinkType;
-data.LinkType.VIDEO = ["VIDEO",1];
-data.LinkType.VIDEO.toString = $estr;
-data.LinkType.VIDEO.__enum__ = data.LinkType;
-data.LinkType.AUDIO = ["AUDIO",2];
-data.LinkType.AUDIO.toString = $estr;
-data.LinkType.AUDIO.__enum__ = data.LinkType;
-data.LinkType.TEXT = ["TEXT",3];
-data.LinkType.TEXT.toString = $estr;
-data.LinkType.TEXT.__enum__ = data.LinkType;
-data.LinkType.ARTICLE = ["ARTICLE",4];
-data.LinkType.ARTICLE.toString = $estr;
-data.LinkType.ARTICLE.__enum__ = data.LinkType;
-data.LinkType.SHOP_ITEM = ["SHOP_ITEM",5];
-data.LinkType.SHOP_ITEM.toString = $estr;
-data.LinkType.SHOP_ITEM.__enum__ = data.LinkType;
-data.LinkType.UNKNOWN = ["UNKNOWN",6];
-data.LinkType.UNKNOWN.toString = $estr;
-data.LinkType.UNKNOWN.__enum__ = data.LinkType;
-haxe.Http = function(url) {
-	this.url = url;
-	this.headers = new haxe.ds.StringMap();
-	this.params = new haxe.ds.StringMap();
-	this.async = true;
-};
-$hxClasses["haxe.Http"] = haxe.Http;
-haxe.Http.__name__ = ["haxe","Http"];
-haxe.Http.prototype = {
-	onStatus: function(status) {
-	}
-	,onError: function(msg) {
-	}
-	,onData: function(data) {
-	}
-	,request: function(post) {
-		var me = this;
-		me.responseData = null;
-		var r = js.Browser.createXMLHttpRequest();
-		var onreadystatechange = function(_) {
-			if(r.readyState != 4) return;
-			var s = (function($this) {
-				var $r;
-				try {
-					$r = r.status;
-				} catch( e ) {
-					$r = null;
-				}
-				return $r;
-			}(this));
-			if(s == undefined) s = null;
-			if(s != null) me.onStatus(s);
-			if(s != null && s >= 200 && s < 400) me.onData(me.responseData = r.responseText); else if(s == null) me.onError("Failed to connect or resolve host"); else switch(s) {
-			case 12029:
-				me.onError("Failed to connect to host");
-				break;
-			case 12007:
-				me.onError("Unknown host");
-				break;
-			default:
-				me.responseData = r.responseText;
-				me.onError("Http Error #" + r.status);
-			}
-		};
-		if(this.async) r.onreadystatechange = onreadystatechange;
-		var uri = this.postData;
-		if(uri != null) post = true; else {
-			var $it0 = this.params.keys();
-			while( $it0.hasNext() ) {
-				var p = $it0.next();
-				if(uri == null) uri = ""; else uri += "&";
-				uri += StringTools.urlEncode(p) + "=" + StringTools.urlEncode(this.params.get(p));
-			}
-		}
-		try {
-			if(post) r.open("POST",this.url,this.async); else if(uri != null) {
-				var question = this.url.split("?").length <= 1;
-				r.open("GET",this.url + (question?"?":"&") + uri,this.async);
-				uri = null;
-			} else r.open("GET",this.url,this.async);
-		} catch( e ) {
-			this.onError(e.toString());
-			return;
-		}
-		if(this.headers.get("Content-Type") == null && post && this.postData == null) r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-		var $it1 = this.headers.keys();
-		while( $it1.hasNext() ) {
-			var h = $it1.next();
-			r.setRequestHeader(h,this.headers.get(h));
-		}
-		r.send(uri);
-		if(!this.async) onreadystatechange(null);
-	}
-	,setHeader: function(header,value) {
-		this.headers.set(header,value);
-		return this;
-	}
-	,__class__: haxe.Http
-}
-haxe.Json = function() {
-};
-$hxClasses["haxe.Json"] = haxe.Json;
-haxe.Json.__name__ = ["haxe","Json"];
-haxe.Json.parse = function(text) {
-	return new haxe.Json().doParse(text);
-}
-haxe.Json.prototype = {
-	parseNumber: function(c) {
-		var start = this.pos - 1;
-		var minus = c == 45, digit = !minus, zero = c == 48;
-		var point = false, e = false, pm = false, end = false;
-		while(true) {
-			c = this.str.charCodeAt(this.pos++);
-			switch(c) {
-			case 48:
-				if(zero && !point) this.invalidNumber(start);
-				if(minus) {
-					minus = false;
-					zero = true;
-				}
-				digit = true;
-				break;
-			case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:
-				if(zero && !point) this.invalidNumber(start);
-				if(minus) minus = false;
-				digit = true;
-				zero = false;
-				break;
-			case 46:
-				if(minus || point) this.invalidNumber(start);
-				digit = false;
-				point = true;
-				break;
-			case 101:case 69:
-				if(minus || zero || e) this.invalidNumber(start);
-				digit = false;
-				e = true;
-				break;
-			case 43:case 45:
-				if(!e || pm) this.invalidNumber(start);
-				digit = false;
-				pm = true;
-				break;
-			default:
-				if(!digit) this.invalidNumber(start);
-				this.pos--;
-				end = true;
-			}
-			if(end) break;
-		}
-		var f = Std.parseFloat(HxOverrides.substr(this.str,start,this.pos - start));
-		var i = f | 0;
-		return i == f?i:f;
-	}
-	,invalidNumber: function(start) {
-		throw "Invalid number at position " + start + ": " + HxOverrides.substr(this.str,start,this.pos - start);
-	}
-	,parseString: function() {
-		var start = this.pos;
-		var buf = new StringBuf();
-		while(true) {
-			var c = this.str.charCodeAt(this.pos++);
-			if(c == 34) break;
-			if(c == 92) {
-				buf.addSub(this.str,start,this.pos - start - 1);
-				c = this.str.charCodeAt(this.pos++);
-				switch(c) {
-				case 114:
-					buf.b += "\r";
-					break;
-				case 110:
-					buf.b += "\n";
-					break;
-				case 116:
-					buf.b += "\t";
-					break;
-				case 98:
-					buf.b += "";
-					break;
-				case 102:
-					buf.b += "";
-					break;
-				case 47:case 92:case 34:
-					buf.b += String.fromCharCode(c);
-					break;
-				case 117:
-					var uc = Std.parseInt("0x" + HxOverrides.substr(this.str,this.pos,4));
-					this.pos += 4;
-					buf.b += String.fromCharCode(uc);
-					break;
-				default:
-					throw "Invalid escape sequence \\" + String.fromCharCode(c) + " at position " + (this.pos - 1);
-				}
-				start = this.pos;
-			} else if(c != c) throw "Unclosed string";
-		}
-		buf.addSub(this.str,start,this.pos - start - 1);
-		return buf.b;
-	}
-	,parseRec: function() {
-		while(true) {
-			var c = this.str.charCodeAt(this.pos++);
-			switch(c) {
-			case 32:case 13:case 10:case 9:
-				break;
-			case 123:
-				var obj = { }, field = null, comma = null;
-				while(true) {
-					var c1 = this.str.charCodeAt(this.pos++);
-					switch(c1) {
-					case 32:case 13:case 10:case 9:
-						break;
-					case 125:
-						if(field != null || comma == false) this.invalidChar();
-						return obj;
-					case 58:
-						if(field == null) this.invalidChar();
-						obj[field] = this.parseRec();
-						field = null;
-						comma = true;
-						break;
-					case 44:
-						if(comma) comma = false; else this.invalidChar();
-						break;
-					case 34:
-						if(comma) this.invalidChar();
-						field = this.parseString();
-						break;
-					default:
-						this.invalidChar();
-					}
-				}
-				break;
-			case 91:
-				var arr = [], comma = null;
-				while(true) {
-					var c1 = this.str.charCodeAt(this.pos++);
-					switch(c1) {
-					case 32:case 13:case 10:case 9:
-						break;
-					case 93:
-						if(comma == false) this.invalidChar();
-						return arr;
-					case 44:
-						if(comma) comma = false; else this.invalidChar();
-						break;
-					default:
-						if(comma) this.invalidChar();
-						this.pos--;
-						arr.push(this.parseRec());
-						comma = true;
-					}
-				}
-				break;
-			case 116:
-				var save = this.pos;
-				if(this.str.charCodeAt(this.pos++) != 114 || this.str.charCodeAt(this.pos++) != 117 || this.str.charCodeAt(this.pos++) != 101) {
-					this.pos = save;
-					this.invalidChar();
-				}
-				return true;
-			case 102:
-				var save = this.pos;
-				if(this.str.charCodeAt(this.pos++) != 97 || this.str.charCodeAt(this.pos++) != 108 || this.str.charCodeAt(this.pos++) != 115 || this.str.charCodeAt(this.pos++) != 101) {
-					this.pos = save;
-					this.invalidChar();
-				}
-				return false;
-			case 110:
-				var save = this.pos;
-				if(this.str.charCodeAt(this.pos++) != 117 || this.str.charCodeAt(this.pos++) != 108 || this.str.charCodeAt(this.pos++) != 108) {
-					this.pos = save;
-					this.invalidChar();
-				}
-				return null;
-			case 34:
-				return this.parseString();
-			case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:case 45:
-				return this.parseNumber(c);
-			default:
-				this.invalidChar();
-			}
-		}
-	}
-	,invalidChar: function() {
-		this.pos--;
-		throw "Invalid char " + this.str.charCodeAt(this.pos) + " at position " + this.pos;
-	}
-	,doParse: function(str) {
-		this.str = str;
-		this.pos = 0;
-		return this.parseRec();
-	}
-	,__class__: haxe.Json
 }
 haxe.Serializer = function() {
 	this.buf = new StringBuf();
@@ -2618,125 +2342,34 @@ haxe.io.Bytes.alloc = function(length) {
 haxe.io.Bytes.prototype = {
 	__class__: haxe.io.Bytes
 }
-var js = {}
-js.Boot = function() { }
-$hxClasses["js.Boot"] = js.Boot;
-js.Boot.__name__ = ["js","Boot"];
-js.Boot.__string_rec = function(o,s) {
-	if(o == null) return "null";
-	if(s.length >= 5) return "<...>";
-	var t = typeof(o);
-	if(t == "function" && (o.__name__ || o.__ename__)) t = "object";
-	switch(t) {
-	case "object":
-		if(o instanceof Array) {
-			if(o.__enum__) {
-				if(o.length == 2) return o[0];
-				var str = o[0] + "(";
-				s += "\t";
-				var _g1 = 2, _g = o.length;
-				while(_g1 < _g) {
-					var i = _g1++;
-					if(i != 2) str += "," + js.Boot.__string_rec(o[i],s); else str += js.Boot.__string_rec(o[i],s);
-				}
-				return str + ")";
-			}
-			var l = o.length;
-			var i;
-			var str = "[";
-			s += "\t";
-			var _g = 0;
-			while(_g < l) {
-				var i1 = _g++;
-				str += (i1 > 0?",":"") + js.Boot.__string_rec(o[i1],s);
-			}
-			str += "]";
-			return str;
-		}
-		var tostr;
-		try {
-			tostr = o.toString;
-		} catch( e ) {
-			return "???";
-		}
-		if(tostr != null && tostr != Object.toString) {
-			var s2 = o.toString();
-			if(s2 != "[object Object]") return s2;
-		}
-		var k = null;
-		var str = "{\n";
-		s += "\t";
-		var hasp = o.hasOwnProperty != null;
-		for( var k in o ) { ;
-		if(hasp && !o.hasOwnProperty(k)) {
-			continue;
-		}
-		if(k == "prototype" || k == "__class__" || k == "__super__" || k == "__interfaces__" || k == "__properties__") {
-			continue;
-		}
-		if(str.length != 2) str += ", \n";
-		str += s + k + " : " + js.Boot.__string_rec(o[k],s);
-		}
-		s = s.substring(1);
-		str += "\n" + s + "}";
-		return str;
-	case "function":
-		return "<function>";
-	case "string":
-		return o;
-	default:
-		return String(o);
-	}
-}
-js.Boot.__interfLoop = function(cc,cl) {
-	if(cc == null) return false;
-	if(cc == cl) return true;
-	var intf = cc.__interfaces__;
-	if(intf != null) {
-		var _g1 = 0, _g = intf.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			var i1 = intf[i];
-			if(i1 == cl || js.Boot.__interfLoop(i1,cl)) return true;
-		}
-	}
-	return js.Boot.__interfLoop(cc.__super__,cl);
-}
-js.Boot.__instanceof = function(o,cl) {
-	try {
-		if(o instanceof cl) {
-			if(cl == Array) return o.__enum__ == null;
-			return true;
-		}
-		if(js.Boot.__interfLoop(o.__class__,cl)) return true;
-	} catch( e ) {
-		if(cl == null) return false;
-	}
-	switch(cl) {
-	case Int:
-		return Math.ceil(o%2147483648.0) === o;
-	case Float:
-		return typeof(o) == "number";
-	case Bool:
-		return o === true || o === false;
-	case String:
-		return typeof(o) == "string";
-	case Dynamic:
-		return true;
-	default:
-		if(o == null) return false;
-		if(cl == Class && o.__name__ != null) return true; else null;
-		if(cl == Enum && o.__ename__ != null) return true; else null;
-		return o.__enum__ == cl;
-	}
-}
 js.Browser = function() { }
 $hxClasses["js.Browser"] = js.Browser;
 js.Browser.__name__ = ["js","Browser"];
+js.Browser.getLocalStorage = function() {
+	try {
+		var s = js.Browser.window.localStorage;
+		s.getItem("");
+		return s;
+	} catch( e ) {
+		return null;
+	}
+}
 js.Browser.createXMLHttpRequest = function() {
 	if(typeof XMLHttpRequest != "undefined") return new XMLHttpRequest();
 	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
 	throw "Unable to create XMLHttpRequest object.";
+}
+var parser = {}
+parser.Markdown = function() { }
+$hxClasses["parser.Markdown"] = parser.Markdown;
+parser.Markdown.__name__ = ["parser","Markdown"];
+parser.Markdown.parse = function(s) {
+	var $it0 = parser.Markdown.regex.keys();
+	while( $it0.hasNext() ) {
+		var r = $it0.next();
+		while(r.match(s)) s = r.replace(s,parser.Markdown.regex.h[r.__id__]);
+	}
+	return s;
 }
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
 var $_;
@@ -2747,17 +2380,7 @@ if(Array.prototype.indexOf) HxOverrides.remove = function(a,o) {
 	a.splice(i,1);
 	return true;
 }; else null;
-Math.__name__ = ["Math"];
-Math.NaN = Number.NaN;
-Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
-Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
-$hxClasses.Math = Math;
-Math.isFinite = function(i) {
-	return isFinite(i);
-};
-Math.isNaN = function(i) {
-	return isNaN(i);
-};
+if(typeof(JSON) != "undefined") haxe.Json = JSON;
 String.prototype.__class__ = $hxClasses.String = String;
 String.__name__ = ["String"];
 Array.prototype.__class__ = $hxClasses.Array = Array;
@@ -2772,17 +2395,109 @@ var Bool = $hxClasses.Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
-if(typeof(JSON) != "undefined") haxe.Json = JSON;
+Math.__name__ = ["Math"];
+Math.NaN = Number.NaN;
+Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+$hxClasses.Math = Math;
+Math.isFinite = function(i) {
+	return isFinite(i);
+};
+Math.isNaN = function(i) {
+	return isNaN(i);
+};
 Expand.buttons = [];
-Markdown.regex = (function($this) {
-	var $r;
-	var _g = new haxe.ds.ObjectMap();
-	_g.set(new EReg("\\*\\*([^\\*]*)\\*\\*",""),"<b>$1</b>");
-	_g.set(new EReg("\\*([^\\*]*)\\*",""),"<em>$1</em>");
-	$r = _g;
-	return $r;
-}(this));
 Reditn.fullPage = true;
+Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
+	cb([{ url : "http://" + e.matched(0), caption : null}]);
+}},{ type : data.LinkType.IMAGE, regex : new EReg("imgur\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
+	cb([{ url : "http://i.imgur.com/" + e.matched(1) + ".jpg", caption : null}]);
+}},{ type : data.LinkType.IMAGE, regex : new EReg("imgur.com/(a|gallery|gallery/album)/([^/]*)",""), method : function(e,cb1) {
+	var id = e.matched(2);
+	var albumType = e.matched(1);
+	var req = new haxe.Http("https://api.imgur.com/3/" + albumType + "/" + id);
+	req.setHeader("Authorization","Client-ID " + "cc1f254578d6c52");
+	req.onData = function(ds) {
+		var d = Reditn.getData(haxe.Json.parse(ds));
+		var album = [];
+		if(d.images_count <= 0) album.push({ url : "http://i.imgur.com/" + d.id + ".jpg", caption : d.title}); else {
+			var _g = 0, _g1 = d.images;
+			while(_g < _g1.length) {
+				var i = _g1[_g];
+				++_g;
+				album.push({ url : "http://i.imgur.com/" + i.id + ".jpg", caption : i.title});
+			}
+		}
+		cb1(album);
+	};
+	req.request(false);
+}},{ type : data.LinkType.IMAGE, regex : new EReg("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", caption : null}]);
+}},{ type : data.LinkType.IMAGE, regex : new EReg("memecrunch.com/meme/([^/]*)/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://" + e.matched(0) + "/image.png", caption : null}]);
+}},{ type : data.LinkType.IMAGE, regex : new EReg("memegenerator\\.net/instance/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + e.matched(1) + ".jpg", caption : null}]);
+}},{ type : data.LinkType.IMAGE, regex : new EReg("imgflip\\.com/i/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://i.imgflip.com/" + e.matched(1) + ".jpg", caption : null}]);
+}},{ type : data.LinkType.IMAGE, regex : new EReg("xkcd.com/([0-9]*)",""), method : function(e,cb2) {
+	Reditn.getJSON("http://xkcd.com/" + e.matched(1) + "/info.0.json",function(data1) {
+		cb2([{ url : data1.img, caption : data1.title}]);
+	});
+}},{ type : data.LinkType.IMAGE, regex : new EReg("explosm.net/comics/([^/]*)",""), method : function(e,cb3) {
+	Reditn.getText("http://" + e.matched(0),function(txt) {
+		var rg = new EReg("http://www\\.explosm\\.net/db/files/Comics/[^\"]*","");
+		rg.match(txt);
+		cb3([{ url : rg.matched(0), caption : null}]);
+	});
+}},{ type : data.LinkType.IMAGE, regex : new EReg("livememe.com/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://livememe.com/" + e.matched(1) + ".jpg", caption : null}]);
+}},{ type : data.LinkType.IMAGE, regex : new EReg("(([^\\.]*\\.)?deviantart\\.com/art|fav\\.me)/.*",""), method : function(e,cb4) {
+	Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(e.matched(0)) + "&format=json",function(d) {
+		cb4([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
+	});
+}},{ type : data.LinkType.IMAGE, regex : new EReg("flickr\\.com(/[^/]*)*?/([0-9@]*)/",""), method : function(e,cb5) {
+	Reditn.getJSON("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + "99dcc3e77bcd8fb489f17e58191f32f7" + "&photo_id=" + e.matched(2) + "&format=json",function(d) {
+		if(d.sizes == null || d.sizes.size == null) return;
+		var sizes = d.sizes.size;
+		var largest = sizes[sizes.length - 1].source;
+		cb5([{ url : largest, caption : null}]);
+	});
+}},{ type : data.LinkType.SHOP_ITEM, regex : new EReg("ebay\\.([a-zA-Z\\.]*)/itm(/[^/]*)?/([0-9]*)",""), method : function(e,cb6) {
+	var domain = e.matched(1);
+	var id = e.matched(3);
+	var url = "http://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=" + "ThomasDa-1e6c-4d29-a156-85557acee70b" + "&siteid=0&version=515&ItemID=" + id + "&IncludeSelector=TextDescription";
+	Reditn.getJSON(url,function(data2) {
+		var imgs = data2.Item.PictureURL;
+		var nalbum = imgs.map(function(i) {
+			return { url : i, caption : null};
+		});
+		cb6({ title : data2.Item.Title, category : data2.Item.PrimaryCategoryName, location : data2.Item.Location + ", " + data2.Item.Country, description : data2.Item.Description, images : nalbum, price : Reditn.formatNumber(data2.Item.ConvertedCurrentPrice.Value) + " " + data2.Item.ConvertedCurrentPrice.CurrencyID});
+	});
+}},{ type : data.LinkType.ARTICLE, regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
+	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.htmlEscape(e.matched(1)) + "/posts/slug:" + StringTools.htmlEscape(e.matched(2));
+	Reditn.getJSON(url,function(data) {
+		var att = data.attachments;
+		cb7({ title : StringTools.htmlUnescape(data.title), content : data.content, author : data.author.name, images : (function($this) {
+			var $r;
+			var _g = [];
+			{
+				var _g1 = 0, _g2 = Reflect.fields(att);
+				while(_g1 < _g2.length) {
+					var f = _g2[_g1];
+					++_g1;
+					_g.push((function($this) {
+						var $r;
+						var img = Reflect.field(att,f);
+						$r = img.mime_type.startsWith("image/")?cb7([{ url : img.URL, caption : null}]):null;
+						return $r;
+					}($this)));
+				}
+			}
+			$r = _g;
+			return $r;
+		}(this))});
+	});
+}}];
 Settings.DESC = (function($this) {
 	var $r;
 	var _g = new haxe.ds.StringMap();
@@ -2826,15 +2541,15 @@ haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 haxe.ds.ObjectMap.count = 0;
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
+parser.Markdown.regex = (function($this) {
+	var $r;
+	var _g = new haxe.ds.ObjectMap();
+	_g.set(new EReg("\\*\\*([^\\*]*)\\*\\*",""),"<b>$1</b>");
+	_g.set(new EReg("\\*([^\\*]*)\\*",""),"<em>$1</em>");
+	_g.set(new EReg("~~([^~]*)~~",""),"<del>$1</del>");
+	_g.set(new EReg("\\^([^\\^]*)",""),"<sup>$1</sup>");
+	$r = _g;
+	return $r;
+}(this));
 Reditn.main();
-function $hxExpose(src, path) {
-	var o = typeof window != "undefined" ? window : exports;
-	var parts = path.split(".");
-	for(var ii = 0; ii < parts.length-1; ++ii) {
-		var p = parts[ii];
-		if(typeof o[p] == "undefined") o[p] = {};
-		o = o[p];
-	}
-	o[parts[parts.length-1]] = src;
-}
 })();
