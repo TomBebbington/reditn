@@ -197,7 +197,17 @@ class Link {
 				Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data) {
 					var post:Dynamic = untyped data.posts[0];
 					cb(switch(post.type) {
-						case "text": {title: post.title, content: post.body, author: data.blog.name, images: []};
+						case "text": 
+						var imx = ~/<img .*?src="([^"]*)"\/?>/;
+						var images = [];
+						while(imx.match(post.body)) {
+							images.push({
+								url: imx.matched(1),
+								caption: null
+							});
+							post.body = imx.replace(post.body, "");
+						}
+						{title: post.title, content: post.body, author: data.blog.name, images: images};
 						case "quote": {title: null, content: '${post.text}<br/><b>${post.source}</b>', author: data.blog.name, images: []};
 						case "photo":
 							var ps:Array<Dynamic> = post.photos;

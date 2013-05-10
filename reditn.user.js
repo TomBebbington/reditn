@@ -2496,7 +2496,17 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 			var $r;
 			switch(post.type) {
 			case "text":
-				$r = { title : post.title, content : post.body, author : data.blog.name, images : []};
+				$r = (function($this) {
+					var $r;
+					var imx = new EReg("<img .*?src=\"([^\"]*)\"/?>","");
+					var images = [];
+					while(imx.match(post.body)) {
+						images.push({ url : imx.matched(1), caption : null});
+						post.body = imx.replace(post.body,"");
+					}
+					$r = { title : post.title, content : post.body, author : data.blog.name, images : images};
+					return $r;
+				}($this));
 				break;
 			case "quote":
 				$r = { title : null, content : "" + Std.string(post.text) + "<br/><b>" + Std.string(post.source) + "</b>", author : data.blog.name, images : []};
