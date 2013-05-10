@@ -188,15 +188,36 @@ class Link {
 					]});
 				});
 			}
+		},
+		{
+			type: LinkType.UNKNOWN,
+			regex: ~/([^\.]*)\.tumblr\.com\/post\/([0-9]*)/,
+			method: function(e, cb) {
+				var author = e.matched(1), id = e.matched(2);
+				Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data) {
+					var post:Dynamic = untyped data.posts[0];
+					cb(switch(post.type) {
+						case "text": {title: post.title, content: post.body, author: data.blog.name, images: []};
+						case "quote": {title: null, content: '${post.text}<br/><b>${post.source}</b>', author: data.blog.name, images: []};
+						case "photo":
+							var ps:Array<Dynamic> = post.photos;
+							[for(p in ps) {
+								{
+									url: p.original_size.url,
+									caption: p.caption
+								}
+							}];
+						default: null;
+					});
+				});
+			}
 		}
 	];
 	public static function resolve(url:String) {
 		url = trimURL(url);
 		for(s in sites)
-			if(s.regex.match(url)) {
-				trace('$url matches ${s.regex} with ${s.regex.matched(0)} and ${s.regex.matched(1)}');
+			if(s.regex.match(url))
 				return s;
-			}
 		return null;
 	}
 	public static function trimURL(url:String) {

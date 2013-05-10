@@ -44,7 +44,7 @@ class Expand {
 					return;
 				site.method(site.regex, function(data:Dynamic) {
 					switch(site.type) {
-						case SHOP_ITEM:
+						case _ if(Reflect.hasField(data, "price")):
 							var i:ShopItem = data;
 							var e = Reditn.getLinkContainer(l);
 							var expando = Browser.document.createDivElement();
@@ -56,7 +56,7 @@ class Expand {
 							var head = null;
 							var contentBlock = Browser.document.createDivElement();
 							var inner = Browser.document.createSpanElement();
-							inner.innerHTML = '<h3>${StringTools.htmlEscape(i.title)}</h3><br>' + 
+							inner.innerHTML = '<h2>${StringTools.htmlEscape(i.title)}</h2><br>' + 
 							'<b>Category:</b> ${StringTools.htmlEscape(i.category)}<br>' + 
 							'<b>Location:</b> ${StringTools.htmlEscape(i.location)}<br>' + 
 							'<b>Price:</b> ${StringTools.htmlEscape(i.price)}<br>' +
@@ -71,7 +71,7 @@ class Expand {
 								pn.removeChild(exp);
 							pn.appendChild(expando);
 							Reditn.show(expando, toggled);
-						case ARTICLE:
+						case _ if(Reflect.hasField(data, "content")):
 							var a:Article = data;
 							var e = Reditn.getLinkContainer(l);
 							var expando = Browser.document.createDivElement();
@@ -100,7 +100,7 @@ class Expand {
 							}
 							pn.appendChild(expando);
 							Reditn.show(expando, toggled);
-						case IMAGE:
+						case _ if(Std.is(data, Array) && Reflect.hasField(untyped data[0], "url")):
 							var a:Album = data;
 							var e = Reditn.getLinkContainer(l);
 							var div = Reditn.embedAlbum(a);

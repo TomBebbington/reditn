@@ -90,8 +90,7 @@ Expand.init = function() {
 				if(site == null) return;
 				site.method(site.regex,(function(l) {
 					return function(data) {
-						switch( (site.type)[1] ) {
-						case 5:
+						if(Reflect.hasField(data,"price")) {
 							var i = data;
 							var e = l[0].parentNode.parentNode.parentNode;
 							var expando = js.Browser.document.createElement("div");
@@ -103,7 +102,7 @@ Expand.init = function() {
 							var head = null;
 							var contentBlock = js.Browser.document.createElement("div");
 							var inner = js.Browser.document.createElement("span");
-							inner.innerHTML = "<h3>" + StringTools.htmlEscape(i.title) + "</h3><br>" + ("<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>") + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + StringTools.htmlEscape(i.description) + "</p>");
+							inner.innerHTML = "<h2>" + StringTools.htmlEscape(i.title) + "</h2><br>" + ("<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>") + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + StringTools.htmlEscape(i.description) + "</p>");
 							contentBlock.appendChild(inner);
 							contentBlock.className = "md";
 							contentBlock.appendChild(Reditn.embedAlbum(i.images));
@@ -119,8 +118,7 @@ Expand.init = function() {
 							pn.appendChild(expando);
 							expando.style.display = Expand.toggled?"":"none";
 							if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-							break;
-						case 4:
+						} else if(Reflect.hasField(data,"content")) {
 							var a = data;
 							var e = l[0].parentNode.parentNode.parentNode;
 							var expando = js.Browser.document.createElement("div");
@@ -151,8 +149,7 @@ Expand.init = function() {
 							pn.appendChild(expando);
 							expando.style.display = Expand.toggled?"":"none";
 							if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-							break;
-						case 0:
+						} else if(js.Boot.__instanceof(data,Array) && Reflect.hasField(data[0],"url")) {
 							var a = data;
 							var e = l[0].parentNode.parentNode.parentNode;
 							var div = Reditn.embedAlbum(a);
@@ -169,10 +166,7 @@ Expand.init = function() {
 							}
 							pn.appendChild(div);
 							Expand.refresh();
-							break;
-						default:
-							Expand.preload(l[0].href);
-						}
+						} else Expand.preload(l[0].href);
 					};
 				})(l));
 			};
@@ -1249,10 +1243,7 @@ Link.resolve = function(url) {
 	while(_g < _g1.length) {
 		var s = _g1[_g];
 		++_g;
-		if(s.regex.match(url)) {
-			console.log("" + url + " matches " + Std.string(s.regex) + " with " + s.regex.matched(0) + " and " + s.regex.matched(1));
-			return s;
-		}
+		if(s.regex.match(url)) return s;
 	}
 	return null;
 }
@@ -2470,9 +2461,9 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 	});
 }},{ type : data.LinkType.ARTICLE, regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
 	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.htmlEscape(e.matched(1)) + "/posts/slug:" + StringTools.htmlEscape(e.matched(2));
-	Reditn.getJSON(url,function(data) {
-		var att = data.attachments;
-		cb7({ title : StringTools.htmlUnescape(data.title), content : data.content, author : data.author.name, images : (function($this) {
+	Reditn.getJSON(url,function(data3) {
+		var att = data3.attachments;
+		cb7({ title : StringTools.htmlUnescape(data3.title), content : data3.content, author : data3.author.name, images : (function($this) {
 			var $r;
 			var _g = [];
 			{
@@ -2491,6 +2482,46 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 			$r = _g;
 			return $r;
 		}(this))});
+	});
+}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/post/([0-9]*)",""), method : function(e,cb8) {
+	var author = e.matched(1), id = e.matched(2);
+	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
+		var post = data.posts[0];
+		cb8((function($this) {
+			var $r;
+			switch(post.type) {
+			case "text":
+				$r = { title : post.title, content : post.body, author : data.blog.name, images : []};
+				break;
+			case "quote":
+				$r = { title : null, content : "" + Std.string(post.text) + "<br/><b>" + Std.string(post.source) + "</b>", author : data.blog.name, images : []};
+				break;
+			case "photo":
+				$r = (function($this) {
+					var $r;
+					var ps = post.photos;
+					$r = (function($this) {
+						var $r;
+						var _g = [];
+						{
+							var _g1 = 0;
+							while(_g1 < ps.length) {
+								var p = ps[_g1];
+								++_g1;
+								_g.push({ url : p.original_size.url, caption : p.caption});
+							}
+						}
+						$r = _g;
+						return $r;
+					}($this));
+					return $r;
+				}($this));
+				break;
+			default:
+				$r = null;
+			}
+			return $r;
+		}(this)));
 	});
 }}];
 Settings.DESC = (function($this) {
