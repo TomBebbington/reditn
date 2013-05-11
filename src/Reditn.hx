@@ -245,7 +245,7 @@ class Reditn {
 			});
 		#end
 	}
-	public static inline function getJSON<T>(url:String, func:T->Void):Void {
+	public static function getJSON<T>(url:String, func:T->Void):Void {
 		getText(url, function(data:String) {
 			if(data.startsWith("jsonFlickrApi(") && data.endsWith(")"))
 				data = data.substring(14, data.length - 1);

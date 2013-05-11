@@ -184,13 +184,14 @@ class Link {
 				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).htmlEscape()}/posts/slug:${e.matched(2).htmlEscape()}';
 				Reditn.getJSON(url, function(data) {
 					var att = data.attachments;
-					cb({title: StringTools.htmlUnescape(data.title), content: data.content, author: data.author.name, images: [
+					cb({title: StringTools.htmlUnescape(data.title), content: data.content, author: data.author.name, images: 
+					try [
 						for(f in Reflect.fields(att)) {
 							var img = Reflect.field(att, f);
 							if(img.mime_type.startsWith("image/"))
-								cb([{url: img.URL, caption: null}]);
+								{url: img.URL, caption: null};
 						}
-					]});
+					] catch(e:Dynamic) []});
 				});
 			}
 		},

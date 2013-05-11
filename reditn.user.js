@@ -7,7 +7,7 @@
 // @include			reddit.com/*
 // @include			*.reddit.com
 // @include			*.reddit.com/*
-// @version			1.6.0
+// @version			1.6.1
 // @grant			none
 // ==/UserScript==
 
@@ -2514,21 +2514,29 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		var att = data3.attachments;
 		cb7({ title : StringTools.htmlUnescape(data3.title), content : data3.content, author : data3.author.name, images : (function($this) {
 			var $r;
-			var _g = [];
-			{
-				var _g1 = 0, _g2 = Reflect.fields(att);
-				while(_g1 < _g2.length) {
-					var f = _g2[_g1];
-					++_g1;
-					_g.push((function($this) {
-						var $r;
-						var img = Reflect.field(att,f);
-						$r = img.mime_type.startsWith("image/")?cb7([{ url : img.URL, caption : null}]):null;
-						return $r;
-					}($this)));
-				}
+			try {
+				$r = (function($this) {
+					var $r;
+					var _g = [];
+					{
+						var _g1 = 0, _g2 = Reflect.fields(att);
+						while(_g1 < _g2.length) {
+							var f = _g2[_g1];
+							++_g1;
+							_g.push((function($this) {
+								var $r;
+								var img = Reflect.field(att,f);
+								$r = img.mime_type.startsWith("image/")?{ url : img.URL, caption : null}:null;
+								return $r;
+							}($this)));
+						}
+					}
+					$r = _g;
+					return $r;
+				}($this));
+			} catch( e1 ) {
+				$r = [];
 			}
-			$r = _g;
 			return $r;
 		}(this))});
 	});
