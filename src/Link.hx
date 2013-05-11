@@ -202,7 +202,9 @@ class Link {
 			method: function(e, cb) {
 				var urlroot = e.matched(1), title = e.matched(2), to = e.matched(3);
 				if(to != null)
-					to = to.substr(1);
+					to = StringTools.trim(to.substr(1));
+				if(to != null && to.length == 0)
+					to = null;
 				if(!urlroot.endsWith(".wikia.com"))
 					urlroot += "/w";
 				function getWikiPage(name:String) {
@@ -222,16 +224,16 @@ class Link {
 								var pages = data.query.pages;
 								for(p in Reflect.fields(pages)) {
 									var page = Reflect.field(pages, p);
-									var images:Array<Dynamic> = page.images == null ? [] : page.images;
+									var images:Array<Dynamic> = page.images;
 									var album:Album = [];
-									var left:Int = images.length;
-									if(images != null)
+									if(images != null && images.length > 0) {
+										var left:Int = images == null ? 0 : images.length;
 										for(img in images) {
 											Reditn.getJSON('http://${urlroot}/api.php?action=query&titles=${StringTools.urlEncode(img.title)}&prop=imageinfo&iiprop=url&format=json', function(data) {
 												var pages:Dynamic = data.query.pages;
 												for(p in Reflect.fields(pages)) {
 													var page = Reflect.field(pages, p);
-													if(page != null && page.imageinfo.length >= 1) {
+													if(page != null && page.pageinfo != null && page.imageinfo.length >= 1) {
 														var url = untyped page.imageinfo[0].url;
 														album.push({url: url, caption: null});
 													}
@@ -240,12 +242,30 @@ class Link {
 													cb({title: page.title, content: cont, author: null, images: album});
 											});
 										}
+									} else
+										cb({title: page.title, content: cont, author: null, images: []});
 								}
 							});
 						}
 					});
 				}
 				getWikiPage(title);
+			}
+		},
+		{
+			type: LinkType.ARTICLE,
+			regex: ~/github\.com\/([^\/]*)\/([^\/]*)/,
+			method: function(e, cb) {
+				var author = e.matched(1), repo = e.matched(2);
+				Reditn.getJSON('https://api.github.com/repos/${author}/${repo}', function(data) {
+					trace(data);
+					cb({
+						name: data.name,
+						owner: author,
+						description: parser.Markdown.parse(data.description),
+						url: data.clone_url
+					});
+				});
 			}
 		},
 		{

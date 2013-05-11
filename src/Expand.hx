@@ -43,16 +43,18 @@ class Expand {
 				if(site == null)
 					return;
 				site.method(site.regex, function(data:Dynamic) {
+					var e = Reditn.getLinkContainer(l);
+					var exp = Browser.document.createDivElement();
+					exp.className = "expando";
+					exp.style.display = "none";
+					Reditn.show(exp, toggled);
+					var name = "selftext";
 					switch(site.type) {
 						case _ if(Reflect.hasField(data, "price")):
 							var i:ShopItem = data;
-							var e = Reditn.getLinkContainer(l);
-							var expando = Browser.document.createDivElement();
-							expando.className = "expando";
-							expando.style.display = "none";
 							var div = Browser.document.createDivElement();
 							div.className = "usertext";
-							expando.appendChild(div);
+							exp.appendChild(div);
 							var head = null;
 							var contentBlock = Browser.document.createDivElement();
 							var inner = Browser.document.createSpanElement();
@@ -65,21 +67,12 @@ class Expand {
 							contentBlock.className = "md";
 							contentBlock.appendChild(Reditn.embedAlbum(i.images));
 							div.appendChild(contentBlock);
-							var s = makeSelfButton(e, "item", l.href);
-							var pn:Element = cast s.parentNode;
-							for(exp in pn.getElementsByClassName("expando"))
-								pn.removeChild(exp);
-							pn.appendChild(expando);
-							Reditn.show(expando, toggled);
+							name = "item";
 						case _ if(Reflect.hasField(data, "content")): // article
 							var a:Article = data;
-							var e = Reditn.getLinkContainer(l);
-							var expando = Browser.document.createDivElement();
-							expando.className = "expando";
-							expando.style.display = "none";
 							var div = Browser.document.createDivElement();
 							div.className = "usertext";
-							expando.appendChild(div);
+							exp.appendChild(div);
 							var head = null;
 							var contentBlock = Browser.document.createDivElement();
 							var inner = Browser.document.createSpanElement();
@@ -89,27 +82,27 @@ class Expand {
 								contentBlock.appendChild(Reditn.embedAlbum(a.images));
 								contentBlock.className = "md";
 							div.appendChild(contentBlock);
-							var s = makeSelfButton(e, "selftext", l.href);
-							var pn:Element = cast s.parentNode;
-							for(exp in pn.getElementsByClassName("expando")) {
-								pn.removeChild(exp);
-							}
-							pn.appendChild(expando);
-							Reditn.show(expando, toggled);
 						case _ if(Std.is(data, Array) && Reflect.hasField(untyped data[0], "url")):
 							var a:Album = data;
-							var e = Reditn.getLinkContainer(l);
 							var div = Reditn.embedAlbum(a);
-								e.appendChild(div);
+							e.appendChild(div);
 							Reditn.show(div, toggled);
-							var s = makeSelfButton(e, "image", l.href);
-							var pn:Element = cast s.parentNode;
-							for(exp in pn.getElementsByClassName("expando"))
-								pn.removeChild(exp);
-							pn.appendChild(div);
-							refresh();
+							name = "image";
+						case _ if(Reflect.hasField(data, "owner")):
+						trace(data);
+							var r:Repo = data;
+							var div = js.Browser.document.createDivElement();
+							div.className = "usertext";
+							div.innerHTML = '<h1>${data.name}<em> by ${data.owner}</em></h1>${data.description}<br><a href="${data.url}"><b>Clone repo</b></a>';
+							exp.appendChild(div);
 						default: preload(l.href);
 					}
+					var s = makeSelfButton(e, name, l.href);
+					var pn:Element = cast s.parentNode;
+					for(ep in pn.getElementsByClassName("expando"))
+						pn.removeChild(ep);
+					pn.appendChild(exp);
+					refresh();
 				});
 			};
 			l.onchange(null);

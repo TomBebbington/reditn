@@ -129,15 +129,18 @@ Expand.init = function() {
 				if(site == null) return;
 				site.method(site.regex,(function(l) {
 					return function(data) {
+						var e = l[0].parentNode.parentNode.parentNode;
+						var exp = js.Browser.document.createElement("div");
+						exp.className = "expando";
+						exp.style.display = "none";
+						exp.style.display = Expand.toggled?"":"none";
+						if(exp.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,exp.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+						var name = "selftext";
 						if(Reflect.hasField(data,"price")) {
 							var i = data;
-							var e = l[0].parentNode.parentNode.parentNode;
-							var expando = js.Browser.document.createElement("div");
-							expando.className = "expando";
-							expando.style.display = "none";
 							var div = js.Browser.document.createElement("div");
 							div.className = "usertext";
-							expando.appendChild(div);
+							exp.appendChild(div);
 							var head = null;
 							var contentBlock = js.Browser.document.createElement("div");
 							var inner = js.Browser.document.createElement("span");
@@ -146,26 +149,12 @@ Expand.init = function() {
 							contentBlock.className = "md";
 							contentBlock.appendChild(Reditn.embedAlbum(i.images));
 							div.appendChild(contentBlock);
-							var s = Expand.makeSelfButton(e,"item",l[0].href);
-							var pn = s.parentNode;
-							var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
-							while(_g2 < _g3.length) {
-								var exp = _g3[_g2];
-								++_g2;
-								pn.removeChild(exp);
-							}
-							pn.appendChild(expando);
-							expando.style.display = Expand.toggled?"":"none";
-							if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+							name = "item";
 						} else if(Reflect.hasField(data,"content")) {
 							var a = data;
-							var e = l[0].parentNode.parentNode.parentNode;
-							var expando = js.Browser.document.createElement("div");
-							expando.className = "expando";
-							expando.style.display = "none";
 							var div = js.Browser.document.createElement("div");
 							div.className = "usertext";
-							expando.appendChild(div);
+							exp.appendChild(div);
 							var head = null;
 							var contentBlock = js.Browser.document.createElement("div");
 							var inner = js.Browser.document.createElement("span");
@@ -174,35 +163,31 @@ Expand.init = function() {
 							if(a.images.length > 0) contentBlock.appendChild(Reditn.embedAlbum(a.images));
 							contentBlock.className = "md";
 							div.appendChild(contentBlock);
-							var s = Expand.makeSelfButton(e,"selftext",l[0].href);
-							var pn = s.parentNode;
-							var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
-							while(_g2 < _g3.length) {
-								var exp = _g3[_g2];
-								++_g2;
-								pn.removeChild(exp);
-							}
-							pn.appendChild(expando);
-							expando.style.display = Expand.toggled?"":"none";
-							if(expando.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,expando.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
 						} else if(js.Boot.__instanceof(data,Array) && Reflect.hasField(data[0],"url")) {
 							var a = data;
-							var e = l[0].parentNode.parentNode.parentNode;
 							var div = Reditn.embedAlbum(a);
 							e.appendChild(div);
 							div.style.display = Expand.toggled?"":"none";
 							if(div.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-							var s = Expand.makeSelfButton(e,"image",l[0].href);
-							var pn = s.parentNode;
-							var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
-							while(_g2 < _g3.length) {
-								var exp = _g3[_g2];
-								++_g2;
-								pn.removeChild(exp);
-							}
-							pn.appendChild(div);
-							Expand.refresh();
+							name = "image";
+						} else if(Reflect.hasField(data,"owner")) {
+							console.log(data);
+							var r = data;
+							var div = js.Browser.document.createElement("div");
+							div.className = "usertext";
+							div.innerHTML = "<h1>" + Std.string(data.name) + "<em> by " + Std.string(data.owner) + "</em></h1>" + Std.string(data.description) + "<br><a href=\"" + Std.string(data.url) + "\"><b>Clone repo</b></a>";
+							exp.appendChild(div);
 						} else Expand.preload(l[0].href);
+						var s = Expand.makeSelfButton(e,name,l[0].href);
+						var pn = s.parentNode;
+						var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
+						while(_g2 < _g3.length) {
+							var ep = _g3[_g2];
+							++_g2;
+							pn.removeChild(ep);
+						}
+						pn.appendChild(exp);
+						Expand.refresh();
 					};
 				})(l));
 			};
@@ -467,7 +452,7 @@ Lambda.has = function(it,elt) {
 	return false;
 }
 var data = {}
-data.LinkType = $hxClasses["data.LinkType"] = { __ename__ : ["data","LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","ARTICLE","SHOP_ITEM","UNKNOWN"] }
+data.LinkType = $hxClasses["data.LinkType"] = { __ename__ : ["data","LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","ARTICLE","REPO","SHOP_ITEM","UNKNOWN"] }
 data.LinkType.IMAGE = ["IMAGE",0];
 data.LinkType.IMAGE.toString = $estr;
 data.LinkType.IMAGE.__enum__ = data.LinkType;
@@ -483,10 +468,13 @@ data.LinkType.TEXT.__enum__ = data.LinkType;
 data.LinkType.ARTICLE = ["ARTICLE",4];
 data.LinkType.ARTICLE.toString = $estr;
 data.LinkType.ARTICLE.__enum__ = data.LinkType;
-data.LinkType.SHOP_ITEM = ["SHOP_ITEM",5];
+data.LinkType.REPO = ["REPO",5];
+data.LinkType.REPO.toString = $estr;
+data.LinkType.REPO.__enum__ = data.LinkType;
+data.LinkType.SHOP_ITEM = ["SHOP_ITEM",6];
 data.LinkType.SHOP_ITEM.toString = $estr;
 data.LinkType.SHOP_ITEM.__enum__ = data.LinkType;
-data.LinkType.UNKNOWN = ["UNKNOWN",6];
+data.LinkType.UNKNOWN = ["UNKNOWN",7];
 data.LinkType.UNKNOWN.toString = $estr;
 data.LinkType.UNKNOWN.__enum__ = data.LinkType;
 var haxe = {}
@@ -816,18 +804,65 @@ Reditn.getData = function(o) {
 }
 Reditn.getText = function(url,func) {
 	GM_xmlhttpRequest({ method : "GET", url : url, onload : function(rsp) {
-		console.log("" + url + " => " + Std.string(rsp.responseText));
 		func(rsp.responseText);
 	}});
+}
+Reditn.getMonthYear = function(d) {
+	var month = (function($this) {
+		var $r;
+		var _g = d.getMonth();
+		$r = (function($this) {
+			var $r;
+			switch(_g) {
+			case 0:
+				$r = "January";
+				break;
+			case 1:
+				$r = "February";
+				break;
+			case 2:
+				$r = "March";
+				break;
+			case 3:
+				$r = "April";
+				break;
+			case 4:
+				$r = "May";
+				break;
+			case 5:
+				$r = "June";
+				break;
+			case 6:
+				$r = "July";
+				break;
+			case 7:
+				$r = "August";
+				break;
+			case 8:
+				$r = "September";
+				break;
+			case 9:
+				$r = "October";
+				break;
+			case 10:
+				$r = "November";
+				break;
+			case 11:
+				$r = "December";
+				break;
+			default:
+				$r = null;
+			}
+			return $r;
+		}($this));
+		return $r;
+	}(this)), year = Std.string(d.getFullYear());
+	return "" + month + ", " + year;
 }
 Reditn.getJSON = function(url,func) {
 	Reditn.getText(url,function(data) {
 		if(StringTools.startsWith(data,"jsonFlickrApi(") && StringTools.endsWith(data,")")) data = data.substring(14,data.length - 1);
-		try {
-			func(Reditn.getData(haxe.Json.parse(data)));
-		} catch( e ) {
-			console.log("Error: " + Std.string(e) + " whilst processing " + data + " for " + url);
-		}
+		func(Reditn.getData(haxe.Json.parse(data)));
 	});
 }
 Reditn.popUp = function(bs,el,x,y) {
@@ -1280,22 +1315,33 @@ parser.MediaWiki.parse = function(s,base) {
 }
 parser.MediaWiki.trimTo = function(h,s) {
 	s = StringTools.trim(StringTools.replace(s,"_"," "));
-	console.log(s);
-	var pos = 0, level = null;
-	while(parser.MediaWiki.sections.matchSub(h,pos)) {
-		var npos = parser.MediaWiki.sections.matchedPos();
-		pos = npos.pos;
+	console.log("Trimming " + h + " to " + s);
+	var pos = { pos : 0, len : 0}, level = null;
+	while(parser.MediaWiki.sections.matchSub(h,pos.pos + pos.len)) {
+		pos = parser.MediaWiki.sections.matchedPos();
 		if(StringTools.trim(parser.MediaWiki.sections.matched(2)) == s) {
 			level = parser.MediaWiki.sections.matched(1);
 			break;
 		}
-		pos += npos.len;
 	}
 	if(level != null) {
-		h = HxOverrides.substr(h,pos,null);
-		h = HxOverrides.substr(h,s.indexOf("</h" + level + ">"),null);
+		h = HxOverrides.substr(h,pos.pos + pos.len,null);
 		h = HxOverrides.substr(h,0,h.indexOf("<h" + level + ">"));
 	}
+	return h;
+}
+parser.Markdown = function() { }
+$hxClasses["parser.Markdown"] = parser.Markdown;
+parser.Markdown.__name__ = ["parser","Markdown"];
+parser.Markdown.parse = function(s) {
+	console.log("Parsing " + s);
+	var _g = 0, _g1 = parser.Markdown.regex;
+	while(_g < _g1.length) {
+		var r = _g1[_g];
+		++_g;
+		while(r.from.match(s)) s = r.from.replace(s,r.to);
+	}
+	console.log("Parsed " + s);
 	return s;
 }
 var Link = function() { }
@@ -2417,20 +2463,6 @@ js.Browser.createXMLHttpRequest = function() {
 	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
 	throw "Unable to create XMLHttpRequest object.";
 }
-parser.Markdown = function() { }
-$hxClasses["parser.Markdown"] = parser.Markdown;
-parser.Markdown.__name__ = ["parser","Markdown"];
-parser.Markdown.parse = function(s) {
-	console.log("Parsing " + s);
-	var _g = 0, _g1 = parser.Markdown.regex;
-	while(_g < _g1.length) {
-		var r = _g1[_g];
-		++_g;
-		while(r.from.match(s)) s = r.from.replace(s,r.to);
-	}
-	console.log("Parsed " + s);
-	return s;
-}
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
 var $_;
 function $bind(o,m) { var f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; return f; };
@@ -2441,6 +2473,17 @@ if(Array.prototype.indexOf) HxOverrides.remove = function(a,o) {
 	return true;
 }; else null;
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
+Math.__name__ = ["Math"];
+Math.NaN = Number.NaN;
+Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+$hxClasses.Math = Math;
+Math.isFinite = function(i) {
+	return isFinite(i);
+};
+Math.isNaN = function(i) {
+	return isNaN(i);
+};
 String.prototype.__class__ = $hxClasses.String = String;
 String.__name__ = ["String"];
 Array.prototype.__class__ = $hxClasses.Array = Array;
@@ -2455,21 +2498,11 @@ var Bool = $hxClasses.Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
-Math.__name__ = ["Math"];
-Math.NaN = Number.NaN;
-Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
-Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
-$hxClasses.Math = Math;
-Math.isFinite = function(i) {
-	return isFinite(i);
-};
-Math.isNaN = function(i) {
-	return isNaN(i);
-};
 Expand.buttons = [];
 Reditn.fullPage = true;
-parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("{{([^{}]*)}}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("^======([^=]*)======","m"), to : "<h6>$1</h6>"},{ from : new EReg("^=====([^=]*)=====","m"), to : "<h5>$1</h5>"},{ from : new EReg("^====([^=]*)====","m"), to : "<h4>$1</h4>"},{ from : new EReg("^===([^=]*)===","m"), to : "<h3>$1</h3>"},{ from : new EReg("^==([^=]*)==","m"), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\\{(.*)\\}",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
+parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{Monthyear\\}\\}",""), to : Reditn.getMonthYear(new Date())},{ from : new EReg("{{convert|([0-9]*)|([^\\|]*)[^\\}]*}}",""), to : "$1"},{ from : new EReg("{{([^{}]*)}}",""), to : ""},{ from : new EReg("{\\|([^[\\|\\}]]*)\\|}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("^======([^=]*)======","m"), to : "<h6>$1</h6>"},{ from : new EReg("^=====([^=]*)=====","m"), to : "<h5>$1</h5>"},{ from : new EReg("^====([^=]*)====","m"), to : "<h4>$1</h4>"},{ from : new EReg("^===([^=]*)===","m"), to : "<h3>$1</h3>"},{ from : new EReg("^==([^=]*)==","m"), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
 parser.MediaWiki.sections = new EReg("<h([1-6])>([^<>]*)</h[1-6]>","");
+parser.Markdown.regex = [{ from : new EReg("\\*\\*([^\\*]*)\\*\\*",""), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*]*)\\*",""), to : "<em>$1</em>"},{ from : new EReg("~~([^~]*)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]*)",""), to : "<sup>$1</sup>"},{ from : new EReg("\\[([^\\]]*)\\]\\(([^\\)]*)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("\n\n",""), to : "<br>"},{ from : new EReg("^#####([^#\n]*)(#####)?","m"), to : "<h5>$1</h5>"},{ from : new EReg("^####([^#\n]*)(####)?","m"), to : "<h4>$1</h4>"},{ from : new EReg("^###([^#\n]*)(###)?","m"), to : "<h3>$1</h3>"},{ from : new EReg("^##([^#\n]*)(##)?","m"), to : "<h2>$1</h2>"},{ from : new EReg("^#([^#\n]*)(#)?","m"), to : "<h1>$1</h1>"}];
 Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null}]);
 }},{ type : data.LinkType.IMAGE, regex : new EReg("imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
@@ -2589,7 +2622,8 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 	});
 }},{ type : data.LinkType.ARTICLE, regex : new EReg("(.*)/wiki/([^#]*)(#.*)?",""), method : function(e,cb8) {
 	var urlroot = e.matched(1), title = e.matched(2), to = e.matched(3);
-	if(to != null) to = HxOverrides.substr(to,1,null);
+	if(to != null) to = StringTools.trim(HxOverrides.substr(to,1,null));
+	if(to != null && to.length == 0) to = null;
 	if(!StringTools.endsWith(urlroot,".wikia.com")) urlroot += "/w";
 	var getWikiPage = (function($this) {
 		var $r;
@@ -2617,10 +2651,10 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 								var p1 = _g3[_g2];
 								++_g2;
 								var page1 = [Reflect.field(pages1,p1)];
-								var images = page1[0].images == null?[]:page1[0].images;
+								var images = page1[0].images;
 								var album1 = [[]];
-								var left = [images.length];
-								if(images != null) {
+								if(images != null && images.length > 0) {
+									var left = [images == null?0:images.length];
 									var _g4 = 0;
 									while(_g4 < images.length) {
 										var img = images[_g4];
@@ -2633,7 +2667,7 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 													var p2 = _g6[_g5];
 													++_g5;
 													var page2 = Reflect.field(pages2,p2);
-													if(page2 != null && page2.imageinfo.length >= 1) {
+													if(page2 != null && page2.pageinfo != null && page2.imageinfo.length >= 1) {
 														var url = page2.imageinfo[0].url;
 														album1[0].push({ url : url, caption : null});
 													}
@@ -2642,7 +2676,7 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 											};
 										})(left,album1,page1,cont));
 									}
-								}
+								} else cb8({ title : page1[0].title, content : cont[0], author : null, images : []});
 							}
 						};
 					})(cont));
@@ -2653,11 +2687,17 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		return $r;
 	}(this));
 	getWikiPage(title);
-}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/post/([0-9]*)",""), method : function(e,cb9) {
+}},{ type : data.LinkType.ARTICLE, regex : new EReg("github\\.com/([^/]*)/([^/]*)",""), method : function(e,cb9) {
+	var author = e.matched(1), repo = e.matched(2);
+	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo,function(data5) {
+		console.log(data5);
+		cb9({ name : data5.name, owner : author, description : parser.Markdown.parse(data5.description), url : data5.clone_url});
+	});
+}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/post/([0-9]*)",""), method : function(e,cb10) {
 	var author = e.matched(1), id = e.matched(2);
 	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 		var post = data.posts[0];
-		cb9((function($this) {
+		cb10((function($this) {
 			var $r;
 			switch(post.type) {
 			case "text":
@@ -2747,6 +2787,5 @@ haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 haxe.ds.ObjectMap.count = 0;
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
-parser.Markdown.regex = [{ from : new EReg("\\*\\*([^\\*]*)\\*\\*",""), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*]*)\\*",""), to : "<em>$1</em>"},{ from : new EReg("~~([^~]*)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]*)",""), to : "<sup>$1</sup>"},{ from : new EReg("\\[([^\\]]*)\\]\\(([^\\)]*)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("\n\n",""), to : "<br>"},{ from : new EReg("^#####([^#\n]*)(#####)?","m"), to : "<h5>$1</h5>"},{ from : new EReg("^####([^#\n]*)(####)?","m"), to : "<h4>$1</h4>"},{ from : new EReg("^###([^#\n]*)(###)?","m"), to : "<h3>$1</h3>"},{ from : new EReg("^##([^#\n]*)(##)?","m"), to : "<h2>$1</h2>"},{ from : new EReg("^#([^#\n]*)(#)?","m"), to : "<h1>$1</h1>"}];
 Reditn.main();
 })();

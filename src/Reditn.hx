@@ -241,21 +241,34 @@ class Reditn {
 				method: "GET",
 				url: url,
 				onload: function(rsp:Dynamic) {
-					trace('$url => ${rsp.responseText}');
 					func(rsp.responseText);
 				}
 			});
 		#end
 	}
+	public static function getMonthYear(d:Date):String {
+		var month = switch(d.getMonth()) {
+			case 0: "January";
+			case 1: "February";
+			case 2: "March";
+			case 3: "April";
+			case 4: "May";
+			case 5: "June";
+			case 6: "July";
+			case 7: "August";
+			case 8: "September";
+			case 9: "October";
+			case 10: "November";
+			case 11: "December";
+			case _: null;
+		}, year = Std.string(d.getFullYear());
+		return '$month, $year';
+	}
 	public static function getJSON<T>(url:String, func:T->Void):Void {
 		getText(url, function(data:String) {
 			if(data.startsWith("jsonFlickrApi(") && data.endsWith(")"))
 				data = data.substring(14, data.length - 1);
-			try {
-				func(getData(haxe.Json.parse(data)));
-			} catch(e:Dynamic) {
-				trace('Error: $e whilst processing $data for $url');
-			}
+			func(getData(haxe.Json.parse(data)));
 		});
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {

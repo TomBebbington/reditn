@@ -5,6 +5,7 @@ enum LinkType {
 	AUDIO;
 	TEXT;
 	ARTICLE;
+	REPO;
 	SHOP_ITEM;
 	UNKNOWN;
 }
