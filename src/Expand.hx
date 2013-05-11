@@ -56,17 +56,17 @@ class Expand {
 							div.className = "usertext";
 							exp.appendChild(div);
 							var head = null;
-							var contentBlock = Browser.document.createDivElement();
+							var cont = Browser.document.createDivElement();
 							var inner = Browser.document.createSpanElement();
 							inner.innerHTML = //'<h2>${StringTools.htmlEscape(i.title)}</h2><br>' + 
 							'<b>Category:</b> ${StringTools.htmlEscape(i.category)}<br>' + 
 							'<b>Location:</b> ${StringTools.htmlEscape(i.location)}<br>' + 
 							'<b>Price:</b> ${StringTools.htmlEscape(i.price)}<br>' +
 							'<p>${StringTools.htmlEscape(i.description)}</p>';
-							contentBlock.appendChild(inner);
-							contentBlock.className = "md";
-							contentBlock.appendChild(Reditn.embedAlbum(i.images));
-							div.appendChild(contentBlock);
+							cont.appendChild(inner);
+							cont.className = "md";
+							cont.appendChild(Reditn.embedAlbum(i.images));
+							div.appendChild(cont);
 							name = "item";
 						case _ if(Reflect.hasField(data, "content")): // article
 							var a:Article = data;
@@ -74,14 +74,14 @@ class Expand {
 							div.className = "usertext";
 							exp.appendChild(div);
 							var head = null;
-							var contentBlock = Browser.document.createDivElement();
+							var content = Browser.document.createDivElement();
 							var inner = Browser.document.createSpanElement();
 							inner.innerHTML = a.content;
-							contentBlock.appendChild(inner);
+							content.appendChild(inner);
 							if(a.images.length > 0)
-								contentBlock.appendChild(Reditn.embedAlbum(a.images));
-								contentBlock.className = "md";
-							div.appendChild(contentBlock);
+								content.appendChild(Reditn.embedAlbum(a.images));
+							content.className = "md";
+							div.appendChild(content);
 						case _ if(Std.is(data, Array) && Reflect.hasField(untyped data[0], "url")):
 							var a:Album = data;
 							var div = Reditn.embedAlbum(a);
@@ -89,11 +89,17 @@ class Expand {
 							Reditn.show(div, toggled);
 							name = "image";
 						case _ if(Reflect.hasField(data, "owner")):
-						trace(data);
 							var r:Repo = data;
 							var div = js.Browser.document.createDivElement();
 							div.className = "usertext";
-							div.innerHTML = '<h1>${data.name}<em> by ${data.owner}</em></h1>${data.description}<br><a href="${data.url}"><b>Clone repo</b></a>';
+							var cont = Browser.document.createDivElement();
+							var inner = Browser.document.createSpanElement();
+							inner.innerHTML = '${data.description}<br><a href="${data.url}"><b>Clone repo</b></a><br>';
+							if(r.album != null && r.album.length > 0)
+								inner.appendChild(Reditn.embedAlbum(r.album));
+							cont.appendChild(inner);
+							cont.className = "md";
+							div.appendChild(cont);
 							exp.appendChild(div);
 						default: preload(l.href);
 					}

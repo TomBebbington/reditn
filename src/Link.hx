@@ -3,9 +3,11 @@ using StringTools;
 class Link {
 	public static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
 	public static inline var TUMBLR_KEY = "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE";
-	public static inline var IMGUR_CLIENT_ID = "cc1f254578d6c52";
+	public static inline var IMGUR_KEY = "cc1f254578d6c52";
 	public static inline var GOOGLE_API_KEY = "95f055321ea256d1d8828674c62105ea3931ae08";
 	public static inline var EBAY_API_KEY = "ThomasDa-1e6c-4d29-a156-85557acee70b";
+	public static inline var GITHUB_KEY = "39d85b9ac427f1176763";
+	public static inline var GITHUB_KEYS = "5117570b83363ca0c71a196edc5b348af150c25d";
 	static var sites:Array<Site> = [
 		{
 			type: LinkType.IMAGE,
@@ -27,9 +29,8 @@ class Link {
 					case "gallery": "gallery/album";
 					default: "album";
 				};
-				trace('Imgur album of type "$albumType" with id $id');
 				var req = new haxe.Http('https://api.imgur.com/3/${albumType}/${id}');
-				req.setHeader("Authorization", 'Client-ID ${IMGUR_CLIENT_ID}');
+				req.setHeader("Authorization", 'Client-ID ${IMGUR_KEY}');
 				req.onData = function(ds:String) {
 					var d:data.imgur.Album = cast Reditn.getData(haxe.Json.parse(ds));
 					var album = [];
@@ -183,7 +184,6 @@ class Link {
 			method: function(e, cb) {
 				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).htmlEscape()}/posts/slug:${e.matched(2).htmlEscape()}';
 				Reditn.getJSON(url, function(data) {
-					trace(data);
 					var att = data.attachments;
 					cb({title: StringTools.htmlUnescape(data.title), content: data.content, author: data.author.name, images: 
 					try [
@@ -257,13 +257,30 @@ class Link {
 			regex: ~/github\.com\/([^\/]*)\/([^\/]*)/,
 			method: function(e, cb) {
 				var author = e.matched(1), repo = e.matched(2);
-				Reditn.getJSON('https://api.github.com/repos/${author}/${repo}', function(data) {
-					trace(data);
+				Reditn.getJSON('https://api.github.com/repos/${author}/${repo}/readme?client_id=${GITHUB_KEY}&client_secret=${GITHUB_KEYS}', function(data) {
+					var c:String = data.content;
+					c = c.replace("\n", "");
+					c = StringTools.trim(c);
+					c = js.Browser.window.atob(c);
+					var imgs:EReg = parser.Markdown.images;
+					var album:Album = [];
+					var tc = c;
+					while(imgs.match(tc)) {
+						var url = imgs.matched(2);
+						if(url.indexOf(".") == url.lastIndexOf(".")) {
+							if(url.startsWith("/"))
+								url = url.substr(1);
+							url = 'https://github.com/${author}/${repo}/raw/master/${url}';
+						}
+						album.push({ url: url, caption: imgs.matched(1)});
+						tc = tc.substr(imgs.matchedPos().pos + imgs.matchedPos().len);
+					}
 					cb({
-						name: data.name,
+						name: repo,
 						owner: author,
-						description: parser.Markdown.parse(data.description),
-						url: data.clone_url
+						description: parser.Markdown.parse(c),
+						url: 'git://github.com/${author}/${repo}.git',
+						album: album
 					});
 				});
 			}

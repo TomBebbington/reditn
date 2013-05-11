@@ -142,13 +142,13 @@ Expand.init = function() {
 							div.className = "usertext";
 							exp.appendChild(div);
 							var head = null;
-							var contentBlock = js.Browser.document.createElement("div");
+							var cont = js.Browser.document.createElement("div");
 							var inner = js.Browser.document.createElement("span");
 							inner.innerHTML = "<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>" + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + StringTools.htmlEscape(i.description) + "</p>");
-							contentBlock.appendChild(inner);
-							contentBlock.className = "md";
-							contentBlock.appendChild(Reditn.embedAlbum(i.images));
-							div.appendChild(contentBlock);
+							cont.appendChild(inner);
+							cont.className = "md";
+							cont.appendChild(Reditn.embedAlbum(i.images));
+							div.appendChild(cont);
 							name = "item";
 						} else if(Reflect.hasField(data,"content")) {
 							var a = data;
@@ -156,13 +156,13 @@ Expand.init = function() {
 							div.className = "usertext";
 							exp.appendChild(div);
 							var head = null;
-							var contentBlock = js.Browser.document.createElement("div");
+							var content = js.Browser.document.createElement("div");
 							var inner = js.Browser.document.createElement("span");
 							inner.innerHTML = a.content;
-							contentBlock.appendChild(inner);
-							if(a.images.length > 0) contentBlock.appendChild(Reditn.embedAlbum(a.images));
-							contentBlock.className = "md";
-							div.appendChild(contentBlock);
+							content.appendChild(inner);
+							if(a.images.length > 0) content.appendChild(Reditn.embedAlbum(a.images));
+							content.className = "md";
+							div.appendChild(content);
 						} else if(js.Boot.__instanceof(data,Array) && Reflect.hasField(data[0],"url")) {
 							var a = data;
 							var div = Reditn.embedAlbum(a);
@@ -171,11 +171,16 @@ Expand.init = function() {
 							if(div.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
 							name = "image";
 						} else if(Reflect.hasField(data,"owner")) {
-							console.log(data);
 							var r = data;
 							var div = js.Browser.document.createElement("div");
 							div.className = "usertext";
-							div.innerHTML = "<h1>" + Std.string(data.name) + "<em> by " + Std.string(data.owner) + "</em></h1>" + Std.string(data.description) + "<br><a href=\"" + Std.string(data.url) + "\"><b>Clone repo</b></a>";
+							var cont = js.Browser.document.createElement("div");
+							var inner = js.Browser.document.createElement("span");
+							inner.innerHTML = "" + Std.string(data.description) + "<br><a href=\"" + Std.string(data.url) + "\"><b>Clone repo</b></a><br>";
+							if(r.album != null && r.album.length > 0) inner.appendChild(Reditn.embedAlbum(r.album));
+							cont.appendChild(inner);
+							cont.className = "md";
+							div.appendChild(cont);
 							exp.appendChild(div);
 						} else Expand.preload(l[0].href);
 						var s = Expand.makeSelfButton(e,name,l[0].href);
@@ -1330,18 +1335,33 @@ parser.MediaWiki.trimTo = function(h,s) {
 	}
 	return h;
 }
+js.Browser = function() { }
+$hxClasses["js.Browser"] = js.Browser;
+js.Browser.__name__ = ["js","Browser"];
+js.Browser.getLocalStorage = function() {
+	try {
+		var s = js.Browser.window.localStorage;
+		s.getItem("");
+		return s;
+	} catch( e ) {
+		return null;
+	}
+}
+js.Browser.createXMLHttpRequest = function() {
+	if(typeof XMLHttpRequest != "undefined") return new XMLHttpRequest();
+	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
+	throw "Unable to create XMLHttpRequest object.";
+}
 parser.Markdown = function() { }
 $hxClasses["parser.Markdown"] = parser.Markdown;
 parser.Markdown.__name__ = ["parser","Markdown"];
 parser.Markdown.parse = function(s) {
-	console.log("Parsing " + s);
 	var _g = 0, _g1 = parser.Markdown.regex;
 	while(_g < _g1.length) {
 		var r = _g1[_g];
 		++_g;
 		while(r.from.match(s)) s = r.from.replace(s,r.to);
 	}
-	console.log("Parsed " + s);
 	return s;
 }
 var Link = function() { }
@@ -2446,23 +2466,6 @@ haxe.io.Bytes.alloc = function(length) {
 haxe.io.Bytes.prototype = {
 	__class__: haxe.io.Bytes
 }
-js.Browser = function() { }
-$hxClasses["js.Browser"] = js.Browser;
-js.Browser.__name__ = ["js","Browser"];
-js.Browser.getLocalStorage = function() {
-	try {
-		var s = js.Browser.window.localStorage;
-		s.getItem("");
-		return s;
-	} catch( e ) {
-		return null;
-	}
-}
-js.Browser.createXMLHttpRequest = function() {
-	if(typeof XMLHttpRequest != "undefined") return new XMLHttpRequest();
-	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
-	throw "Unable to create XMLHttpRequest object.";
-}
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
 var $_;
 function $bind(o,m) { var f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; return f; };
@@ -2502,7 +2505,10 @@ Expand.buttons = [];
 Reditn.fullPage = true;
 parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{Monthyear\\}\\}",""), to : Reditn.getMonthYear(new Date())},{ from : new EReg("{{convert|([0-9]*)|([^\\|]*)[^\\}]*}}",""), to : "$1"},{ from : new EReg("{{([^{}]*)}}",""), to : ""},{ from : new EReg("{\\|([^[\\|\\}]]*)\\|}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("^======([^=]*)======","m"), to : "<h6>$1</h6>"},{ from : new EReg("^=====([^=]*)=====","m"), to : "<h5>$1</h5>"},{ from : new EReg("^====([^=]*)====","m"), to : "<h4>$1</h4>"},{ from : new EReg("^===([^=]*)===","m"), to : "<h3>$1</h3>"},{ from : new EReg("^==([^=]*)==","m"), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
 parser.MediaWiki.sections = new EReg("<h([1-6])>([^<>]*)</h[1-6]>","");
-parser.Markdown.regex = [{ from : new EReg("\\*\\*([^\\*]*)\\*\\*",""), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*]*)\\*",""), to : "<em>$1</em>"},{ from : new EReg("~~([^~]*)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]*)",""), to : "<sup>$1</sup>"},{ from : new EReg("\\[([^\\]]*)\\]\\(([^\\)]*)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("\n\n",""), to : "<br>"},{ from : new EReg("^#####([^#\n]*)(#####)?","m"), to : "<h5>$1</h5>"},{ from : new EReg("^####([^#\n]*)(####)?","m"), to : "<h4>$1</h4>"},{ from : new EReg("^###([^#\n]*)(###)?","m"), to : "<h3>$1</h3>"},{ from : new EReg("^##([^#\n]*)(##)?","m"), to : "<h2>$1</h2>"},{ from : new EReg("^#([^#\n]*)(#)?","m"), to : "<h1>$1</h1>"}];
+js.Browser.window = typeof window != "undefined" ? window : null;
+js.Browser.document = typeof window != "undefined" ? window.document : null;
+parser.Markdown.images = new EReg("!\\[([^\\]]*)\\]\\(([^\\)\\.]*\\.(jpg|bmp|png|jpeg|gif))\\)","");
+parser.Markdown.regex = [{ from : new EReg("\\*\\*([^\\*]*)\\*\\*",""), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*]*)\\*",""), to : "<em>$1</em>"},{ from : new EReg("~~([^~]*)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]*)",""), to : "<sup>$1</sup>"},{ from : new EReg("^(\\*|\\+|\\-) ([^\n]*)$",""), to : "<li>$1</li>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\]]*)\\]\\(([^\\)]*)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("^#*([^#\n])(#*)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^#####([^#\n]*)(#####)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^([^\n]*)$^[=]*$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^([^\n]*)$^\n[#]*$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^####([^#\n]*)(####)?$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^([^\n]*)$^[-]*$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^###([^#\n]*)(###)?$","m"), to : "<h4>$1</h4>"},{ from : new EReg("^##([^#\n]*)(##)?$","m"), to : "<h5>$1</h5>"},{ from : new EReg("^#([^#\n]*)(#)?$","m"), to : "<h6>$1</h6>"},{ from : new EReg("```([^`]*)```","m"), to : "<pre>$1</pre>"},{ from : new EReg("\n\n",""), to : "<br>\n"}];
 Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null}]);
 }},{ type : data.LinkType.IMAGE, regex : new EReg("imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
@@ -2526,7 +2532,6 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		}($this));
 		return $r;
 	}(this));
-	console.log("Imgur album of type \"" + albumType + "\" with id " + id);
 	var req = new haxe.Http("https://api.imgur.com/3/" + albumType + "/" + id);
 	req.setHeader("Authorization","Client-ID " + "cc1f254578d6c52");
 	req.onData = function(ds) {
@@ -2590,7 +2595,6 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 }},{ type : data.LinkType.ARTICLE, regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
 	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.htmlEscape(e.matched(1)) + "/posts/slug:" + StringTools.htmlEscape(e.matched(2));
 	Reditn.getJSON(url,function(data3) {
-		console.log(data3);
 		var att = data3.attachments;
 		cb7({ title : StringTools.htmlUnescape(data3.title), content : data3.content, author : data3.author.name, images : (function($this) {
 			var $r;
@@ -2689,9 +2693,24 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 	getWikiPage(title);
 }},{ type : data.LinkType.ARTICLE, regex : new EReg("github\\.com/([^/]*)/([^/]*)",""), method : function(e,cb9) {
 	var author = e.matched(1), repo = e.matched(2);
-	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo,function(data5) {
-		console.log(data5);
-		cb9({ name : data5.name, owner : author, description : parser.Markdown.parse(data5.description), url : data5.clone_url});
+	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/readme?client_id=" + "39d85b9ac427f1176763" + "&client_secret=" + "5117570b83363ca0c71a196edc5b348af150c25d",function(data5) {
+		var c = data5.content;
+		c = StringTools.replace(c,"\n","");
+		c = StringTools.trim(c);
+		c = js.Browser.window.atob(c);
+		var imgs = parser.Markdown.images;
+		var album = [];
+		var tc = c;
+		while(imgs.match(tc)) {
+			var url = imgs.matched(2);
+			if(url.indexOf(".") == url.lastIndexOf(".")) {
+				if(StringTools.startsWith(url,"/")) url = HxOverrides.substr(url,1,null);
+				url = "https://github.com/" + author + "/" + repo + "/raw/master/" + url;
+			}
+			album.push({ url : url, caption : imgs.matched(1)});
+			tc = HxOverrides.substr(tc,imgs.matchedPos().pos + imgs.matchedPos().len,null);
+		}
+		cb9({ name : repo, owner : author, description : parser.Markdown.parse(c), url : "git://github.com/" + author + "/" + repo + ".git", album : album});
 	});
 }},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/post/([0-9]*)",""), method : function(e,cb10) {
 	var author = e.matched(1), id = e.matched(2);
@@ -2785,7 +2804,5 @@ haxe.Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
 haxe.Unserializer.DEFAULT_RESOLVER = Type;
 haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe.ds.ObjectMap.count = 0;
-js.Browser.window = typeof window != "undefined" ? window : null;
-js.Browser.document = typeof window != "undefined" ? window.document : null;
 Reditn.main();
 })();
