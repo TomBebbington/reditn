@@ -85,8 +85,7 @@ class Expand {
 						case _ if(Std.is(data, Array) && Reflect.hasField(untyped data[0], "url")):
 							var a:Album = data;
 							var div = Reditn.embedAlbum(a);
-							e.appendChild(div);
-							Reditn.show(div, toggled);
+							exp.appendChild(div);
 							name = "image";
 						case _ if(Reflect.hasField(data, "owner")):
 							var r:Repo = data;

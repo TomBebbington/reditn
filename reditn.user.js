@@ -166,9 +166,7 @@ Expand.init = function() {
 						} else if(js.Boot.__instanceof(data,Array) && Reflect.hasField(data[0],"url")) {
 							var a = data;
 							var div = Reditn.embedAlbum(a);
-							e.appendChild(div);
-							div.style.display = Expand.toggled?"":"none";
-							if(div.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,div.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+							exp.appendChild(div);
 							name = "image";
 						} else if(Reflect.hasField(data,"owner")) {
 							var r = data;
