@@ -1528,7 +1528,7 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 	var div = js.Browser.document.createElement("div");
 	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
 	Reditn.getJSON("/r/" + name + "/about.json",function(d) {
-		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = parser.Markdown.parse(d.public_description != null?d.public_description:d.description), age = Reditn.age(d.created_utc);
+		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = parser.Markdown.parse(d.public_description), age = Reditn.age(d.created_utc);
 		var html = "<b>Name:</b> " + name + " <br>";
 		var ts = Settings.data.get("sub-tags");
 		if(ts.exists(name)) html += "<b>Tag:</b> " + ts.get(name) + "<br>";
@@ -2421,19 +2421,38 @@ Reditn.fullPage = true;
 parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("{{([^{}]*)}}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("^======([^=]*)======","m"), to : "<h6>$1</h6>"},{ from : new EReg("^=====([^=]*)=====","m"), to : "<h5>$1</h5>"},{ from : new EReg("^====([^=]*)====","m"), to : "<h4>$1</h4>"},{ from : new EReg("^===([^=]*)===","m"), to : "<h3>$1</h3>"},{ from : new EReg("^==([^=]*)==","m"), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
 Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null}]);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("imgur.com/(a|gallery|gallery/album)/([^/]*)",""), method : function(e,cb1) {
+}},{ type : data.LinkType.IMAGE, regex : new EReg("imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
 	var id = e.matched(2);
-	var albumType = e.matched(1);
+	var albumType = (function($this) {
+		var $r;
+		var _g = e.matched(1);
+		$r = (function($this) {
+			var $r;
+			switch(_g) {
+			case "a":
+				$r = "album";
+				break;
+			case "gallery":
+				$r = "gallery/album";
+				break;
+			default:
+				$r = "album";
+			}
+			return $r;
+		}($this));
+		return $r;
+	}(this));
+	console.log("Imgur album of type \"" + albumType + "\" with id " + id);
 	var req = new haxe.Http("https://api.imgur.com/3/" + albumType + "/" + id);
 	req.setHeader("Authorization","Client-ID " + "cc1f254578d6c52");
 	req.onData = function(ds) {
 		var d = Reditn.getData(haxe.Json.parse(ds));
 		var album = [];
 		if(d.images_count <= 0) album.push({ url : "http://i.imgur.com/" + d.id + ".jpg", caption : d.title}); else {
-			var _g = 0, _g1 = d.images;
-			while(_g < _g1.length) {
-				var i = _g1[_g];
-				++_g;
+			var _g1 = 0, _g2 = d.images;
+			while(_g1 < _g2.length) {
+				var i = _g2[_g1];
+				++_g1;
 				album.push({ url : "http://i.imgur.com/" + i.id + ".jpg", caption : i.title});
 			}
 		}

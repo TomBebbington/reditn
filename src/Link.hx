@@ -19,10 +19,15 @@ class Link {
 		},
 		{
 			type: data.LinkType.IMAGE,
-			regex: ~/imgur.com\/(a|gallery|gallery\/album)\/([^\/]*)/,
+			regex: ~/imgur.com\/(a|gallery)\/([^\/]*)/,
 			method: function(e, cb) {
 				var id = e.matched(2);
-				var albumType = e.matched(1);
+				var albumType = switch(e.matched(1)) {
+					case "a": "album";
+					case "gallery": "gallery/album";
+					default: "album";
+				};
+				trace('Imgur album of type "$albumType" with id $id');
 				var req = new haxe.Http('https://api.imgur.com/3/${albumType}/${id}');
 				req.setHeader("Authorization", 'Client-ID ${IMGUR_CLIENT_ID}');
 				req.onData = function(ds:String) {

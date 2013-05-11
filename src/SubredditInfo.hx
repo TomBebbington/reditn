@@ -17,7 +17,7 @@ class SubredditInfo {
 			var title:String = d.display_name,
 				subs:String = Reditn.formatNumber(d.subscribers),
 				users:String = Reditn.formatNumber(d.accounts_active),
-				desc:String = Markdown.parse(d.public_description != null ? d.public_description : d.description),
+				desc:String = Markdown.parse(d.public_description),
 				age:String = Reditn.age(d.created_utc);
 			var html = '<b>Name:</b> $name <br>';
 			var ts = SubredditTagger.tags;
