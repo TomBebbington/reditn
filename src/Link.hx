@@ -183,6 +183,7 @@ class Link {
 			method: function(e, cb) {
 				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).htmlEscape()}/posts/slug:${e.matched(2).htmlEscape()}';
 				Reditn.getJSON(url, function(data) {
+					trace(data);
 					var att = data.attachments;
 					cb({title: StringTools.htmlUnescape(data.title), content: data.content, author: data.author.name, images: 
 					try [
@@ -197,14 +198,15 @@ class Link {
 		},
 		{
 			type: LinkType.ARTICLE,
-			regex: ~/(.*)\/wiki\/(.*)/,
+			regex: ~/(.*)\/wiki\/([^#]*)(#.*)?/,
 			method: function(e, cb) {
-				var urlroot = e.matched(1), title = e.matched(2);
-				if(urlroot.indexOf(".wikia.com/") != -1)
+				var urlroot = e.matched(1), title = e.matched(2), to = e.matched(3);
+				if(to != null)
+					to = to.substr(1);
+				if(!urlroot.endsWith(".wikia.com"))
 					urlroot += "/w";
 				function getWikiPage(name:String) {
 					Reditn.getJSON('http://${urlroot}/api.php?format=json&prop=revisions&action=query&titles=${name}&rvprop=content', function(data) {
-						trace(data);
 						var pages:Dynamic = data.query.pages;
 						for(p in Reflect.fields(pages)) {
 							var page = Reflect.field(pages, p);
@@ -214,11 +216,13 @@ class Link {
 								return;
 							}
 							cont = parser.MediaWiki.parse(cont, urlroot);
+							if(to != null)
+								cont = parser.MediaWiki.trimTo(cont, to);
 							Reditn.getJSON('http://${urlroot}/api.php?format=json&action=query&prop=images&titles=${StringTools.htmlEscape(name)}', function(data) {
 								var pages = data.query.pages;
 								for(p in Reflect.fields(pages)) {
 									var page = Reflect.field(pages, p);
-									var images:Array<Dynamic> = page.images;
+									var images:Array<Dynamic> = page.images == null ? [] : page.images;
 									var album:Album = [];
 									var left:Int = images.length;
 									if(images != null)
@@ -296,7 +300,7 @@ class Link {
 			url = url.substr(0, url.indexOf("&"));
 		if(url.indexOf("?") != -1)
 			url = url.substr(0, url.indexOf("?"));
-		if(url.indexOf("#") != -1)
+		if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1)
 			url = url.substr(0, url.indexOf("#"));
 		return url;
 	}

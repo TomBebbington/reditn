@@ -56,7 +56,7 @@ class Expand {
 							var head = null;
 							var contentBlock = Browser.document.createDivElement();
 							var inner = Browser.document.createSpanElement();
-							inner.innerHTML = '<h2>${StringTools.htmlEscape(i.title)}</h2><br>' + 
+							inner.innerHTML = //'<h2>${StringTools.htmlEscape(i.title)}</h2><br>' + 
 							'<b>Category:</b> ${StringTools.htmlEscape(i.category)}<br>' + 
 							'<b>Location:</b> ${StringTools.htmlEscape(i.location)}<br>' + 
 							'<b>Price:</b> ${StringTools.htmlEscape(i.price)}<br>' +
@@ -71,7 +71,7 @@ class Expand {
 								pn.removeChild(exp);
 							pn.appendChild(expando);
 							Reditn.show(expando, toggled);
-						case _ if(Reflect.hasField(data, "content")):
+						case _ if(Reflect.hasField(data, "content")): // article
 							var a:Article = data;
 							var e = Reditn.getLinkContainer(l);
 							var expando = Browser.document.createDivElement();
@@ -83,14 +83,10 @@ class Expand {
 							var head = null;
 							var contentBlock = Browser.document.createDivElement();
 							var inner = Browser.document.createSpanElement();
-							inner.innerHTML = (a.title != null ? '<h2>${a.title}</h2>' : "");
-							inner.innerHTML += (a.author != null ? '<em>by ${a.author}</em>' : "");
-							if(a.title != null || a.author != null)
-								inner.innerHTML += "<br>";
-							inner.innerHTML += a.content;
+							inner.innerHTML = a.content;
 							contentBlock.appendChild(inner);
 							if(a.images.length > 0)
-							contentBlock.appendChild(Reditn.embedAlbum(a.images));
+								contentBlock.appendChild(Reditn.embedAlbum(a.images));
 								contentBlock.className = "md";
 							div.appendChild(contentBlock);
 							var s = makeSelfButton(e, "selftext", l.href);
