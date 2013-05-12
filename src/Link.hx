@@ -8,6 +8,10 @@ class Link {
 	public static inline var EBAY_API_KEY = "ThomasDa-1e6c-4d29-a156-85557acee70b";
 	public static inline var GITHUB_KEY = "39d85b9ac427f1176763";
 	public static inline var GITHUB_KEYS = "5117570b83363ca0c71a196edc5b348af150c25d";
+	static var LINK = ~/[src|href]="(\/([^\/]*))*?([^\/]*)"/;
+	static function noRel(html:String):String {
+		return LINK.replace(html, "$1, $2");
+	}
 	static var sites:Array<Site> = [
 		{
 			type: LinkType.IMAGE,
@@ -258,6 +262,8 @@ class Link {
 			method: function(e, cb) {
 				var author = e.matched(1), repo = e.matched(2);
 				Reditn.getJSON('https://api.github.com/repos/${author}/${repo}/readme?client_id=${GITHUB_KEY}&client_secret=${GITHUB_KEYS}', function(data) {
+					if(data.content == null)
+						return;
 					var c:String = data.content;
 					c = c.replace("\n", "");
 					c = StringTools.trim(c);

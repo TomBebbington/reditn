@@ -1354,6 +1354,7 @@ parser.Markdown.parse = function(s) {
 		++_g;
 		while(r.from.match(s)) s = r.from.replace(s,r.to);
 	}
+	console.log("Parsed " + s);
 	return s;
 }
 var Link = function() { }
@@ -2499,8 +2500,8 @@ parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to :
 parser.MediaWiki.sections = new EReg("<h([1-6])>([^<>]*)</h[1-6]>","");
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
-parser.Markdown.images = new EReg("!\\[([^\\]]*)\\]\\(([^\\)\\.]*\\.(jpg|bmp|png|jpeg|gif))\\)","");
-parser.Markdown.regex = [{ from : new EReg("\\*\\*([^\\*]*)\\*\\*",""), to : "<b>$1</b>"},{ from : new EReg("\\*([^\\*]*)\\*",""), to : "<em>$1</em>"},{ from : new EReg("~~([^~]*)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]*)",""), to : "<sup>$1</sup>"},{ from : new EReg("^(\\*|\\+|\\-) ([^\n]*)$",""), to : "<li>$1</li>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\]]*)\\]\\(([^\\)]*)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("^#*([^#\n])(#*)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^#####([^#\n]*)(#####)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^([^\n]*)$^[=]*$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^([^\n]*)$^\n[#]*$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^####([^#\n]*)(####)?$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^([^\n]*)$^[-]*$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^###([^#\n]*)(###)?$","m"), to : "<h4>$1</h4>"},{ from : new EReg("^##([^#\n]*)(##)?$","m"), to : "<h5>$1</h5>"},{ from : new EReg("^#([^#\n]*)(#)?$","m"), to : "<h6>$1</h6>"},{ from : new EReg("```([^`]*)```","m"), to : "<pre>$1</pre>"},{ from : new EReg("\n\n",""), to : "<br>\n"}];
+parser.Markdown.images = new EReg("!\\[([^\\]]*)\\]\\(([^\\)\\.]+\\.(jpg|bmp|png|jpeg|gif))\\)","");
+parser.Markdown.regex = [{ from : new EReg("(\\*\\*|__)([^\\1\n]*?)\\1",""), to : "<b>$2</b>"},{ from : new EReg("(\\*|_)([^\\1\n]*?)\\1",""), to : "<em>$2</em>"},{ from : new EReg("^[\\*|+|-] (.*)$","m"), to : "<ul><li>$1</li></ul>"},{ from : new EReg("</ul><ul>",""), to : ""},{ from : new EReg("\n> (?=[^\n\r]*)",""), to : "<blockquote>$1</blockquote>"},{ from : new EReg("</blockquote>\n?\r?<blockquote>$",""), to : ""},{ from : new EReg("~~([^~]*?)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]+)",""), to : "<sup>$1</sup>"},{ from : new EReg(":\"([^:\"]*?)\":",""), to : "<q>$1</q>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\[]+)\\]\\(([^\\)]+)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("^#####([^#\n]+)(#####)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^####([^#\n]+)(####)?$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^###([^#\n]+)(###)?$","m"), to : "<h4>$1</h4>"},{ from : new EReg("^##([^#\n]+)(##)?$","m"), to : "<h5>$1</h5>"},{ from : new EReg("^#([^#\n]+)(#)?$","m"), to : "<h6>$1</h6>"},{ from : new EReg("^(#*)([^#\n])\\1?$","m"), to : "<h2>$2</h2>"},{ from : new EReg("(.*)\n\r?(?==+)\n",""), to : "<h3>$1</h3>"},{ from : new EReg("(.*)\n\r?(?=(-|#)+)\n",""), to : "<h2>$1</h2>"},{ from : new EReg("(```*|\")([^`\"\"]+)\\1","m"), to : "<pre>$2</pre>"},{ from : new EReg("<pre>(.*)\n\n(.*)</pre>",""), to : "<pre>$1\n$2</pre>"},{ from : new EReg("\n\n",""), to : "<br>\n"}];
 Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null}]);
 }},{ type : data.LinkType.IMAGE, regex : new EReg("imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
@@ -2686,6 +2687,7 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 }},{ type : data.LinkType.ARTICLE, regex : new EReg("github\\.com/([^/]*)/([^/]*)",""), method : function(e,cb9) {
 	var author = e.matched(1), repo = e.matched(2);
 	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/readme?client_id=" + "39d85b9ac427f1176763" + "&client_secret=" + "5117570b83363ca0c71a196edc5b348af150c25d",function(data5) {
+		if(data5.content == null) return;
 		var c = data5.content;
 		c = StringTools.replace(c,"\n","");
 		c = StringTools.trim(c);
