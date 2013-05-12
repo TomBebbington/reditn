@@ -56,10 +56,14 @@ class Settings {
 	}
 	public static function save() {
 		haxe.Serializer.USE_CACHE = false;
-		Browser.getLocalStorage().setItem("reditn", optimisedData());
+		#if plugin
+			Browser.getLocalStorage().setItem("reditn", optimisedData());
+		#else
+			untyped GM_setValue("reditn", optimisedData());
+		#end
 	}
 	public static function init() {
-		var dt = Browser.getLocalStorage().getItem("reditn");
+		var dt = #if plugin Browser.getLocalStorage().getItem("reditn") #else untyped GM_getValue("reditn") #end;
 		if(dt != null)
 			Settings.data = try haxe.Unserializer.run(dt) catch(e:Dynamic) data;
 		fixMissing();

@@ -7,9 +7,10 @@
 // @include			reddit.com/*
 // @include			*.reddit.com
 // @include			*.reddit.com/*
-// @include			public-api.wordpress.com/rest/v1/sites/*
 // @version			1.6.1
 // @grant			GM_xmlhttpRequest
+// @grant			GM_getValue
+// @grant			GM_setValue
 // ==/UserScript==
 
 (function () { "use strict";
@@ -1336,15 +1337,6 @@ parser.MediaWiki.trimTo = function(h,s) {
 js.Browser = function() { }
 $hxClasses["js.Browser"] = js.Browser;
 js.Browser.__name__ = ["js","Browser"];
-js.Browser.getLocalStorage = function() {
-	try {
-		var s = js.Browser.window.localStorage;
-		s.getItem("");
-		return s;
-	} catch( e ) {
-		return null;
-	}
-}
 js.Browser.createXMLHttpRequest = function() {
 	if(typeof XMLHttpRequest != "undefined") return new XMLHttpRequest();
 	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
@@ -1469,10 +1461,10 @@ Settings.optimisedData = function() {
 }
 Settings.save = function() {
 	haxe.Serializer.USE_CACHE = false;
-	js.Browser.getLocalStorage().setItem("reditn",Settings.optimisedData());
+	GM_setValue("reditn",Settings.optimisedData());
 }
 Settings.init = function() {
-	var dt = js.Browser.getLocalStorage().getItem("reditn");
+	var dt = GM_getValue("reditn");
 	if(dt != null) Settings.data = (function($this) {
 		var $r;
 		try {
@@ -2712,8 +2704,8 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		}
 		cb9({ name : repo, owner : author, description : parser.Markdown.parse(c), url : "git://github.com/" + author + "/" + repo + ".git", album : album});
 	});
-}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/post/([0-9]*)",""), method : function(e,cb10) {
-	var author = e.matched(1), id = e.matched(2);
+}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb10) {
+	var author = e.matched(1), id = e.matched(3);
 	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 		var post = data.posts[0];
 		cb10((function($this) {

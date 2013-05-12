@@ -293,9 +293,9 @@ class Link {
 		},
 		{
 			type: LinkType.UNKNOWN,
-			regex: ~/([^\.]*)\.tumblr\.com\/post\/([0-9]*)/,
+			regex: ~/([^\.]*)\.tumblr\.com\/(post|image)\/([0-9]*)/,
 			method: function(e, cb) {
-				var author = e.matched(1), id = e.matched(2);
+				var author = e.matched(1), id = e.matched(3);
 				Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data) {
 					var post:Dynamic = untyped data.posts[0];
 					cb(switch(post.type) {

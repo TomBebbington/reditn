@@ -2706,8 +2706,8 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		}
 		cb9({ name : repo, owner : author, description : parser.Markdown.parse(c), url : "git://github.com/" + author + "/" + repo + ".git", album : album});
 	});
-}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/post/([0-9]*)",""), method : function(e,cb10) {
-	var author = e.matched(1), id = e.matched(2);
+}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb10) {
+	var author = e.matched(1), id = e.matched(3);
 	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 		var post = data.posts[0];
 		cb10((function($this) {
