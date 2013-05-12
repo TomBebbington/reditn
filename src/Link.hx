@@ -54,7 +54,7 @@ class Link {
 		{
 			regex: ~/imgur\.com\/(r\/[^\/]*\/)?([a-zA-Z0-9]*)/,
 			method: function(e, cb) {
-				var id = e.matched(1) == null ? e.matched(2) : e.matched(1);
+				var id = e.matched(1) == null || e.matched(1).indexOf("/") != -1 ? e.matched(2) : e.matched(1);
 				cb([{
 					url: 'http://i.imgur.com/${id}.jpg',
 					caption: null

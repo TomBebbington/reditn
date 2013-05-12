@@ -2533,7 +2533,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		cb1(album);
 	},"Client-ID " + "cc1f254578d6c52");
 }},{ regex : new EReg("imgur\\.com/(r/[^/]*/)?([a-zA-Z0-9]*)",""), method : function(e,cb) {
-	var id = e.matched(1) == null?e.matched(2):e.matched(1);
+	var id = e.matched(1) == null || e.matched(1).indexOf("/") != -1?e.matched(2):e.matched(1);
 	cb([{ url : "http://i.imgur.com/" + id + ".jpg", caption : null}]);
 }},{ regex : new EReg("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", caption : null}]);
