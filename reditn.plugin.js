@@ -130,7 +130,7 @@ Expand.init = function() {
 							var head = null;
 							var cont = js.Browser.document.createElement("div");
 							var inner = js.Browser.document.createElement("span");
-							inner.innerHTML = "<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>" + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + StringTools.htmlEscape(i.description) + "</p>");
+							inner.innerHTML = "<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>" + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + i.description + "</p>");
 							cont.appendChild(inner);
 							cont.className = "md";
 							cont.appendChild(Reditn.embedAlbum(i.images));
@@ -154,8 +154,9 @@ Expand.init = function() {
 							var div = Reditn.embedAlbum(a);
 							exp.appendChild(div);
 							name = "image";
-						} else if(Reflect.hasField(data,"owner")) {
+						} else if(Reflect.hasField(data,"developers")) {
 							var r = data;
+							console.log("Repository: " + Std.string(r));
 							var div = js.Browser.document.createElement("div");
 							div.className = "usertext";
 							var cont = js.Browser.document.createElement("div");
@@ -165,6 +166,7 @@ Expand.init = function() {
 							cont.appendChild(inner);
 							cont.className = "md";
 							div.appendChild(cont);
+							exp.appendChild(div);
 						}
 						var s = Expand.makeSelfButton(e,name,l[0].href);
 						var pn = s.parentNode;
@@ -433,128 +435,6 @@ Lambda.has = function(it,elt) {
 	}
 	return false;
 }
-var haxe = {}
-haxe.Http = function(url) {
-	this.url = url;
-	this.headers = new haxe.ds.StringMap();
-	this.params = new haxe.ds.StringMap();
-	this.async = true;
-};
-$hxClasses["haxe.Http"] = haxe.Http;
-haxe.Http.__name__ = ["haxe","Http"];
-haxe.Http.requestUrl = function(url) {
-	var h = new haxe.Http(url);
-	h.async = false;
-	var r = null;
-	h.onData = function(d) {
-		r = d;
-	};
-	h.onError = function(e) {
-		throw e;
-	};
-	h.request(false);
-	return r;
-}
-haxe.Http.prototype = {
-	onStatus: function(status) {
-	}
-	,onError: function(msg) {
-	}
-	,onData: function(data) {
-	}
-	,request: function(post) {
-		var me = this;
-		me.responseData = null;
-		var r = js.Browser.createXMLHttpRequest();
-		var onreadystatechange = function(_) {
-			if(r.readyState != 4) return;
-			var s = (function($this) {
-				var $r;
-				try {
-					$r = r.status;
-				} catch( e ) {
-					$r = null;
-				}
-				return $r;
-			}(this));
-			if(s == undefined) s = null;
-			if(s != null) me.onStatus(s);
-			if(s != null && s >= 200 && s < 400) me.onData(me.responseData = r.responseText); else if(s == null) me.onError("Failed to connect or resolve host"); else switch(s) {
-			case 12029:
-				me.onError("Failed to connect to host");
-				break;
-			case 12007:
-				me.onError("Unknown host");
-				break;
-			default:
-				me.responseData = r.responseText;
-				me.onError("Http Error #" + r.status);
-			}
-		};
-		if(this.async) r.onreadystatechange = onreadystatechange;
-		var uri = this.postData;
-		if(uri != null) post = true; else {
-			var $it0 = this.params.keys();
-			while( $it0.hasNext() ) {
-				var p = $it0.next();
-				if(uri == null) uri = ""; else uri += "&";
-				uri += StringTools.urlEncode(p) + "=" + StringTools.urlEncode(this.params.get(p));
-			}
-		}
-		try {
-			if(post) r.open("POST",this.url,this.async); else if(uri != null) {
-				var question = this.url.split("?").length <= 1;
-				r.open("GET",this.url + (question?"?":"&") + uri,this.async);
-				uri = null;
-			} else r.open("GET",this.url,this.async);
-		} catch( e ) {
-			this.onError(e.toString());
-			return;
-		}
-		if(this.headers.get("Content-Type") == null && post && this.postData == null) r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-		var $it1 = this.headers.keys();
-		while( $it1.hasNext() ) {
-			var h = $it1.next();
-			r.setRequestHeader(h,this.headers.get(h));
-		}
-		r.send(uri);
-		if(!this.async) onreadystatechange(null);
-	}
-	,setHeader: function(header,value) {
-		this.headers.set(header,value);
-		return this;
-	}
-	,__class__: haxe.Http
-}
-var IMap = function() { }
-$hxClasses["IMap"] = IMap;
-IMap.__name__ = ["IMap"];
-haxe.ds = {}
-haxe.ds.StringMap = function() {
-	this.h = { };
-};
-$hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
-haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
-haxe.ds.StringMap.__interfaces__ = [IMap];
-haxe.ds.StringMap.prototype = {
-	keys: function() {
-		var a = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
-		}
-		return HxOverrides.iter(a);
-	}
-	,exists: function(key) {
-		return this.h.hasOwnProperty("$" + key);
-	}
-	,get: function(key) {
-		return this.h["$" + key];
-	}
-	,set: function(key,value) {
-		this.h["$" + key] = value;
-	}
-	,__class__: haxe.ds.StringMap
-}
 var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
 Reditn.__name__ = ["Reditn"];
@@ -646,6 +526,13 @@ Reditn.formatNumber = function(n) {
 		$r = (n < 0?"-" + s:s) + ad;
 		return $r;
 	}(this));
+}
+Reditn.formatPrice = function(n) {
+	var first = Reditn.formatNumber(n | 0);
+	var last = Std.string(n);
+	last = last.indexOf(".") == -1?".":HxOverrides.substr(last,last.indexOf("."),null);
+	while(last.length < 3) last += "0";
+	return "" + first + last;
 }
 Reditn.show = function(e,shown) {
 	e.style.display = shown?"":"none";
@@ -771,6 +658,15 @@ Reditn.getData = function(o) {
 	while(o.response != null) o = o.response;
 	return o;
 }
+Reditn.getText = function(url,func,auth,type,postData) {
+	var h = new haxe.Http(url);
+	h.setHeader("Accept-Encoding","gzip");
+	if(auth != null) h.setHeader("Authorization",auth);
+	if(type != null) h.setHeader("Content-Type",type);
+	h.onData = func;
+	if(postData != null) h.setPostData(postData);
+	h.request(postData != null);
+}
 Reditn.getMonthYear = function(d) {
 	var month = (function($this) {
 		var $r;
@@ -823,11 +719,16 @@ Reditn.getMonthYear = function(d) {
 	}(this)), year = Std.string(d.getFullYear());
 	return "" + month + ", " + year;
 }
-Reditn.getJSON = function(url,func) {
-	(function(data) {
+Reditn.getJSON = function(url,func,auth,type,postData) {
+	if(type == null) type = "application/json";
+	Reditn.getText(url,function(data) {
 		if(StringTools.startsWith(data,"jsonFlickrApi(") && StringTools.endsWith(data,")")) data = data.substring(14,data.length - 1);
-		func(Reditn.getData(haxe.Json.parse(data)));
-	})(haxe.Http.requestUrl(url));
+		try {
+			func(Reditn.getData(haxe.Json.parse(data)));
+		} catch( e ) {
+			console.log("Error getting \"" + url + "\" - could not parse " + data);
+		}
+	},auth,type,postData);
 }
 Reditn.popUp = function(bs,el,x,y) {
 	if(y == null) y = 0;
@@ -862,6 +763,53 @@ Reditn.fullPopUp = function(el,y) {
 	if(y != 0) el.style.top = "" + (y - js.Browser.window.scrollY) + "px";
 	return el;
 }
+var StringTools = function() { }
+$hxClasses["StringTools"] = StringTools;
+StringTools.__name__ = ["StringTools"];
+StringTools.urlEncode = function(s) {
+	return encodeURIComponent(s);
+}
+StringTools.urlDecode = function(s) {
+	return decodeURIComponent(s.split("+").join(" "));
+}
+StringTools.htmlEscape = function(s,quotes) {
+	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
+}
+StringTools.htmlUnescape = function(s) {
+	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
+}
+StringTools.startsWith = function(s,start) {
+	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
+}
+StringTools.endsWith = function(s,end) {
+	var elen = end.length;
+	var slen = s.length;
+	return slen >= elen && HxOverrides.substr(s,slen - elen,elen) == end;
+}
+StringTools.isSpace = function(s,pos) {
+	var c = HxOverrides.cca(s,pos);
+	return c > 8 && c < 14 || c == 32;
+}
+StringTools.ltrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,r)) r++;
+	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
+}
+StringTools.rtrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
+	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
+}
+StringTools.trim = function(s) {
+	return StringTools.ltrim(StringTools.rtrim(s));
+}
+StringTools.replace = function(s,sub,by) {
+	return s.split(sub).join(by);
+}
+var haxe = {}
 haxe.Json = function() {
 };
 $hxClasses["haxe.Json"] = haxe.Json;
@@ -1058,51 +1006,117 @@ haxe.Json.prototype = {
 	}
 	,__class__: haxe.Json
 }
-var StringTools = function() { }
-$hxClasses["StringTools"] = StringTools;
-StringTools.__name__ = ["StringTools"];
-StringTools.urlEncode = function(s) {
-	return encodeURIComponent(s);
+haxe.Http = function(url) {
+	this.url = url;
+	this.headers = new haxe.ds.StringMap();
+	this.params = new haxe.ds.StringMap();
+	this.async = true;
+};
+$hxClasses["haxe.Http"] = haxe.Http;
+haxe.Http.__name__ = ["haxe","Http"];
+haxe.Http.prototype = {
+	onStatus: function(status) {
+	}
+	,onError: function(msg) {
+	}
+	,onData: function(data) {
+	}
+	,request: function(post) {
+		var me = this;
+		me.responseData = null;
+		var r = js.Browser.createXMLHttpRequest();
+		var onreadystatechange = function(_) {
+			if(r.readyState != 4) return;
+			var s = (function($this) {
+				var $r;
+				try {
+					$r = r.status;
+				} catch( e ) {
+					$r = null;
+				}
+				return $r;
+			}(this));
+			if(s == undefined) s = null;
+			if(s != null) me.onStatus(s);
+			if(s != null && s >= 200 && s < 400) me.onData(me.responseData = r.responseText); else if(s == null) me.onError("Failed to connect or resolve host"); else switch(s) {
+			case 12029:
+				me.onError("Failed to connect to host");
+				break;
+			case 12007:
+				me.onError("Unknown host");
+				break;
+			default:
+				me.responseData = r.responseText;
+				me.onError("Http Error #" + r.status);
+			}
+		};
+		if(this.async) r.onreadystatechange = onreadystatechange;
+		var uri = this.postData;
+		if(uri != null) post = true; else {
+			var $it0 = this.params.keys();
+			while( $it0.hasNext() ) {
+				var p = $it0.next();
+				if(uri == null) uri = ""; else uri += "&";
+				uri += StringTools.urlEncode(p) + "=" + StringTools.urlEncode(this.params.get(p));
+			}
+		}
+		try {
+			if(post) r.open("POST",this.url,this.async); else if(uri != null) {
+				var question = this.url.split("?").length <= 1;
+				r.open("GET",this.url + (question?"?":"&") + uri,this.async);
+				uri = null;
+			} else r.open("GET",this.url,this.async);
+		} catch( e ) {
+			this.onError(e.toString());
+			return;
+		}
+		if(this.headers.get("Content-Type") == null && post && this.postData == null) r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+		var $it1 = this.headers.keys();
+		while( $it1.hasNext() ) {
+			var h = $it1.next();
+			r.setRequestHeader(h,this.headers.get(h));
+		}
+		r.send(uri);
+		if(!this.async) onreadystatechange(null);
+	}
+	,setPostData: function(data) {
+		this.postData = data;
+		return this;
+	}
+	,setHeader: function(header,value) {
+		this.headers.set(header,value);
+		return this;
+	}
+	,__class__: haxe.Http
 }
-StringTools.urlDecode = function(s) {
-	return decodeURIComponent(s.split("+").join(" "));
-}
-StringTools.htmlEscape = function(s,quotes) {
-	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
-}
-StringTools.htmlUnescape = function(s) {
-	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
-}
-StringTools.startsWith = function(s,start) {
-	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
-}
-StringTools.endsWith = function(s,end) {
-	var elen = end.length;
-	var slen = s.length;
-	return slen >= elen && HxOverrides.substr(s,slen - elen,elen) == end;
-}
-StringTools.isSpace = function(s,pos) {
-	var c = HxOverrides.cca(s,pos);
-	return c > 8 && c < 14 || c == 32;
-}
-StringTools.ltrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,r)) r++;
-	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
-}
-StringTools.rtrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
-	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
-}
-StringTools.trim = function(s) {
-	return StringTools.ltrim(StringTools.rtrim(s));
-}
-StringTools.replace = function(s,sub,by) {
-	return s.split(sub).join(by);
+var IMap = function() { }
+$hxClasses["IMap"] = IMap;
+IMap.__name__ = ["IMap"];
+haxe.ds = {}
+haxe.ds.StringMap = function() {
+	this.h = { };
+};
+$hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
+haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
+haxe.ds.StringMap.__interfaces__ = [IMap];
+haxe.ds.StringMap.prototype = {
+	keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
+		}
+		return HxOverrides.iter(a);
+	}
+	,exists: function(key) {
+		return this.h.hasOwnProperty("$" + key);
+	}
+	,get: function(key) {
+		return this.h["$" + key];
+	}
+	,set: function(key,value) {
+		this.h["$" + key] = value;
+	}
+	,__class__: haxe.ds.StringMap
 }
 var Std = function() { }
 $hxClasses["Std"] = Std;
@@ -1350,7 +1364,7 @@ Link.trimURL = function(url) {
 	return url;
 }
 Link.filterHTML = function(html) {
-	var _g = 0, _g1 = Link.FILTERS;
+	var _g = 0, _g1 = Link.HTML_FILTERS;
 	while(_g < _g1.length) {
 		var f = _g1[_g];
 		++_g;
@@ -2506,13 +2520,10 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		}($this));
 		return $r;
 	}(this));
-	var req = new haxe.Http("https://api.imgur.com/3/" + albumType + "/" + id);
-	req.setHeader("Authorization","Client-ID " + "cc1f254578d6c52");
-	req.onData = function(ds) {
-		var d = Reditn.getData(haxe.Json.parse(ds));
+	Reditn.getJSON("https://api.imgur.com/3/" + albumType + "/" + id,function(data) {
 		var album = [];
-		if(d.images_count <= 0) album.push({ url : "http://i.imgur.com/" + d.id + ".jpg", caption : d.title}); else {
-			var _g1 = 0, _g2 = d.images;
+		if(data.images_count <= 0) album.push({ url : "http://i.imgur.com/" + data.id + ".jpg", caption : data.title}); else {
+			var _g1 = 0, _g2 = data.images;
 			while(_g1 < _g2.length) {
 				var i = _g2[_g1];
 				++_g1;
@@ -2520,10 +2531,10 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 			}
 		}
 		cb1(album);
-	};
-	req.request(false);
-}},{ regex : new EReg("imgur\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
-	cb([{ url : "http://i.imgur.com/" + e.matched(1) + ".jpg", caption : null}]);
+	},"Client-ID " + "cc1f254578d6c52");
+}},{ regex : new EReg("imgur\\.com/(r/[^/]*/)?([a-zA-Z0-9]*)",""), method : function(e,cb) {
+	var id = e.matched(1) == null?e.matched(2):e.matched(1);
+	cb([{ url : "http://i.imgur.com/" + id + ".jpg", caption : null}]);
 }},{ regex : new EReg("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", caption : null}]);
 }},{ regex : new EReg("memecrunch.com/meme/([^/]*)/([^/]*)",""), method : function(e,cb) {
@@ -2537,10 +2548,10 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		cb2([{ url : data.img, caption : data.title}]);
 	});
 }},{ regex : new EReg("explosm.net/comics/([0-9]*)",""), method : function(e1,cb3) {
-	(function(txt) {
+	Reditn.getText("http://" + e1.matched(0),function(txt) {
 		var rg = new EReg("http://www\\.explosm\\.net/db/files/Comics/[^\"]*","");
 		if(rg.match(txt)) cb3([{ url : rg.matched(0), caption : null}]); else throw "" + Std.string(rg) + " not matched by " + e1.matched(0);
-	})(haxe.Http.requestUrl("http://" + e1.matched(0)));
+	},null,null,null);
 }},{ regex : new EReg("livememe.com/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://livememe.com/" + e.matched(1) + ".jpg", caption : null}]);
 }},{ regex : new EReg("(([^\\.]*\\.)?deviantart\\.com/art|fav\\.me)/.*",""), method : function(e,cb4) {
@@ -2563,7 +2574,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		var nalbum = imgs.map(function(i) {
 			return { url : i, caption : null};
 		});
-		cb6({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : data.Item.Description, images : nalbum, price : Reditn.formatNumber(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
+		cb6({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : Link.filterHTML(data.Item.Description), images : nalbum, price : Reditn.formatPrice(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
 	});
 }},{ regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
 	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.htmlEscape(e.matched(1)) + "/posts/slug:" + StringTools.htmlEscape(e.matched(2));
@@ -2684,10 +2695,59 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 			album.push({ url : url, caption : imgs.matched(1)});
 			tc = HxOverrides.substr(tc,imgs.matchedPos().pos + imgs.matchedPos().len,null);
 		}
-		cb9({ name : repo, owner : author, description : parser.Markdown.parse(c), url : "git://github.com/" + author + "/" + repo + ".git", album : album});
+		cb9({ name : repo, developers : [author], description : parser.Markdown.parse(c), url : "git://github.com/" + author + "/" + repo + ".git", album : album});
 	});
-}},{ regex : new EReg("(digitaltrends\\.com|webupd8\\.org)/.*",""), method : function(e,cb10) {
-	(function(txt) {
+}},{ regex : new EReg("sourceforge.net/projects/([a-zA-Z-]*)",""), method : function(e,cb10) {
+	console.log("Getting project " + e.matched(1));
+	Reditn.getJSON("http://sourceforge.net/api/project/name/" + e.matched(1) + "/json",function(data) {
+		console.log(data);
+		data = data.Project;
+		var devs = data.developers;
+		cb10({ name : data.name, description : data.description, developers : (function($this) {
+			var $r;
+			var _g = [];
+			{
+				var _g1 = 0;
+				while(_g1 < devs.length) {
+					var d = devs[_g1];
+					++_g1;
+					_g.push(d.name);
+				}
+			}
+			$r = _g;
+			return $r;
+		}(this)), url : (function($this) {
+			var $r;
+			var u = Reflect.field(data,"download-page");
+			{
+				var _g1 = 0, _g2 = Reflect.fields(data);
+				while(_g1 < _g2.length) {
+					var f = _g2[_g1];
+					++_g1;
+					if(StringTools.endsWith(f,"Repository")) {
+						var type = HxOverrides.substr(f,0,f.length - 10).toLowerCase();
+						var loc = Reflect.field(data,f).location;
+						u = StringTools.replace(loc,"http:","" + type + ":");
+					}
+				}
+			}
+			$r = u;
+			return $r;
+		}(this)), album : []});
+	});
+}},{ regex : new EReg("twitter.com/([^/]*)/status/([0-9]*)",""), method : function(e2,cb11) {
+	var get = function(token) {
+		Reditn.getJSON("https://api.twitter.com/1.1/statuses/show.json?id=" + e2.matched(1),function(data) {
+			console.log(data);
+			cb11({ title : null, author : data.author.name, images : [], content : data.text});
+		},"Bearer " + "TGhEbnl1dlE1b3pGemo4TGtrRkcxRjJwSW05aFVaUUVSYmFwVmFLODpGeGNDNVl6dnBaVkdYWjNXT2ViWmc=");
+	};
+	if(Link.twitterToken != null) get(Link.twitterToken); else Reditn.getJSON("https://api.twitter.com/oauth2/token",function(data) {
+		console.log(data);
+		get("" + data.token_type + " " + data.access_token);
+	},"Basic " + "TGhEbnl1dlE1b3pGemo4TGtrRkcxRjJwSW05aFVaUUVSYmFwVmFLODpGeGNDNVl6dnBaVkdYWjNXT2ViWmc=","application/x-www-form-urlencoded;charset=UTF-8","grant_type=client_credentials");
+}},{ regex : new EReg("(digitaltrends\\.com|webupd8\\.org)/.*",""), method : function(e,cb12) {
+	Reditn.getText("http://" + e.matched(0),function(txt) {
 		var t = new EReg("<title>(.*)</title>","");
 		if(t.match(txt)) {
 			var cont = txt;
@@ -2700,14 +2760,14 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 				cont = Link.HTML_IMG.replace(cont,"");
 			}
 			cont = Link.filterHTML(cont);
-			cb10({ title : t.matched(1), content : cont, author : null, images : images});
+			cb12({ title : t.matched(1), content : cont, author : null, images : images});
 		}
-	})(haxe.Http.requestUrl("http://" + e.matched(0)));
-}},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb11) {
+	},null,null,null);
+}},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb13) {
 	var author = e.matched(1), id = e.matched(3);
 	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 		var post = data.posts[0];
-		cb11((function($this) {
+		cb13((function($this) {
 			var $r;
 			switch(post.type) {
 			case "text":
@@ -2754,7 +2814,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		}(this)));
 	});
 }}];
-Link.FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>.*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("<br></br>","g"),new EReg("<br( )?/>","g"),new EReg("style=\"[^\"]*\"","g")];
+Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("(<br></br>|<br ?/>)(<br></br>|<br ?/>)","g"),new EReg("style ?= ?\"[^\"]*\"","g")];
 Settings.DESC = (function($this) {
 	var $r;
 	var _g = new haxe.ds.StringMap();

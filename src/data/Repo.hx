@@ -1,6 +1,6 @@
 package data;
 typedef Repo = {
-	owner:String,
+	developers:Array<String>,
 	name:String,
 	url:String,
 	description:String,

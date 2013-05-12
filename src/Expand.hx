@@ -61,7 +61,7 @@ class Expand {
 						'<b>Category:</b> ${StringTools.htmlEscape(i.category)}<br>' + 
 						'<b>Location:</b> ${StringTools.htmlEscape(i.location)}<br>' + 
 						'<b>Price:</b> ${StringTools.htmlEscape(i.price)}<br>' +
-						'<p>${StringTools.htmlEscape(i.description)}</p>';
+						'<p>${i.description}</p>';
 						cont.appendChild(inner);
 						cont.className = "md";
 						cont.appendChild(Reditn.embedAlbum(i.images));
@@ -86,8 +86,9 @@ class Expand {
 						var div = Reditn.embedAlbum(a);
 						exp.appendChild(div);
 						name = "image";
-					} else if(Reflect.hasField(data, "owner")) {
+					} else if(Reflect.hasField(data, "developers")) {
 						var r:Repo = data;
+						trace('Repository: $r');
 						var div = js.Browser.document.createDivElement();
 						div.className = "usertext";
 						var cont = Browser.document.createDivElement();
@@ -98,6 +99,7 @@ class Expand {
 						cont.appendChild(inner);
 						cont.className = "md";
 						div.appendChild(cont);
+						exp.appendChild(div);
 					}
 					var s = makeSelfButton(e, name, l.href);
 					var pn:Element = cast s.parentNode;

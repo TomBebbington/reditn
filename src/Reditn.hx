@@ -79,7 +79,7 @@ class Reditn {
 				#end
 			}
 	}
-	public static function formatNumber(n:Int):String {
+	public static function formatNumber(n:Float):String {
 		return if (!Math.isFinite(n))
 			Std.string(n);
 		else {
@@ -100,6 +100,14 @@ class Reditn {
 			}
 			(n < 0 ? "-"+s:s)+ad;
 		}
+	}
+	public static function formatPrice(n:Float):String {
+		var first = formatNumber(Std.int(n));
+		var last = Std.string(n);
+		last = last.indexOf(".") == -1 ? "." : last.substr(last.indexOf("."));
+		while(last.length < 3)
+			last += "0";
+		return '${first}${last}';
 	}
 	static inline function plural(n:Int) {
 		return n <= 1 ? "" : "s";
@@ -233,12 +241,30 @@ class Reditn {
 			o = o.response;
 		return o;
 	}
-	public static inline function getText(url:String, func:String->Void):Void {
+	public static inline function getText(url:String, func:String->Void, ?auth:String, ?type:String, ?postData:String):Void {
 		#if plugin
-			func(haxe.Http.requestUrl(url));
+			var h = new haxe.Http(url);
+			h.setHeader("Accept-Encoding", "gzip");
+			if(auth != null)
+				h.setHeader("Authorization", auth);
+			if(type != null)
+				h.setHeader("Content-Type", type);
+			h.onData = func;
+			if(postData != null)
+				h.setPostData(postData);
+			h.request(postData != null);
 		#else
+			var heads:Dynamic = {
+				"Accept-Encoding": "gzip"
+			};
+			if(auth != null)
+				heads.Authorization = auth;
+			if(type != null)
+				Reflect.setField(heads, "Content-Type", type);
 			untyped GM_xmlhttpRequest({
-				method: "GET",
+				method: postData != null ? "POST" : "GET",
+				headers: heads,
+				data: postData,
 				url: url,
 				onload: function(rsp:Dynamic) {
 					func(rsp.responseText);
@@ -264,12 +290,14 @@ class Reditn {
 		}, year = Std.string(d.getFullYear());
 		return '$month, $year';
 	}
-	public static function getJSON<T>(url:String, func:T->Void):Void {
+	public static function getJSON<T>(url:String, func:T->Void, ?auth:String, type:String="application/json", ?postData:String):Void {
 		getText(url, function(data:String) {
 			if(data.startsWith("jsonFlickrApi(") && data.endsWith(")"))
 				data = data.substring(14, data.length - 1);
-			func(getData(haxe.Json.parse(data)));
-		});
+			try func(getData(haxe.Json.parse(data))) catch(e:Dynamic) {
+				trace('Error getting "${url}" - could not parse ${data}');
+			}
+		}, auth, type, postData);
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);

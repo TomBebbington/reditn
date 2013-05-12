@@ -8,8 +8,10 @@ class Link {
 	public static inline var EBAY_API_KEY = "ThomasDa-1e6c-4d29-a156-85557acee70b";
 	public static inline var GITHUB_KEY = "39d85b9ac427f1176763";
 	public static inline var GITHUB_KEYS = "5117570b83363ca0c71a196edc5b348af150c25d";
+	public static inline var TWITTER_KEY = "TGhEbnl1dlE1b3pGemo4TGtrRkcxRjJwSW05aFVaUUVSYmFwVmFLODpGeGNDNVl6dnBaVkdYWjNXT2ViWmc=";
 	static var LINK = ~/[src|href]="(\/([^\/]*))*?([^\/]*)"/;
 	static var HTML_IMG = ~/<img .*?src="([^"]*)"\/?>/;
+	static var twitterToken:String = null;
 	static function noRel(html:String):String {
 		return LINK.replace(html, "$1, $2");
 	}
@@ -32,32 +34,29 @@ class Link {
 					case "gallery": "gallery/album";
 					default: "album";
 				};
-				var req = new haxe.Http('https://api.imgur.com/3/${albumType}/${id}');
-				req.setHeader("Authorization", 'Client-ID ${IMGUR_KEY}');
-				req.onData = function(ds:String) {
-					var d:data.imgur.Album = cast Reditn.getData(haxe.Json.parse(ds));
+				Reditn.getJSON('https://api.imgur.com/3/${albumType}/${id}', function(data:data.imgur.Album) {
 					var album = [];
-					if(d.images_count <= 0)
+					if(data.images_count <= 0)
 						album.push({
-							url: 'http://i.imgur.com/${d.id}.jpg',
-							caption: d.title
+							url: 'http://i.imgur.com/${data.id}.jpg',
+							caption: data.title
 						});
 					else
-						for(i in d.images)
+						for(i in data.images)
 							album.push({
 								url: 'http://i.imgur.com/${i.id}.jpg',
 								caption: i.title
 							});
 					cb(album);
-				};
-				req.request(false);
+				}, 'Client-ID ${IMGUR_KEY}');
 			}
 		},
 		{
-			regex: ~/imgur\.com\/([a-zA-Z0-9]*)/,
+			regex: ~/imgur\.com\/(r\/[^\/]*\/)?([a-zA-Z0-9]*)/,
 			method: function(e, cb) {
+				var id = e.matched(1) == null ? e.matched(2) : e.matched(1);
 				cb([{
-					url: 'http://i.imgur.com/${e.matched(1)}.jpg',
+					url: 'http://i.imgur.com/${id}.jpg',
 					caption: null
 				}]);
 			}
@@ -168,7 +167,7 @@ class Link {
 				Reditn.getJSON(url, function(data) {
 					var imgs:Array<String> = data.Item.PictureURL;
 					var nalbum = imgs.map(function(i) return { url: i, caption: null });
-					cb({title: data.Item.Title, category: data.Item.PrimaryCategoryName, location: data.Item.Location + ", " + data.Item.Country, description: data.Item.Description, images: nalbum, price: Reditn.formatNumber(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
+					cb({title: data.Item.Title, category: data.Item.PrimaryCategoryName, location: data.Item.Location + ", " + data.Item.Country, description: filterHTML(data.Item.Description), images: nalbum, price: Reditn.formatPrice(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
 				});
 			}
 		},
@@ -270,12 +269,62 @@ class Link {
 					}
 					cb({
 						name: repo,
-						owner: author,
+						developers: [author],
 						description: parser.Markdown.parse(c),
 						url: 'git://github.com/${author}/${repo}.git',
 						album: album
 					});
 				});
+			}
+		},
+		{
+			regex: ~/sourceforge.net\/projects\/([a-zA-Z-]*)/,
+			method: function(e, cb) {
+				trace('Getting project ${e.matched(1)}');
+				Reditn.getJSON('http://sourceforge.net/api/project/name/${e.matched(1)}/json', function(data:Dynamic) {
+					trace(data);
+					data = data.Project;
+					var devs:Array<Dynamic> = data.developers;
+					cb({
+						name: data.name,
+						description: data.description,
+						developers: [for(d in devs) d.name],
+						url: {
+							var u = Reflect.field(data, "download-page");
+							for(f in Reflect.fields(data))
+								if(f.endsWith("Repository")) {
+									var type = f.substr(0, f.length - 10).toLowerCase();
+									var loc:String = Reflect.field(data, f).location;
+									u = loc.replace("http:", '${type}:');
+								}
+							u;
+						},
+						album: []
+					});
+				});
+			}
+		},
+		{
+			regex: ~/twitter.com\/([^\/]*)\/status\/([0-9]*)/,
+			method: function(e, cb) {
+				function get(token) {
+					Reditn.getJSON('https://api.twitter.com/1.1/statuses/show.json?id=${e.matched(1)}', function(data) {
+						trace(data);
+						cb({
+							title: null,
+							author: data.author.name,
+							images: [],
+							content: data.text
+						});
+					}, 'Bearer $TWITTER_KEY');
+				}
+				if(twitterToken != null)
+					get(twitterToken)
+				else
+					Reditn.getJSON('https://api.twitter.com/oauth2/token', function(data) {
+						trace(data);
+						get('${data.token_type} ${data.access_token}');
+					}, 'Basic ${TWITTER_KEY}', "application/x-www-form-urlencoded;charset=UTF-8", "grant_type=client_credentials");
 			}
 		},
 		{
@@ -366,21 +415,20 @@ class Link {
 			url = url.substr(0, url.indexOf("#"));
 		return url;
 	}
-	static var FILTERS:Array<EReg> = [
+	static var HTML_FILTERS:Array<EReg> = [
 		HTML_IMG,
 		~/<meta[^>]*\/>/g,
 		~/<(h1|header)[^>]*>.*<\/\1>/g,
 		~/<table([^>]*)>(.|\n|\n\r)*<\/table>/gm,
-		~/<div class="(seperator|ga-ads)"[^>]*>.*<\/div>/g,
+		~/<div class="(seperator|ga-ads)"[^>]*>(.|\n|\n\r)*<\/div>/g,
 		~/<([^>]*)( [^>]*)?><\/\1>/g,
 		~/<script[^>\/]*\/>/g,
 		~/<script[^>\/]*><\/script>/g,
-		~/<br><\/br>/g,
-		~/<br( )?\/>/g,
-		~/style="[^"]*"/g
+		~/(<br><\/br>|<br ?\/>)(<br><\/br>|<br ?\/>)/g,
+		~/style ?= ?"[^"]*"/g
 	];
 	static function filterHTML(html:String):String {
-		for(f in FILTERS)
+		for(f in HTML_FILTERS)
 			html = f.replace(html, "");
 		return html;
 	}
