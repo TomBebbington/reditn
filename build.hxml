@@ -9,7 +9,3 @@
 -js reditn.plugin.js
 -dce full
 -D plugin
---next
--cp src
--main tools.TwitterTokenGen
--neko twitter-gen.n
