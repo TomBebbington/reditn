@@ -206,14 +206,14 @@ class Reditn {
 			var height = null;
 			if(img != null) {
 				Reditn.show(img, false);
-				height = img.height;
+				height = Std.parseInt(img.style.height);
 			}
 			img = imgs[ind];
 			img.style.display = "block";
 			if(height != null) {
 				var ratio = img.width / img.height;
-				img.height = height;
-				img.width = Std.int(height * ratio);
+				img.style.height = height + "px";
+				img.style.width = Std.int(height * ratio) + "px";
 			}
 			span.appendChild(img);
 			if(prev != null) {

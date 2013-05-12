@@ -636,14 +636,14 @@ Reditn.embedAlbum = function(a) {
 		if(img != null) {
 			img.style.display = "none";
 			if(img.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,img.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-			height = img.height;
+			height = Std.parseInt(img.style.height);
 		}
 		img = imgs[ind];
 		img.style.display = "block";
 		if(height != null) {
 			var ratio = img.width / img.height;
-			img.height = height;
-			img.width = height * ratio | 0;
+			img.style.height = height + "px";
+			img.style.width = (height * ratio | 0) + "px";
 		}
 		span.appendChild(img);
 		if(prev != null) {
