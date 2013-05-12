@@ -9,12 +9,12 @@ class Link {
 	public static inline var GITHUB_KEY = "39d85b9ac427f1176763";
 	public static inline var GITHUB_KEYS = "5117570b83363ca0c71a196edc5b348af150c25d";
 	static var LINK = ~/[src|href]="(\/([^\/]*))*?([^\/]*)"/;
+	static var HTML_IMG = ~/<img .*?src="([^"]*)"\/?>/;
 	static function noRel(html:String):String {
 		return LINK.replace(html, "$1, $2");
 	}
 	static var sites:Array<Site> = [
 		{
-			type: LinkType.IMAGE,
 			regex: ~/.*\.(jpeg|gif|jpg|bmp|png)/,
 			method: function(e, cb) {
 				cb([{
@@ -24,7 +24,6 @@ class Link {
 			}
 		},
 		{
-			type: data.LinkType.IMAGE,
 			regex: ~/imgur.com\/(a|gallery)\/([^\/]*)/,
 			method: function(e, cb) {
 				var id = e.matched(2);
@@ -55,7 +54,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
 			regex: ~/imgur\.com\/([a-zA-Z0-9]*)/,
 			method: function(e, cb) {
 				cb([{
@@ -65,7 +63,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
 			regex: ~/(qkme\.me|quickmeme\.com\/meme|m\.quickmeme.com\/meme)\/([^\/]*)/,
 			method: function(e, cb) {
 				cb([{
@@ -75,7 +72,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
 			regex: ~/memecrunch.com\/meme\/([^\/]*)\/([^\/]*)/,
 			method: function(e, cb) {
 				cb([{
@@ -85,7 +81,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
 			regex: ~/memegenerator\.net\/instance\/([^\/]*)/,
 			method: function(e, cb) {
 				cb([{
@@ -95,7 +90,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
 			regex: ~/imgflip\.com\/i\/([^\/]*)/,
 			method: function(e, cb) {
 				cb([{
@@ -105,7 +99,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
 			regex: ~/xkcd.com\/([0-9]*)/,
 			method: function(e, cb) {
 				Reditn.getJSON('http://xkcd.com/${e.matched(1)}/info.0.json', function(data:Dynamic) {
@@ -117,21 +110,21 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
-			regex: ~/explosm.net\/comics\/([^\/]*)/,
+			regex: ~/explosm.net\/comics\/([0-9]*)/,
 			method: function(e, cb) {
 				Reditn.getText('http://${e.matched(0)}', function(txt) {
 					var rg = ~/http:\/\/www\.explosm\.net\/db\/files\/Comics\/[^"]*/;
-					rg.match(txt);
-					cb([{
-						url: rg.matched(0),
-						caption: null
-					}]);
+					if(rg.match(txt))
+						cb([{
+							url: rg.matched(0),
+							caption: null
+						}]);
+					else
+						throw '$rg not matched by ${e.matched(0)}';
 				});
 			}
 		},
 		{
-			type: LinkType.IMAGE,
 			regex: ~/livememe.com\/([^\/]*)/,
 			method: function(e, cb) {
 				cb([{
@@ -141,7 +134,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
 			regex: ~/(([^\.]*\.)?deviantart\.com\/art|fav\.me)\/.*/,
 			method: function(e, cb) {
 				Reditn.getJSON('http://backend.deviantart.com/oembed?url=${e.matched(0).urlEncode()}&format=json', function(d) {
@@ -153,7 +145,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.IMAGE,
 			regex: ~/flickr\.com(\/[^\/]*)*?\/([0-9@]*)\//,
 			method: function(e, cb) {
 				Reditn.getJSON('http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=${FLICKR_KEY}&photo_id=${e.matched(2)}&format=json', function(d) {
@@ -169,7 +160,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.SHOP_ITEM,
 			regex: ~/ebay\.([a-zA-Z\.]*)\/itm(\/[^\/]*)?\/([0-9]*)/,
 			method: function(e, cb) {
 				var domain = e.matched(1);
@@ -183,7 +173,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.ARTICLE,
 			regex: ~/([^\.]*\.wordpress\.com)\/[0-9\/]*([^\/]*)\/?/,
 			method: function(e, cb) {
 				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).htmlEscape()}/posts/slug:${e.matched(2).htmlEscape()}';
@@ -201,7 +190,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.ARTICLE,
 			regex: ~/(.*)\/wiki\/([^#]*)(#.*)?/,
 			method: function(e, cb) {
 				var urlroot = e.matched(1), title = e.matched(2), to = e.matched(3);
@@ -257,7 +245,6 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.ARTICLE,
 			regex: ~/github\.com\/([^\/]*)\/([^\/]*)/,
 			method: function(e, cb) {
 				var author = e.matched(1), repo = e.matched(2);
@@ -292,22 +279,48 @@ class Link {
 			}
 		},
 		{
-			type: LinkType.UNKNOWN,
+			regex: ~/digitaltrends.com\/.*/,
+			method: function(e, cb) {
+				Reditn.getText('http://${e.matched(0)}', function(txt) {
+					var t = ~/<title>(.*)<\/title>/;
+					if(t.match(txt)) {
+						var cont = txt;
+						cont = cont.substr(cont.indexOf("<article"));
+						cont = cont.substr(cont.indexOf(">")+1);
+						cont = cont.substr(0, cont.indexOf("</article>"));
+						var images = [];
+						while(HTML_IMG.match(cont)) {
+							images.push({
+								url: HTML_IMG.matched(1),
+								caption: null
+							});
+							cont = HTML_IMG.replace(cont, "");
+						}
+						cb({
+							title: t.matched(1),
+							content: cont,
+							author: null,
+							images: images
+						});
+					}
+				});
+			}
+		},
+		{
 			regex: ~/([^\.]*)\.tumblr\.com\/(post|image)\/([0-9]*)/,
 			method: function(e, cb) {
 				var author = e.matched(1), id = e.matched(3);
 				Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data) {
 					var post:Dynamic = untyped data.posts[0];
 					cb(switch(post.type) {
-						case "text": 
-						var imx = ~/<img .*?src="([^"]*)"\/?>/;
+						case "text":
 						var images = [];
-						while(imx.match(post.body)) {
+						while(HTML_IMG.match(post.body)) {
 							images.push({
-								url: imx.matched(1),
+								url: HTML_IMG.matched(1),
 								caption: null
 							});
-							post.body = imx.replace(post.body, "");
+							post.body = HTML_IMG.replace(post.body, "");
 						}
 						{title: post.title, content: post.body, author: data.blog.name, images: images};
 						case "quote": {title: null, content: '${post.text}<br/><b>${post.source}</b>', author: data.blog.name, images: []};
@@ -328,8 +341,12 @@ class Link {
 	public static function resolve(url:String) {
 		url = trimURL(url);
 		for(s in sites)
-			if(s.regex.match(url))
-				return s;
+			try {
+				if(s.regex.match(url))
+					return s;
+			} catch(d:Dynamic) {
+				trace('Error $d whilst processing regex ${s.regex}');
+			}
 		return null;
 	}
 	public static function trimURL(url:String) {

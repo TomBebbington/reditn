@@ -180,8 +180,7 @@ Expand.init = function() {
 							cont.appendChild(inner);
 							cont.className = "md";
 							div.appendChild(cont);
-							exp.appendChild(div);
-						} else Expand.preload(l[0].href);
+						}
 						var s = Expand.makeSelfButton(e,name,l[0].href);
 						var pn = s.parentNode;
 						var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
@@ -266,12 +265,6 @@ Expand.toggle = function(t) {
 		btn.toggle(t);
 	}
 	Expand.refresh();
-}
-Expand.preload = function(url) {
-	var link = js.Browser.document.createElement("link");
-	link.href = url;
-	link.rel = "preload";
-	js.Browser.document.head.appendChild(link);
 }
 Expand.loadImage = function(url) {
 	var img = js.Browser.document.createElement("img");
@@ -455,32 +448,6 @@ Lambda.has = function(it,elt) {
 	}
 	return false;
 }
-var data = {}
-data.LinkType = $hxClasses["data.LinkType"] = { __ename__ : ["data","LinkType"], __constructs__ : ["IMAGE","VIDEO","AUDIO","TEXT","ARTICLE","REPO","SHOP_ITEM","UNKNOWN"] }
-data.LinkType.IMAGE = ["IMAGE",0];
-data.LinkType.IMAGE.toString = $estr;
-data.LinkType.IMAGE.__enum__ = data.LinkType;
-data.LinkType.VIDEO = ["VIDEO",1];
-data.LinkType.VIDEO.toString = $estr;
-data.LinkType.VIDEO.__enum__ = data.LinkType;
-data.LinkType.AUDIO = ["AUDIO",2];
-data.LinkType.AUDIO.toString = $estr;
-data.LinkType.AUDIO.__enum__ = data.LinkType;
-data.LinkType.TEXT = ["TEXT",3];
-data.LinkType.TEXT.toString = $estr;
-data.LinkType.TEXT.__enum__ = data.LinkType;
-data.LinkType.ARTICLE = ["ARTICLE",4];
-data.LinkType.ARTICLE.toString = $estr;
-data.LinkType.ARTICLE.__enum__ = data.LinkType;
-data.LinkType.REPO = ["REPO",5];
-data.LinkType.REPO.toString = $estr;
-data.LinkType.REPO.__enum__ = data.LinkType;
-data.LinkType.SHOP_ITEM = ["SHOP_ITEM",6];
-data.LinkType.SHOP_ITEM.toString = $estr;
-data.LinkType.SHOP_ITEM.__enum__ = data.LinkType;
-data.LinkType.UNKNOWN = ["UNKNOWN",7];
-data.LinkType.UNKNOWN.toString = $estr;
-data.LinkType.UNKNOWN.__enum__ = data.LinkType;
 var haxe = {}
 haxe.Http = function(url) {
 	this.url = url;
@@ -1364,7 +1331,11 @@ Link.resolve = function(url) {
 	while(_g < _g1.length) {
 		var s = _g1[_g];
 		++_g;
-		if(s.regex.match(url)) return s;
+		try {
+			if(s.regex.match(url)) return s;
+		} catch( d ) {
+			console.log("Error " + Std.string(d) + " whilst processing regex " + Std.string(s.regex));
+		}
 	}
 	return null;
 }
@@ -2467,17 +2438,6 @@ if(Array.prototype.indexOf) HxOverrides.remove = function(a,o) {
 	return true;
 }; else null;
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
-Math.__name__ = ["Math"];
-Math.NaN = Number.NaN;
-Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
-Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
-$hxClasses.Math = Math;
-Math.isFinite = function(i) {
-	return isFinite(i);
-};
-Math.isNaN = function(i) {
-	return isNaN(i);
-};
 String.prototype.__class__ = $hxClasses.String = String;
 String.__name__ = ["String"];
 Array.prototype.__class__ = $hxClasses.Array = Array;
@@ -2492,6 +2452,17 @@ var Bool = $hxClasses.Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
+Math.__name__ = ["Math"];
+Math.NaN = Number.NaN;
+Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+$hxClasses.Math = Math;
+Math.isFinite = function(i) {
+	return isFinite(i);
+};
+Math.isNaN = function(i) {
+	return isNaN(i);
+};
 Expand.buttons = [];
 Reditn.fullPage = true;
 parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{Monthyear\\}\\}",""), to : Reditn.getMonthYear(new Date())},{ from : new EReg("{{convert|([0-9]*)|([^\\|]*)[^\\}]*}}",""), to : "$1"},{ from : new EReg("{{([^{}]*)}}",""), to : ""},{ from : new EReg("{\\|([^[\\|\\}]]*)\\|}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("^======([^=]*)======","m"), to : "<h6>$1</h6>"},{ from : new EReg("^=====([^=]*)=====","m"), to : "<h5>$1</h5>"},{ from : new EReg("^====([^=]*)====","m"), to : "<h4>$1</h4>"},{ from : new EReg("^===([^=]*)===","m"), to : "<h3>$1</h3>"},{ from : new EReg("^==([^=]*)==","m"), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
@@ -2500,9 +2471,10 @@ js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 parser.Markdown.images = new EReg("!\\[([^\\]]*)\\]\\(([^\\)\\.]+\\.(jpg|bmp|png|jpeg|gif))\\)","");
 parser.Markdown.regex = [{ from : new EReg("(\\*\\*|__)([^\\1\n]*?)\\1",""), to : "<b>$2</b>"},{ from : new EReg("(\\*|_)([^\\1\n]*?)\\1",""), to : "<em>$2</em>"},{ from : new EReg("^[\\*|+|-] (.*)$","m"), to : "<ul><li>$1</li></ul>"},{ from : new EReg("</ul><ul>",""), to : ""},{ from : new EReg("\n> (?=[^\n\r]*)",""), to : "<blockquote>$1</blockquote>"},{ from : new EReg("</blockquote>\n?\r?<blockquote>$",""), to : ""},{ from : new EReg("~~([^~]*?)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]+)",""), to : "<sup>$1</sup>"},{ from : new EReg(":\"([^:\"]*?)\":",""), to : "<q>$1</q>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\[]+)\\]\\(([^\\)]+)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("^#####([^#\n]+)(#####)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^####([^#\n]+)(####)?$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^###([^#\n]+)(###)?$","m"), to : "<h4>$1</h4>"},{ from : new EReg("^##([^#\n]+)(##)?$","m"), to : "<h5>$1</h5>"},{ from : new EReg("^#([^#\n]+)(#)?$","m"), to : "<h6>$1</h6>"},{ from : new EReg("^(#*)([^#\n])\\1?$","m"), to : "<h2>$2</h2>"},{ from : new EReg("(.*)\n\r?(?==+)\n",""), to : "<h3>$1</h3>"},{ from : new EReg("(.*)\n\r?(?=(-|#)+)\n",""), to : "<h2>$1</h2>"},{ from : new EReg("(```*|\")([^`\"\"]+)\\1","m"), to : "<pre>$2</pre>"},{ from : new EReg("<pre>(.*)\n\n(.*)</pre>",""), to : "<pre>$1\n$2</pre>"},{ from : new EReg("\n\n",""), to : "<br>\n"}];
-Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
+Link.HTML_IMG = new EReg("<img .*?src=\"([^\"]*)\"/?>","");
+Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null}]);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
+}},{ regex : new EReg("imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
 	var id = e.matched(2);
 	var albumType = (function($this) {
 		var $r;
@@ -2539,55 +2511,54 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		cb1(album);
 	};
 	req.request(false);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("imgur\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("imgur\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.imgur.com/" + e.matched(1) + ".jpg", caption : null}]);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", caption : null}]);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("memecrunch.com/meme/([^/]*)/([^/]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("memecrunch.com/meme/([^/]*)/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0) + "/image.png", caption : null}]);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("memegenerator\\.net/instance/([^/]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("memegenerator\\.net/instance/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + e.matched(1) + ".jpg", caption : null}]);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("imgflip\\.com/i/([^/]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("imgflip\\.com/i/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.imgflip.com/" + e.matched(1) + ".jpg", caption : null}]);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("xkcd.com/([0-9]*)",""), method : function(e,cb2) {
-	Reditn.getJSON("http://xkcd.com/" + e.matched(1) + "/info.0.json",function(data1) {
-		cb2([{ url : data1.img, caption : data1.title}]);
+}},{ regex : new EReg("xkcd.com/([0-9]*)",""), method : function(e,cb2) {
+	Reditn.getJSON("http://xkcd.com/" + e.matched(1) + "/info.0.json",function(data) {
+		cb2([{ url : data.img, caption : data.title}]);
 	});
-}},{ type : data.LinkType.IMAGE, regex : new EReg("explosm.net/comics/([^/]*)",""), method : function(e,cb3) {
-	Reditn.getText("http://" + e.matched(0),function(txt) {
+}},{ regex : new EReg("explosm.net/comics/([0-9]*)",""), method : function(e1,cb3) {
+	Reditn.getText("http://" + e1.matched(0),function(txt) {
 		var rg = new EReg("http://www\\.explosm\\.net/db/files/Comics/[^\"]*","");
-		rg.match(txt);
-		cb3([{ url : rg.matched(0), caption : null}]);
+		if(rg.match(txt)) cb3([{ url : rg.matched(0), caption : null}]); else throw "" + Std.string(rg) + " not matched by " + e1.matched(0);
 	});
-}},{ type : data.LinkType.IMAGE, regex : new EReg("livememe.com/([^/]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("livememe.com/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://livememe.com/" + e.matched(1) + ".jpg", caption : null}]);
-}},{ type : data.LinkType.IMAGE, regex : new EReg("(([^\\.]*\\.)?deviantart\\.com/art|fav\\.me)/.*",""), method : function(e,cb4) {
+}},{ regex : new EReg("(([^\\.]*\\.)?deviantart\\.com/art|fav\\.me)/.*",""), method : function(e,cb4) {
 	Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(e.matched(0)) + "&format=json",function(d) {
 		cb4([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
 	});
-}},{ type : data.LinkType.IMAGE, regex : new EReg("flickr\\.com(/[^/]*)*?/([0-9@]*)/",""), method : function(e,cb5) {
+}},{ regex : new EReg("flickr\\.com(/[^/]*)*?/([0-9@]*)/",""), method : function(e,cb5) {
 	Reditn.getJSON("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + "99dcc3e77bcd8fb489f17e58191f32f7" + "&photo_id=" + e.matched(2) + "&format=json",function(d) {
 		if(d.sizes == null || d.sizes.size == null) return;
 		var sizes = d.sizes.size;
 		var largest = sizes[sizes.length - 1].source;
 		cb5([{ url : largest, caption : null}]);
 	});
-}},{ type : data.LinkType.SHOP_ITEM, regex : new EReg("ebay\\.([a-zA-Z\\.]*)/itm(/[^/]*)?/([0-9]*)",""), method : function(e,cb6) {
+}},{ regex : new EReg("ebay\\.([a-zA-Z\\.]*)/itm(/[^/]*)?/([0-9]*)",""), method : function(e,cb6) {
 	var domain = e.matched(1);
 	var id = e.matched(3);
 	var url = "http://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=" + "ThomasDa-1e6c-4d29-a156-85557acee70b" + "&siteid=0&version=515&ItemID=" + id + "&IncludeSelector=TextDescription";
-	Reditn.getJSON(url,function(data2) {
-		var imgs = data2.Item.PictureURL;
+	Reditn.getJSON(url,function(data) {
+		var imgs = data.Item.PictureURL;
 		var nalbum = imgs.map(function(i) {
 			return { url : i, caption : null};
 		});
-		cb6({ title : data2.Item.Title, category : data2.Item.PrimaryCategoryName, location : data2.Item.Location + ", " + data2.Item.Country, description : data2.Item.Description, images : nalbum, price : Reditn.formatNumber(data2.Item.ConvertedCurrentPrice.Value) + " " + data2.Item.ConvertedCurrentPrice.CurrencyID});
+		cb6({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : data.Item.Description, images : nalbum, price : Reditn.formatNumber(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
 	});
-}},{ type : data.LinkType.ARTICLE, regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
+}},{ regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
 	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.htmlEscape(e.matched(1)) + "/posts/slug:" + StringTools.htmlEscape(e.matched(2));
-	Reditn.getJSON(url,function(data3) {
-		var att = data3.attachments;
-		cb7({ title : StringTools.htmlUnescape(data3.title), content : data3.content, author : data3.author.name, images : (function($this) {
+	Reditn.getJSON(url,function(data) {
+		var att = data.attachments;
+		cb7({ title : StringTools.htmlUnescape(data.title), content : data.content, author : data.author.name, images : (function($this) {
 			var $r;
 			try {
 				$r = (function($this) {
@@ -2615,7 +2586,7 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 			return $r;
 		}(this))});
 	});
-}},{ type : data.LinkType.ARTICLE, regex : new EReg("(.*)/wiki/([^#]*)(#.*)?",""), method : function(e,cb8) {
+}},{ regex : new EReg("(.*)/wiki/([^#]*)(#.*)?",""), method : function(e,cb8) {
 	var urlroot = e.matched(1), title = e.matched(2), to = e.matched(3);
 	if(to != null) to = StringTools.trim(HxOverrides.substr(to,1,null));
 	if(to != null && to.length == 0) to = null;
@@ -2624,8 +2595,8 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		var $r;
 		var getWikiPage1 = null;
 		getWikiPage1 = function(name) {
-			Reditn.getJSON("http://" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(data4) {
-				var pages = data4.query.pages;
+			Reditn.getJSON("http://" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(data) {
+				var pages = data.query.pages;
 				var _g = 0, _g1 = Reflect.fields(pages);
 				while(_g < _g1.length) {
 					var p = _g1[_g];
@@ -2682,11 +2653,11 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		return $r;
 	}(this));
 	getWikiPage(title);
-}},{ type : data.LinkType.ARTICLE, regex : new EReg("github\\.com/([^/]*)/([^/]*)",""), method : function(e,cb9) {
+}},{ regex : new EReg("github\\.com/([^/]*)/([^/]*)",""), method : function(e,cb9) {
 	var author = e.matched(1), repo = e.matched(2);
-	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/readme?client_id=" + "39d85b9ac427f1176763" + "&client_secret=" + "5117570b83363ca0c71a196edc5b348af150c25d",function(data5) {
-		if(data5.content == null) return;
-		var c = data5.content;
+	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/readme?client_id=" + "39d85b9ac427f1176763" + "&client_secret=" + "5117570b83363ca0c71a196edc5b348af150c25d",function(data) {
+		if(data.content == null) return;
+		var c = data.content;
 		c = StringTools.replace(c,"\n","");
 		c = StringTools.trim(c);
 		c = js.Browser.window.atob(c);
@@ -2704,21 +2675,36 @@ Link.sites = [{ type : data.LinkType.IMAGE, regex : new EReg(".*\\.(jpeg|gif|jpg
 		}
 		cb9({ name : repo, owner : author, description : parser.Markdown.parse(c), url : "git://github.com/" + author + "/" + repo + ".git", album : album});
 	});
-}},{ type : data.LinkType.UNKNOWN, regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb10) {
+}},{ regex : new EReg("digitaltrends.com/.*",""), method : function(e,cb10) {
+	Reditn.getText("http://" + e.matched(0),function(txt) {
+		var t = new EReg("<title>(.*)</title>","");
+		if(t.match(txt)) {
+			var cont = txt;
+			cont = HxOverrides.substr(cont,cont.indexOf("<article"),null);
+			cont = HxOverrides.substr(cont,cont.indexOf(">") + 1,null);
+			cont = HxOverrides.substr(cont,0,cont.indexOf("</article>"));
+			var images = [];
+			while(Link.HTML_IMG.match(cont)) {
+				images.push({ url : Link.HTML_IMG.matched(1), caption : null});
+				cont = Link.HTML_IMG.replace(cont,"");
+			}
+			cb10({ title : t.matched(1), content : cont, author : null, images : images});
+		}
+	});
+}},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb11) {
 	var author = e.matched(1), id = e.matched(3);
 	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 		var post = data.posts[0];
-		cb10((function($this) {
+		cb11((function($this) {
 			var $r;
 			switch(post.type) {
 			case "text":
 				$r = (function($this) {
 					var $r;
-					var imx = new EReg("<img .*?src=\"([^\"]*)\"/?>","");
 					var images = [];
-					while(imx.match(post.body)) {
-						images.push({ url : imx.matched(1), caption : null});
-						post.body = imx.replace(post.body,"");
+					while(Link.HTML_IMG.match(post.body)) {
+						images.push({ url : Link.HTML_IMG.matched(1), caption : null});
+						post.body = Link.HTML_IMG.replace(post.body,"");
 					}
 					$r = { title : post.title, content : post.body, author : data.blog.name, images : images};
 					return $r;
