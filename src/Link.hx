@@ -178,7 +178,7 @@ class Link {
 				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).htmlEscape()}/posts/slug:${e.matched(2).htmlEscape()}';
 				Reditn.getJSON(url, function(data) {
 					var att = data.attachments;
-					cb({title: StringTools.htmlUnescape(data.title), content: data.content, author: data.author.name, images: 
+					cb({title: StringTools.htmlUnescape(data.title), content: filterHTML(data.content), author: data.author.name, images: 
 					try [
 						for(f in Reflect.fields(att)) {
 							var img = Reflect.field(att, f);
@@ -279,7 +279,7 @@ class Link {
 			}
 		},
 		{
-			regex: ~/digitaltrends.com\/.*/,
+			regex: ~/(digitaltrends\.com|webupd8\.org)\/.*/,
 			method: function(e, cb) {
 				Reditn.getText('http://${e.matched(0)}', function(txt) {
 					var t = ~/<title>(.*)<\/title>/;
@@ -296,6 +296,7 @@ class Link {
 							});
 							cont = HTML_IMG.replace(cont, "");
 						}
+						cont = filterHTML(cont);
 						cb({
 							title: t.matched(1),
 							content: cont,
@@ -322,8 +323,9 @@ class Link {
 							});
 							post.body = HTML_IMG.replace(post.body, "");
 						}
+						post.body = filterHTML(post.body);
 						{title: post.title, content: post.body, author: data.blog.name, images: images};
-						case "quote": {title: null, content: '${post.text}<br/><b>${post.source}</b>', author: data.blog.name, images: []};
+						case "quote": {title: null, content: post.text+"<br/><b>"+post.source+"</b>", author: data.blog.name, images: []};
 						case "photo":
 							var ps:Array<Dynamic> = post.photos;
 							[for(p in ps) {
@@ -363,5 +365,23 @@ class Link {
 		if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1)
 			url = url.substr(0, url.indexOf("#"));
 		return url;
+	}
+	static var FILTERS:Array<EReg> = [
+		HTML_IMG,
+		~/<meta[^>]*\/>/g,
+		~/<(h1|header)[^>]*>.*<\/\1>/g,
+		~/<table([^>]*)>(.|\n|\n\r)*<\/table>/gm,
+		~/<div class="(seperator|ga-ads)"[^>]*>.*<\/div>/g,
+		~/<([^>]*)( [^>]*)?><\/\1>/g,
+		~/<script[^>\/]*\/>/g,
+		~/<script[^>\/]*><\/script>/g,
+		~/<br><\/br>/g,
+		~/<br( )?\/>/g,
+		~/style="[^"]*"/g
+	];
+	static function filterHTML(html:String):String {
+		for(f in FILTERS)
+			html = f.replace(html, "");
+		return html;
 	}
 }

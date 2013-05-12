@@ -1349,6 +1349,15 @@ Link.trimURL = function(url) {
 	if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1) url = HxOverrides.substr(url,0,url.indexOf("#"));
 	return url;
 }
+Link.filterHTML = function(html) {
+	var _g = 0, _g1 = Link.FILTERS;
+	while(_g < _g1.length) {
+		var f = _g1[_g];
+		++_g;
+		html = f.replace(html,"");
+	}
+	return html;
+}
 var List = function() {
 	this.length = 0;
 };
@@ -2560,7 +2569,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.htmlEscape(e.matched(1)) + "/posts/slug:" + StringTools.htmlEscape(e.matched(2));
 	Reditn.getJSON(url,function(data) {
 		var att = data.attachments;
-		cb7({ title : StringTools.htmlUnescape(data.title), content : data.content, author : data.author.name, images : (function($this) {
+		cb7({ title : StringTools.htmlUnescape(data.title), content : Link.filterHTML(data.content), author : data.author.name, images : (function($this) {
 			var $r;
 			try {
 				$r = (function($this) {
@@ -2677,7 +2686,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		}
 		cb9({ name : repo, owner : author, description : parser.Markdown.parse(c), url : "git://github.com/" + author + "/" + repo + ".git", album : album});
 	});
-}},{ regex : new EReg("digitaltrends.com/.*",""), method : function(e,cb10) {
+}},{ regex : new EReg("(digitaltrends\\.com|webupd8\\.org)/.*",""), method : function(e,cb10) {
 	(function(txt) {
 		var t = new EReg("<title>(.*)</title>","");
 		if(t.match(txt)) {
@@ -2690,6 +2699,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 				images.push({ url : Link.HTML_IMG.matched(1), caption : null});
 				cont = Link.HTML_IMG.replace(cont,"");
 			}
+			cont = Link.filterHTML(cont);
 			cb10({ title : t.matched(1), content : cont, author : null, images : images});
 		}
 	})(haxe.Http.requestUrl("http://" + e.matched(0)));
@@ -2708,12 +2718,13 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 						images.push({ url : Link.HTML_IMG.matched(1), caption : null});
 						post.body = Link.HTML_IMG.replace(post.body,"");
 					}
+					post.body = Link.filterHTML(post.body);
 					$r = { title : post.title, content : post.body, author : data.blog.name, images : images};
 					return $r;
 				}($this));
 				break;
 			case "quote":
-				$r = { title : null, content : "" + Std.string(post.text) + "<br/><b>" + Std.string(post.source) + "</b>", author : data.blog.name, images : []};
+				$r = { title : null, content : Std.string(post.text) + "<br/><b>" + Std.string(post.source) + "</b>", author : data.blog.name, images : []};
 				break;
 			case "photo":
 				$r = (function($this) {
@@ -2743,6 +2754,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		}(this)));
 	});
 }}];
+Link.FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>.*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("<br></br>","g"),new EReg("<br( )?/>","g"),new EReg("style=\"[^\"]*\"","g")];
 Settings.DESC = (function($this) {
 	var $r;
 	var _g = new haxe.ds.StringMap();
