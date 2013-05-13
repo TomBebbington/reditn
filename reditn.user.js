@@ -2615,9 +2615,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		cb9({ name : repo, developers : [author], description : parser.Markdown.parse(c), url : "git://github.com/" + author + "/" + repo + ".git", album : album});
 	});
 }},{ regex : new EReg("sourceforge.net/projects/([a-zA-Z-]*)",""), method : function(e,cb10) {
-	console.log("Getting project " + e.matched(1));
 	Reditn.getJSON("http://sourceforge.net/api/project/name/" + e.matched(1) + "/json",function(data) {
-		console.log(data);
 		data = data.Project;
 		var devs = data.developers;
 		cb10({ name : data.name, description : data.description, developers : (function($this) {
@@ -2655,7 +2653,6 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 }},{ regex : new EReg("twitter.com/([^/]*)/status/([0-9]*)",""), method : function(e2,cb11) {
 	var get = function(token) {
 		Reditn.getJSON("https://api.twitter.com/1.1/statuses/show.json?id=" + e2.matched(1),function(data) {
-			console.log(data);
 			cb11({ title : null, author : data.author.name, images : [], content : data.text});
 		},"Bearer " + "TGhEbnl1dlE1b3pGemo4TGtrRkcxRjJwSW05aFVaUUVSYmFwVmFLODpGeGNDNVl6dnBaVkdYWjNXT2ViWmc=");
 	};

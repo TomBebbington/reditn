@@ -4,7 +4,7 @@
 	"manifest_version": 2,
 	"description": "Reddit plugin that adds much-needed functionality such as image toggle buttons, advert blocking and more!",
 	"browser_action": {
-		"default_icon": "icon.svg"
+		"default_icon": "icon.png"
 	},
 	"content_scripts": [
 	{
@@ -13,6 +13,22 @@
 		}
 	],
 	"permissions": [
-		"http://*.reddit.com/*"
+		"http://*.reddit.com/*",
+		"http://www.xkcd.com/*",
+		"http://www.explosm.net/comics/",
+		"http://livememe.com/*",
+		"http://backend.deviantart.com/*",
+		"http://api.flickr.com/*",
+		"http://open.ebay.com/*",
+		"http://public-api.wordpress.com/rest/v1/*",
+		"http://*.wikipedia.org/w/*",
+		"http://*.wikia.com/*",
+		"https://api.github.com/*",
+		"http://sourceforge.net/api/*",
+		"https://api.twitter.com/*",
+		"http://www.digitaltrends.com/*",
+		"http://www.webupd8.com/*",
+		"http://api.tumblr.com/v2/*",
+		"https://api.imgur.com/3/*"
 	]
 }

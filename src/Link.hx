@@ -280,9 +280,7 @@ class Link {
 		{
 			regex: ~/sourceforge.net\/projects\/([a-zA-Z-]*)/,
 			method: function(e, cb) {
-				trace('Getting project ${e.matched(1)}');
 				Reditn.getJSON('http://sourceforge.net/api/project/name/${e.matched(1)}/json', function(data:Dynamic) {
-					trace(data);
 					data = data.Project;
 					var devs:Array<Dynamic> = data.developers;
 					cb({
@@ -309,7 +307,6 @@ class Link {
 			method: function(e, cb) {
 				function get(token) {
 					Reditn.getJSON('https://api.twitter.com/1.1/statuses/show.json?id=${e.matched(1)}', function(data) {
-						trace(data);
 						cb({
 							title: null,
 							author: data.author.name,
