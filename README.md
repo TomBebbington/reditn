@@ -1,7 +1,7 @@
-reditn
+Reditn
 ======
 
-Reddit plugin that adds much-needed functionality such as image toggle buttons, advert blocking and more, implemented in good ol' Haxe!
+Reditn is a browser plugin (with Greasemonkey and Chrome support) that adds much-needed functionality such as extra toggle buttons, advert blocking and more, to the Reddit interface in a clean non-obtrusive way.
 The stable version is available [here](http://userscripts.org/scripts/show/150976).
 
 Features

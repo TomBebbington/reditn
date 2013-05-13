@@ -1223,7 +1223,6 @@ parser.Markdown.parse = function(s) {
 		++_g;
 		while(r.from.match(s)) s = r.from.replace(s,r.to);
 	}
-	console.log("Parsed " + s);
 	return s;
 }
 var Link = function() { }

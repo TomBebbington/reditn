@@ -34,7 +34,6 @@ class Markdown {
 		for(r in regex)
 			while(r.from.match(s))
 				s = r.from.replace(s, r.to);
-		trace('Parsed $s');
 		return s;
 	}
 }
