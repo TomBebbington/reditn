@@ -8,9 +8,7 @@ chrome:
 	cp icon128.png plugin/chrome/icon.png
 	cp reditn.min.plugin.js plugin/chrome/reditn.js
 chrome-full: chrome
-	echo "Please enter path of .pem file to sign the extension with:"
-	read $key -p "Path of .pem file: "
-	chromium-browser --pack-extension=plugin/chrome --pack-extension-key=$key
+	chromium-browser --pack-extension=plugin/chrome --pack-extension-key=plugin/chrome.pem
 minify:
 	curl -s --data-urlencode js_code@reditn.user.js -d output_format=text -d output_info=compiled_code -d compilation_level=SIMPLE_OPTIMIZATIONS ${SERVICE_URL} >> oldtemp
 	cat info >> temp
