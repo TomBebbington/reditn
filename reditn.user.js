@@ -127,8 +127,7 @@ Expand.init = function() {
 		l[0].onchange = (function(l) {
 			return function(_) {
 				var site = Link.resolve(l[0].href);
-				if(site == null) return;
-				site.method(site.regex,(function(l) {
+				if(site == null) Expand.defaultButton(l[0].parentNode.parentNode.parentNode); else site.method(site.regex,(function(l) {
 					return function(data) {
 						var e = l[0].parentNode.parentNode.parentNode;
 						var exp = js.Browser.document.createElement("div");
@@ -185,8 +184,8 @@ Expand.init = function() {
 							cont.className = "md";
 							div.appendChild(cont);
 							exp.appendChild(div);
-						}
-						var s = Expand.makeSelfButton(e,name,l[0].href);
+						} else Expand.defaultButton(e);
+						var s = Expand.createButton(e,name,l[0].href);
 						var pn = s.parentNode;
 						var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
 						while(_g2 < _g3.length) {
@@ -195,15 +194,31 @@ Expand.init = function() {
 							pn.removeChild(ep);
 						}
 						pn.appendChild(exp);
-						Expand.refresh();
 					};
 				})(l));
+				Expand.refresh();
 			};
 		})(l);
 		l[0].onchange(null);
 	}
 }
-Expand.makeSelfButton = function(e,extra,url) {
+Expand.defaultButton = function(cont) {
+	var _g = 0, _g1 = cont.getElementsByClassName("expando-button");
+	while(_g < _g1.length) {
+		var be = _g1[_g];
+		++_g;
+		if(be != null) Expand.buttons.push(Expand.adaptButton(be));
+	}
+}
+Expand.adaptButton = function(exp) {
+	return { toggled : function() {
+		return exp.className.indexOf("expanded") != -1;
+	}, toggle : function(v) {
+		var c = exp.className.indexOf("expanded") != -1;
+		if(v != c) exp.onclick(null);
+	}, url : (js.Boot.__cast(exp.parentElement.getElementsByTagName("a")[0] , HTMLAnchorElement)).href, element : exp};
+}
+Expand.createButton = function(e,extra,url) {
 	var d = js.Browser.document.createElement("div");
 	var cn = "expando-button " + extra + " ";
 	d.className = "" + cn + " collapsed";
@@ -230,7 +245,6 @@ Expand.makeSelfButton = function(e,extra,url) {
 	tagline.parentNode.insertBefore(d,tagline);
 	Expand.buttons.push(btn);
 	if(Expand.toggled) btn.toggle(true);
-	Expand.refresh();
 	return d;
 }
 Expand.refresh = function() {
@@ -455,6 +469,7 @@ Lambda.has = function(it,elt) {
 }
 var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
+$hxExpose(Reditn, "Reditn");
 Reditn.__name__ = ["Reditn"];
 Reditn.main = function() {
 	if(document.readyState == "complete") Reditn.init(); else js.Browser.window.onload = function(_) {
@@ -1101,6 +1116,9 @@ js.Boot.__instanceof = function(o,cl) {
 		if(cl == Enum && o.__ename__ != null) return true; else null;
 		return o.__enum__ == cl;
 	}
+}
+js.Boot.__cast = function(o,t) {
+	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
 }
 var Reflect = function() { }
 $hxClasses["Reflect"] = Reflect;
@@ -2728,4 +2746,14 @@ haxe.Unserializer.DEFAULT_RESOLVER = Type;
 haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe.ds.ObjectMap.count = 0;
 Reditn.main();
+function $hxExpose(src, path) {
+	var o = typeof window != "undefined" ? window : exports;
+	var parts = path.split(".");
+	for(var ii = 0; ii < parts.length-1; ++ii) {
+		var p = parts[ii];
+		if(typeof o[p] == "undefined") o[p] = {};
+		o = o[p];
+	}
+	o[parts[parts.length-1]] = src;
+}
 })();

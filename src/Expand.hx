@@ -41,80 +41,102 @@ class Expand {
 			l.onchange = function(_) {
 				var site = Link.resolve(l.href);
 				if(site == null)
-					return;
-				site.method(site.regex, function(data:Dynamic) {
-					var e = Reditn.getLinkContainer(l);
-					var exp = Browser.document.createDivElement();
-					exp.className = "expando";
-					exp.style.display = "none";
-					Reditn.show(exp, toggled);
-					var name = "selftext";
-					if(Reflect.hasField(data, "price")) {
-						var i:ShopItem = data;
-						var div = Browser.document.createDivElement();
-						div.className = "usertext";
-						exp.appendChild(div);
-						var head = null;
-						var cont = Browser.document.createDivElement();
-						var inner = Browser.document.createSpanElement();
-						inner.innerHTML = //'<h2>${StringTools.htmlEscape(i.title)}</h2><br>' + 
-						'<b>Category:</b> ${StringTools.htmlEscape(i.category)}<br>' + 
-						'<b>Location:</b> ${StringTools.htmlEscape(i.location)}<br>' + 
-						'<b>Price:</b> ${StringTools.htmlEscape(i.price)}<br>' +
-						'<p>${i.description}</p>';
-						cont.appendChild(inner);
-						cont.className = "md";
-						cont.appendChild(Reditn.embedAlbum(i.images));
-						div.appendChild(cont);
-						name = "item";
-					} else if(Reflect.hasField(data, "content")) { // article
-						var a:Article = data;
-						var div = Browser.document.createDivElement();
-						div.className = "usertext";
-						exp.appendChild(div);
-						var head = null;
-						var content = Browser.document.createDivElement();
-						var inner = Browser.document.createSpanElement();
-						inner.innerHTML = a.content;
-						content.appendChild(inner);
-						if(a.images.length > 0) {
-							content.appendChild(Browser.document.createBRElement());
-							content.appendChild(Reditn.embedAlbum(a.images));
-						}
-						content.className = "md";
-						div.appendChild(content);
-					} else if(Std.is(data, Array) && Reflect.hasField(untyped data[0], "url")) {
-						var a:Album = data;
-						var div = Reditn.embedAlbum(a);
-						exp.appendChild(div);
-						name = "image";
-					} else if(Reflect.hasField(data, "developers")) {
-						var r:Repo = data;
-						trace('Repository: $r');
-						var div = js.Browser.document.createDivElement();
-						div.className = "usertext";
-						var cont = Browser.document.createDivElement();
-						var inner = Browser.document.createSpanElement();
-						inner.innerHTML = '${data.description}<br><a href="${data.url}"><b>Clone repo</b></a><br>';
-						if(r.album != null && r.album.length > 0)
-							inner.appendChild(Reditn.embedAlbum(r.album));
-						cont.appendChild(inner);
-						cont.className = "md";
-						div.appendChild(cont);
-						exp.appendChild(div);
-					}
-					var s = makeSelfButton(e, name, l.href);
-					var pn:Element = cast s.parentNode;
-					for(ep in pn.getElementsByClassName("expando"))
-						pn.removeChild(ep);
-					pn.appendChild(exp);
-					refresh();
-				});
+					defaultButton(Reditn.getLinkContainer(l));
+				else
+					site.method(site.regex, function(data:Dynamic) {
+						var e = Reditn.getLinkContainer(l);
+						var exp = Browser.document.createDivElement();
+						exp.className = "expando";
+						exp.style.display = "none";
+						Reditn.show(exp, toggled);
+						var name = "selftext";
+						if(Reflect.hasField(data, "price")) {
+							var i:ShopItem = data;
+							var div = Browser.document.createDivElement();
+							div.className = "usertext";
+							exp.appendChild(div);
+							var head = null;
+							var cont = Browser.document.createDivElement();
+							var inner = Browser.document.createSpanElement();
+							inner.innerHTML = //'<h2>${StringTools.htmlEscape(i.title)}</h2><br>' + 
+							'<b>Category:</b> ${StringTools.htmlEscape(i.category)}<br>' + 
+							'<b>Location:</b> ${StringTools.htmlEscape(i.location)}<br>' + 
+							'<b>Price:</b> ${StringTools.htmlEscape(i.price)}<br>' +
+							'<p>${i.description}</p>';
+							cont.appendChild(inner);
+							cont.className = "md";
+							cont.appendChild(Reditn.embedAlbum(i.images));
+							div.appendChild(cont);
+							name = "item";
+						} else if(Reflect.hasField(data, "content")) { // article
+							var a:Article = data;
+							var div = Browser.document.createDivElement();
+							div.className = "usertext";
+							exp.appendChild(div);
+							var head = null;
+							var content = Browser.document.createDivElement();
+							var inner = Browser.document.createSpanElement();
+							inner.innerHTML = a.content;
+							content.appendChild(inner);
+							if(a.images.length > 0) {
+								content.appendChild(Browser.document.createBRElement());
+								content.appendChild(Reditn.embedAlbum(a.images));
+							}
+							content.className = "md";
+							div.appendChild(content);
+						} else if(Std.is(data, Array) && Reflect.hasField(untyped data[0], "url")) {
+							var a:Album = data;
+							var div = Reditn.embedAlbum(a);
+							exp.appendChild(div);
+							name = "image";
+						} else if(Reflect.hasField(data, "developers")) {
+							var r:Repo = data;
+							trace('Repository: $r');
+							var div = js.Browser.document.createDivElement();
+							div.className = "usertext";
+							var cont = Browser.document.createDivElement();
+							var inner = Browser.document.createSpanElement();
+							inner.innerHTML = '${data.description}<br><a href="${data.url}"><b>Clone repo</b></a><br>';
+							if(r.album != null && r.album.length > 0)
+								inner.appendChild(Reditn.embedAlbum(r.album));
+							cont.appendChild(inner);
+							cont.className = "md";
+							div.appendChild(cont);
+							exp.appendChild(div);
+						} else
+							defaultButton(e);
+						var s = createButton(e, name, l.href);
+						var pn:Element = cast s.parentNode;
+						for(ep in pn.getElementsByClassName("expando"))
+							pn.removeChild(ep);
+						pn.appendChild(exp);
+					});
+				refresh();
 			};
 			l.onchange(null);
 		}
 	}
-	static function makeSelfButton(e:Element, extra:String, url:String):DivElement {
+	static inline function defaultButton(cont:Element):Void {
+		for(be in cont.getElementsByClassName("expando-button")) {
+			if(be != null)
+				buttons.push(adaptButton(cast be));
+		}
+	}
+	static function adaptButton(exp:DivElement):Button {
+		return {
+			toggled: function():Bool {
+				return exp.className.indexOf("expanded") != -1;
+			},
+			toggle: function(v) {
+				var c = exp.className.indexOf("expanded") != -1;
+				if(v != c)
+					exp.onclick(null);
+			},
+			url: cast(exp.parentElement.getElementsByTagName("a")[0], js.html.AnchorElement).href,
+			element: exp
+		};
+	}
+	static function createButton(e:Element, extra:String, url:String):DivElement {
 		var d = js.Browser.document.createDivElement();
 		var cn = 'expando-button $extra ';
 		d.className = '$cn collapsed';
@@ -143,7 +165,6 @@ class Expand {
 
 		if(Expand.toggled)
 			btn.toggle(true);
-		refresh();
 		return d;
 	}
 	public static function refresh() {

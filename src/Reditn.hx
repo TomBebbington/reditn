@@ -3,7 +3,7 @@ import js.Browser;
 import data.*;
 import haxe.Json;
 using StringTools;
-class Reditn {
+@:expose class Reditn {
 	static inline var year = 31557600;
 	static inline var month = 2629800;
 	static inline var day = 86400;
