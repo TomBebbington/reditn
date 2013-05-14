@@ -2412,6 +2412,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 	cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + e.matched(1) + ".jpg", caption : null}]);
 }},{ regex : new EReg("imgflip\\.com/i/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.imgflip.com/" + e.matched(1) + ".jpg", caption : null}]);
+}},{ regex : new EReg("what-if.xkcd.com/([0-9]*)",""), method : function(e,cb) {
 }},{ regex : new EReg("xkcd.com/([0-9]*)",""), method : function(e,cb2) {
 	Reditn.getJSON("http://www.xkcd.com/" + e.matched(1) + "/info.0.json",function(data) {
 		cb2([{ url : data.img, caption : data.title}]);

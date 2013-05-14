@@ -96,6 +96,12 @@ class Link {
 			}
 		},
 		{
+			regex: ~/what-if.xkcd.com\/([0-9]*)/,
+			method: function(e, cb) {
+				
+			}
+		},
+		{
 			regex: ~/xkcd.com\/([0-9]*)/,
 			method: function(e, cb) {
 				Reditn.getJSON('http://www.xkcd.com/${e.matched(1)}/info.0.json', function(data:Dynamic) {
