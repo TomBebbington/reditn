@@ -77,8 +77,10 @@ class Expand {
 						var inner = Browser.document.createSpanElement();
 						inner.innerHTML = a.content;
 						content.appendChild(inner);
-						if(a.images.length > 0)
+						if(a.images.length > 0) {
+							content.appendChild(Browser.document.createBRElement());
 							content.appendChild(Reditn.embedAlbum(a.images));
+						}
 						content.className = "md";
 						div.appendChild(content);
 					} else if(Std.is(data, Array) && Reflect.hasField(untyped data[0], "url")) {

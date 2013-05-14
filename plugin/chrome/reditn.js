@@ -1,117 +1,2813 @@
-(function(){var m={},B=function(){return g.Boot.__string_rec(this,"")},C=function(){};m.Adblock=C;C.__name__=["Adblock"];C.init=function(){C.hideAll(g.Browser.document.body.getElementsByClassName("promoted"));C.hideAll(g.Browser.document.body.getElementsByClassName("infobar"));C.hideAll(g.Browser.document.body.getElementsByClassName("goldvertisement"));var a=g.Browser.document.getElementById("spotlight-help");null!=a&&h.show(a.parentNode.parentNode,!1);a=g.Browser.document.getElementById("ad-frame");
-null!=a&&(a.style.display="none",-1!=a.className.indexOf("link")&&j.remove(h.links,a.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]))};C.hideAll=function(a){for(var b=0,c=a.length;b<c;){var d=b++;h.show(a[d],!1)}};var K=function(){};m.DuplicateHider=K;K.__name__=["DuplicateHider"];K.init=function(){for(var a=[],b=0,c=h.links;b<c.length;){var d=c[b];++b;"a"==d.nodeName.toLowerCase()&&(L.has(a,d.href)?h.show(d.parentNode.parentNode.parentNode,!1):a.push(d.href))}};var f=function(a,
-b){b=b.split("u").join("");this.r=RegExp(a,b)};m.EReg=f;f.__name__=["EReg"];f.prototype={replace:function(a,b){return a.replace(this.r,b)},matchSub:function(a,b,c){null==c&&(c=-1);if(this.r.global){this.r.lastIndex=b;this.r.m=this.r.exec(0>c?a:j.substr(a,0,b+c));if(b=null!=this.r.m)this.r.s=a;a=b}else{if(c=this.match(0>c?j.substr(a,b,null):j.substr(a,b,c)))this.r.s=a,this.r.m.index+=b;a=c}return a},matchedPos:function(){if(null==this.r.m)throw"No string matched";return{pos:this.r.m.index,len:this.r.m[0].length}},
-matched:function(a){if(null!=this.r.m&&0<=a&&a<this.r.m.length)a=this.r.m[a];else throw"EReg::matched";return a},match:function(a){this.r.global&&(this.r.lastIndex=0);this.r.m=this.r.exec(a);this.r.s=a;return null!=this.r.m},__class__:f};var r=function(){};m.Expand=r;r.__name__=["Expand"];r.init=function(){r.toggled="#showall"==g.Browser.window.location.hash;var a=g.Browser.document.getElementsByClassName("tabmenu")[0],b=g.Browser.document.createElement("li");r.button=g.Browser.document.createElement("a");
-r.button.href="javascript:void(0);";r.refresh();r.button.onclick=function(){r.toggle(!r.toggled);g.Browser.window.history.pushState(e.Serializer.run(h.state()),null,r.toggled?"#showall":null)};b.appendChild(r.button);null!=a&&a.appendChild(b);a=0;for(b=h.links;a<b.length;){var c=[b[a]];++a;"a"==c[0].nodeName.toLowerCase()&&(c[0].onchange=function(a){return function(){var b=v.resolve(a[0].href);null!=b&&b.method(b.regex,function(a){return function(b){var c=a[0].parentNode.parentNode.parentNode,d=g.Browser.document.createElement("div");
-d.className="expando";d.style.display="none";d.style.display=r.toggled?"":"none";-1!=d.className.indexOf("link")&&j.remove(h.links,d.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);var l="selftext";if(s.hasField(b,"price")){var e=g.Browser.document.createElement("div");e.className="usertext";d.appendChild(e);var f=g.Browser.document.createElement("div"),k=g.Browser.document.createElement("span");k.innerHTML="<b>Category:</b> "+p.htmlEscape(b.category)+"<br>"+("<b>Location:</b> "+
-p.htmlEscape(b.location)+"<br>")+("<b>Price:</b> "+p.htmlEscape(b.price)+"<br>")+("<p>"+b.description+"</p>");f.appendChild(k);f.className="md";f.appendChild(h.embedAlbum(b.images));e.appendChild(f);l="item"}else s.hasField(b,"content")?(e=g.Browser.document.createElement("div"),e.className="usertext",d.appendChild(e),f=g.Browser.document.createElement("div"),k=g.Browser.document.createElement("span"),k.innerHTML=b.content,f.appendChild(k),0<b.images.length&&f.appendChild(h.embedAlbum(b.images)),
-f.className="md",e.appendChild(f)):g.Boot.__instanceof(b,Array)&&s.hasField(b[0],"url")?(e=h.embedAlbum(b),d.appendChild(e),l="image"):s.hasField(b,"developers")&&(console.log("Repository: "+q.string(b)),e=g.Browser.document.createElement("div"),e.className="usertext",f=g.Browser.document.createElement("div"),k=g.Browser.document.createElement("span"),k.innerHTML=""+q.string(b.description)+'<br><a href="'+q.string(b.url)+'"><b>Clone repo</b></a><br>',null!=b.album&&0<b.album.length&&k.appendChild(h.embedAlbum(b.album)),
-f.appendChild(k),f.className="md",e.appendChild(f),d.appendChild(e));c=r.makeSelfButton(c,l,a[0].href).parentNode;l=0;for(e=c.getElementsByClassName("expando");l<e.length;)k=e[l],++l,c.removeChild(k);c.appendChild(d);r.refresh()}}(a))}}(c),c[0].onchange(null))}};r.makeSelfButton=function(a,b,c){var d=g.Browser.document.createElement("div"),l="expando-button "+b+" ";d.className=""+l+" collapsed";var x=!1,e={toggled:function(){return x},toggle:function(a){x=a;d.className=l+(x?"expanded":"collapsed");
-for(var b=d.parentNode.getElementsByClassName("expando"),c=0;c<b.length;){var e=b[c];++c;e.style.display=a?"":"none";-1!=e.className.indexOf("link")&&j.remove(h.links,e.getElementsByClassName("entry")[0].getElementsByTagName("a")[0])}},url:c,element:d};d.onclick=function(){e.toggle(!x)};a=a.getElementsByClassName("tagline")[0];a.parentNode.insertBefore(d,a);r.buttons.push(e);r.toggled&&e.toggle(!0);r.refresh();return d};r.refresh=function(){if(null!=r.button){r.button.innerHTML=""+(r.toggled?"hide":
-"show")+" all ("+r.buttons.length+")";for(var a=[],b=g.Browser.document.body.getElementsByClassName("next"),c=g.Browser.document.body.getElementsByClassName("prev"),d=0;d<b.length;){var l=b[d];++d;a.push(l)}for(d=0;d<c.length;)b=c[d],++d,a.push(b);for(d=0;d<a.length;)c=a[d],++d,"a"==c.nodeName.toLowerCase()&&(r.toggled&&-1==c.href.indexOf("#")?c.href+="#showall":!r.toggled&&-1!=c.href.indexOf("#")&&(c.href=j.substr(c.href,0,c.href.indexOf("#"))));h.show(r.button,0<r.buttons.length)}};r.toggle=function(a){r.toggled=
-a;for(var b=0,c=r.buttons;b<c.length;){var d=c[b];++b;d.toggle(a)}r.refresh()};r.loadImage=function(a){var b=g.Browser.document.createElement("img");b.src=a;b.className="resize";r.initResize(b);var c=new e.Timer(30);c.run=function(){if(0<b.width&&0<b.height){c.stop();if(b.width>(0.7*g.Browser.window.innerWidth|0)){var a=b.height/b.width;b.width=0.7*g.Browser.window.innerWidth|0;b.height=b.width*a|0}b.height>(0.6*g.Browser.window.innerHeight|0)&&(a=b.width/b.height,b.height=0.6*g.Browser.window.innerHeight|
-0,b.width=b.height*a|0)}};return b};r.initResize=function(a){var b=0,c=0,d=1,l=!1;a.onmousedown=function(x){l=!0;b=a.offsetWidth/x.clientX;c=a.offsetHeight/x.clientY;d=a.offsetWidth/a.offsetHeight;x.preventDefault()};a.onmousemove=function(x){if(l){var e=x.clientX*b,g=e/d,f=x.clientY*c,h=f*d;a.width=(g>f?e:h)|0;a.height=(g>f?g:f)|0}x.preventDefault()};a.onmouseup=a.onmouseout=function(a){l=!1;a.preventDefault()}};var j=function(){};m.HxOverrides=j;j.__name__=["HxOverrides"];j.dateStr=function(a){var b=
-a.getMonth()+1,c=a.getDate(),d=a.getHours(),l=a.getMinutes(),x=a.getSeconds();return a.getFullYear()+"-"+(10>b?"0"+b:""+b)+"-"+(10>c?"0"+c:""+c)+" "+(10>d?"0"+d:""+d)+":"+(10>l?"0"+l:""+l)+":"+(10>x?"0"+x:""+x)};j.strDate=function(a){switch(a.length){case 8:a=a.split(":");var b=new Date;b.setTime(0);b.setUTCHours(a[0]);b.setUTCMinutes(a[1]);b.setUTCSeconds(a[2]);return b;case 10:return a=a.split("-"),new Date(a[0],a[1]-1,a[2],0,0,0);case 19:return a=a.split(" "),b=a[0].split("-"),a=a[1].split(":"),
-new Date(b[0],b[1]-1,b[2],a[0],a[1],a[2]);default:throw"Invalid date format : "+a;}};j.cca=function(a,b){var c=a.charCodeAt(b);return c!=c?void 0:c};j.substr=function(a,b,c){if(null!=b&&0!=b&&null!=c&&0>c)return"";null==c&&(c=a.length);0>b?(b=a.length+b,0>b&&(b=0)):0>c&&(c=a.length+c-b);return a.substr(b,c)};j.remove=function(a,b){for(var c=0,d=a.length;c<d;){if(a[c]==b)return a.splice(c,1),!0;c++}return!1};j.iter=function(a){return{cur:0,arr:a,hasNext:function(){return this.cur<this.arr.length},
-next:function(){return this.arr[this.cur++]}}};var u=function(){};m.Keyboard=u;u.__name__=["Keyboard"];u.get_highlighted=function(){return null==u.current?null:h.links[u.current].parentNode.parentNode.parentNode};u.init=function(){g.Browser.document.onkeydown=function(a){u.keyDown(a.keyCode)}};u.unhighlight=function(){var a=u.get_highlighted();null!=a&&(a.style.border="")};u.highlight=function(a){u.unhighlight();null!=u.current&&h.links[u.current+a]&&(u.current+=a);null==u.current&&(u.current=0);
-a=u.get_highlighted();a.style.border="3px solid grey";a.scrollIntoView(!0);a.focus()};u.show=function(a){null==a&&(a=!0);var b=u.get_highlighted(),c=b.getElementsByClassName("toggle")[0];if(null!=c.toggle)c.toggle(a);else if(c=b.getElementsByClassName("expando-button")[0],null!=c&&(a?-1==c.className.indexOf("expanded"):-1!=c.className.indexOf("expanded")))c.onclick(null);b.scrollIntoView(!0);b.focus()};u.keyDown=function(a){switch(a){case 39:u.show(!0);break;case 37:u.show(!1);break;case 38:u.highlight(-1);
-break;case 40:u.highlight(1)}};var L=function(){};m.Lambda=L;L.__name__=["Lambda"];L.has=function(a,b){var c;if(a instanceof Array)c=function(){return j.iter(a)};else if("function"==typeof a.iterator){c=a.iterator;var d=function(){return d.method.apply(d.scope,arguments)};d.scope=a;d.method=c;c=d}else c=a.iterator;for(c=c();c.hasNext();)if(c.next()==b)return!0;return!1};var h=function(){};m.Reditn=h;h.__name__=["Reditn"];h.main=function(){"complete"==document.readyState?h.init():g.Browser.window.onload=
-function(){h.init()}};h.init=function(){if(-1!=g.Browser.window.location.href.indexOf("reddit.")){h.fullPage=0<g.Browser.document.getElementsByClassName("tabmenu").length;h.links=g.Browser.document.body.getElementsByClassName("title");for(var a=[],b=0,c=h.links;b<c.length;){var d=[c[b]];++b;"a"==d[0].nodeName.toLowerCase()&&"parent"!=d[0].parentNode.className&&a.push(function(){h.expandURL(d[0].href,function(a){return function(b){a[0].href=b;if(null!=a[0].onchange)a[0].onchange(null)}}(d));return d[0]}(this))}h.links=
-a;h.wrap(k.init);h.wrap(C.init,"adblock");h.wrap(K.init,"dup-hider");h.wrap(M.init,"nsfw-filter");N.init();h.wrap(r.init,"expand");h.wrap(u.init,"keys");h.wrap(E.init,"preview");h.wrap(F.init,"subinfo");h.wrap(G.init,"userinfo");h.wrap(H.init,"user-tag");h.wrap(I.init,"sub-tag");g.Browser.window.history.replaceState(e.Serializer.run(h.state()),null,r.toggled?"#showall":null);g.Browser.window.onpopstate=function(a){a=a.state;null!=a&&(a=e.Unserializer.run(a),a.allExpanded!=r.toggled&&r.toggle(a.allExpanded))}}};
-h.state=function(){return{allExpanded:r.toggled}};h.wrap=function(a,b){var c=null==b?null:k.data.get(b);if(null==b||c)try{a()}catch(d){console.log("Module "+b+" has failed to load in Reditn due to the following error:\n "+q.string(d))}};h.formatNumber=function(a){if(Math.isFinite(a)){var b=q.string(Math.abs(a)),c;-1!=b.indexOf(".")?(c=j.substr(b,b.indexOf("."),null),b=j.substr(b,0,b.indexOf("."))):c="";if(3<=b.length){for(var d="",l=0,x=b.length;l<x;){var e=l++,d=d+b.charAt(e);0==(b.length-(e+1))%
-3&&e<b.length-1&&(d+=",")}b=d}a=(0>a?"-"+b:b)+c}else a=q.string(a);return a};h.formatPrice=function(a){var b=h.formatNumber(a|0);a=q.string(a);for(a=-1==a.indexOf(".")?".":j.substr(a,a.indexOf("."),null);3>a.length;)a+="0";return""+b+a};h.show=function(a,b){a.style.display=b?"":"none";-1!=a.className.indexOf("link")&&j.remove(h.links,a.getElementsByClassName("entry")[0].getElementsByTagName("a")[0])};h.age=function(a){a=e.Timer.stamp()-a;var b=a/86400%30.4375|0,c=a/2629800%12|0;a=a/2629800/12|0;var d=
-"";0<a&&(d+=""+a+" year"+(1>=a?"":"s"));0<c&&(d+=", "+c+" month"+(1>=c?"":"s"));d+=", "+b+" day"+(1>=b?"":"s");for(p.startsWith(d,", ")&&(d=j.substr(d,2,null));-1!=d.indexOf(", , ");)d=p.replace(d,", , ",", ");return d};h.expandURL=function(a,b){var c=v.trimURL(a);if(-1==c.indexOf("/"))b(a);else switch(c=j.substr(c,0,c.indexOf("/")),c){case "0rz.tw":case "1link.in":case "1url.com":case "2.gp":case "2big.at":case "2tu.us":case "3.ly":case "307.to":case "4ms.me":case "4sq.com":case "4url.cc":case "6url.com":case "7.ly":case "a.gg":case "a.nf":case "aa.cx":case "abcurl.net":case "ad.vu":case "adf.ly":case "adjix.com":case "afx.cc":case "all.fuseurl.com":case "alturl.com":case "amzn.to":case "ar.gy":case "arst.ch":case "atu.ca":case "azc.cc":case "b23.ru":case "b2l.me":case "bacn.me":case "bcool.bz":case "binged.it":case "bit.ly":case "bizj.us":case "bloat.me":case "bravo.ly":case "bsa.ly":case "budurl.com":case "canurl.com":case "chilp.it":case "chzb.gr":case "cl.lk":case "cl.ly":case "clck.ru":case "cli.gs":case "cliccami.info":case "clickthru.ca":case "clop.in":case "conta.cc":case "cort.as":case "cot.ag":case "crks.me":case "ctvr.us":case "cutt.us":case "dai.ly":case "decenturl.com":case "dfl8.me":case "digbig.com":case "digg.com":case "disq.us":case "dld.bz":case "dlvr.it":case "do.my":case "doiop.com":case "dopen.us":case "easyuri.com":case "easyurl.net":case "eepurl.com":case "eweri.com":case "fa.by":case "fav.me":case "fb.me":case "fbshare.me":case "ff.im":case "fff.to":case "fire.to":case "firsturl.de":case "firsturl.net":case "flic.kr":case "flq.us":case "fly2.ws":case "fon.gs":case "freak.to":case "fuseurl.com":case "fuzzy.to":case "fwd4.me":case "fwib.net":case "g.ro.lt":case "gizmo.do":case "gl.am":case "go.9nl.com":case "go.ign.com":case "go.usa.gov":case "goo.gl":case "goshrink.com":case "gurl.es":case "hex.io":case "hiderefer.com":case "hmm.ph":case "href.in":case "hsblinks.com":case "htxt.it":case "huff.to":case "hulu.com":case "hurl.me":case "hurl.ws":case "icanhaz.com":case "idek.net":case "ilix.in":case "is.gd":case "its.my":case "ix.lt":case "j.mp":case "jijr.com":case "kl.am":case "klck.me":case "korta.nu":case "krunchd.com":case "l9k.net":case "lat.ms":case "liip.to":case "liltext.com":case "linkbee.com":case "linkbun.ch":case "liurl.cn":case "ln-s.net":case "ln-s.ru":case "lnk.gd":case "lnk.ms":case "lnkd.in":case "lnkurl.com":case "lru.jp":case "lt.tl":case "lurl.no":case "macte.ch":case "mash.to":case "merky.de":case "migre.me":case "miniurl.com":case "minurl.fr":case "mke.me":case "moby.to":case "moourl.com":case "mrte.ch":case "myloc.me":case "myurl.in":case "n.pr":case "nbc.co":case "nblo.gs":case "nn.nf":case "not.my":case "notlong.com":case "nsfw.in":case "nutshellurl.com":case "nxy.in":case "nyti.ms":case "o-x.fr":case "oc1.us":case "om.ly":case "omf.gd":case "omoikane.net":case "on.cnn.com":case "on.mktw.net":case "onforb.es":case "orz.se":case "ow.ly":case "ping.fm":case "pli.gs":case "pnt.me":case "politi.co":case "post.ly":case "pp.gg":case "profile.to":case "ptiturl.com":case "pub.vitrue.com":case "qlnk.net":case "qte.me":case "qu.tc":case "qy.fi":case "r.im":case "rb6.me":case "read.bi":case "readthis.ca":case "reallytinyurl.com":case "redir.ec":case "redirects.ca":case "redirx.com":case "retwt.me":case "ri.ms":case "rickroll.it":case "riz.gd":case "rt.nu":case "ru.ly":case "rubyurl.com":case "rurl.org":case "rww.tw":case "s4c.in":case "s7y.us":case "safe.mn":case "sameurl.com":case "sdut.us":case "shar.es":case "shink.de":case "shorl.com":case "short.ie":case "short.to":case "shortlinks.co.uk":case "shorturl.com":case "shout.to":case "show.my":case "shrinkify.com":case "shrinkr.com":case "shrt.fr":case "shrt.st":case "shrten.com":case "shrunkin.com":case "simurl.com":case "slate.me":case "smallr.com":case "smsh.me":case "smurl.name":case "sn.im":case "snipr.com":case "snipurl.com":case "snurl.com":case "sp2.ro":case "spedr.com":case "srnk.net":case "srs.li":case "starturl.com":case "su.pr":case "surl.co.uk":case "surl.hu":case "t.cn":case "t.co":case "t.lh.com":case "ta.gd":case "tbd.ly":case "tcrn.ch":case "tgr.me":case "tgr.ph":case "tighturl.com":case "tiniuri.com":case "tiny.cc":case "tiny.ly":case "tiny.pl":case "tinylink.in":case "tinyuri.ca":case "tinyurl.com":case "tk.":case "tl.gd":case "tmi.me":case "tnij.org":case "tnw.to":case "tny.com":case "to.":case "to.ly":case "togoto.us":case "totc.us":case "toysr.us":case "tpm.ly":case "tr.im":case "tra.kz":case "trunc.it":case "twhub.com":case "twirl.at":case "twitclicks.com":case "twitterurl.net":case "twitterurl.org":case "twiturl.de":case "twurl.cc":case "twurl.nl":case "u.mavrev.com":case "u.nu":case "u76.org":case "ub0.cc":case "ulu.lu":case "updating.me":case "ur1.ca":case "url.az":case "url.co.uk":case "url.ie":case "url360.me":case "url4.eu":case "urlborg.com":case "urlbrief.com":case "urlcover.com":case "urlcut.com":case "urlenco.de":case "urli.nl":case "urls.im":case "urlshorteningservicefortwitter.com":case "urlx.ie":case "urlzen.com":case "usat.ly":case "use.my":case "vb.ly":case "vgn.am":case "vl.am":case "vm.lc":case "w55.de":case "wapo.st":case "wapurl.co.uk":case "wipi.es":case "wp.me":case "x.vu":case "xr.com":case "xrl.in":case "xrl.us":case "xurl.es":case "xurl.jp":case "y.ahoo.it":case "yatuc.com":case "ye.pe":case "yep.it":case "yfrog.com":case "yhoo.it":case "yiyd.com":case "youtu.be":case "yuarel.com":case "z0p.de":case "zi.ma":case "zi.mu":case "zipmyurl.com":case "zud.me":case "zurl.ws":case "zz.gd":case "zzang.kr":case "r.ebay.com":c=
-p.urlEncode(a);h.getJSON("http://api.longurl.org/v2/expand?url="+c+"&format=json&User-Agent=Reditn",function(a){b(s.field(a,"long-url"))});break;default:b(a)}};h.embedAlbum=function(a){var b=g.Browser.document.createElement("span");b.style.textAlign="center";b.className="expando";for(var c=[],d=0;d<a.length;){var l=a[d];++d;c.push(function(){var a=r.loadImage(l.url);b.appendChild(a);h.show(a,!1);return a}(this))}var e=null,f=g.Browser.document.createElement("span");f.style.fontWeight="bold";f.style.marginLeft=
-"10px";var k=0,z=null,m=null,n=null;1<a.length&&(z=g.Browser.document.createElement("button"),z.innerHTML="Prev",b.appendChild(z),m=g.Browser.document.createElement("span"),m.style.textAlign="center",m.style.paddingLeft=m.style.paddingRight="5px",b.appendChild(m),n=g.Browser.document.createElement("button"),n.innerHTML="Next",b.appendChild(n));if(1<a.length||null!=a[0].caption&&0<a[0].caption.length)b.appendChild(f),b.appendChild(g.Browser.document.createElement("br"));var s=function(d){if(!(0>d||
-d>=a.length)){var l=a[d],g=null;null!=e&&(e.style.display="none",-1!=e.className.indexOf("link")&&j.remove(h.links,e.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]),g=q.parseInt(e.style.height));e=c[d];e.style.display="block";if(null!=g){var k=e.width/e.height;e.style.height=g+"px";e.style.width=(g*k|0)+"px"}b.appendChild(e);null!=z&&(g=h.formatNumber(a.length),k=h.formatNumber(d+1),m.innerHTML=""+k+" of "+g,z.disabled=0>=d,n.disabled=d>=a.length-1);f.style.display=null!=l.caption?
-"":"none";-1!=f.className.indexOf("link")&&j.remove(h.links,f.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);null!=l.caption&&(f.innerHTML=p.htmlEscape(l.caption))}};s(0);null!=z&&(z.onmousedown=function(){s(--k)},n.onmousedown=function(){s(++k)});return b};h.getData=function(a){for(;null!=a.data;)a=a.data;for(;null!=a.response;)a=a.response;return a};h.getText=function(a,b,c,d,l){a=new e.Http(a);null!=c&&a.setHeader("Authorization",c);null!=d&&a.setHeader("Content-Type",d);a.onData=
-b;null!=l&&a.setPostData(l);a.request(null!=l)};h.getJSON=function(a,b,c,d,l){null==d&&(d="application/json");h.getText(a,function(c){p.startsWith(c,"jsonFlickrApi(")&&p.endsWith(c,")")&&(c=c.substring(14,c.length-1));try{b(h.getData(e.Json.parse(c)))}catch(d){console.log('Error getting "'+a+'" - could not parse '+c)}},c,d,l)};h.popUp=function(a,b,c,d){null==d&&(d=0);null==c&&(c=0);g.Browser.document.body.appendChild(b);b.className="popup";b.style.position="absolute";b.style.width=(0.25*g.Browser.window.innerWidth|
-0)+"px";b.style.left=""+c+"px";b.style.top=""+(d-30)+"px";a.onmouseout=b.onblur=function(){b.parentNode.removeChild(b);a.mouseover=!1};return b};h.fullPopUp=function(a,b){null==b&&(b=0);var c=g.Browser.document.getElementsByClassName("popup")[0];null!=c&&c.parentNode.removeChild(c);g.Browser.document.body.appendChild(a);c=g.Browser.document.createElement("a");c.style.position="absolute";c.style.right=c.style.top="5px";c.innerHTML="<b>Close</b>";c.href="javascript:void(0);";c.onclick=a.onblur=function(){a.parentNode.removeChild(a)};
-a.appendChild(c);a.className="popup";0!=b&&(a.style.top=""+(b-g.Browser.window.scrollY)+"px");return a};var p=function(){};m.StringTools=p;p.__name__=["StringTools"];p.urlEncode=function(a){return encodeURIComponent(a)};p.urlDecode=function(a){return decodeURIComponent(a.split("+").join(" "))};p.htmlEscape=function(a,b){a=a.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");return b?a.split('"').join("&quot;").split("'").join("&#039;"):a};p.htmlUnescape=function(a){return a.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join('"').split("&#039;").join("'").split("&amp;").join("&")};
-p.startsWith=function(a,b){return a.length>=b.length&&j.substr(a,0,b.length)==b};p.endsWith=function(a,b){var c=b.length,d=a.length;return d>=c&&j.substr(a,d-c,c)==b};p.isSpace=function(a,b){var c=j.cca(a,b);return 8<c&&14>c||32==c};p.ltrim=function(a){for(var b=a.length,c=0;c<b&&p.isSpace(a,c);)c++;return 0<c?j.substr(a,c,b-c):a};p.rtrim=function(a){for(var b=a.length,c=0;c<b&&p.isSpace(a,b-c-1);)c++;return 0<c?j.substr(a,0,b-c):a};p.trim=function(a){return p.ltrim(p.rtrim(a))};p.replace=function(a,
-b,c){return a.split(b).join(c)};var e={Json:function(){}};m["haxe.Json"]=e.Json;e.Json.__name__=["haxe","Json"];e.Json.parse=function(a){return(new e.Json).doParse(a)};e.Json.prototype={parseNumber:function(a){for(var b=this.pos-1,c=45==a,d=!c,l=48==a,e=!1,g=!1,f=!1,h=!1;;){a=this.str.charCodeAt(this.pos++);switch(a){case 48:l&&!e&&this.invalidNumber(b);c&&(c=!1,l=!0);d=!0;break;case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:l&&!e&&this.invalidNumber(b);c&&(c=!1);d=!0;l=!1;
-break;case 46:(c||e)&&this.invalidNumber(b);d=!1;e=!0;break;case 101:case 69:(c||l||g)&&this.invalidNumber(b);d=!1;g=!0;break;case 43:case 45:(!g||f)&&this.invalidNumber(b);d=!1;f=!0;break;default:d||this.invalidNumber(b),this.pos--,h=!0}if(h)break}a=q.parseFloat(j.substr(this.str,b,this.pos-b));b=a|0;return b==a?b:a},invalidNumber:function(a){throw"Invalid number at position "+a+": "+j.substr(this.str,a,this.pos-a);},parseString:function(){for(var a=this.pos,b=new D;;){var c=this.str.charCodeAt(this.pos++);
-if(34==c)break;if(92==c){b.addSub(this.str,a,this.pos-a-1);c=this.str.charCodeAt(this.pos++);switch(c){case 114:b.b+="\r";break;case 110:b.b+="\n";break;case 116:b.b+="\t";break;case 98:b.b+="\b";break;case 102:b.b+="\f";break;case 47:case 92:case 34:b.b+=String.fromCharCode(c);break;case 117:a=q.parseInt("0x"+j.substr(this.str,this.pos,4));this.pos+=4;b.b+=String.fromCharCode(a);break;default:throw"Invalid escape sequence \\"+String.fromCharCode(c)+" at position "+(this.pos-1);}a=this.pos}else if(c!=
-c)throw"Unclosed string";}b.addSub(this.str,a,this.pos-a-1);return b.b},parseRec:function(){for(;;){var a=this.str.charCodeAt(this.pos++);switch(a){case 32:case 13:case 10:case 9:break;case 123:for(var b={},c=null,a=null;;){var d=this.str.charCodeAt(this.pos++);switch(d){case 32:case 13:case 10:case 9:break;case 125:return(null!=c||!1==a)&&this.invalidChar(),b;case 58:null==c&&this.invalidChar();b[c]=this.parseRec();c=null;a=!0;break;case 44:a?a=!1:this.invalidChar();break;case 34:a&&this.invalidChar();
-c=this.parseString();break;default:this.invalidChar()}}break;case 91:b=[];for(a=null;;)switch(d=this.str.charCodeAt(this.pos++),d){case 32:case 13:case 10:case 9:break;case 93:return!1==a&&this.invalidChar(),b;case 44:a?a=!1:this.invalidChar();break;default:a&&this.invalidChar(),this.pos--,b.push(this.parseRec()),a=!0}break;case 116:a=this.pos;if(114!=this.str.charCodeAt(this.pos++)||117!=this.str.charCodeAt(this.pos++)||101!=this.str.charCodeAt(this.pos++))this.pos=a,this.invalidChar();return!0;
-case 102:a=this.pos;if(97!=this.str.charCodeAt(this.pos++)||108!=this.str.charCodeAt(this.pos++)||115!=this.str.charCodeAt(this.pos++)||101!=this.str.charCodeAt(this.pos++))this.pos=a,this.invalidChar();return!1;case 110:a=this.pos;if(117!=this.str.charCodeAt(this.pos++)||108!=this.str.charCodeAt(this.pos++)||108!=this.str.charCodeAt(this.pos++))this.pos=a,this.invalidChar();return null;case 34:return this.parseString();case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:case 45:return this.parseNumber(a);
-default:this.invalidChar()}}},invalidChar:function(){this.pos--;throw"Invalid char "+this.str.charCodeAt(this.pos)+" at position "+this.pos;},doParse:function(a){this.str=a;this.pos=0;return this.parseRec()},__class__:e.Json};e.Http=function(a){this.url=a;this.headers=new e.ds.StringMap;this.params=new e.ds.StringMap;this.async=!0};m["haxe.Http"]=e.Http;e.Http.__name__=["haxe","Http"];e.Http.prototype={onStatus:function(){},onError:function(){},onData:function(){},request:function(a){var b=this;b.responseData=
-null;var c=g.Browser.createXMLHttpRequest(),d=function(){if(4==c.readyState){var a;try{a=c.status}catch(d){a=null}void 0==a&&(a=null);if(null!=a)b.onStatus(a);if(null!=a&&200<=a&&400>a)b.onData(b.responseData=c.responseText);else if(null==a)b.onError("Failed to connect or resolve host");else switch(a){case 12029:b.onError("Failed to connect to host");break;case 12007:b.onError("Unknown host");break;default:b.responseData=c.responseText,b.onError("Http Error #"+c.status)}}};this.async&&(c.onreadystatechange=
-d);var l=this.postData;if(null!=l)a=!0;else for(var e=this.params.keys();e.hasNext();)var f=e.next(),l=null==l?"":l+"&",l=l+(p.urlEncode(f)+"="+p.urlEncode(this.params.get(f)));try{if(a)c.open("POST",this.url,this.async);else if(null!=l){var h=1>=this.url.split("?").length;c.open("GET",this.url+(h?"?":"&")+l,this.async);l=null}else c.open("GET",this.url,this.async)}catch(z){this.onError(z.toString());return}null==this.headers.get("Content-Type")&&(a&&null==this.postData)&&c.setRequestHeader("Content-Type",
-"application/x-www-form-urlencoded");for(a=this.headers.keys();a.hasNext();)e=a.next(),c.setRequestHeader(e,this.headers.get(e));c.send(l);this.async||d(null)},setPostData:function(a){this.postData=a;return this},setHeader:function(a,b){this.headers.set(a,b);return this},__class__:e.Http};var t=function(){};m.IMap=t;t.__name__=["IMap"];e.ds={};e.ds.StringMap=function(){this.h={}};m["haxe.ds.StringMap"]=e.ds.StringMap;e.ds.StringMap.__name__=["haxe","ds","StringMap"];e.ds.StringMap.__interfaces__=
-[t];e.ds.StringMap.prototype={keys:function(){var a=[],b;for(b in this.h)this.h.hasOwnProperty(b)&&a.push(b.substr(1));return j.iter(a)},exists:function(a){return this.h.hasOwnProperty("$"+a)},get:function(a){return this.h["$"+a]},set:function(a,b){this.h["$"+a]=b},__class__:e.ds.StringMap};var q=function(){};m.Std=q;q.__name__=["Std"];q.string=function(a){return g.Boot.__string_rec(a,"")};q.parseInt=function(a){var b=parseInt(a,10);if(0==b&&(120==j.cca(a,1)||88==j.cca(a,1)))b=parseInt(a);return isNaN(b)?
-null:b};q.parseFloat=function(a){return parseFloat(a)};var g={Boot:function(){}};m["js.Boot"]=g.Boot;g.Boot.__name__=["js","Boot"];g.Boot.__string_rec=function(a,b){if(null==a)return"null";if(5<=b.length)return"<...>";var c=typeof a;if("function"==c&&(a.__name__||a.__ename__))c="object";switch(c){case "object":if(a instanceof Array){if(a.__enum__){if(2==a.length)return a[0];c=a[0]+"(";b+="\t";for(var d=2,l=a.length;d<l;)var e=d++,c=2!=e?c+(","+g.Boot.__string_rec(a[e],b)):c+g.Boot.__string_rec(a[e],
-b);return c+")"}d=a.length;c="[";b+="\t";for(l=0;l<d;)e=l++,c+=(0<e?",":"")+g.Boot.__string_rec(a[e],b);return c+"]"}try{l=a.toString}catch(f){return"???"}if(null!=l&&l!=Object.toString&&(c=a.toString(),"[object Object]"!=c))return c;l=null;c="{\n";b+="\t";d=null!=a.hasOwnProperty;for(l in a)if(!d||a.hasOwnProperty(l))"prototype"==l||("__class__"==l||"__super__"==l||"__interfaces__"==l||"__properties__"==l)||(2!=c.length&&(c+=", \n"),c+=b+l+" : "+g.Boot.__string_rec(a[l],b));b=b.substring(1);return c+=
-"\n"+b+"}";case "function":return"<function>";case "string":return a;default:return String(a)}};g.Boot.__interfLoop=function(a,b){if(null==a)return!1;if(a==b)return!0;var c=a.__interfaces__;if(null!=c)for(var d=0,l=c.length;d<l;){var e=d++,e=c[e];if(e==b||g.Boot.__interfLoop(e,b))return!0}return g.Boot.__interfLoop(a.__super__,b)};g.Boot.__instanceof=function(a,b){try{if(a instanceof b)return b==Array?null==a.__enum__:!0;if(g.Boot.__interfLoop(a.__class__,b))return!0}catch(c){if(null==b)return!1}switch(b){case P:return Math.ceil(a%
-2147483648)===a;case Q:return"number"==typeof a;case O:return!0===a||!1===a;case String:return"string"==typeof a;case R:return!0;default:if(null==a)return!1;if(b==S&&null!=a.__name__)return!0;null;if(b==T&&null!=a.__ename__)return!0;null;return a.__enum__==b}};var s=function(){};m.Reflect=s;s.__name__=["Reflect"];s.hasField=function(a,b){return Object.prototype.hasOwnProperty.call(a,b)};s.field=function(a,b){var c=null;try{c=a[b]}catch(d){}return c};s.fields=function(a){var b=[];if(null!=a){var c=
-Object.prototype.hasOwnProperty,d;for(d in a)"__id__"!=d&&c.call(a,d)&&b.push(d)}return b};s.isFunction=function(a){return"function"==typeof a&&!(a.__name__||a.__ename__)};s.deleteField=function(a,b){if(!s.hasField(a,b))return!1;delete a[b];return!0};var y,A;y=function(){};m["parser.MediaWiki"]=y;y.__name__=["parser","MediaWiki"];y.parse=function(a){for(var b=0,c=y.regex;b<c.length;){var d=c[b];for(++b;d.from.match(a);){console.log(d.from);try{a=d.from.replace(a,d.to)}catch(e){console.log("Error "+
-q.string(e)+" while replacing "+q.string(d.from)+" with "+d.to)}}}return a};y.trimTo=function(a,b){b=p.trim(p.replace(b,"_"," "));for(var c={pos:0,len:0},d=null;y.sections.matchSub(a,c.pos+c.len);)if(c=y.sections.matchedPos(),p.trim(y.sections.matched(2))==b){d=y.sections.matched(1);break}null!=d&&(a=j.substr(a,c.pos+c.len,null),a=j.substr(a,0,a.indexOf("<h"+d+">")));return a};g.Browser=function(){};m["js.Browser"]=g.Browser;g.Browser.__name__=["js","Browser"];g.Browser.getLocalStorage=function(){try{var a=
-g.Browser.window.localStorage;a.getItem("");return a}catch(b){return null}};g.Browser.createXMLHttpRequest=function(){if("undefined"!=typeof XMLHttpRequest)return new XMLHttpRequest;if("undefined"!=typeof ActiveXObject)return new ActiveXObject("Microsoft.XMLHTTP");throw"Unable to create XMLHttpRequest object.";};A=function(){};m["parser.Markdown"]=A;A.__name__=["parser","Markdown"];A.parse=function(a){for(var b=0,c=A.regex;b<c.length;){var d=c[b];for(++b;d.from.match(a);)a=d.from.replace(a,d.to)}return a};
-var v=function(){};m.Link=v;v.__name__=["Link"];v.resolve=function(a){a=v.trimURL(a);for(var b=0,c=v.sites;b<c.length;){var d=c[b];++b;try{if(d.regex.match(a))return d}catch(e){console.log("Error "+q.string(e)+" whilst processing regex "+q.string(d.regex))}}return null};v.trimURL=function(a){p.startsWith(a,"http://")?a=j.substr(a,7,null):p.startsWith(a,"https://")&&(a=j.substr(a,8,null));p.startsWith(a,"www.")&&(a=j.substr(a,4,null));-1!=a.indexOf("&")&&(a=j.substr(a,0,a.indexOf("&")));-1!=a.indexOf("?")&&
-(a=j.substr(a,0,a.indexOf("?")));-1!=a.indexOf("#")&&-1==a.indexOf("/wiki/")&&(a=j.substr(a,0,a.indexOf("#")));return a};v.filterHTML=function(a){for(var b=0,c=v.HTML_FILTERS;b<c.length;){var d=c[b];++b;a=d.replace(a,"")}return a};var J=function(){this.length=0};m.List=J;J.__name__=["List"];J.prototype={iterator:function(){return{h:this.h,hasNext:function(){return null!=this.h},next:function(){if(null==this.h)return null;var a=this.h[0];this.h=this.h[1];return a}}},add:function(a){a=[a];null==this.h?
-this.h=a:this.q[1]=a;this.q=a;this.length++},__class__:J};var M=function(){};m.NSFWFilter=M;M.__name__=["NSFWFilter"];M.init=function(){for(var a=g.Browser.document.body.getElementsByClassName("nsfw-stamp"),b=0;b<a.length;){var c=a[b];++b;"li"==c.nodeName.toLowerCase()&&h.show(c.parentNode.parentNode.parentNode,!1)}};var E=function(){};m.Preview=E;E.__name__=["Preview"];E.init=function(){for(var a=g.Browser.document.body.getElementsByClassName("usertext-edit"),b=0;b<a.length;){var c=a[b];++b;E.preview(c)}};
-E.preview=function(a){var b=a.getElementsByTagName("textarea")[0];if(null!=b){var c=g.Browser.document.createElement("div");a.appendChild(c);c.className="md";var d=null;b.onfocus=function(){d=new e.Timer(100);d.run=function(){c.innerHTML=A.parse(b.value)}};b.onblur=function(){d.stop();d=null}}};var k=function(){};m.Settings=k;k.__name__=["Settings"];k.optimisedData=function(){for(var a=new e.ds.StringMap,b=k.data.keys();b.hasNext();){var c=b.next(),d=k.data.get(c);k.DEFAULTS.get(c)!=d&&a.set(c,d)}return e.Serializer.run(a)};
-k.save=function(){e.Serializer.USE_CACHE=!1;g.Browser.getLocalStorage().setItem("reditn",k.optimisedData())};k.init=function(){var a=g.Browser.getLocalStorage().getItem("reditn");if(null!=a){var b;try{b=e.Unserializer.run(a)}catch(c){b=k.data}k.data=b}k.fixMissing();a=g.Browser.document.getElementById("header-bottom-right");b=a.getElementsByTagName("ul")[0];var d=g.Browser.document.createElement("a");d.innerHTML="reditn";d.className="pref-lang";d.href="javascript:void(0);";d.onclick=function(){k.settingsPopUp()};
-null==b?a.appendChild(d):a.insertBefore(d,b);d=g.Browser.document.createElement("span");d.innerHTML=" | ";d.className="seperator";d.style.fontWeight="none";a.insertBefore(d,b)};k.settingsPopUp=function(){var a=g.Browser.document.getElementById("reditn-config");null!=a&&a.parentNode.removeChild(a);var a=g.Browser.document.createElement("div"),b=g.Browser.document.createElement("h1");b.innerHTML="Reditn settings";a.appendChild(b);h.fullPopUp(a);var c=g.Browser.document.createElement("form");c.id="reditn-config";
-c.action="javascript:void(0);";c.onchange=function(){for(var a=c.childNodes,b=0;b<a.length;){var d=a[b];++b;if("button"!=d.type&&"input"==d.nodeName.toLowerCase()){var e=void 0;switch(d.type.toLowerCase()){case "checkbox":e=d.checked;break;default:e=d.value}k.data.set(d.name,e)}}k.save()};b=g.Browser.document.createElement("input");b.type="button";b.value="Restore default settings";b.onclick=function(){k.fixMissing(!0);k.save();k.settingsPopUp()};c.appendChild(b);b=k.makeButton("Export settings to text",
-function(){g.Browser.window.alert(g.Browser.window.btoa(k.optimisedData()))});c.appendChild(b);b=k.makeButton("Import settings",function(){k.data=e.Unserializer.run(g.Browser.window.atob(g.Browser.window.prompt("Settings to import",g.Browser.window.btoa(k.optimisedData()))));k.fixMissing();k.save();k.settingsPopUp()});c.appendChild(b);c.appendChild(g.Browser.document.createElement("br"));for(b=k.data.keys();b.hasNext();){var d=b.next(),l=k.data.get(d);if(!g.Boot.__instanceof(l,e.ds.StringMap)&&k.DESC.exists(d)){var f=
-k.DESC.get(d),j=g.Browser.document.createElement("label");j.setAttribute("for",d);j.style.position="absolute";j.style.width="46%";j.style.textAlign="right";j.innerHTML=""+f+" ";c.appendChild(j);f=g.Browser.document.createElement("input");f.style.position="absolute";f.style.left="54%";f.style.textAlign="left";f.style.width="46%";f.name=d;c.appendChild(f);c.appendChild(g.Browser.document.createElement("br"));f.type=g.Boot.__instanceof(l,O)?"checkbox":g.Boot.__instanceof(l,String)?"text":g.Boot.__instanceof(l,
-Date)?"datetime":g.Boot.__instanceof(l,P)?"number":null;g.Boot.__instanceof(l,O)?f.checked=k.data.get(d):f.value=k.data.get(d)}}b=g.Browser.document.createElement("div");b.style.fontWeight="bold";b.innerHTML="Close this dialog and refresh the page to see your changes in effect. Changes will be saved automatically.";c.appendChild(b);a.appendChild(c)};k.makeButton=function(a,b){var c=g.Browser.document.createElement("input");c.type="button";c.value=a;c.onclick=b;return c};k.fixMissing=function(a){null==
-a&&(a=!1);for(var b=k.DEFAULTS.keys();b.hasNext();){var c=b.next();if(a||!k.data.exists(c))k.data.set(c,g.Boot.__instanceof(k.DEFAULTS.get(c),e.ds.StringMap)?new e.ds.StringMap:k.DEFAULTS.get(c))}};var D=function(){this.b=""};m.StringBuf=D;D.__name__=["StringBuf"];D.prototype={addSub:function(a,b,c){this.b+=null==c?j.substr(a,b,null):j.substr(a,b,c)},__class__:D};var N=function(){};m.Style=N;N.__name__=["Style"];N.init=function(){var a=g.Browser.document.createElement("style");a.innerHTML='.expando-button.image.collapsed{\n\tbackground-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url("https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}';
-g.Browser.document.head.appendChild(a)};var F=function(){};m.SubredditInfo=F;F.__name__=["SubredditInfo"];F.init=function(){for(var a=g.Browser.document.body.getElementsByClassName("subreddit"),b=0;b<a.length;){var c=a[b];++b;c.onmouseover=F._onMouseOverSubreddit}};F._onMouseOverSubreddit=function(a){a=a.target;var b=a.innerHTML,c=g.Browser.document.createElement("div");h.popUp(a,c,a.offsetLeft+a.offsetWidth,a.offsetTop);h.getJSON("/r/"+b+"/about.json",function(a){var e=h.formatNumber(a.subscribers),
-g=h.formatNumber(a.accounts_active),f=A.parse(a.public_description);a=h.age(a.created_utc);var j="<b>Name:</b> "+b+" <br>",z=k.data.get("sub-tags");z.exists(b)&&(j+="<b>Tag:</b> "+z.get(b)+"<br>");j=j+("<b>Subscribers:</b> "+e+" <br>")+("<b>Active Users:</b> "+g+" <br>");j+="<b>Description:</b> "+f+" <br>";j+="<b>Age:</b> "+a+" <br>";c.innerHTML=j})};var I=function(){};m.SubredditTagger=I;I.__name__=["SubredditTagger"];I.init=function(){for(var a=g.Browser.document.body.getElementsByClassName("subreddit"),
-b=0;b<a.length;){var c=a[b];++b;I.getTag(c)}};I.getTag=function(a){var b=g.Browser.document.createElement("span"),c=p.trim(a.innerHTML),d=k.data.get("sub-tags").exists(c)?k.data.get("sub-tags").get(c):null;b.className="flair";var e=g.Browser.document.createElement("span");e.innerHTML=null==d?"":p.htmlEscape(d)+" ";b.appendChild(e);var f=g.Browser.document.createElement("a");f.href="javascript:void(0);";f.innerHTML="[+]";b.appendChild(f);f.onclick=function(){var a=g.Browser.document.createElement("div"),
-b=g.Browser.document.createElement("label");b.setAttribute("for","tag-change");b.innerHTML="Tag for "+c+" ";a.appendChild(b);var j=g.Browser.document.createElement("input");j.name="tag-change";j.value=d;j.style.width="100%";j.onchange=function(){k.data.get("sub-tags").set(c,j.value);e.innerHTML=p.htmlEscape(j.value)+" ";k.save();a.parentNode.removeChild(a)};a.appendChild(j);h.fullPopUp(a,f.offsetTop+f.offsetHeight);j.focus()};a.parentNode.insertBefore(b,a.nextSibling)};var n=m.ValueType={__ename__:["ValueType"],
-__constructs__:"TNull TInt TFloat TBool TObject TFunction TClass TEnum TUnknown".split(" ")};n.TNull=["TNull",0];n.TNull.toString=B;n.TNull.__enum__=n;n.TInt=["TInt",1];n.TInt.toString=B;n.TInt.__enum__=n;n.TFloat=["TFloat",2];n.TFloat.toString=B;n.TFloat.__enum__=n;n.TBool=["TBool",3];n.TBool.toString=B;n.TBool.__enum__=n;n.TObject=["TObject",4];n.TObject.toString=B;n.TObject.__enum__=n;n.TFunction=["TFunction",5];n.TFunction.toString=B;n.TFunction.__enum__=n;n.TClass=function(a){a=["TClass",6,a];
-a.__enum__=n;a.toString=B;return a};n.TEnum=function(a){a=["TEnum",7,a];a.__enum__=n;a.toString=B;return a};n.TUnknown=["TUnknown",8];n.TUnknown.toString=B;n.TUnknown.__enum__=n;var w=function(){};m.Type=w;w.__name__=["Type"];w.getClassName=function(a){return a.__name__.join(".")};w.getEnumName=function(a){return a.__ename__.join(".")};w.resolveClass=function(a){a=m[a];return null==a||!a.__name__?null:a};w.resolveEnum=function(a){a=m[a];return null==a||!a.__ename__?null:a};w.createEmptyInstance=function(a){function b(){}
-b.prototype=a.prototype;return new b};w.createEnum=function(a,b,c){var d=s.field(a,b);if(null==d)throw"No such constructor "+b;if(s.isFunction(d)){if(null==c)throw"Constructor "+b+" need parameters";return d.apply(a,c)}if(null!=c&&0!=c.length)throw"Constructor "+b+" does not need parameters";return d};w.getEnumConstructs=function(a){return a.__constructs__.slice()};w["typeof"]=function(a){switch(typeof a){case "boolean":return n.TBool;case "string":return n.TClass(String);case "number":return Math.ceil(a)==
-a%2147483648?n.TInt:n.TFloat;case "object":if(null==a)return n.TNull;var b=a.__enum__;if(null!=b)return n.TEnum(b);a=a.__class__;return null!=a?n.TClass(a):n.TObject;case "function":return a.__name__||a.__ename__?n.TObject:n.TFunction;case "undefined":return n.TNull;default:return n.TUnknown}};var G=function(){};m.UserInfo=G;G.__name__=["UserInfo"];G.init=function(){for(var a=g.Browser.document.body.getElementsByClassName("author"),b=0;b<a.length;){var c=a[b];++b;c.onmouseover=G._onMouseOverUser}};
-G._onMouseOverUser=function(a){a=a.target;var b=a.innerHTML,b=j.substr(b,b.lastIndexOf("/")+1,null),c=g.Browser.document.createElement("div");h.popUp(a,c,a.offsetLeft+a.offsetWidth,a.offsetTop);h.getJSON("/user/"+b+"/about.json",function(a){var b=a.name,e=h.age(a.created_utc),g=h.formatNumber(a.link_karma),f=h.formatNumber(a.comment_karma),j="<b>User:</b> "+b+"<br>",m=k.data.get("user-tags");m.exists(b)&&(j+="<b>Tag:</b> "+m.get(b)+"<br>");j=j+("<b>Account age:</b> "+e+"<br>")+("<b>Karma:</b> "+g+
-" link karma, "+f+" comment karma");a.is_mod&&(j+="<br><b>Moderator</b>");a.is_gold&&(j+="<br><b>Gold</b>");c.innerHTML=j})};var H=function(){};m.UserTagger=H;H.__name__=["UserTagger"];H.init=function(){for(var a=g.Browser.document.body.getElementsByClassName("author"),b=0;b<a.length;){var c=a[b];++b;H.getTag(c)}};H.getTag=function(a){var b=g.Browser.document.createElement("span"),c=p.trim(a.innerHTML),d=k.data.get("user-tags").exists(c)?k.data.get("user-tags").get(c):null;b.className="flair";var e=
-g.Browser.document.createElement("span");e.innerHTML=null==d?"":p.htmlEscape(d)+" ";b.appendChild(e);var f=g.Browser.document.createElement("a");f.href="javascript:void(0);";f.innerHTML="[+]";b.appendChild(f);f.onclick=function(){var a=g.Browser.document.createElement("div"),b=g.Browser.document.createElement("label");b.setAttribute("for","tag-change");b.innerHTML="Tag for "+c+" ";a.appendChild(b);var j=g.Browser.document.createElement("input");j.name="tag-change";j.value=d;j.style.width="100%";j.onchange=
-function(){k.data.get("user-tags").set(c,j.value);e.innerHTML=p.htmlEscape(j.value)+" ";k.save();a.parentNode.removeChild(a)};a.appendChild(j);h.fullPopUp(a,f.offsetTop+f.offsetHeight);j.focus()};a.parentNode.insertBefore(b,a.nextSibling)};e.Serializer=function(){this.buf=new D;this.cache=[];this.useCache=e.Serializer.USE_CACHE;this.useEnumIndex=e.Serializer.USE_ENUM_INDEX;this.shash=new e.ds.StringMap;this.scount=0};m["haxe.Serializer"]=e.Serializer;e.Serializer.__name__=["haxe","Serializer"];e.Serializer.run=
-function(a){var b=new e.Serializer;b.serialize(a);return b.toString()};e.Serializer.prototype={serialize:function(a){var b=w["typeof"](a);switch(b[1]){case 0:this.buf.b+="n";break;case 1:if(0==a){this.buf.b+="z";break}this.buf.b+="i";this.buf.b+=q.string(a);break;case 2:Math.isNaN(a)?this.buf.b+="k":Math.isFinite(a)?(this.buf.b+="d",this.buf.b+=q.string(a)):this.buf.b+=q.string(0>a?"m":"p");break;case 3:this.buf.b+=q.string(a?"t":"f");break;case 6:b=b[2];if(b==String){this.serializeString(a);break}if(this.useCache&&
-this.serializeRef(a))break;switch(b){case Array:var c=0;this.buf.b+="a";for(var d=a.length,l=0;l<d;)b=l++,null==a[b]?c++:(0<c&&(1==c?this.buf.b+="n":(this.buf.b+="u",this.buf.b+=q.string(c)),c=0),this.serialize(a[b]));0<c&&(1==c?this.buf.b+="n":(this.buf.b+="u",this.buf.b+=q.string(c)));this.buf.b+="h";break;case J:this.buf.b+="l";for(a=a.iterator();a.hasNext();)b=a.next(),this.serialize(b);this.buf.b+="h";break;case Date:this.buf.b+="v";this.buf.b+=q.string(j.dateStr(a));break;case e.ds.StringMap:this.buf.b+=
-"b";for(c=a.keys();c.hasNext();)b=c.next(),this.serializeString(b),this.serialize(a.get(b));this.buf.b+="h";break;case e.ds.IntMap:this.buf.b+="q";for(c=a.keys();c.hasNext();)b=c.next(),this.buf.b+=":",this.buf.b+=q.string(b),this.serialize(a.get(b));this.buf.b+="h";break;case e.ds.ObjectMap:this.buf.b+="M";for(c=a.keys();c.hasNext();)b=c.next(),d=s.field(b,"__id__"),s.deleteField(b,"__id__"),this.serialize(b),b.__id__=d,this.serialize(a.h[b.__id__]);this.buf.b+="h";break;case e.io.Bytes:b=0;c=a.length-
-2;d=new D;for(l=e.Serializer.BASE64;b<c;){var f=a.b[b++],g=a.b[b++],h=a.b[b++];d.b+=q.string(l.charAt(f>>2));d.b+=q.string(l.charAt((f<<4|g>>4)&63));d.b+=q.string(l.charAt((g<<2|h>>6)&63));d.b+=q.string(l.charAt(h&63))}b==c?(f=a.b[b++],g=a.b[b++],d.b+=q.string(l.charAt(f>>2)),d.b+=q.string(l.charAt((f<<4|g>>4)&63)),d.b+=q.string(l.charAt(g<<2&63))):b==c+1&&(f=a.b[b++],d.b+=q.string(l.charAt(f>>2)),d.b+=q.string(l.charAt(f<<4&63)));b=d.b;this.buf.b+="s";this.buf.b+=q.string(b.length);this.buf.b+=":";
-this.buf.b+=q.string(b);break;default:this.cache.pop(),null!=a.hxSerialize?(this.buf.b+="C",this.serializeString(w.getClassName(b)),this.cache.push(a),a.hxSerialize(this),this.buf.b+="g"):(this.buf.b+="c",this.serializeString(w.getClassName(b)),this.cache.push(a),this.serializeFields(a))}break;case 4:if(this.useCache&&this.serializeRef(a))break;this.buf.b+="o";this.serializeFields(a);break;case 7:b=b[2];if(this.useCache&&this.serializeRef(a))break;this.cache.pop();this.buf.b+=q.string(this.useEnumIndex?
-"j":"w");this.serializeString(w.getEnumName(b));this.useEnumIndex?(this.buf.b+=":",this.buf.b+=q.string(a[1])):this.serializeString(a[0]);this.buf.b+=":";d=a.length;this.buf.b+=q.string(d-2);for(l=2;l<d;)b=l++,this.serialize(a[b]);this.cache.push(a);break;case 5:throw"Cannot serialize function";default:throw"Cannot serialize "+q.string(a);}},serializeFields:function(a){for(var b=0,c=s.fields(a);b<c.length;){var d=c[b];++b;this.serializeString(d);this.serialize(s.field(a,d))}this.buf.b+="g"},serializeRef:function(a){for(var b=
-typeof a,c=0,d=this.cache.length;c<d;){var e=c++,f=this.cache[e];if(typeof f==b&&f==a)return this.buf.b+="r",this.buf.b+=q.string(e),!0}this.cache.push(a);return!1},serializeString:function(a){var b=this.shash.get(a);null!=b?(this.buf.b+="R",this.buf.b+=q.string(b)):(this.shash.set(a,this.scount++),this.buf.b+="y",a=p.urlEncode(a),this.buf.b+=q.string(a.length),this.buf.b+=":",this.buf.b+=q.string(a))},toString:function(){return this.buf.b},__class__:e.Serializer};e.Timer=function(a){var b=this;this.id=
-setInterval(function(){b.run()},a)};m["haxe.Timer"]=e.Timer;e.Timer.__name__=["haxe","Timer"];e.Timer.stamp=function(){return(new Date).getTime()/1E3};e.Timer.prototype={run:function(){console.log("run")},stop:function(){null!=this.id&&(clearInterval(this.id),this.id=null)},__class__:e.Timer};e.Unserializer=function(a){this.buf=a;this.length=a.length;this.pos=0;this.scache=[];this.cache=[];a=e.Unserializer.DEFAULT_RESOLVER;null==a&&(a=w,e.Unserializer.DEFAULT_RESOLVER=a);this.setResolver(a)};m["haxe.Unserializer"]=
-e.Unserializer;e.Unserializer.__name__=["haxe","Unserializer"];e.Unserializer.initCodes=function(){for(var a=[],b=0,c=e.Unserializer.BASE64.length;b<c;){var d=b++;a[e.Unserializer.BASE64.charCodeAt(d)]=d}return a};e.Unserializer.run=function(a){return(new e.Unserializer(a)).unserialize()};e.Unserializer.prototype={unserialize:function(){switch(this.buf.charCodeAt(this.pos++)){case 110:return null;case 116:return!0;case 102:return!1;case 122:return 0;case 105:return this.readDigits();case 100:for(var a=
-this.pos;;){var b=this.buf.charCodeAt(this.pos);if(43<=b&&58>b||101==b||69==b)this.pos++;else break}return q.parseFloat(j.substr(this.buf,a,this.pos-a));case 121:b=this.readDigits();if(58!=this.buf.charCodeAt(this.pos++)||this.length-this.pos<b)throw"Invalid string length";a=j.substr(this.buf,this.pos,b);this.pos+=b;a=p.urlDecode(a);this.scache.push(a);return a;case 107:return Math.NaN;case 109:return Math.NEGATIVE_INFINITY;case 112:return Math.POSITIVE_INFINITY;case 97:var c=this.buf,a=[];for(this.cache.push(a);;){b=
-this.buf.charCodeAt(this.pos);if(104==b){this.pos++;break}117==b?(this.pos++,b=this.readDigits(),a[a.length+b-1]=null):a.push(this.unserialize())}return a;case 111:return b={},this.cache.push(b),this.unserializeObject(b),b;case 114:b=this.readDigits();if(0>b||b>=this.cache.length)throw"Invalid reference";return this.cache[b];case 82:b=this.readDigits();if(0>b||b>=this.scache.length)throw"Invalid string reference";return this.scache[b];case 120:throw this.unserialize();case 99:b=this.unserialize();
-a=this.resolver.resolveClass(b);if(null==a)throw"Class not found "+b;b=w.createEmptyInstance(a);this.cache.push(b);this.unserializeObject(b);return b;case 119:b=this.unserialize();a=this.resolver.resolveEnum(b);if(null==a)throw"Enum not found "+b;b=this.unserializeEnum(a,this.unserialize());this.cache.push(b);return b;case 106:b=this.unserialize();a=this.resolver.resolveEnum(b);if(null==a)throw"Enum not found "+b;this.pos++;var c=this.readDigits(),d=w.getEnumConstructs(a)[c];if(null==d)throw"Unknown enum index "+
-b+"@"+c;b=this.unserializeEnum(a,d);this.cache.push(b);return b;case 108:b=new J;for(this.cache.push(b);104!=this.buf.charCodeAt(this.pos);)b.add(this.unserialize());this.pos++;return b;case 98:c=new e.ds.StringMap;for(this.cache.push(c);104!=this.buf.charCodeAt(this.pos);)a=this.unserialize(),c.set(a,this.unserialize());this.pos++;return c;case 113:c=new e.ds.IntMap;this.cache.push(c);for(b=this.buf.charCodeAt(this.pos++);58==b;)a=this.readDigits(),c.set(a,this.unserialize()),b=this.buf.charCodeAt(this.pos++);
-if(104!=b)throw"Invalid IntMap format";return c;case 77:c=new e.ds.ObjectMap;for(this.cache.push(c);104!=this.buf.charCodeAt(this.pos);)a=this.unserialize(),c.set(a,this.unserialize());this.pos++;return c;case 118:return b=j.strDate(j.substr(this.buf,this.pos,19)),this.cache.push(b),this.pos+=19,b;case 115:b=this.readDigits();c=this.buf;if(58!=this.buf.charCodeAt(this.pos++)||this.length-this.pos<b)throw"Invalid bytes length";d=e.Unserializer.CODES;null==d&&(d=e.Unserializer.initCodes(),e.Unserializer.CODES=
-d);for(var a=this.pos,f=b&3,g=a+(b-f),h=e.io.Bytes.alloc(3*(b>>2)+(2<=f?f-1:0)),k=0;a<g;){var m=d[c.charCodeAt(a++)],n=d[c.charCodeAt(a++)];h.b[k++]=(m<<2|n>>4)&255;m=d[c.charCodeAt(a++)];h.b[k++]=(n<<4|m>>2)&255;n=d[c.charCodeAt(a++)];h.b[k++]=(m<<6|n)&255}2<=f&&(m=d[c.charCodeAt(a++)],n=d[c.charCodeAt(a++)],h.b[k++]=(m<<2|n>>4)&255,3==f&&(m=d[c.charCodeAt(a++)],h.b[k++]=(n<<4|m>>2)&255));this.pos+=b;this.cache.push(h);return h;case 67:b=this.unserialize();a=this.resolver.resolveClass(b);if(null==
-a)throw"Class not found "+b;b=w.createEmptyInstance(a);this.cache.push(b);b.hxUnserialize(this);if(103!=this.buf.charCodeAt(this.pos++))throw"Invalid custom data";return b}this.pos--;throw"Invalid char "+this.buf.charAt(this.pos)+" at position "+this.pos;},unserializeEnum:function(a,b){if(58!=this.buf.charCodeAt(this.pos++))throw"Invalid enum format";var c=this.readDigits();if(0==c)return w.createEnum(a,b);for(var d=[];0<c--;)d.push(this.unserialize());return w.createEnum(a,b,d)},unserializeObject:function(a){for(;;){if(this.pos>=
-this.length)throw"Invalid object";if(103==this.buf.charCodeAt(this.pos))break;var b=this.unserialize();if(!g.Boot.__instanceof(b,String))throw"Invalid object key";var c=this.unserialize();a[b]=c}this.pos++},readDigits:function(){for(var a=0,b=!1,c=this.pos;;){var d=this.buf.charCodeAt(this.pos);if(d!=d)break;if(45==d){if(this.pos!=c)break;b=!0}else{if(48>d||57<d)break;a=10*a+(d-48)}this.pos++}b&&(a*=-1);return a},setResolver:function(a){this.resolver=null==a?{resolveClass:function(){return null},
-resolveEnum:function(){return null}}:a},__class__:e.Unserializer};e.ds.IntMap=function(){this.h={}};m["haxe.ds.IntMap"]=e.ds.IntMap;e.ds.IntMap.__name__=["haxe","ds","IntMap"];e.ds.IntMap.__interfaces__=[t];e.ds.IntMap.prototype={keys:function(){var a=[],b;for(b in this.h)this.h.hasOwnProperty(b)&&a.push(b|0);return j.iter(a)},get:function(a){return this.h[a]},set:function(a,b){this.h[a]=b},__class__:e.ds.IntMap};e.ds.ObjectMap=function(){this.h={};this.h.__keys__={}};m["haxe.ds.ObjectMap"]=e.ds.ObjectMap;
-e.ds.ObjectMap.__name__=["haxe","ds","ObjectMap"];e.ds.ObjectMap.__interfaces__=[t];e.ds.ObjectMap.prototype={keys:function(){var a=[],b;for(b in this.h.__keys__)this.h.hasOwnProperty(b)&&a.push(this.h.__keys__[b]);return j.iter(a)},set:function(a,b){var c=null!=a.__id__?a.__id__:a.__id__=++e.ds.ObjectMap.count;this.h[c]=b;this.h.__keys__[c]=a},__class__:e.ds.ObjectMap};e.io={};e.io.Bytes=function(a,b){this.length=a;this.b=b};m["haxe.io.Bytes"]=e.io.Bytes;e.io.Bytes.__name__=["haxe","io","Bytes"];
-e.io.Bytes.alloc=function(a){for(var b=[],c=0;c<a;)c++,b.push(0);return new e.io.Bytes(a,b)};e.io.Bytes.prototype={__class__:e.io.Bytes};Array.prototype.indexOf?j.remove=function(a,b){var c=a.indexOf(b);if(-1==c)return!1;a.splice(c,1);return!0}:null;"undefined"!=typeof JSON&&(e.Json=JSON);String.prototype.__class__=m.String=String;String.__name__=["String"];Array.prototype.__class__=m.Array=Array;Array.__name__=["Array"];Date.prototype.__class__=m.Date=Date;Date.__name__=["Date"];var P=m.Int={__name__:["Int"]},
-R=m.Dynamic={__name__:["Dynamic"]},Q=m.Float=Number;Q.__name__=["Float"];var O=m.Bool=Boolean;O.__ename__=["Bool"];var S=m.Class={__name__:["Class"]},T={};Math.__name__=["Math"];Math.NaN=Number.NaN;Math.NEGATIVE_INFINITY=Number.NEGATIVE_INFINITY;Math.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;m.Math=Math;Math.isFinite=function(a){return isFinite(a)};Math.isNaN=function(a){return isNaN(a)};r.buttons=[];h.fullPage=!0;y.regex=[{from:new f("\\[\\[([^\\]\\|]*)\\]\\]",""),to:'<a href="$BASE/wiki/$1">$1</a>'},
-{from:new f("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""),to:'<a href="$BASE/wiki/$1">$2</a>'},{from:new f("\\[\\[File:([^\\]]*)\\]\\]",""),to:""},{from:new f("{{spaced ndash}}",""),to:" - "},{from:new f("\\{\\{convert\\|([0-9]*)\\|([^\\|]*)([^\\}]*)\\}\\}",""),to:"$1 $2"},{from:new f("\\{\\{Infobox(([^\\}]|\n|\n\r|.)*)\\}\\}",""),to:""},{from:new f("\\{\\{([^\\}]*)\\}\\}",""),to:""},{from:new f("<gallery>(.|\n|\n\r)*</gallery>",""),to:""},{from:new f("\\{\\|(.|\n|\n\r)*\\|\\}",""),to:""},{from:new f("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",
-""),to:""},{from:new f("'''([^']*)'''",""),to:"<b>$1</b>"},{from:new f("''([^']*)''",""),to:"<em>$1</em>"},{from:new f("======([^=]*)======",""),to:"<h6>$1</h6>"},{from:new f("=====([^=]*)=====",""),to:"<h5>$1</h5>"},{from:new f("====([^=]*)====",""),to:"<h4>$1</h4>"},{from:new f("===([^=]*)===",""),to:"<h3>$1</h3>"},{from:new f("==([^=]*)==",""),to:"<h2>$1</h2>"},{from:new f("\n\\* ?([^\n]*)",""),to:"<li>$1</li>"},{from:new f("<ref>[^<>]*</ref>",""),to:""},{from:new f("\n",""),to:""},{from:new f("<br><br>",
-""),to:"<br>"},{from:new f("\x3c!--Interwiki links--\x3e.*",""),to:""}];y.sections=new f("<h([1-6])>([^<>]*)</h[1-6]>","");g.Browser.window="undefined"!=typeof window?window:null;g.Browser.document="undefined"!=typeof window?window.document:null;A.images=new f("!\\[([^\\]]*)\\]\\(([^\\)\\.]+\\.(jpg|bmp|png|jpeg|gif))\\)","");A.regex=[{from:new f("(\\*\\*|__)([^\\1\n]*?)\\1",""),to:"<b>$2</b>"},{from:new f("(\\*|_)([^\\1\n]*?)\\1",""),to:"<em>$2</em>"},{from:new f("^[\\*|+|-] (.*)$","m"),to:"<ul><li>$1</li></ul>"},
-{from:new f("</ul><ul>",""),to:""},{from:new f("\n> (?=[^\n\r]*)",""),to:"<blockquote>$1</blockquote>"},{from:new f("</blockquote>\n?\r?<blockquote>$",""),to:""},{from:new f("~~([^~]*?)~~",""),to:"<del>$1</del>"},{from:new f("\\^([^\\^]+)",""),to:"<sup>$1</sup>"},{from:new f(':"([^:"]*?)":',""),to:"<q>$1</q>"},{from:A.images,to:""},{from:new f("\\[([^\\[]+)\\]\\(([^\\)]+)\\)",""),to:'<a href="$2">$1</a>'},{from:new f("^#####([^#\n]+)(#####)?$","m"),to:"<h2>$1</h2>"},{from:new f("^####([^#\n]+)(####)?$",
-"m"),to:"<h3>$1</h3>"},{from:new f("^###([^#\n]+)(###)?$","m"),to:"<h4>$1</h4>"},{from:new f("^##([^#\n]+)(##)?$","m"),to:"<h5>$1</h5>"},{from:new f("^#([^#\n]+)(#)?$","m"),to:"<h6>$1</h6>"},{from:new f("^(#*)([^#\n])\\1?$","m"),to:"<h2>$2</h2>"},{from:new f("(.*)\n\r?(?==+)\n",""),to:"<h3>$1</h3>"},{from:new f("(.*)\n\r?(?=(-|#)+)\n",""),to:"<h2>$1</h2>"},{from:new f('(```*|")([^`""]+)\\1',"m"),to:"<pre>$2</pre>"},{from:new f("<pre>(.*)\n\n(.*)</pre>",""),to:"<pre>$1\n$2</pre>"},{from:new f("\n\n",
-""),to:"<br>\n"}];v.HTML_IMG=new f('<img .*?src="([^"]*)"/?>',"");v.sites=[{regex:new f(".*\\.(jpeg|gif|jpg|bmp|png)",""),method:function(a,b){b([{url:"http://"+a.matched(0),caption:null}])}},{regex:new f("imgur.com/(a|gallery)/([^/]*)",""),method:function(a,b){var c=a.matched(2),d;switch(a.matched(1)){case "a":d="album";break;case "gallery":d="gallery/album";break;default:d="album"}h.getJSON("https://api.imgur.com/3/"+d+"/"+c,function(a){var c=[];if(0>=a.images_count)c.push({url:"http://i.imgur.com/"+
-a.id+".jpg",caption:a.title});else{var d=0;for(a=a.images;d<a.length;){var e=a[d];++d;c.push({url:"http://i.imgur.com/"+e.id+".jpg",caption:e.title})}}b(c)},"Client-ID cc1f254578d6c52")}},{regex:new f("imgur\\.com/(r/[^/]*/)?([a-zA-Z0-9]*)",""),method:function(a,b){var c=null==a.matched(1)||-1!=a.matched(1).indexOf("/")?a.matched(2):a.matched(1);b([{url:"http://i.imgur.com/"+c+".jpg",caption:null}])}},{regex:new f("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""),method:function(a,
-b){b([{url:"http://i.qkme.me/"+a.matched(2)+".jpg",caption:null}])}},{regex:new f("memecrunch.com/meme/([^/]*)/([^/]*)",""),method:function(a,b){b([{url:"http://"+a.matched(0)+"/image.png",caption:null}])}},{regex:new f("memegenerator\\.net/instance/([^/]*)",""),method:function(a,b){b([{url:"http://cdn.memegenerator.net/instances/400x/"+a.matched(1)+".jpg",caption:null}])}},{regex:new f("imgflip\\.com/i/([^/]*)",""),method:function(a,b){b([{url:"http://i.imgflip.com/"+a.matched(1)+".jpg",caption:null}])}},
-{regex:new f("what-if.xkcd.com/([0-9]*)",""),method:function(){}},{regex:new f("xkcd.com/([0-9]*)",""),method:function(a,b){h.getJSON("http://www.xkcd.com/"+a.matched(1)+"/info.0.json",function(a){b([{url:a.img,caption:a.title}])})}},{regex:new f("explosm.net/comics/([0-9]*)",""),method:function(a,b){h.getText("http://www."+a.matched(0),function(c){var d=new f('"http://www\\.explosm\\.net/db/files/Comics/([^"]*)"',"");if(d.match(c))b([{url:d.matched(0).substring(1,d.matched(0).length-1),caption:null}]);
-else throw""+q.string(d)+" not matched by "+a.matched(0)+" in "+c;},null,null,null)}},{regex:new f("livememe.com/([^/]*)",""),method:function(a,b){b([{url:"http://livememe.com/"+a.matched(1)+".jpg",caption:null}])}},{regex:new f("(([^\\.]*\\.)?deviantart\\.com/art|fav\\.me)/.*",""),method:function(a,b){h.getJSON("http://backend.deviantart.com/oembed?url="+p.urlEncode(a.matched(0))+"&format=json",function(a){b([{url:a.url,caption:""+a.title+" by "+a.author_name}])})}},{regex:new f("flickr\\.com(/[^/]*)*?/([0-9@]*)/",
-""),method:function(a,b){h.getJSON("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=99dcc3e77bcd8fb489f17e58191f32f7&photo_id="+a.matched(2)+"&format=json",function(a){null==a.sizes||null==a.sizes.size||(a=a.sizes.size,b([{url:a[a.length-1].source,caption:null}]))})}},{regex:new f("ebay\\.([a-zA-Z\\.]*)/itm(/[^/]*)?/([0-9]*)",""),method:function(a,b){a.matched(1);var c="http://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=ThomasDa-1e6c-4d29-a156-85557acee70b&siteid=0&version=515&ItemID="+
-a.matched(3)+"&IncludeSelector=TextDescription";h.getJSON(c,function(a){var c=a.Item.PictureURL.map(function(a){return{url:a,caption:null}});b({title:a.Item.Title,category:a.Item.PrimaryCategoryName,location:a.Item.Location+", "+a.Item.Country,description:v.filterHTML(a.Item.Description),images:c,price:h.formatPrice(a.Item.ConvertedCurrentPrice.Value)+" "+a.Item.ConvertedCurrentPrice.CurrencyID})})}},{regex:new f("([^\\.]*\\.wordpress\\.com)/[0-9/]*([^/]*)/?",""),method:function(a,b){var c="http://public-api.wordpress.com/rest/v1/sites/"+
-p.htmlEscape(a.matched(1))+"/posts/slug:"+p.htmlEscape(a.matched(2));h.getJSON(c,function(a){var c=a.attachments,e=p.htmlUnescape(a.title),f=v.filterHTML(a.content);a=a.author.name;var g;try{for(var h=[],j=0,k=s.fields(c);j<k.length;){var m=k[j];++j;h.push(function(){var a=s.field(c,m);return a.mime_type.startsWith("image/")?{url:a.URL,caption:null}:null}(this))}g=h}catch(n){g=[]}b({title:e,content:f,author:a,images:g})})}},{regex:new f("(.*)/wiki/([^#]*)(#.*)?",""),method:function(a,b){var c=a.matched(1),
-d=a.matched(2),e=a.matched(3);null!=e&&(e=p.trim(j.substr(e,1,null)));null!=e&&0==e.length&&(e=null);p.endsWith(c,".wikia.com")||(c+="/w");var f=null,f=function(a){h.getJSON("http://"+c+"/api.php?format=json&prop=revisions&action=query&titles="+a+"&rvprop=content",function(d){d=d.query.pages;for(var g=0,j=s.fields(d);g<j.length;){var k=j[g];++g;k=s.field(d,k);k=[s.field(k.revisions[0],"*")];if(p.startsWith(k[0],"#REDIRECT [[")){f(k[0].substring(12,k[0].lastIndexOf("]]")));break}k[0]=y.parse(k[0],
-c);null!=e&&(k[0]=y.trimTo(k[0],e));h.getJSON("http://"+c+"/api.php?format=json&action=query&prop=images&titles="+p.htmlEscape(a),function(a){return function(d){d=d.query.pages;for(var e=0,f=s.fields(d);e<f.length;){var g=f[e];++e;var g=[s.field(d,g)],l=g[0].images,j=[[]];if(null!=l&&0<l.length)for(var k=[null==l?0:l.length],m=0;m<l.length;){var n=l[m];++m;h.getJSON("http://"+c+"/api.php?action=query&titles="+p.urlEncode(n.title)+"&prop=imageinfo&iiprop=url&format=json",function(a,c,d,e){return function(f){f=
-f.query.pages;for(var g=0,l=s.fields(f);g<l.length;){var j=l[g];++g;j=s.field(f,j);null!=j&&(null!=j.pageinfo&&1<=j.imageinfo.length)&&c[0].push({url:j.imageinfo[0].url,caption:null})}0>=--a[0]&&b({title:d[0].title,content:e[0],author:null,images:c[0]})}}(k,j,g,a))}else b({title:g[0].title,content:a[0],author:null,images:[]})}}}(k))}})};f(d)}},{regex:new f("github\\.com/([^/]*)/([^/]*)",""),method:function(a,b){var c=a.matched(1),d=a.matched(2);h.getJSON("https://api.github.com/repos/"+c+"/"+d+"/readme?client_id=39d85b9ac427f1176763&client_secret=5117570b83363ca0c71a196edc5b348af150c25d",
-function(a){if(null!=a.content){a=a.content;a=p.replace(a,"\n","");a=p.trim(a);a=g.Browser.window.atob(a);for(var e=A.images,f=[],h=a;e.match(h);){var k=e.matched(2);k.indexOf(".")==k.lastIndexOf(".")&&(p.startsWith(k,"/")&&(k=j.substr(k,1,null)),k="https://github.com/"+c+"/"+d+"/raw/master/"+k);f.push({url:k,caption:e.matched(1)});h=j.substr(h,e.matchedPos().pos+e.matchedPos().len,null)}b({name:d,developers:[c],description:A.parse(a),url:"git://github.com/"+c+"/"+d+".git",album:f})}})}},{regex:new f("sourceforge.net/projects/([a-zA-Z-]*)",
-""),method:function(a,b){h.getJSON("http://sourceforge.net/api/project/name/"+a.matched(1)+"/json",function(a){a=a.Project;for(var d=a.developers,e=a.name,f=a.description,g=[],h=0;h<d.length;){var k=d[h];++h;g.push(k.name)}for(var m=s.field(a,"download-page"),d=0,h=s.fields(a);d<h.length;)k=h[d],++d,p.endsWith(k,"Repository")&&(m=j.substr(k,0,k.length-10).toLowerCase(),k=s.field(a,k).location,m=p.replace(k,"http:",""+m+":"));b({name:e,description:f,developers:g,url:m,album:[]})})}},{regex:new f("(digitaltrends\\.com|webupd8\\.org)/.*",
-""),method:function(a,b){h.getText("http://"+a.matched(0),function(a){var d=new f("<title>(.*)</title>","");if(d.match(a)){a=j.substr(a,a.indexOf("<article"),null);a=j.substr(a,a.indexOf(">")+1,null);a=j.substr(a,0,a.indexOf("</article>"));for(var e=[];v.HTML_IMG.match(a);)e.push({url:v.HTML_IMG.matched(1),caption:null}),a=v.HTML_IMG.replace(a,"");a=v.filterHTML(a);b({title:d.matched(1),content:a,author:null,images:e})}},null,null,null)}},{regex:new f("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",
-""),method:function(a,b){var c=a.matched(1),d=a.matched(3);h.getJSON("http://api.tumblr.com/v2/blog/"+c+".tumblr.com/posts/json?api_key=k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE&id="+d,function(a){var c=a.posts[0];switch(c.type){case "text":for(var d=[];v.HTML_IMG.match(c.body);)d.push({url:v.HTML_IMG.matched(1),caption:null}),c.body=v.HTML_IMG.replace(c.body,"");c.body=v.filterHTML(c.body);a={title:c.title,content:c.body,author:a.blog.name,images:d};break;case "quote":a={title:null,content:q.string(c.text)+
-"<br/><b>"+q.string(c.source)+"</b>",author:a.blog.name,images:[]};break;case "photo":a=c.photos;c=[];for(d=0;d<a.length;){var e=a[d];++d;c.push({url:e.original_size.url,caption:e.caption})}a=c;break;default:a=null}b(a)})}}];v.HTML_FILTERS=[v.HTML_IMG,new f("<meta[^>]*/>","g"),new f("<(h1|header)[^>]*>.*</\\1>","g"),new f("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new f('<div class="(seperator|ga-ads)"[^>]*>(.|\n|\n\r)*</div>',"g"),new f("<([^>]*)( [^>]*)?></\\1>","g"),new f("<script[^>/]*/>","g"),
-new f("<script[^>/]*>\x3c/script>","g"),new f("(<br></br>|<br ?/>)(<br></br>|<br ?/>)","g"),new f('style ?= ?"[^"]*"',"g")];t=new e.ds.StringMap;t.set("adblock","Block advertisements and sponsors");t.set("userinfo","Show information about a user upon hover");t.set("subinfo","Show information about a subreddit upon hover");t.set("expand","Allow expansion of images, articles, etc");t.set("dup-hider","Hide duplicate links");t.set("user-tag","Tag users");t.set("sub-tag","Tag subreddits");t.set("preview",
-"Preview comments and posts");t.set("keys","Keyboard shortcuts");t.set("nsfw-filter","Hide NSFW content");k.DESC=t;t=new e.ds.StringMap;t.set("adblock",!0);t.set("userinfo",!0);t.set("subinfo",!0);t.set("expand",!0);t.set("dup-hider",!0);t.set("user-tag",!0);t.set("sub-tag",!0);t.set("preview",!0);t.set("keys",!0);t.set("nsfw-filter",!0);t.set("user-tags",new e.ds.StringMap);t.set("sub-tags",new e.ds.StringMap);k.DEFAULTS=t;k.data=new e.ds.StringMap;e.Serializer.USE_CACHE=!1;e.Serializer.USE_ENUM_INDEX=
-!1;e.Serializer.BASE64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";e.Unserializer.DEFAULT_RESOLVER=w;e.Unserializer.BASE64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";e.ds.ObjectMap.count=0;h.main()})();
+(function () { "use strict";
+var $hxClasses = {},$estr = function() { return js.Boot.__string_rec(this,''); };
+var Adblock = function() { }
+$hxClasses["Adblock"] = Adblock;
+Adblock.__name__ = ["Adblock"];
+Adblock.init = function() {
+	Adblock.hideAll(js.Browser.document.body.getElementsByClassName("promoted"));
+	Adblock.hideAll(js.Browser.document.body.getElementsByClassName("infobar"));
+	Adblock.hideAll(js.Browser.document.body.getElementsByClassName("goldvertisement"));
+	var help = js.Browser.document.getElementById("spotlight-help");
+	if(help != null) {
+		var link = help.parentNode.parentNode;
+		Reditn.show(link,false);
+	}
+	var sidebarAd = js.Browser.document.getElementById("ad-frame");
+	if(sidebarAd != null) {
+		sidebarAd.style.display = "none";
+		if(sidebarAd.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,sidebarAd.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+	}
+}
+Adblock.hideAll = function(a) {
+	var _g1 = 0, _g = a.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		Reditn.show(a[i],false);
+	}
+}
+var DuplicateHider = function() { }
+$hxClasses["DuplicateHider"] = DuplicateHider;
+DuplicateHider.__name__ = ["DuplicateHider"];
+DuplicateHider.init = function() {
+	var seen = [];
+	var _g = 0, _g1 = Reditn.links;
+	while(_g < _g1.length) {
+		var link = _g1[_g];
+		++_g;
+		if(link.nodeName.toLowerCase() != "a") continue;
+		if(Lambda.has(seen,link.href)) Reditn.show(link.parentNode.parentNode.parentNode,false); else seen.push(link.href);
+	}
+}
+var EReg = function(r,opt) {
+	opt = opt.split("u").join("");
+	this.r = new RegExp(r,opt);
+};
+$hxClasses["EReg"] = EReg;
+EReg.__name__ = ["EReg"];
+EReg.prototype = {
+	replace: function(s,by) {
+		return s.replace(this.r,by);
+	}
+	,matchSub: function(s,pos,len) {
+		if(len == null) len = -1;
+		return this.r.global?(function($this) {
+			var $r;
+			$this.r.lastIndex = pos;
+			$this.r.m = $this.r.exec(len < 0?s:HxOverrides.substr(s,0,pos + len));
+			var b = $this.r.m != null;
+			if(b) $this.r.s = s;
+			$r = b;
+			return $r;
+		}(this)):(function($this) {
+			var $r;
+			var b = $this.match(len < 0?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len));
+			if(b) {
+				$this.r.s = s;
+				$this.r.m.index += pos;
+			}
+			$r = b;
+			return $r;
+		}(this));
+	}
+	,matchedPos: function() {
+		if(this.r.m == null) throw "No string matched";
+		return { pos : this.r.m.index, len : this.r.m[0].length};
+	}
+	,matched: function(n) {
+		return this.r.m != null && n >= 0 && n < this.r.m.length?this.r.m[n]:(function($this) {
+			var $r;
+			throw "EReg::matched";
+			return $r;
+		}(this));
+	}
+	,match: function(s) {
+		if(this.r.global) this.r.lastIndex = 0;
+		this.r.m = this.r.exec(s);
+		this.r.s = s;
+		return this.r.m != null;
+	}
+	,__class__: EReg
+}
+var Expand = function() { }
+$hxClasses["Expand"] = Expand;
+Expand.__name__ = ["Expand"];
+Expand.init = function() {
+	Expand.toggled = js.Browser.window.location.hash == "#showall";
+	var menu = js.Browser.document.getElementsByClassName("tabmenu")[0];
+	var li = js.Browser.document.createElement("li");
+	Expand.button = js.Browser.document.createElement("a");
+	Expand.button.href = "javascript:void(0);";
+	Expand.refresh();
+	Expand.button.onclick = function(e) {
+		Expand.toggle(!Expand.toggled);
+		js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
+	};
+	li.appendChild(Expand.button);
+	if(menu != null) menu.appendChild(li);
+	var _g = 0, _g1 = Reditn.links;
+	while(_g < _g1.length) {
+		var l = [_g1[_g]];
+		++_g;
+		if(l[0].nodeName.toLowerCase() != "a") continue;
+		l[0].onchange = (function(l) {
+			return function(_) {
+				var site = Link.resolve(l[0].href);
+				if(site == null) return;
+				site.method(site.regex,(function(l) {
+					return function(data) {
+						var e = l[0].parentNode.parentNode.parentNode;
+						var exp = js.Browser.document.createElement("div");
+						exp.className = "expando";
+						exp.style.display = "none";
+						exp.style.display = Expand.toggled?"":"none";
+						if(exp.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,exp.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+						var name = "selftext";
+						if(Reflect.hasField(data,"price")) {
+							var i = data;
+							var div = js.Browser.document.createElement("div");
+							div.className = "usertext";
+							exp.appendChild(div);
+							var head = null;
+							var cont = js.Browser.document.createElement("div");
+							var inner = js.Browser.document.createElement("span");
+							inner.innerHTML = "<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>" + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + i.description + "</p>");
+							cont.appendChild(inner);
+							cont.className = "md";
+							cont.appendChild(Reditn.embedAlbum(i.images));
+							div.appendChild(cont);
+							name = "item";
+						} else if(Reflect.hasField(data,"content")) {
+							var a = data;
+							var div = js.Browser.document.createElement("div");
+							div.className = "usertext";
+							exp.appendChild(div);
+							var head = null;
+							var content = js.Browser.document.createElement("div");
+							var inner = js.Browser.document.createElement("span");
+							inner.innerHTML = a.content;
+							content.appendChild(inner);
+							if(a.images.length > 0) {
+								content.appendChild(js.Browser.document.createElement("br"));
+								content.appendChild(Reditn.embedAlbum(a.images));
+							}
+							content.className = "md";
+							div.appendChild(content);
+						} else if(js.Boot.__instanceof(data,Array) && Reflect.hasField(data[0],"url")) {
+							var a = data;
+							var div = Reditn.embedAlbum(a);
+							exp.appendChild(div);
+							name = "image";
+						} else if(Reflect.hasField(data,"developers")) {
+							var r = data;
+							console.log("Repository: " + Std.string(r));
+							var div = js.Browser.document.createElement("div");
+							div.className = "usertext";
+							var cont = js.Browser.document.createElement("div");
+							var inner = js.Browser.document.createElement("span");
+							inner.innerHTML = "" + Std.string(data.description) + "<br><a href=\"" + Std.string(data.url) + "\"><b>Clone repo</b></a><br>";
+							if(r.album != null && r.album.length > 0) inner.appendChild(Reditn.embedAlbum(r.album));
+							cont.appendChild(inner);
+							cont.className = "md";
+							div.appendChild(cont);
+							exp.appendChild(div);
+						}
+						var s = Expand.makeSelfButton(e,name,l[0].href);
+						var pn = s.parentNode;
+						var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
+						while(_g2 < _g3.length) {
+							var ep = _g3[_g2];
+							++_g2;
+							pn.removeChild(ep);
+						}
+						pn.appendChild(exp);
+						Expand.refresh();
+					};
+				})(l));
+			};
+		})(l);
+		l[0].onchange(null);
+	}
+}
+Expand.makeSelfButton = function(e,extra,url) {
+	var d = js.Browser.document.createElement("div");
+	var cn = "expando-button " + extra + " ";
+	d.className = "" + cn + " collapsed";
+	var isToggled = false;
+	var btn = { toggled : function() {
+		return isToggled;
+	}, toggle : function(v) {
+		isToggled = v;
+		d.className = cn + (isToggled?"expanded":"collapsed");
+		var entry = d.parentNode;
+		var expandos = entry.getElementsByClassName("expando");
+		var _g = 0;
+		while(_g < expandos.length) {
+			var e1 = expandos[_g];
+			++_g;
+			e1.style.display = v?"":"none";
+			if(e1.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,e1.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+		}
+	}, url : url, element : d};
+	d.onclick = function(_) {
+		btn.toggle(!isToggled);
+	};
+	var tagline = e.getElementsByClassName("tagline")[0];
+	tagline.parentNode.insertBefore(d,tagline);
+	Expand.buttons.push(btn);
+	if(Expand.toggled) btn.toggle(true);
+	Expand.refresh();
+	return d;
+}
+Expand.refresh = function() {
+	if(Expand.button != null) {
+		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " all (" + Expand.buttons.length + ")";
+		var np = [];
+		var n = js.Browser.document.body.getElementsByClassName("next");
+		var p = js.Browser.document.body.getElementsByClassName("prev");
+		var _g = 0;
+		while(_g < n.length) {
+			var nl = n[_g];
+			++_g;
+			np.push(nl);
+		}
+		var _g = 0;
+		while(_g < p.length) {
+			var pl = p[_g];
+			++_g;
+			np.push(pl);
+		}
+		var _g = 0;
+		while(_g < np.length) {
+			var i = np[_g];
+			++_g;
+			if(i.nodeName.toLowerCase() != "a") continue;
+			if(Expand.toggled && i.href.indexOf("#") == -1) i.href += "#showall"; else if(!Expand.toggled && i.href.indexOf("#") != -1) i.href = HxOverrides.substr(i.href,0,i.href.indexOf("#"));
+		}
+		Reditn.show(Expand.button,Expand.buttons.length > 0);
+	}
+}
+Expand.toggle = function(t) {
+	Expand.toggled = t;
+	var _g = 0, _g1 = Expand.buttons;
+	while(_g < _g1.length) {
+		var btn = _g1[_g];
+		++_g;
+		btn.toggle(t);
+	}
+	Expand.refresh();
+}
+Expand.loadImage = function(url) {
+	var img = js.Browser.document.createElement("img");
+	img.src = url;
+	img.className = "resize";
+	Expand.initResize(img);
+	var autosize = function() {
+		if(img.width > (js.Browser.window.innerWidth * 0.7 | 0)) {
+			var rt = img.height / img.width;
+			img.width = js.Browser.window.innerWidth * 0.7 | 0;
+			img.height = img.width * rt | 0;
+		}
+		if(img.height > (js.Browser.window.innerHeight * 0.6 | 0)) {
+			var rt = img.width / img.height;
+			img.height = js.Browser.window.innerHeight * 0.6 | 0;
+			img.width = img.height * rt | 0;
+		}
+	};
+	var t = new haxe.Timer(30);
+	t.run = function() {
+		if(img.width > 0 && img.height > 0) {
+			t.stop();
+			autosize();
+		}
+	};
+	return img;
+}
+Expand.initResize = function(e) {
+	var drx = 0.0, dry = 0.0, rt = 1.0;
+	var drag = false;
+	e.onmousedown = function(ev) {
+		drag = true;
+		var ev1 = ev;
+		drx = e.offsetWidth / ev1.clientX;
+		dry = e.offsetHeight / ev1.clientY;
+		rt = e.offsetWidth / e.offsetHeight;
+		ev1.preventDefault();
+	};
+	e.onmousemove = function(ev) {
+		var ev1 = ev;
+		if(drag) {
+			var nw = ev1.clientX * drx;
+			var nwh = nw / rt;
+			var nh = ev1.clientY * dry;
+			var nhw = nh * rt;
+			e.width = (nwh > nh?nw:nhw) | 0;
+			e.height = (nwh > nh?nwh:nh) | 0;
+		}
+		ev1.preventDefault();
+	};
+	e.onmouseup = e.onmouseout = function(ev) {
+		drag = false;
+		ev.preventDefault();
+	};
+}
+var HxOverrides = function() { }
+$hxClasses["HxOverrides"] = HxOverrides;
+HxOverrides.__name__ = ["HxOverrides"];
+HxOverrides.dateStr = function(date) {
+	var m = date.getMonth() + 1;
+	var d = date.getDate();
+	var h = date.getHours();
+	var mi = date.getMinutes();
+	var s = date.getSeconds();
+	return date.getFullYear() + "-" + (m < 10?"0" + m:"" + m) + "-" + (d < 10?"0" + d:"" + d) + " " + (h < 10?"0" + h:"" + h) + ":" + (mi < 10?"0" + mi:"" + mi) + ":" + (s < 10?"0" + s:"" + s);
+}
+HxOverrides.strDate = function(s) {
+	switch(s.length) {
+	case 8:
+		var k = s.split(":");
+		var d = new Date();
+		d.setTime(0);
+		d.setUTCHours(k[0]);
+		d.setUTCMinutes(k[1]);
+		d.setUTCSeconds(k[2]);
+		return d;
+	case 10:
+		var k = s.split("-");
+		return new Date(k[0],k[1] - 1,k[2],0,0,0);
+	case 19:
+		var k = s.split(" ");
+		var y = k[0].split("-");
+		var t = k[1].split(":");
+		return new Date(y[0],y[1] - 1,y[2],t[0],t[1],t[2]);
+	default:
+		throw "Invalid date format : " + s;
+	}
+}
+HxOverrides.cca = function(s,index) {
+	var x = s.charCodeAt(index);
+	if(x != x) return undefined;
+	return x;
+}
+HxOverrides.substr = function(s,pos,len) {
+	if(pos != null && pos != 0 && len != null && len < 0) return "";
+	if(len == null) len = s.length;
+	if(pos < 0) {
+		pos = s.length + pos;
+		if(pos < 0) pos = 0;
+	} else if(len < 0) len = s.length + len - pos;
+	return s.substr(pos,len);
+}
+HxOverrides.remove = function(a,obj) {
+	var i = 0;
+	var l = a.length;
+	while(i < l) {
+		if(a[i] == obj) {
+			a.splice(i,1);
+			return true;
+		}
+		i++;
+	}
+	return false;
+}
+HxOverrides.iter = function(a) {
+	return { cur : 0, arr : a, hasNext : function() {
+		return this.cur < this.arr.length;
+	}, next : function() {
+		return this.arr[this.cur++];
+	}};
+}
+var Keyboard = function() { }
+$hxClasses["Keyboard"] = Keyboard;
+Keyboard.__name__ = ["Keyboard"];
+Keyboard.get_highlighted = function() {
+	return Keyboard.current == null?null:Reditn.links[Keyboard.current].parentNode.parentNode.parentNode;
+}
+Keyboard.init = function() {
+	js.Browser.document.onkeydown = function(e) {
+		Keyboard.keyDown(e.keyCode);
+	};
+}
+Keyboard.unhighlight = function() {
+	var h = Keyboard.get_highlighted();
+	if(h != null) h.style.border = "";
+}
+Keyboard.highlight = function(dir) {
+	Keyboard.unhighlight();
+	if(Keyboard.current != null && Reditn.links[Keyboard.current + dir]) Keyboard.current += dir; else dir = 0;
+	if(Keyboard.current == null) Keyboard.current = 0;
+	var h = Keyboard.get_highlighted();
+	h.style.border = "3px solid grey";
+	h.scrollIntoView(true);
+	h.focus();
+}
+Keyboard.show = function(s) {
+	if(s == null) s = true;
+	var h = Keyboard.get_highlighted();
+	var tg = h.getElementsByClassName("toggle")[0];
+	if(tg.toggle != null) tg.toggle(s); else {
+		var btn = h.getElementsByClassName("expando-button")[0];
+		if(btn != null && (s?btn.className.indexOf("expanded") == -1:btn.className.indexOf("expanded") != -1)) btn.onclick(null);
+	}
+	h.scrollIntoView(true);
+	h.focus();
+}
+Keyboard.keyDown = function(c) {
+	switch(c) {
+	case 39:
+		Keyboard.show(true);
+		break;
+	case 37:
+		Keyboard.show(false);
+		break;
+	case 38:
+		Keyboard.highlight(-1);
+		break;
+	case 40:
+		Keyboard.highlight(1);
+		break;
+	}
+}
+var Lambda = function() { }
+$hxClasses["Lambda"] = Lambda;
+Lambda.__name__ = ["Lambda"];
+Lambda.has = function(it,elt) {
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var x = $it0.next();
+		if(x == elt) return true;
+	}
+	return false;
+}
+var Reditn = function() { }
+$hxClasses["Reditn"] = Reditn;
+Reditn.__name__ = ["Reditn"];
+Reditn.main = function() {
+	if(document.readyState == "complete") Reditn.init(); else js.Browser.window.onload = function(_) {
+		Reditn.init();
+	};
+}
+Reditn.init = function() {
+	if(js.Browser.window.location.href.indexOf("reddit.") == -1) return;
+	Reditn.fullPage = js.Browser.document.getElementsByClassName("tabmenu").length > 0;
+	Reditn.links = js.Browser.document.body.getElementsByClassName("title");
+	Reditn.links = (function($this) {
+		var $r;
+		var _g = [];
+		{
+			var _g1 = 0, _g2 = Reditn.links;
+			while(_g1 < _g2.length) {
+				var l = [_g2[_g1]];
+				++_g1;
+				if(l[0].nodeName.toLowerCase() == "a" && l[0].parentNode.className != "parent") _g.push((function($this) {
+					var $r;
+					Reditn.expandURL(l[0].href,(function(l) {
+						return function(url) {
+							l[0].href = url;
+							if(l[0].onchange != null) l[0].onchange(null);
+						};
+					})(l));
+					$r = l[0];
+					return $r;
+				}($this)));
+			}
+		}
+		$r = _g;
+		return $r;
+	}(this));
+	Reditn.wrap(Settings.init);
+	Reditn.wrap(Adblock.init,"adblock");
+	Reditn.wrap(DuplicateHider.init,"dup-hider");
+	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
+	Style.init();
+	Reditn.wrap(Expand.init,"expand");
+	Reditn.wrap(Keyboard.init,"keys");
+	Reditn.wrap(Preview.init,"preview");
+	Reditn.wrap(SubredditInfo.init,"subinfo");
+	Reditn.wrap(UserInfo.init,"userinfo");
+	Reditn.wrap(UserTagger.init,"user-tag");
+	Reditn.wrap(SubredditTagger.init,"sub-tag");
+	js.Browser.window.history.replaceState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
+	js.Browser.window.onpopstate = function(e) {
+		var s = e.state;
+		if(s == null) return;
+		var state = haxe.Unserializer.run(s);
+		if(state.allExpanded != Expand.toggled) Expand.toggle(state.allExpanded);
+	};
+}
+Reditn.state = function() {
+	return { allExpanded : Expand.toggled};
+}
+Reditn.wrap = function(fn,id) {
+	var d = id == null?null:Settings.data.get(id);
+	if(id == null || d) try {
+		fn();
+	} catch( d1 ) {
+		console.log("Module " + id + " has failed to load in Reditn due to the following error:\n " + Std.string(d1));
+	}
+}
+Reditn.formatNumber = function(n) {
+	return !Math.isFinite(n)?Std.string(n):(function($this) {
+		var $r;
+		var s = Std.string(Math.abs(n));
+		var ad = s.indexOf(".") != -1?(function($this) {
+			var $r;
+			var t = HxOverrides.substr(s,s.indexOf("."),null);
+			s = HxOverrides.substr(s,0,s.indexOf("."));
+			$r = t;
+			return $r;
+		}($this)):"";
+		if(s.length >= 3) {
+			var ns = "";
+			var _g1 = 0, _g = s.length;
+			while(_g1 < _g) {
+				var i = _g1++;
+				ns += s.charAt(i);
+				if((s.length - (i + 1)) % 3 == 0 && i < s.length - 1) ns += ",";
+			}
+			s = ns;
+		}
+		$r = (n < 0?"-" + s:s) + ad;
+		return $r;
+	}(this));
+}
+Reditn.formatPrice = function(n) {
+	var first = Reditn.formatNumber(n | 0);
+	var last = Std.string(n);
+	last = last.indexOf(".") == -1?".":HxOverrides.substr(last,last.indexOf("."),null);
+	while(last.length < 3) last += "0";
+	return "" + first + last;
+}
+Reditn.show = function(e,shown) {
+	e.style.display = shown?"":"none";
+	if(e.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,e.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+}
+Reditn.age = function(t) {
+	t = haxe.Timer.stamp() - t;
+	var days = t / 86400 % 30.4375 | 0;
+	var months = t / 2629800 % 12 | 0;
+	var years = t / 2629800 / 12 | 0;
+	var s = "";
+	if(years > 0) s += "" + years + " year" + (years <= 1?"":"s");
+	if(months > 0) s += ", " + months + " month" + (months <= 1?"":"s");
+	s += ", " + days + " day" + (days <= 1?"":"s");
+	if(StringTools.startsWith(s,", ")) s = HxOverrides.substr(s,2,null);
+	while(s.indexOf(", , ") != -1) s = StringTools.replace(s,", , ",", ");
+	return s;
+}
+Reditn.expandURL = function(ourl,cb) {
+	var url = Link.trimURL(ourl);
+	if(url.indexOf("/") == -1) cb(ourl); else {
+		url = HxOverrides.substr(url,0,url.indexOf("/"));
+		switch(url) {
+		case "0rz.tw":case "1link.in":case "1url.com":case "2.gp":case "2big.at":case "2tu.us":case "3.ly":case "307.to":case "4ms.me":case "4sq.com":case "4url.cc":case "6url.com":case "7.ly":case "a.gg":case "a.nf":case "aa.cx":case "abcurl.net":case "ad.vu":case "adf.ly":case "adjix.com":case "afx.cc":case "all.fuseurl.com":case "alturl.com":case "amzn.to":case "ar.gy":case "arst.ch":case "atu.ca":case "azc.cc":case "b23.ru":case "b2l.me":case "bacn.me":case "bcool.bz":case "binged.it":case "bit.ly":case "bizj.us":case "bloat.me":case "bravo.ly":case "bsa.ly":case "budurl.com":case "canurl.com":case "chilp.it":case "chzb.gr":case "cl.lk":case "cl.ly":case "clck.ru":case "cli.gs":case "cliccami.info":case "clickthru.ca":case "clop.in":case "conta.cc":case "cort.as":case "cot.ag":case "crks.me":case "ctvr.us":case "cutt.us":case "dai.ly":case "decenturl.com":case "dfl8.me":case "digbig.com":case "digg.com":case "disq.us":case "dld.bz":case "dlvr.it":case "do.my":case "doiop.com":case "dopen.us":case "easyuri.com":case "easyurl.net":case "eepurl.com":case "eweri.com":case "fa.by":case "fav.me":case "fb.me":case "fbshare.me":case "ff.im":case "fff.to":case "fire.to":case "firsturl.de":case "firsturl.net":case "flic.kr":case "flq.us":case "fly2.ws":case "fon.gs":case "freak.to":case "fuseurl.com":case "fuzzy.to":case "fwd4.me":case "fwib.net":case "g.ro.lt":case "gizmo.do":case "gl.am":case "go.9nl.com":case "go.ign.com":case "go.usa.gov":case "goo.gl":case "goshrink.com":case "gurl.es":case "hex.io":case "hiderefer.com":case "hmm.ph":case "href.in":case "hsblinks.com":case "htxt.it":case "huff.to":case "hulu.com":case "hurl.me":case "hurl.ws":case "icanhaz.com":case "idek.net":case "ilix.in":case "is.gd":case "its.my":case "ix.lt":case "j.mp":case "jijr.com":case "kl.am":case "klck.me":case "korta.nu":case "krunchd.com":case "l9k.net":case "lat.ms":case "liip.to":case "liltext.com":case "linkbee.com":case "linkbun.ch":case "liurl.cn":case "ln-s.net":case "ln-s.ru":case "lnk.gd":case "lnk.ms":case "lnkd.in":case "lnkurl.com":case "lru.jp":case "lt.tl":case "lurl.no":case "macte.ch":case "mash.to":case "merky.de":case "migre.me":case "miniurl.com":case "minurl.fr":case "mke.me":case "moby.to":case "moourl.com":case "mrte.ch":case "myloc.me":case "myurl.in":case "n.pr":case "nbc.co":case "nblo.gs":case "nn.nf":case "not.my":case "notlong.com":case "nsfw.in":case "nutshellurl.com":case "nxy.in":case "nyti.ms":case "o-x.fr":case "oc1.us":case "om.ly":case "omf.gd":case "omoikane.net":case "on.cnn.com":case "on.mktw.net":case "onforb.es":case "orz.se":case "ow.ly":case "ping.fm":case "pli.gs":case "pnt.me":case "politi.co":case "post.ly":case "pp.gg":case "profile.to":case "ptiturl.com":case "pub.vitrue.com":case "qlnk.net":case "qte.me":case "qu.tc":case "qy.fi":case "r.im":case "rb6.me":case "read.bi":case "readthis.ca":case "reallytinyurl.com":case "redir.ec":case "redirects.ca":case "redirx.com":case "retwt.me":case "ri.ms":case "rickroll.it":case "riz.gd":case "rt.nu":case "ru.ly":case "rubyurl.com":case "rurl.org":case "rww.tw":case "s4c.in":case "s7y.us":case "safe.mn":case "sameurl.com":case "sdut.us":case "shar.es":case "shink.de":case "shorl.com":case "short.ie":case "short.to":case "shortlinks.co.uk":case "shorturl.com":case "shout.to":case "show.my":case "shrinkify.com":case "shrinkr.com":case "shrt.fr":case "shrt.st":case "shrten.com":case "shrunkin.com":case "simurl.com":case "slate.me":case "smallr.com":case "smsh.me":case "smurl.name":case "sn.im":case "snipr.com":case "snipurl.com":case "snurl.com":case "sp2.ro":case "spedr.com":case "srnk.net":case "srs.li":case "starturl.com":case "su.pr":case "surl.co.uk":case "surl.hu":case "t.cn":case "t.co":case "t.lh.com":case "ta.gd":case "tbd.ly":case "tcrn.ch":case "tgr.me":case "tgr.ph":case "tighturl.com":case "tiniuri.com":case "tiny.cc":case "tiny.ly":case "tiny.pl":case "tinylink.in":case "tinyuri.ca":case "tinyurl.com":case "tk.":case "tl.gd":case "tmi.me":case "tnij.org":case "tnw.to":case "tny.com":case "to.":case "to.ly":case "togoto.us":case "totc.us":case "toysr.us":case "tpm.ly":case "tr.im":case "tra.kz":case "trunc.it":case "twhub.com":case "twirl.at":case "twitclicks.com":case "twitterurl.net":case "twitterurl.org":case "twiturl.de":case "twurl.cc":case "twurl.nl":case "u.mavrev.com":case "u.nu":case "u76.org":case "ub0.cc":case "ulu.lu":case "updating.me":case "ur1.ca":case "url.az":case "url.co.uk":case "url.ie":case "url360.me":case "url4.eu":case "urlborg.com":case "urlbrief.com":case "urlcover.com":case "urlcut.com":case "urlenco.de":case "urli.nl":case "urls.im":case "urlshorteningservicefortwitter.com":case "urlx.ie":case "urlzen.com":case "usat.ly":case "use.my":case "vb.ly":case "vgn.am":case "vl.am":case "vm.lc":case "w55.de":case "wapo.st":case "wapurl.co.uk":case "wipi.es":case "wp.me":case "x.vu":case "xr.com":case "xrl.in":case "xrl.us":case "xurl.es":case "xurl.jp":case "y.ahoo.it":case "yatuc.com":case "ye.pe":case "yep.it":case "yfrog.com":case "yhoo.it":case "yiyd.com":case "youtu.be":case "yuarel.com":case "z0p.de":case "zi.ma":case "zi.mu":case "zipmyurl.com":case "zud.me":case "zurl.ws":case "zz.gd":case "zzang.kr":case "r.ebay.com":
+			var surl = StringTools.urlEncode(ourl);
+			Reditn.getJSON("http://api.longurl.org/v2/expand?url=" + surl + "&format=json&User-Agent=Reditn",function(data) {
+				cb(Reflect.field(data,"long-url"));
+			});
+			break;
+		default:
+			cb(ourl);
+		}
+	}
+}
+Reditn.embedAlbum = function(a) {
+	var span = js.Browser.document.createElement("span");
+	span.style.textAlign = "center";
+	span.className = "expando";
+	var imgs = (function($this) {
+		var $r;
+		var _g = [];
+		{
+			var _g1 = 0;
+			while(_g1 < a.length) {
+				var i = a[_g1];
+				++_g1;
+				_g.push((function($this) {
+					var $r;
+					var i1 = Expand.loadImage(i.url);
+					span.appendChild(i1);
+					Reditn.show(i1,false);
+					$r = i1;
+					return $r;
+				}($this)));
+			}
+		}
+		$r = _g;
+		return $r;
+	}(this));
+	var img = null;
+	var caption = js.Browser.document.createElement("span");
+	caption.style.fontWeight = "bold";
+	caption.style.marginLeft = "10px";
+	var currentIndex = 0;
+	var prev = null, info = null, next = null;
+	if(a.length > 1) {
+		prev = js.Browser.document.createElement("button");
+		prev.innerHTML = "Prev";
+		span.appendChild(prev);
+		info = js.Browser.document.createElement("span");
+		info.style.textAlign = "center";
+		info.style.paddingLeft = info.style.paddingRight = "5px";
+		span.appendChild(info);
+		next = js.Browser.document.createElement("button");
+		next.innerHTML = "Next";
+		span.appendChild(next);
+	}
+	if(a.length > 1 || a[0].caption != null && a[0].caption.length > 0) {
+		span.appendChild(caption);
+		span.appendChild(js.Browser.document.createElement("br"));
+	}
+	var switchImage = function(ind) {
+		if(ind < 0 || ind >= a.length) return;
+		var i = a[ind];
+		var height = null;
+		if(img != null) {
+			img.style.display = "none";
+			if(img.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,img.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+			height = Std.parseInt(img.style.height);
+		}
+		img = imgs[ind];
+		img.style.display = "block";
+		if(height != null) {
+			var ratio = img.width / img.height;
+			img.style.height = height + "px";
+			img.style.width = (height * ratio | 0) + "px";
+		}
+		span.appendChild(img);
+		if(prev != null) {
+			var len = Reditn.formatNumber(a.length);
+			var curr = Reditn.formatNumber(ind + 1);
+			info.innerHTML = "" + curr + " of " + len;
+			prev.disabled = ind <= 0;
+			next.disabled = ind >= a.length - 1;
+		}
+		caption.style.display = i.caption != null?"":"none";
+		if(caption.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,caption.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+		if(i.caption != null) caption.innerHTML = StringTools.htmlEscape(i.caption);
+	};
+	switchImage(0);
+	if(prev != null) {
+		prev.onmousedown = function(_) {
+			switchImage(--currentIndex);
+		};
+		next.onmousedown = function(_) {
+			switchImage(++currentIndex);
+		};
+	}
+	return span;
+}
+Reditn.getData = function(o) {
+	while(o.data != null) o = o.data;
+	while(o.response != null) o = o.response;
+	return o;
+}
+Reditn.getText = function(url,func,auth,type,postData) {
+	var h = new haxe.Http(url);
+	if(auth != null) h.setHeader("Authorization",auth);
+	if(type != null) h.setHeader("Content-Type",type);
+	h.onData = func;
+	if(postData != null) h.setPostData(postData);
+	h.request(postData != null);
+}
+Reditn.getJSON = function(url,func,auth,type,postData) {
+	if(type == null) type = "application/json";
+	Reditn.getText(url,function(data) {
+		if(StringTools.startsWith(data,"jsonFlickrApi(") && StringTools.endsWith(data,")")) data = data.substring(14,data.length - 1);
+		try {
+			func(Reditn.getData(haxe.Json.parse(data)));
+		} catch( e ) {
+			try {
+				func(Reditn.getData(JSON.parse(data)));
+			} catch( e1 ) {
+				console.log("Error getting \"" + url + "\" - could not parse " + data);
+			}
+		}
+	},auth,type,postData);
+}
+Reditn.popUp = function(bs,el,x,y) {
+	if(y == null) y = 0;
+	if(x == null) x = 0;
+	js.Browser.document.body.appendChild(el);
+	el.className = "popup";
+	el.style.position = "absolute";
+	el.style.width = (js.Browser.window.innerWidth * 0.25 | 0) + "px";
+	el.style.left = "" + x + "px";
+	el.style.top = "" + (y - 30) + "px";
+	bs.onmouseout = el.onblur = function(e) {
+		el.parentNode.removeChild(el);
+		bs.mouseover = false;
+	};
+	return el;
+}
+Reditn.fullPopUp = function(el,y) {
+	if(y == null) y = 0;
+	var old = js.Browser.document.getElementsByClassName("popup")[0];
+	if(old != null) old.parentNode.removeChild(old);
+	js.Browser.document.body.appendChild(el);
+	var close = js.Browser.document.createElement("a");
+	close.style.position = "absolute";
+	close.style.right = close.style.top = "5px";
+	close.innerHTML = "<b>Close</b>";
+	close.href = "javascript:void(0);";
+	close.onclick = el.onblur = function(e) {
+		el.parentNode.removeChild(el);
+	};
+	el.appendChild(close);
+	el.className = "popup";
+	if(y != 0) el.style.top = "" + (y - js.Browser.window.scrollY) + "px";
+	return el;
+}
+var StringTools = function() { }
+$hxClasses["StringTools"] = StringTools;
+StringTools.__name__ = ["StringTools"];
+StringTools.urlEncode = function(s) {
+	return encodeURIComponent(s);
+}
+StringTools.urlDecode = function(s) {
+	return decodeURIComponent(s.split("+").join(" "));
+}
+StringTools.htmlEscape = function(s,quotes) {
+	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
+}
+StringTools.htmlUnescape = function(s) {
+	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
+}
+StringTools.startsWith = function(s,start) {
+	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
+}
+StringTools.endsWith = function(s,end) {
+	var elen = end.length;
+	var slen = s.length;
+	return slen >= elen && HxOverrides.substr(s,slen - elen,elen) == end;
+}
+StringTools.isSpace = function(s,pos) {
+	var c = HxOverrides.cca(s,pos);
+	return c > 8 && c < 14 || c == 32;
+}
+StringTools.ltrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,r)) r++;
+	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
+}
+StringTools.rtrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
+	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
+}
+StringTools.trim = function(s) {
+	return StringTools.ltrim(StringTools.rtrim(s));
+}
+StringTools.replace = function(s,sub,by) {
+	return s.split(sub).join(by);
+}
+var haxe = {}
+haxe.Json = function() {
+};
+$hxClasses["haxe.Json"] = haxe.Json;
+haxe.Json.__name__ = ["haxe","Json"];
+haxe.Json.parse = function(text) {
+	return new haxe.Json().doParse(text);
+}
+haxe.Json.prototype = {
+	parseNumber: function(c) {
+		var start = this.pos - 1;
+		var minus = c == 45, digit = !minus, zero = c == 48;
+		var point = false, e = false, pm = false, end = false;
+		while(true) {
+			c = this.str.charCodeAt(this.pos++);
+			switch(c) {
+			case 48:
+				if(zero && !point) this.invalidNumber(start);
+				if(minus) {
+					minus = false;
+					zero = true;
+				}
+				digit = true;
+				break;
+			case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:
+				if(zero && !point) this.invalidNumber(start);
+				if(minus) minus = false;
+				digit = true;
+				zero = false;
+				break;
+			case 46:
+				if(minus || point) this.invalidNumber(start);
+				digit = false;
+				point = true;
+				break;
+			case 101:case 69:
+				if(minus || zero || e) this.invalidNumber(start);
+				digit = false;
+				e = true;
+				break;
+			case 43:case 45:
+				if(!e || pm) this.invalidNumber(start);
+				digit = false;
+				pm = true;
+				break;
+			default:
+				if(!digit) this.invalidNumber(start);
+				this.pos--;
+				end = true;
+			}
+			if(end) break;
+		}
+		var f = Std.parseFloat(HxOverrides.substr(this.str,start,this.pos - start));
+		var i = f | 0;
+		return i == f?i:f;
+	}
+	,invalidNumber: function(start) {
+		throw "Invalid number at position " + start + ": " + HxOverrides.substr(this.str,start,this.pos - start);
+	}
+	,parseString: function() {
+		var start = this.pos;
+		var buf = new StringBuf();
+		while(true) {
+			var c = this.str.charCodeAt(this.pos++);
+			if(c == 34) break;
+			if(c == 92) {
+				buf.addSub(this.str,start,this.pos - start - 1);
+				c = this.str.charCodeAt(this.pos++);
+				switch(c) {
+				case 114:
+					buf.b += "\r";
+					break;
+				case 110:
+					buf.b += "\n";
+					break;
+				case 116:
+					buf.b += "\t";
+					break;
+				case 98:
+					buf.b += "";
+					break;
+				case 102:
+					buf.b += "";
+					break;
+				case 47:case 92:case 34:
+					buf.b += String.fromCharCode(c);
+					break;
+				case 117:
+					var uc = Std.parseInt("0x" + HxOverrides.substr(this.str,this.pos,4));
+					this.pos += 4;
+					buf.b += String.fromCharCode(uc);
+					break;
+				default:
+					throw "Invalid escape sequence \\" + String.fromCharCode(c) + " at position " + (this.pos - 1);
+				}
+				start = this.pos;
+			} else if(c != c) throw "Unclosed string";
+		}
+		buf.addSub(this.str,start,this.pos - start - 1);
+		return buf.b;
+	}
+	,parseRec: function() {
+		while(true) {
+			var c = this.str.charCodeAt(this.pos++);
+			switch(c) {
+			case 32:case 13:case 10:case 9:
+				break;
+			case 123:
+				var obj = { }, field = null, comma = null;
+				while(true) {
+					var c1 = this.str.charCodeAt(this.pos++);
+					switch(c1) {
+					case 32:case 13:case 10:case 9:
+						break;
+					case 125:
+						if(field != null || comma == false) this.invalidChar();
+						return obj;
+					case 58:
+						if(field == null) this.invalidChar();
+						obj[field] = this.parseRec();
+						field = null;
+						comma = true;
+						break;
+					case 44:
+						if(comma) comma = false; else this.invalidChar();
+						break;
+					case 34:
+						if(comma) this.invalidChar();
+						field = this.parseString();
+						break;
+					default:
+						this.invalidChar();
+					}
+				}
+				break;
+			case 91:
+				var arr = [], comma = null;
+				while(true) {
+					var c1 = this.str.charCodeAt(this.pos++);
+					switch(c1) {
+					case 32:case 13:case 10:case 9:
+						break;
+					case 93:
+						if(comma == false) this.invalidChar();
+						return arr;
+					case 44:
+						if(comma) comma = false; else this.invalidChar();
+						break;
+					default:
+						if(comma) this.invalidChar();
+						this.pos--;
+						arr.push(this.parseRec());
+						comma = true;
+					}
+				}
+				break;
+			case 116:
+				var save = this.pos;
+				if(this.str.charCodeAt(this.pos++) != 114 || this.str.charCodeAt(this.pos++) != 117 || this.str.charCodeAt(this.pos++) != 101) {
+					this.pos = save;
+					this.invalidChar();
+				}
+				return true;
+			case 102:
+				var save = this.pos;
+				if(this.str.charCodeAt(this.pos++) != 97 || this.str.charCodeAt(this.pos++) != 108 || this.str.charCodeAt(this.pos++) != 115 || this.str.charCodeAt(this.pos++) != 101) {
+					this.pos = save;
+					this.invalidChar();
+				}
+				return false;
+			case 110:
+				var save = this.pos;
+				if(this.str.charCodeAt(this.pos++) != 117 || this.str.charCodeAt(this.pos++) != 108 || this.str.charCodeAt(this.pos++) != 108) {
+					this.pos = save;
+					this.invalidChar();
+				}
+				return null;
+			case 34:
+				return this.parseString();
+			case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:case 45:
+				return this.parseNumber(c);
+			default:
+				this.invalidChar();
+			}
+		}
+	}
+	,invalidChar: function() {
+		this.pos--;
+		throw "Invalid char " + this.str.charCodeAt(this.pos) + " at position " + this.pos;
+	}
+	,doParse: function(str) {
+		this.str = str;
+		this.pos = 0;
+		return this.parseRec();
+	}
+	,__class__: haxe.Json
+}
+haxe.Http = function(url) {
+	this.url = url;
+	this.headers = new haxe.ds.StringMap();
+	this.params = new haxe.ds.StringMap();
+	this.async = true;
+};
+$hxClasses["haxe.Http"] = haxe.Http;
+haxe.Http.__name__ = ["haxe","Http"];
+haxe.Http.prototype = {
+	onStatus: function(status) {
+	}
+	,onError: function(msg) {
+	}
+	,onData: function(data) {
+	}
+	,request: function(post) {
+		var me = this;
+		me.responseData = null;
+		var r = js.Browser.createXMLHttpRequest();
+		var onreadystatechange = function(_) {
+			if(r.readyState != 4) return;
+			var s = (function($this) {
+				var $r;
+				try {
+					$r = r.status;
+				} catch( e ) {
+					$r = null;
+				}
+				return $r;
+			}(this));
+			if(s == undefined) s = null;
+			if(s != null) me.onStatus(s);
+			if(s != null && s >= 200 && s < 400) me.onData(me.responseData = r.responseText); else if(s == null) me.onError("Failed to connect or resolve host"); else switch(s) {
+			case 12029:
+				me.onError("Failed to connect to host");
+				break;
+			case 12007:
+				me.onError("Unknown host");
+				break;
+			default:
+				me.responseData = r.responseText;
+				me.onError("Http Error #" + r.status);
+			}
+		};
+		if(this.async) r.onreadystatechange = onreadystatechange;
+		var uri = this.postData;
+		if(uri != null) post = true; else {
+			var $it0 = this.params.keys();
+			while( $it0.hasNext() ) {
+				var p = $it0.next();
+				if(uri == null) uri = ""; else uri += "&";
+				uri += StringTools.urlEncode(p) + "=" + StringTools.urlEncode(this.params.get(p));
+			}
+		}
+		try {
+			if(post) r.open("POST",this.url,this.async); else if(uri != null) {
+				var question = this.url.split("?").length <= 1;
+				r.open("GET",this.url + (question?"?":"&") + uri,this.async);
+				uri = null;
+			} else r.open("GET",this.url,this.async);
+		} catch( e ) {
+			this.onError(e.toString());
+			return;
+		}
+		if(this.headers.get("Content-Type") == null && post && this.postData == null) r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+		var $it1 = this.headers.keys();
+		while( $it1.hasNext() ) {
+			var h = $it1.next();
+			r.setRequestHeader(h,this.headers.get(h));
+		}
+		r.send(uri);
+		if(!this.async) onreadystatechange(null);
+	}
+	,setPostData: function(data) {
+		this.postData = data;
+		return this;
+	}
+	,setHeader: function(header,value) {
+		this.headers.set(header,value);
+		return this;
+	}
+	,__class__: haxe.Http
+}
+var IMap = function() { }
+$hxClasses["IMap"] = IMap;
+IMap.__name__ = ["IMap"];
+haxe.ds = {}
+haxe.ds.StringMap = function() {
+	this.h = { };
+};
+$hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
+haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
+haxe.ds.StringMap.__interfaces__ = [IMap];
+haxe.ds.StringMap.prototype = {
+	keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
+		}
+		return HxOverrides.iter(a);
+	}
+	,exists: function(key) {
+		return this.h.hasOwnProperty("$" + key);
+	}
+	,get: function(key) {
+		return this.h["$" + key];
+	}
+	,set: function(key,value) {
+		this.h["$" + key] = value;
+	}
+	,__class__: haxe.ds.StringMap
+}
+var Std = function() { }
+$hxClasses["Std"] = Std;
+Std.__name__ = ["Std"];
+Std.string = function(s) {
+	return js.Boot.__string_rec(s,"");
+}
+Std.parseInt = function(x) {
+	var v = parseInt(x,10);
+	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
+	if(isNaN(v)) return null;
+	return v;
+}
+Std.parseFloat = function(x) {
+	return parseFloat(x);
+}
+var js = {}
+js.Boot = function() { }
+$hxClasses["js.Boot"] = js.Boot;
+js.Boot.__name__ = ["js","Boot"];
+js.Boot.__string_rec = function(o,s) {
+	if(o == null) return "null";
+	if(s.length >= 5) return "<...>";
+	var t = typeof(o);
+	if(t == "function" && (o.__name__ || o.__ename__)) t = "object";
+	switch(t) {
+	case "object":
+		if(o instanceof Array) {
+			if(o.__enum__) {
+				if(o.length == 2) return o[0];
+				var str = o[0] + "(";
+				s += "\t";
+				var _g1 = 2, _g = o.length;
+				while(_g1 < _g) {
+					var i = _g1++;
+					if(i != 2) str += "," + js.Boot.__string_rec(o[i],s); else str += js.Boot.__string_rec(o[i],s);
+				}
+				return str + ")";
+			}
+			var l = o.length;
+			var i;
+			var str = "[";
+			s += "\t";
+			var _g = 0;
+			while(_g < l) {
+				var i1 = _g++;
+				str += (i1 > 0?",":"") + js.Boot.__string_rec(o[i1],s);
+			}
+			str += "]";
+			return str;
+		}
+		var tostr;
+		try {
+			tostr = o.toString;
+		} catch( e ) {
+			return "???";
+		}
+		if(tostr != null && tostr != Object.toString) {
+			var s2 = o.toString();
+			if(s2 != "[object Object]") return s2;
+		}
+		var k = null;
+		var str = "{\n";
+		s += "\t";
+		var hasp = o.hasOwnProperty != null;
+		for( var k in o ) { ;
+		if(hasp && !o.hasOwnProperty(k)) {
+			continue;
+		}
+		if(k == "prototype" || k == "__class__" || k == "__super__" || k == "__interfaces__" || k == "__properties__") {
+			continue;
+		}
+		if(str.length != 2) str += ", \n";
+		str += s + k + " : " + js.Boot.__string_rec(o[k],s);
+		}
+		s = s.substring(1);
+		str += "\n" + s + "}";
+		return str;
+	case "function":
+		return "<function>";
+	case "string":
+		return o;
+	default:
+		return String(o);
+	}
+}
+js.Boot.__interfLoop = function(cc,cl) {
+	if(cc == null) return false;
+	if(cc == cl) return true;
+	var intf = cc.__interfaces__;
+	if(intf != null) {
+		var _g1 = 0, _g = intf.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var i1 = intf[i];
+			if(i1 == cl || js.Boot.__interfLoop(i1,cl)) return true;
+		}
+	}
+	return js.Boot.__interfLoop(cc.__super__,cl);
+}
+js.Boot.__instanceof = function(o,cl) {
+	try {
+		if(o instanceof cl) {
+			if(cl == Array) return o.__enum__ == null;
+			return true;
+		}
+		if(js.Boot.__interfLoop(o.__class__,cl)) return true;
+	} catch( e ) {
+		if(cl == null) return false;
+	}
+	switch(cl) {
+	case Int:
+		return Math.ceil(o%2147483648.0) === o;
+	case Float:
+		return typeof(o) == "number";
+	case Bool:
+		return o === true || o === false;
+	case String:
+		return typeof(o) == "string";
+	case Dynamic:
+		return true;
+	default:
+		if(o == null) return false;
+		if(cl == Class && o.__name__ != null) return true; else null;
+		if(cl == Enum && o.__ename__ != null) return true; else null;
+		return o.__enum__ == cl;
+	}
+}
+var Reflect = function() { }
+$hxClasses["Reflect"] = Reflect;
+Reflect.__name__ = ["Reflect"];
+Reflect.hasField = function(o,field) {
+	return Object.prototype.hasOwnProperty.call(o,field);
+}
+Reflect.field = function(o,field) {
+	var v = null;
+	try {
+		v = o[field];
+	} catch( e ) {
+	}
+	return v;
+}
+Reflect.fields = function(o) {
+	var a = [];
+	if(o != null) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		for( var f in o ) {
+		if(f != "__id__" && hasOwnProperty.call(o,f)) a.push(f);
+		}
+	}
+	return a;
+}
+Reflect.isFunction = function(f) {
+	return typeof(f) == "function" && !(f.__name__ || f.__ename__);
+}
+Reflect.deleteField = function(o,field) {
+	if(!Reflect.hasField(o,field)) return false;
+	delete(o[field]);
+	return true;
+}
+var parser = {}
+parser.MediaWiki = function() { }
+$hxClasses["parser.MediaWiki"] = parser.MediaWiki;
+parser.MediaWiki.__name__ = ["parser","MediaWiki"];
+parser.MediaWiki.parse = function(s,base) {
+	var _g = 0, _g1 = parser.MediaWiki.regex;
+	while(_g < _g1.length) {
+		var r = _g1[_g];
+		++_g;
+		var i = 0;
+		while(r.from.match(s) && i++ < 64) {
+			s = r.from.replace(s,r.to);
+			var p = r.from.matchedPos();
+		}
+	}
+	s = StringTools.replace(s,"$BASE","http://" + base);
+	if(StringTools.startsWith(s,"<br>")) s = HxOverrides.substr(s,4,null);
+	if(s.split("{{").length < s.split("}}").length) s = HxOverrides.substr(s,s.indexOf("}}") + 2,null);
+	return s;
+}
+parser.MediaWiki.trimTo = function(h,s) {
+	console.log("Trimming...");
+	s = StringTools.trim(StringTools.replace(s,"_"," "));
+	var pos = { pos : 0, len : 0}, level = null;
+	while(parser.MediaWiki.sections.matchSub(h,pos.pos + pos.len)) {
+		pos = parser.MediaWiki.sections.matchedPos();
+		if(StringTools.trim(parser.MediaWiki.sections.matched(2)) == StringTools.trim(s)) {
+			level = parser.MediaWiki.sections.matched(1).length;
+			break;
+		}
+		console.log("Pos: " + Std.string(pos) + " level: " + level + " name: " + parser.MediaWiki.sections.matched(1));
+	}
+	console.log("MATCHED IN SECCCTIYSHION: " + parser.MediaWiki.sections.matched(1));
+	if(level != null) {
+		h = HxOverrides.substr(h,pos.pos + pos.len,null);
+		h = HxOverrides.substr(h,0,h.indexOf("<h" + level + ">"));
+	}
+	return h;
+}
+parser.MediaWiki.getAlbum = function(s) {
+	var a = [];
+	while(parser.MediaWiki.IMAGES.match(s)) {
+		var p = parser.MediaWiki.IMAGES.matchedPos();
+		s = HxOverrides.substr(s,p.pos + p.len,null);
+		var name = parser.MediaWiki.IMAGES.matched(2) + "." + parser.MediaWiki.IMAGES.matched(3);
+		if(!StringTools.startsWith(name,"File:")) name = "File:" + name;
+		a.push({ url : name, caption : null});
+	}
+	console.log("Images: " + Std.string(a));
+	return a;
+}
+js.Browser = function() { }
+$hxClasses["js.Browser"] = js.Browser;
+js.Browser.__name__ = ["js","Browser"];
+js.Browser.getLocalStorage = function() {
+	try {
+		var s = js.Browser.window.localStorage;
+		s.getItem("");
+		return s;
+	} catch( e ) {
+		return null;
+	}
+}
+js.Browser.createXMLHttpRequest = function() {
+	if(typeof XMLHttpRequest != "undefined") return new XMLHttpRequest();
+	if(typeof ActiveXObject != "undefined") return new ActiveXObject("Microsoft.XMLHTTP");
+	throw "Unable to create XMLHttpRequest object.";
+}
+parser.Markdown = function() { }
+$hxClasses["parser.Markdown"] = parser.Markdown;
+parser.Markdown.__name__ = ["parser","Markdown"];
+parser.Markdown.parse = function(s) {
+	var _g = 0, _g1 = parser.Markdown.regex;
+	while(_g < _g1.length) {
+		var r = _g1[_g];
+		++_g;
+		while(r.from.match(s)) s = r.from.replace(s,r.to);
+	}
+	return s;
+}
+var Link = function() { }
+$hxClasses["Link"] = Link;
+Link.__name__ = ["Link"];
+Link.resolve = function(url) {
+	url = Link.trimURL(url);
+	var _g = 0, _g1 = Link.sites;
+	while(_g < _g1.length) {
+		var s = _g1[_g];
+		++_g;
+		try {
+			if(s.regex.match(url)) return s;
+		} catch( d ) {
+			console.log("Error " + Std.string(d) + " whilst processing regex " + Std.string(s.regex));
+		}
+	}
+	return null;
+}
+Link.trimURL = function(url) {
+	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
+	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null);
+	if(url.indexOf("&") != -1) url = HxOverrides.substr(url,0,url.indexOf("&"));
+	if(url.indexOf("?") != -1) url = HxOverrides.substr(url,0,url.indexOf("?"));
+	if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1) url = HxOverrides.substr(url,0,url.indexOf("#"));
+	return url;
+}
+Link.filterHTML = function(html) {
+	var _g = 0, _g1 = Link.HTML_FILTERS;
+	while(_g < _g1.length) {
+		var f = _g1[_g];
+		++_g;
+		html = f.replace(html,"");
+	}
+	return html;
+}
+var List = function() {
+	this.length = 0;
+};
+$hxClasses["List"] = List;
+List.__name__ = ["List"];
+List.prototype = {
+	iterator: function() {
+		return { h : this.h, hasNext : function() {
+			return this.h != null;
+		}, next : function() {
+			if(this.h == null) return null;
+			var x = this.h[0];
+			this.h = this.h[1];
+			return x;
+		}};
+	}
+	,add: function(item) {
+		var x = [item];
+		if(this.h == null) this.h = x; else this.q[1] = x;
+		this.q = x;
+		this.length++;
+	}
+	,__class__: List
+}
+var NSFWFilter = function() { }
+$hxClasses["NSFWFilter"] = NSFWFilter;
+NSFWFilter.__name__ = ["NSFWFilter"];
+NSFWFilter.init = function() {
+	var ns = js.Browser.document.body.getElementsByClassName("nsfw-stamp");
+	var _g = 0;
+	while(_g < ns.length) {
+		var n = ns[_g];
+		++_g;
+		if(n.nodeName.toLowerCase() != "li") continue;
+		Reditn.show(n.parentNode.parentNode.parentNode,false);
+	}
+}
+var Preview = function() { }
+$hxClasses["Preview"] = Preview;
+Preview.__name__ = ["Preview"];
+Preview.init = function() {
+	var ts = js.Browser.document.body.getElementsByClassName("usertext-edit");
+	var _g = 0;
+	while(_g < ts.length) {
+		var t = ts[_g];
+		++_g;
+		Preview.preview(t);
+	}
+}
+Preview.preview = function(e) {
+	var box = e.getElementsByTagName("textarea")[0];
+	if(box == null) return;
+	var preview = js.Browser.document.createElement("div");
+	e.appendChild(preview);
+	preview.className = "md";
+	var t = null;
+	box.onfocus = function(_) {
+		t = new haxe.Timer(100);
+		t.run = function() {
+			preview.innerHTML = parser.Markdown.parse(box.value);
+		};
+	};
+	box.onblur = function(_) {
+		t.stop();
+		t = null;
+	};
+}
+var Settings = function() { }
+$hxClasses["Settings"] = Settings;
+Settings.__name__ = ["Settings"];
+Settings.optimisedData = function() {
+	var e = new haxe.ds.StringMap();
+	var $it0 = Settings.data.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		var v = Settings.data.get(k);
+		if(Settings.DEFAULTS.get(k) != v) {
+			var value = v;
+			e.set(k,value);
+		}
+	}
+	return haxe.Serializer.run(e);
+}
+Settings.save = function() {
+	haxe.Serializer.USE_CACHE = false;
+	js.Browser.getLocalStorage().setItem("reditn",Settings.optimisedData());
+}
+Settings.init = function() {
+	var dt = js.Browser.getLocalStorage().getItem("reditn");
+	if(dt != null) Settings.data = (function($this) {
+		var $r;
+		try {
+			$r = haxe.Unserializer.run(dt);
+		} catch( e ) {
+			$r = Settings.data;
+		}
+		return $r;
+	}(this));
+	Settings.fixMissing();
+	var h = js.Browser.document.getElementById("header-bottom-right");
+	var prefs = h.getElementsByTagName("ul")[0];
+	var d = js.Browser.document.createElement("a");
+	d.innerHTML = "reditn";
+	d.className = "pref-lang";
+	d.href = "javascript:void(0);";
+	d.onclick = function(e) {
+		Settings.settingsPopUp();
+	};
+	if(prefs == null) h.appendChild(d); else h.insertBefore(d,prefs);
+	var sep = js.Browser.document.createElement("span");
+	sep.innerHTML = " | ";
+	sep.className = "seperator";
+	sep.style.fontWeight = "none";
+	h.insertBefore(sep,prefs);
+}
+Settings.settingsPopUp = function() {
+	var old = js.Browser.document.getElementById("reditn-config");
+	if(old != null) old.parentNode.removeChild(old);
+	var e = js.Browser.document.createElement("div");
+	var h = js.Browser.document.createElement("h1");
+	h.innerHTML = "Reditn settings";
+	e.appendChild(h);
+	Reditn.fullPopUp(e);
+	var form = js.Browser.document.createElement("form");
+	form.id = "reditn-config";
+	form.action = "javascript:void(0);";
+	form.onchange = function(ev) {
+		var a = form.childNodes;
+		var _g = 0;
+		while(_g < a.length) {
+			var i = a[_g];
+			++_g;
+			if(i.type == "button") continue;
+			if(i.nodeName.toLowerCase() != "input") continue;
+			var i1 = i;
+			var val = (function($this) {
+				var $r;
+				var _g1 = i1.type.toLowerCase();
+				$r = (function($this) {
+					var $r;
+					switch(_g1) {
+					case "checkbox":
+						$r = i1.checked;
+						break;
+					default:
+						$r = i1.value;
+					}
+					return $r;
+				}($this));
+				return $r;
+			}(this));
+			Settings.data.set(i1.name,val);
+		}
+		Settings.save();
+	};
+	var delb = js.Browser.document.createElement("input");
+	delb.type = "button";
+	delb.value = "Restore default settings";
+	delb.onclick = function(_) {
+		Settings.fixMissing(true);
+		Settings.save();
+		Settings.settingsPopUp();
+	};
+	form.appendChild(delb);
+	var $export = Settings.makeButton("Export settings to text",function() {
+		js.Browser.window.alert(js.Browser.window.btoa(Settings.optimisedData()));
+	});
+	form.appendChild($export);
+	var importbtn = Settings.makeButton("Import settings",function() {
+		Settings.data = haxe.Unserializer.run(js.Browser.window.atob(js.Browser.window.prompt("Settings to import",js.Browser.window.btoa(Settings.optimisedData()))));
+		Settings.fixMissing();
+		Settings.save();
+		Settings.settingsPopUp();
+	});
+	form.appendChild(importbtn);
+	form.appendChild(js.Browser.document.createElement("br"));
+	var $it0 = Settings.data.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		var d = Settings.data.get(k);
+		if(!js.Boot.__instanceof(d,haxe.ds.StringMap) && Settings.DESC.exists(k)) {
+			var l = Settings.DESC.get(k);
+			var label = js.Browser.document.createElement("label");
+			label.setAttribute("for",k);
+			label.style.position = "absolute";
+			label.style.width = "46%";
+			label.style.textAlign = "right";
+			label.innerHTML = "" + l + " ";
+			form.appendChild(label);
+			var input = js.Browser.document.createElement("input");
+			input.style.position = "absolute";
+			input.style.left = "54%";
+			input.style.textAlign = "left";
+			input.style.width = "46%";
+			input.name = k;
+			form.appendChild(input);
+			form.appendChild(js.Browser.document.createElement("br"));
+			input.type = js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":null;
+			if(js.Boot.__instanceof(d,Bool)) input.checked = Settings.data.get(k); else input.value = Settings.data.get(k);
+		}
+	}
+	var note = js.Browser.document.createElement("div");
+	note.style.fontWeight = "bold";
+	note.innerHTML = "Close this dialog and refresh the page to see your changes in effect. Changes will be saved automatically.";
+	form.appendChild(note);
+	e.appendChild(form);
+}
+Settings.makeButton = function(t,fn) {
+	var b = js.Browser.document.createElement("input");
+	b.type = "button";
+	b.value = t;
+	b.onclick = fn;
+	return b;
+}
+Settings.fixMissing = function(all) {
+	if(all == null) all = false;
+	var $it0 = Settings.DEFAULTS.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		if(all || !Settings.data.exists(k)) Settings.data.set(k,js.Boot.__instanceof(Settings.DEFAULTS.get(k),haxe.ds.StringMap)?new haxe.ds.StringMap():Settings.DEFAULTS.get(k));
+	}
+}
+var StringBuf = function() {
+	this.b = "";
+};
+$hxClasses["StringBuf"] = StringBuf;
+StringBuf.__name__ = ["StringBuf"];
+StringBuf.prototype = {
+	addSub: function(s,pos,len) {
+		this.b += len == null?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len);
+	}
+	,__class__: StringBuf
+}
+var Style = function() { }
+$hxClasses["Style"] = Style;
+Style.__name__ = ["Style"];
+Style.init = function() {
+	var s = js.Browser.document.createElement("style");
+	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}";
+	js.Browser.document.head.appendChild(s);
+}
+var SubredditInfo = function() { }
+$hxClasses["SubredditInfo"] = SubredditInfo;
+SubredditInfo.__name__ = ["SubredditInfo"];
+SubredditInfo.init = function() {
+	var subs = js.Browser.document.body.getElementsByClassName("subreddit");
+	var _g = 0;
+	while(_g < subs.length) {
+		var i = subs[_g];
+		++_g;
+		i.onmouseover = SubredditInfo._onMouseOverSubreddit;
+	}
+}
+SubredditInfo._onMouseOverSubreddit = function(e) {
+	var e1 = e.target;
+	var name = e1.innerHTML;
+	var div = js.Browser.document.createElement("div");
+	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
+	Reditn.getJSON("/r/" + name + "/about.json",function(d) {
+		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = parser.Markdown.parse(d.public_description), age = Reditn.age(d.created_utc);
+		var html = "<b>Name:</b> " + name + " <br>";
+		var ts = Settings.data.get("sub-tags");
+		if(ts.exists(name)) html += "<b>Tag:</b> " + ts.get(name) + "<br>";
+		html += "<b>Subscribers:</b> " + subs + " <br>";
+		html += "<b>Active Users:</b> " + users + " <br>";
+		html += "<b>Description:</b> " + desc + " <br>";
+		html += "<b>Age:</b> " + age + " <br>";
+		div.innerHTML = html;
+	});
+}
+var SubredditTagger = function() { }
+$hxClasses["SubredditTagger"] = SubredditTagger;
+SubredditTagger.__name__ = ["SubredditTagger"];
+SubredditTagger.init = function() {
+	var d = js.Browser.document.body.getElementsByClassName("subreddit");
+	var _g = 0;
+	while(_g < d.length) {
+		var s = d[_g];
+		++_g;
+		SubredditTagger.getTag(s);
+	}
+}
+SubredditTagger.getTag = function(a) {
+	var tagline = a.parentNode;
+	var tag = js.Browser.document.createElement("span");
+	var sub = StringTools.trim(a.innerHTML);
+	var currentTag = Settings.data.get("sub-tags").exists(sub)?Settings.data.get("sub-tags").get(sub):null;
+	tag.className = "flair";
+	var tagName = js.Browser.document.createElement("span");
+	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
+	tag.appendChild(tagName);
+	var link = js.Browser.document.createElement("a");
+	link.href = "javascript:void(0);";
+	link.innerHTML = "[+]";
+	tag.appendChild(link);
+	link.onclick = function(e) {
+		var div = js.Browser.document.createElement("div");
+		var label = js.Browser.document.createElement("label");
+		label.setAttribute("for","tag-change");
+		label.innerHTML = "Tag for " + sub + " ";
+		div.appendChild(label);
+		var box = js.Browser.document.createElement("input");
+		box.name = "tag-change";
+		box.value = currentTag;
+		box.style.width = "100%";
+		box.onchange = function(ev) {
+			Settings.data.get("sub-tags").set(sub,box.value);
+			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.save();
+			div.parentNode.removeChild(div);
+		};
+		div.appendChild(box);
+		Reditn.fullPopUp(div,link.offsetTop + link.offsetHeight);
+		box.focus();
+	};
+	a.parentNode.insertBefore(tag,a.nextSibling);
+}
+var ValueType = $hxClasses["ValueType"] = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
+ValueType.TNull = ["TNull",0];
+ValueType.TNull.toString = $estr;
+ValueType.TNull.__enum__ = ValueType;
+ValueType.TInt = ["TInt",1];
+ValueType.TInt.toString = $estr;
+ValueType.TInt.__enum__ = ValueType;
+ValueType.TFloat = ["TFloat",2];
+ValueType.TFloat.toString = $estr;
+ValueType.TFloat.__enum__ = ValueType;
+ValueType.TBool = ["TBool",3];
+ValueType.TBool.toString = $estr;
+ValueType.TBool.__enum__ = ValueType;
+ValueType.TObject = ["TObject",4];
+ValueType.TObject.toString = $estr;
+ValueType.TObject.__enum__ = ValueType;
+ValueType.TFunction = ["TFunction",5];
+ValueType.TFunction.toString = $estr;
+ValueType.TFunction.__enum__ = ValueType;
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; }
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; }
+ValueType.TUnknown = ["TUnknown",8];
+ValueType.TUnknown.toString = $estr;
+ValueType.TUnknown.__enum__ = ValueType;
+var Type = function() { }
+$hxClasses["Type"] = Type;
+Type.__name__ = ["Type"];
+Type.getClassName = function(c) {
+	var a = c.__name__;
+	return a.join(".");
+}
+Type.getEnumName = function(e) {
+	var a = e.__ename__;
+	return a.join(".");
+}
+Type.resolveClass = function(name) {
+	var cl = $hxClasses[name];
+	if(cl == null || !cl.__name__) return null;
+	return cl;
+}
+Type.resolveEnum = function(name) {
+	var e = $hxClasses[name];
+	if(e == null || !e.__ename__) return null;
+	return e;
+}
+Type.createEmptyInstance = function(cl) {
+	function empty() {}; empty.prototype = cl.prototype;
+	return new empty();
+}
+Type.createEnum = function(e,constr,params) {
+	var f = Reflect.field(e,constr);
+	if(f == null) throw "No such constructor " + constr;
+	if(Reflect.isFunction(f)) {
+		if(params == null) throw "Constructor " + constr + " need parameters";
+		return f.apply(e,params);
+	}
+	if(params != null && params.length != 0) throw "Constructor " + constr + " does not need parameters";
+	return f;
+}
+Type.getEnumConstructs = function(e) {
+	var a = e.__constructs__;
+	return a.slice();
+}
+Type["typeof"] = function(v) {
+	var _g = typeof(v);
+	switch(_g) {
+	case "boolean":
+		return ValueType.TBool;
+	case "string":
+		return ValueType.TClass(String);
+	case "number":
+		if(Math.ceil(v) == v % 2147483648.0) return ValueType.TInt;
+		return ValueType.TFloat;
+	case "object":
+		if(v == null) return ValueType.TNull;
+		var e = v.__enum__;
+		if(e != null) return ValueType.TEnum(e);
+		var c = v.__class__;
+		if(c != null) return ValueType.TClass(c);
+		return ValueType.TObject;
+	case "function":
+		if(v.__name__ || v.__ename__) return ValueType.TObject;
+		return ValueType.TFunction;
+	case "undefined":
+		return ValueType.TNull;
+	default:
+		return ValueType.TUnknown;
+	}
+}
+var UserInfo = function() { }
+$hxClasses["UserInfo"] = UserInfo;
+UserInfo.__name__ = ["UserInfo"];
+UserInfo.init = function() {
+	var users = js.Browser.document.body.getElementsByClassName("author");
+	var _g = 0;
+	while(_g < users.length) {
+		var i = users[_g];
+		++_g;
+		i.onmouseover = UserInfo._onMouseOverUser;
+	}
+}
+UserInfo._onMouseOverUser = function(e) {
+	var e1 = e.target;
+	var user = e1.innerHTML;
+	user = HxOverrides.substr(user,user.lastIndexOf("/") + 1,null);
+	var div = js.Browser.document.createElement("div");
+	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
+	Reditn.getJSON("/user/" + user + "/about.json",function(i) {
+		var name = i.name, age = Reditn.age(i.created_utc), linkKarma = Reditn.formatNumber(i.link_karma), commentKarma = Reditn.formatNumber(i.comment_karma);
+		var html = "<b>User:</b> " + name + "<br>";
+		var ts = Settings.data.get("user-tags");
+		if(ts.exists(name)) html += "<b>Tag:</b> " + ts.get(name) + "<br>";
+		html += "<b>Account age:</b> " + age + "<br>";
+		html += "<b>Karma:</b> " + linkKarma + " link karma, " + commentKarma + " comment karma";
+		if(i.is_mod) html += "<br><b>Moderator</b>";
+		if(i.is_gold) html += "<br><b>Gold</b>";
+		div.innerHTML = html;
+	});
+}
+var UserTagger = function() { }
+$hxClasses["UserTagger"] = UserTagger;
+UserTagger.__name__ = ["UserTagger"];
+UserTagger.init = function() {
+	var authors = js.Browser.document.body.getElementsByClassName("author");
+	var _g = 0;
+	while(_g < authors.length) {
+		var a = authors[_g];
+		++_g;
+		UserTagger.getTag(a);
+	}
+}
+UserTagger.getTag = function(a) {
+	var tagline = a.parentNode;
+	var tag = js.Browser.document.createElement("span");
+	var user = StringTools.trim(a.innerHTML);
+	var currentTag = Settings.data.get("user-tags").exists(user)?Settings.data.get("user-tags").get(user):null;
+	tag.className = "flair";
+	var tagName = js.Browser.document.createElement("span");
+	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
+	tag.appendChild(tagName);
+	var link = js.Browser.document.createElement("a");
+	link.href = "javascript:void(0);";
+	link.innerHTML = "[+]";
+	tag.appendChild(link);
+	link.onclick = function(e) {
+		var div = js.Browser.document.createElement("div");
+		var label = js.Browser.document.createElement("label");
+		label.setAttribute("for","tag-change");
+		label.innerHTML = "Tag for " + user + " ";
+		div.appendChild(label);
+		var box = js.Browser.document.createElement("input");
+		box.name = "tag-change";
+		box.value = currentTag;
+		box.style.width = "100%";
+		box.onchange = function(ev) {
+			Settings.data.get("user-tags").set(user,box.value);
+			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.save();
+			div.parentNode.removeChild(div);
+		};
+		div.appendChild(box);
+		Reditn.fullPopUp(div,link.offsetTop + link.offsetHeight);
+		box.focus();
+	};
+	a.parentNode.insertBefore(tag,a.nextSibling);
+}
+haxe.Serializer = function() {
+	this.buf = new StringBuf();
+	this.cache = new Array();
+	this.useCache = haxe.Serializer.USE_CACHE;
+	this.useEnumIndex = haxe.Serializer.USE_ENUM_INDEX;
+	this.shash = new haxe.ds.StringMap();
+	this.scount = 0;
+};
+$hxClasses["haxe.Serializer"] = haxe.Serializer;
+haxe.Serializer.__name__ = ["haxe","Serializer"];
+haxe.Serializer.run = function(v) {
+	var s = new haxe.Serializer();
+	s.serialize(v);
+	return s.toString();
+}
+haxe.Serializer.prototype = {
+	serialize: function(v) {
+		var _g = Type["typeof"](v);
+		var $e = (_g);
+		switch( $e[1] ) {
+		case 0:
+			this.buf.b += "n";
+			break;
+		case 1:
+			if(v == 0) {
+				this.buf.b += "z";
+				return;
+			}
+			this.buf.b += "i";
+			this.buf.b += Std.string(v);
+			break;
+		case 2:
+			if(Math.isNaN(v)) this.buf.b += "k"; else if(!Math.isFinite(v)) this.buf.b += Std.string(v < 0?"m":"p"); else {
+				this.buf.b += "d";
+				this.buf.b += Std.string(v);
+			}
+			break;
+		case 3:
+			this.buf.b += Std.string(v?"t":"f");
+			break;
+		case 6:
+			var _g_eTClass_0 = $e[2];
+			if(_g_eTClass_0 == String) {
+				this.serializeString(v);
+				return;
+			}
+			if(this.useCache && this.serializeRef(v)) return;
+			switch(_g_eTClass_0) {
+			case Array:
+				var ucount = 0;
+				this.buf.b += "a";
+				var l = v.length;
+				var _g1 = 0;
+				while(_g1 < l) {
+					var i = _g1++;
+					if(v[i] == null) ucount++; else {
+						if(ucount > 0) {
+							if(ucount == 1) this.buf.b += "n"; else {
+								this.buf.b += "u";
+								this.buf.b += Std.string(ucount);
+							}
+							ucount = 0;
+						}
+						this.serialize(v[i]);
+					}
+				}
+				if(ucount > 0) {
+					if(ucount == 1) this.buf.b += "n"; else {
+						this.buf.b += "u";
+						this.buf.b += Std.string(ucount);
+					}
+				}
+				this.buf.b += "h";
+				break;
+			case List:
+				this.buf.b += "l";
+				var v1 = v;
+				var $it0 = v1.iterator();
+				while( $it0.hasNext() ) {
+					var i = $it0.next();
+					this.serialize(i);
+				}
+				this.buf.b += "h";
+				break;
+			case Date:
+				var d = v;
+				this.buf.b += "v";
+				this.buf.b += Std.string(HxOverrides.dateStr(d));
+				break;
+			case haxe.ds.StringMap:
+				this.buf.b += "b";
+				var v1 = v;
+				var $it1 = v1.keys();
+				while( $it1.hasNext() ) {
+					var k = $it1.next();
+					this.serializeString(k);
+					this.serialize(v1.get(k));
+				}
+				this.buf.b += "h";
+				break;
+			case haxe.ds.IntMap:
+				this.buf.b += "q";
+				var v1 = v;
+				var $it2 = v1.keys();
+				while( $it2.hasNext() ) {
+					var k = $it2.next();
+					this.buf.b += ":";
+					this.buf.b += Std.string(k);
+					this.serialize(v1.get(k));
+				}
+				this.buf.b += "h";
+				break;
+			case haxe.ds.ObjectMap:
+				this.buf.b += "M";
+				var v1 = v;
+				var $it3 = v1.keys();
+				while( $it3.hasNext() ) {
+					var k = $it3.next();
+					var id = Reflect.field(k,"__id__");
+					Reflect.deleteField(k,"__id__");
+					this.serialize(k);
+					k.__id__ = id;
+					this.serialize(v1.h[k.__id__]);
+				}
+				this.buf.b += "h";
+				break;
+			case haxe.io.Bytes:
+				var v1 = v;
+				var i = 0;
+				var max = v1.length - 2;
+				var charsBuf = new StringBuf();
+				var b64 = haxe.Serializer.BASE64;
+				while(i < max) {
+					var b1 = v1.b[i++];
+					var b2 = v1.b[i++];
+					var b3 = v1.b[i++];
+					charsBuf.b += Std.string(b64.charAt(b1 >> 2));
+					charsBuf.b += Std.string(b64.charAt((b1 << 4 | b2 >> 4) & 63));
+					charsBuf.b += Std.string(b64.charAt((b2 << 2 | b3 >> 6) & 63));
+					charsBuf.b += Std.string(b64.charAt(b3 & 63));
+				}
+				if(i == max) {
+					var b1 = v1.b[i++];
+					var b2 = v1.b[i++];
+					charsBuf.b += Std.string(b64.charAt(b1 >> 2));
+					charsBuf.b += Std.string(b64.charAt((b1 << 4 | b2 >> 4) & 63));
+					charsBuf.b += Std.string(b64.charAt(b2 << 2 & 63));
+				} else if(i == max + 1) {
+					var b1 = v1.b[i++];
+					charsBuf.b += Std.string(b64.charAt(b1 >> 2));
+					charsBuf.b += Std.string(b64.charAt(b1 << 4 & 63));
+				}
+				var chars = charsBuf.b;
+				this.buf.b += "s";
+				this.buf.b += Std.string(chars.length);
+				this.buf.b += ":";
+				this.buf.b += Std.string(chars);
+				break;
+			default:
+				this.cache.pop();
+				if(v.hxSerialize != null) {
+					this.buf.b += "C";
+					this.serializeString(Type.getClassName(_g_eTClass_0));
+					this.cache.push(v);
+					v.hxSerialize(this);
+					this.buf.b += "g";
+				} else {
+					this.buf.b += "c";
+					this.serializeString(Type.getClassName(_g_eTClass_0));
+					this.cache.push(v);
+					this.serializeFields(v);
+				}
+			}
+			break;
+		case 4:
+			if(this.useCache && this.serializeRef(v)) return;
+			this.buf.b += "o";
+			this.serializeFields(v);
+			break;
+		case 7:
+			var _g_eTEnum_0 = $e[2];
+			if(this.useCache && this.serializeRef(v)) return;
+			this.cache.pop();
+			this.buf.b += Std.string(this.useEnumIndex?"j":"w");
+			this.serializeString(Type.getEnumName(_g_eTEnum_0));
+			if(this.useEnumIndex) {
+				this.buf.b += ":";
+				this.buf.b += Std.string(v[1]);
+			} else this.serializeString(v[0]);
+			this.buf.b += ":";
+			var l = v.length;
+			this.buf.b += Std.string(l - 2);
+			var _g1 = 2;
+			while(_g1 < l) {
+				var i = _g1++;
+				this.serialize(v[i]);
+			}
+			this.cache.push(v);
+			break;
+		case 5:
+			throw "Cannot serialize function";
+			break;
+		default:
+			throw "Cannot serialize " + Std.string(v);
+		}
+	}
+	,serializeFields: function(v) {
+		var _g = 0, _g1 = Reflect.fields(v);
+		while(_g < _g1.length) {
+			var f = _g1[_g];
+			++_g;
+			this.serializeString(f);
+			this.serialize(Reflect.field(v,f));
+		}
+		this.buf.b += "g";
+	}
+	,serializeRef: function(v) {
+		var vt = typeof(v);
+		var _g1 = 0, _g = this.cache.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var ci = this.cache[i];
+			if(typeof(ci) == vt && ci == v) {
+				this.buf.b += "r";
+				this.buf.b += Std.string(i);
+				return true;
+			}
+		}
+		this.cache.push(v);
+		return false;
+	}
+	,serializeString: function(s) {
+		var x = this.shash.get(s);
+		if(x != null) {
+			this.buf.b += "R";
+			this.buf.b += Std.string(x);
+			return;
+		}
+		this.shash.set(s,this.scount++);
+		this.buf.b += "y";
+		s = StringTools.urlEncode(s);
+		this.buf.b += Std.string(s.length);
+		this.buf.b += ":";
+		this.buf.b += Std.string(s);
+	}
+	,toString: function() {
+		return this.buf.b;
+	}
+	,__class__: haxe.Serializer
+}
+haxe.Timer = function(time_ms) {
+	var me = this;
+	this.id = setInterval(function() {
+		me.run();
+	},time_ms);
+};
+$hxClasses["haxe.Timer"] = haxe.Timer;
+haxe.Timer.__name__ = ["haxe","Timer"];
+haxe.Timer.stamp = function() {
+	return new Date().getTime() / 1000;
+}
+haxe.Timer.prototype = {
+	run: function() {
+		console.log("run");
+	}
+	,stop: function() {
+		if(this.id == null) return;
+		clearInterval(this.id);
+		this.id = null;
+	}
+	,__class__: haxe.Timer
+}
+haxe.Unserializer = function(buf) {
+	this.buf = buf;
+	this.length = buf.length;
+	this.pos = 0;
+	this.scache = new Array();
+	this.cache = new Array();
+	var r = haxe.Unserializer.DEFAULT_RESOLVER;
+	if(r == null) {
+		r = Type;
+		haxe.Unserializer.DEFAULT_RESOLVER = r;
+	}
+	this.setResolver(r);
+};
+$hxClasses["haxe.Unserializer"] = haxe.Unserializer;
+haxe.Unserializer.__name__ = ["haxe","Unserializer"];
+haxe.Unserializer.initCodes = function() {
+	var codes = new Array();
+	var _g1 = 0, _g = haxe.Unserializer.BASE64.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		codes[haxe.Unserializer.BASE64.charCodeAt(i)] = i;
+	}
+	return codes;
+}
+haxe.Unserializer.run = function(v) {
+	return new haxe.Unserializer(v).unserialize();
+}
+haxe.Unserializer.prototype = {
+	unserialize: function() {
+		var _g = this.buf.charCodeAt(this.pos++);
+		switch(_g) {
+		case 110:
+			return null;
+		case 116:
+			return true;
+		case 102:
+			return false;
+		case 122:
+			return 0;
+		case 105:
+			return this.readDigits();
+		case 100:
+			var p1 = this.pos;
+			while(true) {
+				var c = this.buf.charCodeAt(this.pos);
+				if(c >= 43 && c < 58 || c == 101 || c == 69) this.pos++; else break;
+			}
+			return Std.parseFloat(HxOverrides.substr(this.buf,p1,this.pos - p1));
+		case 121:
+			var len = this.readDigits();
+			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) throw "Invalid string length";
+			var s = HxOverrides.substr(this.buf,this.pos,len);
+			this.pos += len;
+			s = StringTools.urlDecode(s);
+			this.scache.push(s);
+			return s;
+		case 107:
+			return Math.NaN;
+		case 109:
+			return Math.NEGATIVE_INFINITY;
+		case 112:
+			return Math.POSITIVE_INFINITY;
+		case 97:
+			var buf = this.buf;
+			var a = new Array();
+			this.cache.push(a);
+			while(true) {
+				var c = this.buf.charCodeAt(this.pos);
+				if(c == 104) {
+					this.pos++;
+					break;
+				}
+				if(c == 117) {
+					this.pos++;
+					var n = this.readDigits();
+					a[a.length + n - 1] = null;
+				} else a.push(this.unserialize());
+			}
+			return a;
+		case 111:
+			var o = { };
+			this.cache.push(o);
+			this.unserializeObject(o);
+			return o;
+		case 114:
+			var n = this.readDigits();
+			if(n < 0 || n >= this.cache.length) throw "Invalid reference";
+			return this.cache[n];
+		case 82:
+			var n = this.readDigits();
+			if(n < 0 || n >= this.scache.length) throw "Invalid string reference";
+			return this.scache[n];
+		case 120:
+			throw this.unserialize();
+			break;
+		case 99:
+			var name = this.unserialize();
+			var cl = this.resolver.resolveClass(name);
+			if(cl == null) throw "Class not found " + name;
+			var o = Type.createEmptyInstance(cl);
+			this.cache.push(o);
+			this.unserializeObject(o);
+			return o;
+		case 119:
+			var name = this.unserialize();
+			var edecl = this.resolver.resolveEnum(name);
+			if(edecl == null) throw "Enum not found " + name;
+			var e = this.unserializeEnum(edecl,this.unserialize());
+			this.cache.push(e);
+			return e;
+		case 106:
+			var name = this.unserialize();
+			var edecl = this.resolver.resolveEnum(name);
+			if(edecl == null) throw "Enum not found " + name;
+			this.pos++;
+			var index = this.readDigits();
+			var tag = Type.getEnumConstructs(edecl)[index];
+			if(tag == null) throw "Unknown enum index " + name + "@" + index;
+			var e = this.unserializeEnum(edecl,tag);
+			this.cache.push(e);
+			return e;
+		case 108:
+			var l = new List();
+			this.cache.push(l);
+			var buf = this.buf;
+			while(this.buf.charCodeAt(this.pos) != 104) l.add(this.unserialize());
+			this.pos++;
+			return l;
+		case 98:
+			var h = new haxe.ds.StringMap();
+			this.cache.push(h);
+			var buf = this.buf;
+			while(this.buf.charCodeAt(this.pos) != 104) {
+				var s = this.unserialize();
+				h.set(s,this.unserialize());
+			}
+			this.pos++;
+			return h;
+		case 113:
+			var h = new haxe.ds.IntMap();
+			this.cache.push(h);
+			var buf = this.buf;
+			var c = this.buf.charCodeAt(this.pos++);
+			while(c == 58) {
+				var i = this.readDigits();
+				h.set(i,this.unserialize());
+				c = this.buf.charCodeAt(this.pos++);
+			}
+			if(c != 104) throw "Invalid IntMap format";
+			return h;
+		case 77:
+			var h = new haxe.ds.ObjectMap();
+			this.cache.push(h);
+			var buf = this.buf;
+			while(this.buf.charCodeAt(this.pos) != 104) {
+				var s = this.unserialize();
+				h.set(s,this.unserialize());
+			}
+			this.pos++;
+			return h;
+		case 118:
+			var d = HxOverrides.strDate(HxOverrides.substr(this.buf,this.pos,19));
+			this.cache.push(d);
+			this.pos += 19;
+			return d;
+		case 115:
+			var len = this.readDigits();
+			var buf = this.buf;
+			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) throw "Invalid bytes length";
+			var codes = haxe.Unserializer.CODES;
+			if(codes == null) {
+				codes = haxe.Unserializer.initCodes();
+				haxe.Unserializer.CODES = codes;
+			}
+			var i = this.pos;
+			var rest = len & 3;
+			var size = (len >> 2) * 3 + (rest >= 2?rest - 1:0);
+			var max = i + (len - rest);
+			var bytes = haxe.io.Bytes.alloc(size);
+			var bpos = 0;
+			while(i < max) {
+				var c1 = codes[buf.charCodeAt(i++)];
+				var c2 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = (c1 << 2 | c2 >> 4) & 255;
+				var c3 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = (c2 << 4 | c3 >> 2) & 255;
+				var c4 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = (c3 << 6 | c4) & 255;
+			}
+			if(rest >= 2) {
+				var c1 = codes[buf.charCodeAt(i++)];
+				var c2 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = (c1 << 2 | c2 >> 4) & 255;
+				if(rest == 3) {
+					var c3 = codes[buf.charCodeAt(i++)];
+					bytes.b[bpos++] = (c2 << 4 | c3 >> 2) & 255;
+				}
+			}
+			this.pos += len;
+			this.cache.push(bytes);
+			return bytes;
+		case 67:
+			var name = this.unserialize();
+			var cl = this.resolver.resolveClass(name);
+			if(cl == null) throw "Class not found " + name;
+			var o = Type.createEmptyInstance(cl);
+			this.cache.push(o);
+			o.hxUnserialize(this);
+			if(this.buf.charCodeAt(this.pos++) != 103) throw "Invalid custom data";
+			return o;
+		default:
+		}
+		this.pos--;
+		throw "Invalid char " + this.buf.charAt(this.pos) + " at position " + this.pos;
+	}
+	,unserializeEnum: function(edecl,tag) {
+		if(this.buf.charCodeAt(this.pos++) != 58) throw "Invalid enum format";
+		var nargs = this.readDigits();
+		if(nargs == 0) return Type.createEnum(edecl,tag);
+		var args = new Array();
+		while(nargs-- > 0) args.push(this.unserialize());
+		return Type.createEnum(edecl,tag,args);
+	}
+	,unserializeObject: function(o) {
+		while(true) {
+			if(this.pos >= this.length) throw "Invalid object";
+			if(this.buf.charCodeAt(this.pos) == 103) break;
+			var k = this.unserialize();
+			if(!js.Boot.__instanceof(k,String)) throw "Invalid object key";
+			var v = this.unserialize();
+			o[k] = v;
+		}
+		this.pos++;
+	}
+	,readDigits: function() {
+		var k = 0;
+		var s = false;
+		var fpos = this.pos;
+		while(true) {
+			var c = this.buf.charCodeAt(this.pos);
+			if(c != c) break;
+			if(c == 45) {
+				if(this.pos != fpos) break;
+				s = true;
+				this.pos++;
+				continue;
+			}
+			if(c < 48 || c > 57) break;
+			k = k * 10 + (c - 48);
+			this.pos++;
+		}
+		if(s) k *= -1;
+		return k;
+	}
+	,setResolver: function(r) {
+		if(r == null) this.resolver = { resolveClass : function(_) {
+			return null;
+		}, resolveEnum : function(_) {
+			return null;
+		}}; else this.resolver = r;
+	}
+	,__class__: haxe.Unserializer
+}
+haxe.ds.IntMap = function() {
+	this.h = { };
+};
+$hxClasses["haxe.ds.IntMap"] = haxe.ds.IntMap;
+haxe.ds.IntMap.__name__ = ["haxe","ds","IntMap"];
+haxe.ds.IntMap.__interfaces__ = [IMap];
+haxe.ds.IntMap.prototype = {
+	keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key | 0);
+		}
+		return HxOverrides.iter(a);
+	}
+	,get: function(key) {
+		return this.h[key];
+	}
+	,set: function(key,value) {
+		this.h[key] = value;
+	}
+	,__class__: haxe.ds.IntMap
+}
+haxe.ds.ObjectMap = function() {
+	this.h = { };
+	this.h.__keys__ = { };
+};
+$hxClasses["haxe.ds.ObjectMap"] = haxe.ds.ObjectMap;
+haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
+haxe.ds.ObjectMap.__interfaces__ = [IMap];
+haxe.ds.ObjectMap.prototype = {
+	keys: function() {
+		var a = [];
+		for( var key in this.h.__keys__ ) {
+		if(this.h.hasOwnProperty(key)) a.push(this.h.__keys__[key]);
+		}
+		return HxOverrides.iter(a);
+	}
+	,set: function(key,value) {
+		var id = key.__id__ != null?key.__id__:key.__id__ = ++haxe.ds.ObjectMap.count;
+		this.h[id] = value;
+		this.h.__keys__[id] = key;
+	}
+	,__class__: haxe.ds.ObjectMap
+}
+haxe.io = {}
+haxe.io.Bytes = function(length,b) {
+	this.length = length;
+	this.b = b;
+};
+$hxClasses["haxe.io.Bytes"] = haxe.io.Bytes;
+haxe.io.Bytes.__name__ = ["haxe","io","Bytes"];
+haxe.io.Bytes.alloc = function(length) {
+	var a = new Array();
+	var _g = 0;
+	while(_g < length) {
+		var i = _g++;
+		a.push(0);
+	}
+	return new haxe.io.Bytes(length,a);
+}
+haxe.io.Bytes.prototype = {
+	__class__: haxe.io.Bytes
+}
+function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
+var $_;
+function $bind(o,m) { var f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; return f; };
+if(Array.prototype.indexOf) HxOverrides.remove = function(a,o) {
+	var i = a.indexOf(o);
+	if(i == -1) return false;
+	a.splice(i,1);
+	return true;
+}; else null;
+if(typeof(JSON) != "undefined") haxe.Json = JSON;
+String.prototype.__class__ = $hxClasses.String = String;
+String.__name__ = ["String"];
+Array.prototype.__class__ = $hxClasses.Array = Array;
+Array.__name__ = ["Array"];
+Date.prototype.__class__ = $hxClasses.Date = Date;
+Date.__name__ = ["Date"];
+var Int = $hxClasses.Int = { __name__ : ["Int"]};
+var Dynamic = $hxClasses.Dynamic = { __name__ : ["Dynamic"]};
+var Float = $hxClasses.Float = Number;
+Float.__name__ = ["Float"];
+var Bool = $hxClasses.Bool = Boolean;
+Bool.__ename__ = ["Bool"];
+var Class = $hxClasses.Class = { __name__ : ["Class"]};
+var Enum = { };
+Math.__name__ = ["Math"];
+Math.NaN = Number.NaN;
+Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+$hxClasses.Math = Math;
+Math.isFinite = function(i) {
+	return isFinite(i);
+};
+Math.isNaN = function(i) {
+	return isNaN(i);
+};
+Expand.buttons = [];
+Reditn.fullPage = true;
+parser.MediaWiki.regex = [{ from : new EReg("\\[\\[Category:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("\\[\\[([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\n]*)\\|([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("<gallery>(.|\n|\n\r)*</gallery>",""), to : ""},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("(=*) ?(References|Gallery) ?\\1.*\\1?",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{convert\\|([0-9]*)\\|([^\\|]*)([^\\}]*)\\}\\}",""), to : "$1 $2"},{ from : new EReg("\\{\\{([^\\}]*)\\}\\}",""), to : ""},{ from : new EReg("\\{\\|(.|\n|\n\r)*\\|\\}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n\r?\n\r?",""), to : "<br>"},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""},{ from : new EReg("\\[\\]",""), to : ""}];
+parser.MediaWiki.sections = new EReg("'=(=*)([^=]*)=\\\\1\n\r?(.|\n|\n\r)*(\\\\1)?'","");
+parser.MediaWiki.IMAGES = new EReg("(File:|img=|Image:)([^\\.\\|\\]\\}\\{\\[<>=]*)\\.(gif|jpg|jpeg|bmp|png|webp|svg|raw)(\\|([^\\)]*))?","");
+js.Browser.window = typeof window != "undefined" ? window : null;
+js.Browser.document = typeof window != "undefined" ? window.document : null;
+parser.Markdown.images = new EReg("!\\[([^\\]]*)\\]\\(([^\\)\\.]+\\.(jpg|bmp|png|jpeg|gif))\\)","");
+parser.Markdown.regex = [{ from : new EReg("(\\*\\*|__)([^\\1\n]*?)\\1",""), to : "<b>$2</b>"},{ from : new EReg("(\\*|_)([^\\1\n]*?)\\1",""), to : "<em>$2</em>"},{ from : new EReg("^[\\*|+|-] (.*)$","m"), to : "<ul><li>$1</li></ul>"},{ from : new EReg("</ul><ul>",""), to : ""},{ from : new EReg("\n> (?=[^\n\r]*)",""), to : "<blockquote>$1</blockquote>"},{ from : new EReg("</blockquote>\n?\r?<blockquote>$",""), to : ""},{ from : new EReg("~~([^~]*?)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]+)",""), to : "<sup>$1</sup>"},{ from : new EReg(":\"([^:\"]*?)\":",""), to : "<q>$1</q>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\[]+)\\]\\(([^\\)]+)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("^#####([^#\n]+)(#####)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^####([^#\n]+)(####)?$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^###([^#\n]+)(###)?$","m"), to : "<h4>$1</h4>"},{ from : new EReg("^##([^#\n]+)(##)?$","m"), to : "<h5>$1</h5>"},{ from : new EReg("^#([^#\n]+)(#)?$","m"), to : "<h6>$1</h6>"},{ from : new EReg("^(#*)([^#\n])\\1?$","m"), to : "<h2>$2</h2>"},{ from : new EReg("(.*)\n\r?(?==+)\n",""), to : "<h3>$1</h3>"},{ from : new EReg("(.*)\n\r?(?=(-|#)+)\n",""), to : "<h2>$1</h2>"},{ from : new EReg("(```*|\")([^`\"\"]+)\\1","m"), to : "<pre>$2</pre>"},{ from : new EReg("<pre>(.*)\n\n(.*)</pre>",""), to : "<pre>$1\n$2</pre>"},{ from : new EReg("\n\n",""), to : "<br>\n"}];
+Link.HTML_IMG = new EReg("<img .*?src=\"([^\"]*)\"/?>","");
+Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
+	cb([{ url : "http://" + e.matched(0), caption : null}]);
+}},{ regex : new EReg("imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
+	var id = e.matched(2);
+	var albumType = (function($this) {
+		var $r;
+		var _g = e.matched(1);
+		$r = (function($this) {
+			var $r;
+			switch(_g) {
+			case "a":
+				$r = "album";
+				break;
+			case "gallery":
+				$r = "gallery/album";
+				break;
+			default:
+				$r = "album";
+			}
+			return $r;
+		}($this));
+		return $r;
+	}(this));
+	Reditn.getJSON("https://api.imgur.com/3/" + albumType + "/" + id,function(data) {
+		var album = [];
+		if(data.images_count <= 0) album.push({ url : "http://i.imgur.com/" + data.id + ".jpg", caption : data.title}); else {
+			var _g1 = 0, _g2 = data.images;
+			while(_g1 < _g2.length) {
+				var i = _g2[_g1];
+				++_g1;
+				album.push({ url : "http://i.imgur.com/" + i.id + ".jpg", caption : i.title});
+			}
+		}
+		cb1(album);
+	},"Client-ID " + "cc1f254578d6c52");
+}},{ regex : new EReg("imgur\\.com/(r/[^/]*/)?([a-zA-Z0-9]*)",""), method : function(e,cb) {
+	var id = e.matched(1) == null || e.matched(1).indexOf("/") != -1?e.matched(2):e.matched(1);
+	cb([{ url : "http://i.imgur.com/" + id + ".jpg", caption : null}]);
+}},{ regex : new EReg("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", caption : null}]);
+}},{ regex : new EReg("memecrunch.com/meme/([^/]*)/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://" + e.matched(0) + "/image.png", caption : null}]);
+}},{ regex : new EReg("memegenerator\\.net/instance/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + e.matched(1) + ".jpg", caption : null}]);
+}},{ regex : new EReg("imgflip\\.com/i/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://i.imgflip.com/" + e.matched(1) + ".jpg", caption : null}]);
+}},{ regex : new EReg("what-if.xkcd.com/([0-9]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("xkcd.com/([0-9]*)",""), method : function(e,cb2) {
+	Reditn.getJSON("http://www.xkcd.com/" + e.matched(1) + "/info.0.json",function(data) {
+		cb2([{ url : data.img, caption : data.title}]);
+	});
+}},{ regex : new EReg("explosm.net/comics/([0-9]*)",""), method : function(e1,cb3) {
+	Reditn.getText("http://www." + e1.matched(0),function(txt) {
+		var rg = new EReg("\"http://www\\.explosm\\.net/db/files/Comics/([^\"]*)\"","");
+		if(rg.match(txt)) cb3([{ url : rg.matched(0).substring(1,rg.matched(0).length - 1), caption : null}]); else throw "" + Std.string(rg) + " not matched by " + e1.matched(0) + " in " + txt;
+	},null,null,null);
+}},{ regex : new EReg("livememe.com/([^/]*)",""), method : function(e,cb) {
+	cb([{ url : "http://livememe.com/" + e.matched(1) + ".jpg", caption : null}]);
+}},{ regex : new EReg("(([^\\.]*\\.)?deviantart\\.com/art|fav\\.me)/.*",""), method : function(e,cb4) {
+	Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(e.matched(0)) + "&format=json",function(d) {
+		cb4([{ url : d.url, caption : "" + d.title + " by " + d.author_name}]);
+	});
+}},{ regex : new EReg("flickr\\.com(/[^/]*)*?/([0-9@]*)/",""), method : function(e,cb5) {
+	Reditn.getJSON("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + "99dcc3e77bcd8fb489f17e58191f32f7" + "&photo_id=" + e.matched(2) + "&format=json",function(d) {
+		if(d.sizes == null || d.sizes.size == null) return;
+		var sizes = d.sizes.size;
+		var largest = sizes[sizes.length - 1].source;
+		cb5([{ url : largest, caption : null}]);
+	});
+}},{ regex : new EReg("ebay\\.([a-zA-Z\\.]*)/itm(/[^/]*)?/([0-9]*)",""), method : function(e,cb6) {
+	var domain = e.matched(1);
+	var id = e.matched(3);
+	var url = "http://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=" + "ThomasDa-1e6c-4d29-a156-85557acee70b" + "&siteid=0&version=515&ItemID=" + id + "&IncludeSelector=TextDescription";
+	Reditn.getJSON(url,function(data) {
+		var imgs = data.Item.PictureURL;
+		var nalbum = imgs.map(function(i) {
+			return { url : i, caption : null};
+		});
+		cb6({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : Link.filterHTML(data.Item.Description), images : nalbum, price : Reditn.formatPrice(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
+	});
+}},{ regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
+	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.htmlEscape(e.matched(1)) + "/posts/slug:" + StringTools.htmlEscape(e.matched(2));
+	Reditn.getJSON(url,function(data) {
+		var att = data.attachments;
+		cb7({ title : StringTools.htmlUnescape(data.title), content : Link.filterHTML(data.content), author : data.author.name, images : (function($this) {
+			var $r;
+			try {
+				$r = (function($this) {
+					var $r;
+					var _g = [];
+					{
+						var _g1 = 0, _g2 = Reflect.fields(att);
+						while(_g1 < _g2.length) {
+							var f = _g2[_g1];
+							++_g1;
+							_g.push((function($this) {
+								var $r;
+								var img = Reflect.field(att,f);
+								$r = img.mime_type.startsWith("image/")?{ url : img.URL, caption : null}:null;
+								return $r;
+							}($this)));
+						}
+					}
+					$r = _g;
+					return $r;
+				}($this));
+			} catch( e1 ) {
+				$r = [];
+			}
+			return $r;
+		}(this))});
+	});
+}},{ regex : new EReg("(.*)/wiki/([^#]*)(#.*)?",""), method : function(e,cb8) {
+	var urlroot = e.matched(1), title = e.matched(2), to = e.matched(3);
+	if(to != null) to = StringTools.trim(HxOverrides.substr(to,1,null));
+	if(to != null && to.length == 0) to = null;
+	if(!StringTools.endsWith(urlroot,".wikia.com")) urlroot += "/w";
+	var getWikiPage = (function($this) {
+		var $r;
+		var getWikiPage1 = null;
+		getWikiPage1 = function(name) {
+			Reditn.getJSON("http://" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(data) {
+				var pages = data.query.pages;
+				var _g = 0, _g1 = Reflect.fields(pages);
+				while(_g < _g1.length) {
+					var p = _g1[_g];
+					++_g;
+					var page = [Reflect.field(pages,p)];
+					var cont = [Reflect.field(page[0].revisions[0],"*")];
+					if(StringTools.startsWith(cont[0],"#REDIRECT [[")) {
+						getWikiPage1(cont[0].substring(12,cont[0].lastIndexOf("]]")));
+						return;
+					}
+					var images = [parser.MediaWiki.getAlbum(cont[0])];
+					if(to != null) cont[0] = parser.MediaWiki.trimTo(cont[0],to);
+					cont[0] = parser.MediaWiki.parse(cont[0],urlroot);
+					if(images[0].length > 0) {
+						var nimages = [[]];
+						var _g2 = 0;
+						while(_g2 < images[0].length) {
+							var i1 = [images[0][_g2]];
+							++_g2;
+							Reditn.getJSON("http://" + urlroot + "/api.php?action=query&titles=" + StringTools.urlEncode(i1[0].url) + "&prop=imageinfo&iiprop=url&format=json",(function(i1,nimages,images,cont,page) {
+								return function(data1) {
+									var pages1 = data1.query.pages;
+									var _g3 = 0, _g4 = Reflect.fields(pages1);
+									while(_g3 < _g4.length) {
+										var p1 = _g4[_g3];
+										++_g3;
+										var page1 = Reflect.field(pages1,p1);
+										if(page1 != null && page1.imageinfo != null) {
+											var url = page1.imageinfo[0].url;
+											nimages[0].push({ url : url, caption : i1[0].caption});
+										} else {
+											console.log("Error whilst rpocessing " + Std.string(page1) + " for " + i1[0].url);
+											HxOverrides.remove(images[0],i1[0]);
+										}
+									}
+									if(nimages[0].length >= images[0].length) cb8({ title : page[0].title, content : cont[0], author : null, images : nimages[0]});
+								};
+							})(i1,nimages,images,cont,page));
+						}
+					} else cb8({ title : page[0].title, content : cont[0], author : null, images : null});
+				}
+			});
+		};
+		$r = getWikiPage1;
+		return $r;
+	}(this));
+	getWikiPage(title);
+}},{ regex : new EReg("github\\.com/([^/]*)/([^/]*)",""), method : function(e,cb9) {
+	var author = e.matched(1), repo = e.matched(2);
+	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/readme?client_id=" + "39d85b9ac427f1176763" + "&client_secret=" + "5117570b83363ca0c71a196edc5b348af150c25d",function(data) {
+		if(data.content == null) return;
+		var c = data.content;
+		c = StringTools.replace(c,"\n","");
+		c = StringTools.trim(c);
+		c = js.Browser.window.atob(c);
+		var imgs = parser.Markdown.images;
+		var album = [];
+		var tc = c;
+		while(imgs.match(tc)) {
+			var url = imgs.matched(2);
+			if(url.indexOf(".") == url.lastIndexOf(".")) {
+				if(StringTools.startsWith(url,"/")) url = HxOverrides.substr(url,1,null);
+				url = "https://github.com/" + author + "/" + repo + "/raw/master/" + url;
+			}
+			album.push({ url : url, caption : imgs.matched(1)});
+			tc = HxOverrides.substr(tc,imgs.matchedPos().pos + imgs.matchedPos().len,null);
+		}
+		cb9({ name : repo, developers : [author], description : parser.Markdown.parse(c), url : "git://github.com/" + author + "/" + repo + ".git", album : album});
+	});
+}},{ regex : new EReg("sourceforge.net/projects/([a-zA-Z-]*)",""), method : function(e,cb10) {
+	Reditn.getJSON("http://sourceforge.net/api/project/name/" + e.matched(1) + "/json",function(data) {
+		data = data.Project;
+		var devs = data.developers;
+		cb10({ name : data.name, description : data.description, developers : (function($this) {
+			var $r;
+			var _g = [];
+			{
+				var _g1 = 0;
+				while(_g1 < devs.length) {
+					var d = devs[_g1];
+					++_g1;
+					_g.push(d.name);
+				}
+			}
+			$r = _g;
+			return $r;
+		}(this)), url : (function($this) {
+			var $r;
+			var u = Reflect.field(data,"download-page");
+			{
+				var _g1 = 0, _g2 = Reflect.fields(data);
+				while(_g1 < _g2.length) {
+					var f = _g2[_g1];
+					++_g1;
+					if(StringTools.endsWith(f,"Repository")) {
+						var type = HxOverrides.substr(f,0,f.length - 10).toLowerCase();
+						var loc = Reflect.field(data,f).location;
+						u = StringTools.replace(loc,"http:","" + type + ":");
+					}
+				}
+			}
+			$r = u;
+			return $r;
+		}(this)), album : []});
+	});
+}},{ regex : new EReg("(digitaltrends\\.com|webupd8\\.org)/.*",""), method : function(e,cb11) {
+	Reditn.getText("http://" + e.matched(0),function(txt) {
+		var t = new EReg("<title>(.*)</title>","");
+		if(t.match(txt)) {
+			var cont = txt;
+			cont = HxOverrides.substr(cont,cont.indexOf("<article"),null);
+			cont = HxOverrides.substr(cont,cont.indexOf(">") + 1,null);
+			cont = HxOverrides.substr(cont,0,cont.indexOf("</article>"));
+			var images = [];
+			while(Link.HTML_IMG.match(cont)) {
+				images.push({ url : Link.HTML_IMG.matched(1), caption : null});
+				cont = Link.HTML_IMG.replace(cont,"");
+			}
+			cont = Link.filterHTML(cont);
+			cb11({ title : t.matched(1), content : cont, author : null, images : images});
+		}
+	},null,null,null);
+}},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb12) {
+	var author = e.matched(1), id = e.matched(3);
+	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
+		var post = data.posts[0];
+		cb12((function($this) {
+			var $r;
+			switch(post.type) {
+			case "text":
+				$r = (function($this) {
+					var $r;
+					var images = [];
+					while(Link.HTML_IMG.match(post.body)) {
+						images.push({ url : Link.HTML_IMG.matched(1), caption : null});
+						post.body = Link.HTML_IMG.replace(post.body,"");
+					}
+					post.body = Link.filterHTML(post.body);
+					$r = { title : post.title, content : post.body, author : data.blog.name, images : images};
+					return $r;
+				}($this));
+				break;
+			case "quote":
+				$r = { title : null, content : Std.string(post.text) + "<br/><b>" + Std.string(post.source) + "</b>", author : data.blog.name, images : []};
+				break;
+			case "photo":
+				$r = (function($this) {
+					var $r;
+					var ps = post.photos;
+					$r = (function($this) {
+						var $r;
+						var _g = [];
+						{
+							var _g1 = 0;
+							while(_g1 < ps.length) {
+								var p = ps[_g1];
+								++_g1;
+								_g.push({ url : p.original_size.url, caption : p.caption});
+							}
+						}
+						$r = _g;
+						return $r;
+					}($this));
+					return $r;
+				}($this));
+				break;
+			default:
+				$r = null;
+			}
+			return $r;
+		}(this)));
+	});
+}}];
+Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("(<br></br>|<br ?/>)(<br></br>|<br ?/>)","g"),new EReg("style ?= ?\"[^\"]*\"","g")];
+Settings.DESC = (function($this) {
+	var $r;
+	var _g = new haxe.ds.StringMap();
+	_g.set("adblock","Block advertisements and sponsors");
+	_g.set("userinfo","Show information about a user upon hover");
+	_g.set("subinfo","Show information about a subreddit upon hover");
+	_g.set("expand","Allow expansion of images, articles, etc");
+	_g.set("dup-hider","Hide duplicate links");
+	_g.set("user-tag","Tag users");
+	_g.set("sub-tag","Tag subreddits");
+	_g.set("preview","Preview comments and posts");
+	_g.set("keys","Keyboard shortcuts");
+	_g.set("nsfw-filter","Hide NSFW content");
+	$r = _g;
+	return $r;
+}(this));
+Settings.DEFAULTS = (function($this) {
+	var $r;
+	var _g = new haxe.ds.StringMap();
+	_g.set("adblock",true);
+	_g.set("userinfo",true);
+	_g.set("subinfo",true);
+	_g.set("expand",true);
+	_g.set("dup-hider",true);
+	_g.set("user-tag",true);
+	_g.set("sub-tag",true);
+	_g.set("preview",true);
+	_g.set("keys",true);
+	_g.set("nsfw-filter",true);
+	_g.set("user-tags",new haxe.ds.StringMap());
+	_g.set("sub-tags",new haxe.ds.StringMap());
+	$r = _g;
+	return $r;
+}(this));
+Settings.data = new haxe.ds.StringMap();
+haxe.Serializer.USE_CACHE = false;
+haxe.Serializer.USE_ENUM_INDEX = false;
+haxe.Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
+haxe.Unserializer.DEFAULT_RESOLVER = Type;
+haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
+haxe.ds.ObjectMap.count = 0;
+Reditn.main();
+})();

@@ -293,7 +293,9 @@ class Reditn {
 			if(data.startsWith("jsonFlickrApi(") && data.endsWith(")"))
 				data = data.substring(14, data.length - 1);
 			try func(getData(haxe.Json.parse(data))) catch(e:Dynamic) {
-				trace('Error getting "${url}" - could not parse ${data}');
+				try func(getData(untyped JSON.parse(data))) catch(e:Dynamic) {
+					trace('Error getting "${url}" - could not parse ${data}');
+				}
 			}
 		}, auth, type, postData);
 	}

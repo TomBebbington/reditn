@@ -213,35 +213,30 @@ class Link {
 								getWikiPage(cont.substring(12, cont.lastIndexOf("]]")));
 								return;
 							}
-							cont = parser.MediaWiki.parse(cont, urlroot);
+							var images = parser.MediaWiki.getAlbum(cont);
 							if(to != null)
 								cont = parser.MediaWiki.trimTo(cont, to);
-							Reditn.getJSON('http://${urlroot}/api.php?format=json&action=query&prop=images&titles=${StringTools.htmlEscape(name)}', function(data) {
-								var pages = data.query.pages;
-								for(p in Reflect.fields(pages)) {
-									var page = Reflect.field(pages, p);
-									var images:Array<Dynamic> = page.images;
-									var album:Album = [];
-									if(images != null && images.length > 0) {
-										var left:Int = images == null ? 0 : images.length;
-										for(img in images) {
-											Reditn.getJSON('http://${urlroot}/api.php?action=query&titles=${StringTools.urlEncode(img.title)}&prop=imageinfo&iiprop=url&format=json', function(data) {
-												var pages:Dynamic = data.query.pages;
-												for(p in Reflect.fields(pages)) {
-													var page = Reflect.field(pages, p);
-													if(page != null && page.pageinfo != null && page.imageinfo.length >= 1) {
-														var url = untyped page.imageinfo[0].url;
-														album.push({url: url, caption: null});
-													}
-												}
-												if(--left <= 0)
-													cb({title: page.title, content: cont, author: null, images: album});
-											});
+							cont = parser.MediaWiki.parse(cont, urlroot);
+							if(images.length > 0) {
+								var nimages = [];
+								for(i in images)
+									Reditn.getJSON('http://${urlroot}/api.php?action=query&titles=${StringTools.urlEncode(i.url)}&prop=imageinfo&iiprop=url&format=json', function(data) {
+										var pages:Dynamic = data.query.pages;
+										for(p in Reflect.fields(pages)) {
+											var page = Reflect.field(pages, p);
+											if(page != null && page.imageinfo != null) {
+												var url = untyped page.imageinfo[0].url;
+												nimages.push({url: url, caption: i.caption});
+											} else {
+												trace('Error whilst rpocessing $page for ${i.url}');
+												images.remove(i);
+											}
 										}
-									} else
-										cb({title: page.title, content: cont, author: null, images: []});
-								}
-							});
+										if(nimages.length >= images.length)
+											cb({title: page.title, content: cont, author: null, images: nimages});
+									});
+							} else 
+								cb({title: page.title, content: cont, author: null, images: null});
 						}
 					});
 				}

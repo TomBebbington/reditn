@@ -146,7 +146,10 @@ Expand.init = function() {
 							var inner = js.Browser.document.createElement("span");
 							inner.innerHTML = a.content;
 							content.appendChild(inner);
-							if(a.images.length > 0) content.appendChild(Reditn.embedAlbum(a.images));
+							if(a.images.length > 0) {
+								content.appendChild(js.Browser.document.createElement("br"));
+								content.appendChild(Reditn.embedAlbum(a.images));
+							}
 							content.className = "md";
 							div.appendChild(content);
 						} else if(js.Boot.__instanceof(data,Array) && Reflect.hasField(data[0],"url")) {
@@ -673,7 +676,11 @@ Reditn.getJSON = function(url,func,auth,type,postData) {
 		try {
 			func(Reditn.getData(haxe.Json.parse(data)));
 		} catch( e ) {
-			console.log("Error getting \"" + url + "\" - could not parse " + data);
+			try {
+				func(Reditn.getData(JSON.parse(data)));
+			} catch( e1 ) {
+				console.log("Error getting \"" + url + "\" - could not parse " + data);
+			}
 		}
 	},auth,type,postData);
 }
@@ -1233,32 +1240,47 @@ parser.MediaWiki.parse = function(s,base) {
 	while(_g < _g1.length) {
 		var r = _g1[_g];
 		++_g;
-		while(r.from.match(s)) {
-			console.log(r.from);
-			try {
-				s = r.from.replace(s,r.to);
-			} catch( e ) {
-				console.log("Error " + Std.string(e) + " while replacing " + Std.string(r.from) + " with " + r.to);
-			}
+		var i = 0;
+		while(r.from.match(s) && i++ < 64) {
+			s = r.from.replace(s,r.to);
+			var p = r.from.matchedPos();
 		}
 	}
+	s = StringTools.replace(s,"$BASE","http://" + base);
+	if(StringTools.startsWith(s,"<br>")) s = HxOverrides.substr(s,4,null);
+	if(s.split("{{").length < s.split("}}").length) s = HxOverrides.substr(s,s.indexOf("}}") + 2,null);
 	return s;
 }
 parser.MediaWiki.trimTo = function(h,s) {
+	console.log("Trimming...");
 	s = StringTools.trim(StringTools.replace(s,"_"," "));
 	var pos = { pos : 0, len : 0}, level = null;
 	while(parser.MediaWiki.sections.matchSub(h,pos.pos + pos.len)) {
 		pos = parser.MediaWiki.sections.matchedPos();
-		if(StringTools.trim(parser.MediaWiki.sections.matched(2)) == s) {
-			level = parser.MediaWiki.sections.matched(1);
+		if(StringTools.trim(parser.MediaWiki.sections.matched(2)) == StringTools.trim(s)) {
+			level = parser.MediaWiki.sections.matched(1).length;
 			break;
 		}
+		console.log("Pos: " + Std.string(pos) + " level: " + level + " name: " + parser.MediaWiki.sections.matched(1));
 	}
+	console.log("MATCHED IN SECCCTIYSHION: " + parser.MediaWiki.sections.matched(1));
 	if(level != null) {
 		h = HxOverrides.substr(h,pos.pos + pos.len,null);
 		h = HxOverrides.substr(h,0,h.indexOf("<h" + level + ">"));
 	}
 	return h;
+}
+parser.MediaWiki.getAlbum = function(s) {
+	var a = [];
+	while(parser.MediaWiki.IMAGES.match(s)) {
+		var p = parser.MediaWiki.IMAGES.matchedPos();
+		s = HxOverrides.substr(s,p.pos + p.len,null);
+		var name = parser.MediaWiki.IMAGES.matched(2) + "." + parser.MediaWiki.IMAGES.matched(3);
+		if(!StringTools.startsWith(name,"File:")) name = "File:" + name;
+		a.push({ url : name, caption : null});
+	}
+	console.log("Images: " + Std.string(a));
+	return a;
 }
 js.Browser = function() { }
 $hxClasses["js.Browser"] = js.Browser;
@@ -2441,8 +2463,9 @@ Math.isNaN = function(i) {
 };
 Expand.buttons = [];
 Reditn.fullPage = true;
-parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{convert\\|([0-9]*)\\|([^\\|]*)([^\\}]*)\\}\\}",""), to : "$1 $2"},{ from : new EReg("\\{\\{Infobox(([^\\}]|\n|\n\r|.)*)\\}\\}",""), to : ""},{ from : new EReg("\\{\\{([^\\}]*)\\}\\}",""), to : ""},{ from : new EReg("<gallery>(.|\n|\n\r)*</gallery>",""), to : ""},{ from : new EReg("\\{\\|(.|\n|\n\r)*\\|\\}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
-parser.MediaWiki.sections = new EReg("<h([1-6])>([^<>]*)</h[1-6]>","");
+parser.MediaWiki.regex = [{ from : new EReg("\\[\\[Category:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("\\[\\[([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\n]*)\\|([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("<gallery>(.|\n|\n\r)*</gallery>",""), to : ""},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("(=*) ?(References|Gallery) ?\\1.*\\1?",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{convert\\|([0-9]*)\\|([^\\|]*)([^\\}]*)\\}\\}",""), to : "$1 $2"},{ from : new EReg("\\{\\{([^\\}]*)\\}\\}",""), to : ""},{ from : new EReg("\\{\\|(.|\n|\n\r)*\\|\\}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n\r?\n\r?",""), to : "<br>"},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""},{ from : new EReg("\\[\\]",""), to : ""}];
+parser.MediaWiki.sections = new EReg("'=(=*)([^=]*)=\\\\1\n\r?(.|\n|\n\r)*(\\\\1)?'","");
+parser.MediaWiki.IMAGES = new EReg("(File:|img=|Image:)([^\\.\\|\\]\\}\\{\\[<>=]*)\\.(gif|jpg|jpeg|bmp|png|webp|svg|raw)(\\|([^\\)]*))?","");
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 parser.Markdown.images = new EReg("!\\[([^\\]]*)\\]\\(([^\\)\\.]+\\.(jpg|bmp|png|jpeg|gif))\\)","");
@@ -2575,51 +2598,42 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 				while(_g < _g1.length) {
 					var p = _g1[_g];
 					++_g;
-					var page = Reflect.field(pages,p);
-					var cont = [Reflect.field(page.revisions[0],"*")];
+					var page = [Reflect.field(pages,p)];
+					var cont = [Reflect.field(page[0].revisions[0],"*")];
 					if(StringTools.startsWith(cont[0],"#REDIRECT [[")) {
 						getWikiPage1(cont[0].substring(12,cont[0].lastIndexOf("]]")));
 						return;
 					}
-					cont[0] = parser.MediaWiki.parse(cont[0],urlroot);
+					var images = [parser.MediaWiki.getAlbum(cont[0])];
 					if(to != null) cont[0] = parser.MediaWiki.trimTo(cont[0],to);
-					Reditn.getJSON("http://" + urlroot + "/api.php?format=json&action=query&prop=images&titles=" + StringTools.htmlEscape(name),(function(cont) {
-						return function(data1) {
-							var pages1 = data1.query.pages;
-							var _g2 = 0, _g3 = Reflect.fields(pages1);
-							while(_g2 < _g3.length) {
-								var p1 = _g3[_g2];
-								++_g2;
-								var page1 = [Reflect.field(pages1,p1)];
-								var images = page1[0].images;
-								var album1 = [[]];
-								if(images != null && images.length > 0) {
-									var left = [images == null?0:images.length];
-									var _g4 = 0;
-									while(_g4 < images.length) {
-										var img = images[_g4];
-										++_g4;
-										Reditn.getJSON("http://" + urlroot + "/api.php?action=query&titles=" + StringTools.urlEncode(img.title) + "&prop=imageinfo&iiprop=url&format=json",(function(left,album1,page1,cont) {
-											return function(data2) {
-												var pages2 = data2.query.pages;
-												var _g5 = 0, _g6 = Reflect.fields(pages2);
-												while(_g5 < _g6.length) {
-													var p2 = _g6[_g5];
-													++_g5;
-													var page2 = Reflect.field(pages2,p2);
-													if(page2 != null && page2.pageinfo != null && page2.imageinfo.length >= 1) {
-														var url = page2.imageinfo[0].url;
-														album1[0].push({ url : url, caption : null});
-													}
-												}
-												if(--left[0] <= 0) cb8({ title : page1[0].title, content : cont[0], author : null, images : album1[0]});
-											};
-										})(left,album1,page1,cont));
+					cont[0] = parser.MediaWiki.parse(cont[0],urlroot);
+					if(images[0].length > 0) {
+						var nimages = [[]];
+						var _g2 = 0;
+						while(_g2 < images[0].length) {
+							var i1 = [images[0][_g2]];
+							++_g2;
+							Reditn.getJSON("http://" + urlroot + "/api.php?action=query&titles=" + StringTools.urlEncode(i1[0].url) + "&prop=imageinfo&iiprop=url&format=json",(function(i1,nimages,images,cont,page) {
+								return function(data1) {
+									var pages1 = data1.query.pages;
+									var _g3 = 0, _g4 = Reflect.fields(pages1);
+									while(_g3 < _g4.length) {
+										var p1 = _g4[_g3];
+										++_g3;
+										var page1 = Reflect.field(pages1,p1);
+										if(page1 != null && page1.imageinfo != null) {
+											var url = page1.imageinfo[0].url;
+											nimages[0].push({ url : url, caption : i1[0].caption});
+										} else {
+											console.log("Error whilst rpocessing " + Std.string(page1) + " for " + i1[0].url);
+											HxOverrides.remove(images[0],i1[0]);
+										}
 									}
-								} else cb8({ title : page1[0].title, content : cont[0], author : null, images : []});
-							}
-						};
-					})(cont));
+									if(nimages[0].length >= images[0].length) cb8({ title : page[0].title, content : cont[0], author : null, images : nimages[0]});
+								};
+							})(i1,nimages,images,cont,page));
+						}
+					} else cb8({ title : page[0].title, content : cont[0], author : null, images : null});
 				}
 			});
 		};
