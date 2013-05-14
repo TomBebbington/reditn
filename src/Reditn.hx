@@ -244,7 +244,6 @@ class Reditn {
 	public static inline function getText(url:String, func:String->Void, ?auth:String, ?type:String, ?postData:String):Void {
 		#if plugin
 			var h = new haxe.Http(url);
-			h.setHeader("Accept-Encoding", "gzip");
 			if(auth != null)
 				h.setHeader("Authorization", auth);
 			if(type != null)
@@ -255,7 +254,6 @@ class Reditn {
 			h.request(postData != null);
 		#else
 			var heads:Dynamic = {
-				"Accept-Encoding": "gzip"
 			};
 			if(auth != null)
 				heads.Authorization = auth;

@@ -674,64 +674,12 @@ Reditn.getData = function(o) {
 	return o;
 }
 Reditn.getText = function(url,func,auth,type,postData) {
-	var heads = { 'Accept-Encoding' : "gzip"};
+	var heads = { };
 	if(auth != null) heads.Authorization = auth;
 	if(type != null) heads["Content-Type"] = type;
 	GM_xmlhttpRequest({ method : postData != null?"POST":"GET", headers : heads, data : postData, url : url, onload : function(rsp) {
 		func(rsp.responseText);
 	}});
-}
-Reditn.getMonthYear = function(d) {
-	var month = (function($this) {
-		var $r;
-		var _g = d.getMonth();
-		$r = (function($this) {
-			var $r;
-			switch(_g) {
-			case 0:
-				$r = "January";
-				break;
-			case 1:
-				$r = "February";
-				break;
-			case 2:
-				$r = "March";
-				break;
-			case 3:
-				$r = "April";
-				break;
-			case 4:
-				$r = "May";
-				break;
-			case 5:
-				$r = "June";
-				break;
-			case 6:
-				$r = "July";
-				break;
-			case 7:
-				$r = "August";
-				break;
-			case 8:
-				$r = "September";
-				break;
-			case 9:
-				$r = "October";
-				break;
-			case 10:
-				$r = "November";
-				break;
-			case 11:
-				$r = "December";
-				break;
-			default:
-				$r = null;
-			}
-			return $r;
-		}($this));
-		return $r;
-	}(this)), year = Std.string(d.getFullYear());
-	return "" + month + ", " + year;
 }
 Reditn.getJSON = function(url,func,auth,type,postData) {
 	if(type == null) type = "application/json";
@@ -1188,14 +1136,19 @@ parser.MediaWiki.parse = function(s,base) {
 	while(_g < _g1.length) {
 		var r = _g1[_g];
 		++_g;
-		while(r.from.match(s)) s = r.from.replace(s,r.to);
+		while(r.from.match(s)) {
+			console.log(r.from);
+			try {
+				s = r.from.replace(s,r.to);
+			} catch( e ) {
+				console.log("Error " + Std.string(e) + " while replacing " + Std.string(r.from) + " with " + r.to);
+			}
+		}
 	}
-	s = StringTools.replace(s,"$BASE",base);
 	return s;
 }
 parser.MediaWiki.trimTo = function(h,s) {
 	s = StringTools.trim(StringTools.replace(s,"_"," "));
-	console.log("Trimming " + h + " to " + s);
 	var pos = { pos : 0, len : 0}, level = null;
 	while(parser.MediaWiki.sections.matchSub(h,pos.pos + pos.len)) {
 		pos = parser.MediaWiki.sections.matchedPos();
@@ -2406,7 +2359,7 @@ Math.isNaN = function(i) {
 };
 Expand.buttons = [];
 Reditn.fullPage = true;
-parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{Monthyear\\}\\}",""), to : Reditn.getMonthYear(new Date())},{ from : new EReg("{{convert|([0-9]*)|([^\\|]*)[^\\}]*}}",""), to : "$1"},{ from : new EReg("{{([^{}]*)}}",""), to : ""},{ from : new EReg("{\\|([^[\\|\\}]]*)\\|}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("^======([^=]*)======","m"), to : "<h6>$1</h6>"},{ from : new EReg("^=====([^=]*)=====","m"), to : "<h5>$1</h5>"},{ from : new EReg("^====([^=]*)====","m"), to : "<h4>$1</h4>"},{ from : new EReg("^===([^=]*)===","m"), to : "<h3>$1</h3>"},{ from : new EReg("^==([^=]*)==","m"), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
+parser.MediaWiki.regex = [{ from : new EReg("\\[\\[([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\\|]*)\\|([^\\]\\|]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{convert\\|([0-9]*)\\|([^\\|]*)([^\\}]*)\\}\\}",""), to : "$1 $2"},{ from : new EReg("\\{\\{Infobox(([^\\}]|\n|\n\r|.)*)\\}\\}",""), to : ""},{ from : new EReg("\\{\\{([^\\}]*)\\}\\}",""), to : ""},{ from : new EReg("<gallery>(.|\n|\n\r)*</gallery>",""), to : ""},{ from : new EReg("\\{\\|(.|\n|\n\r)*\\|\\}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""}];
 parser.MediaWiki.sections = new EReg("<h([1-6])>([^<>]*)</h[1-6]>","");
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
@@ -2464,9 +2417,9 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		cb2([{ url : data.img, caption : data.title}]);
 	});
 }},{ regex : new EReg("explosm.net/comics/([0-9]*)",""), method : function(e1,cb3) {
-	Reditn.getText("http://" + e1.matched(0),function(txt) {
-		var rg = new EReg("http://www\\.explosm\\.net/db/files/Comics/[^\"]*","");
-		if(rg.match(txt)) cb3([{ url : rg.matched(0), caption : null}]); else throw "" + Std.string(rg) + " not matched by " + e1.matched(0);
+	Reditn.getText("http://www." + e1.matched(0),function(txt) {
+		var rg = new EReg("\"http://www\\.explosm\\.net/db/files/Comics/([^\"]*)\"","");
+		if(rg.match(txt)) cb3([{ url : rg.matched(0).substring(1,rg.matched(0).length - 1), caption : null}]); else throw "" + Std.string(rg) + " not matched by " + e1.matched(0) + " in " + txt;
 	},null,null,null);
 }},{ regex : new EReg("livememe.com/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://livememe.com/" + e.matched(1) + ".jpg", caption : null}]);
@@ -2649,17 +2602,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 			return $r;
 		}(this)), album : []});
 	});
-}},{ regex : new EReg("twitter.com/([^/]*)/status/([0-9]*)",""), method : function(e2,cb11) {
-	var get = function(token) {
-		Reditn.getJSON("https://api.twitter.com/1.1/statuses/show.json?id=" + e2.matched(1),function(data) {
-			cb11({ title : null, author : data.author.name, images : [], content : data.text});
-		},"Bearer " + "TGhEbnl1dlE1b3pGemo4TGtrRkcxRjJwSW05aFVaUUVSYmFwVmFLODpGeGNDNVl6dnBaVkdYWjNXT2ViWmc=");
-	};
-	if(Link.twitterToken != null) get(Link.twitterToken); else Reditn.getJSON("https://api.twitter.com/oauth2/token",function(data) {
-		console.log(data);
-		get("" + data.token_type + " " + data.access_token);
-	},"Basic " + "TGhEbnl1dlE1b3pGemo4TGtrRkcxRjJwSW05aFVaUUVSYmFwVmFLODpGeGNDNVl6dnBaVkdYWjNXT2ViWmc=","application/x-www-form-urlencoded;charset=UTF-8","grant_type=client_credentials");
-}},{ regex : new EReg("(digitaltrends\\.com|webupd8\\.org)/.*",""), method : function(e,cb12) {
+}},{ regex : new EReg("(digitaltrends\\.com|webupd8\\.org)/.*",""), method : function(e,cb11) {
 	Reditn.getText("http://" + e.matched(0),function(txt) {
 		var t = new EReg("<title>(.*)</title>","");
 		if(t.match(txt)) {
@@ -2673,14 +2616,14 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 				cont = Link.HTML_IMG.replace(cont,"");
 			}
 			cont = Link.filterHTML(cont);
-			cb12({ title : t.matched(1), content : cont, author : null, images : images});
+			cb11({ title : t.matched(1), content : cont, author : null, images : images});
 		}
 	},null,null,null);
-}},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb13) {
+}},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb12) {
 	var author = e.matched(1), id = e.matched(3);
 	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 		var post = data.posts[0];
-		cb13((function($this) {
+		cb12((function($this) {
 			var $r;
 			switch(post.type) {
 			case "text":

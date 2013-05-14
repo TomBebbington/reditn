@@ -8,10 +8,8 @@ class Link {
 	public static inline var EBAY_API_KEY = "ThomasDa-1e6c-4d29-a156-85557acee70b";
 	public static inline var GITHUB_KEY = "39d85b9ac427f1176763";
 	public static inline var GITHUB_KEYS = "5117570b83363ca0c71a196edc5b348af150c25d";
-	public static inline var TWITTER_KEY = "TGhEbnl1dlE1b3pGemo4TGtrRkcxRjJwSW05aFVaUUVSYmFwVmFLODpGeGNDNVl6dnBaVkdYWjNXT2ViWmc=";
 	static var LINK = ~/[src|href]="(\/([^\/]*))*?([^\/]*)"/;
 	static var HTML_IMG = ~/<img .*?src="([^"]*)"\/?>/;
-	static var twitterToken:String = null;
 	static function noRel(html:String):String {
 		return LINK.replace(html, "$1, $2");
 	}
@@ -111,15 +109,16 @@ class Link {
 		{
 			regex: ~/explosm.net\/comics\/([0-9]*)/,
 			method: function(e, cb) {
-				Reditn.getText('http://${e.matched(0)}', function(txt) {
-					var rg = ~/http:\/\/www\.explosm\.net\/db\/files\/Comics\/[^"]*/;
-					if(rg.match(txt))
+				Reditn.getText('http://www.${e.matched(0)}', function(txt) {
+					var rg = ~/"http:\/\/www\.explosm\.net\/db\/files\/Comics\/([^"]*)"/;
+					if(rg.match(txt)) {
 						cb([{
-							url: rg.matched(0),
+							url: rg.matched(0).substring(1, rg.matched(0).length-1),
 							caption: null
 						}]);
+					}
 					else
-						throw '$rg not matched by ${e.matched(0)}';
+						throw '$rg not matched by ${e.matched(0)} in $txt';
 				});
 			}
 		},
@@ -300,28 +299,6 @@ class Link {
 						album: []
 					});
 				});
-			}
-		},
-		{
-			regex: ~/twitter.com\/([^\/]*)\/status\/([0-9]*)/,
-			method: function(e, cb) {
-				function get(token) {
-					Reditn.getJSON('https://api.twitter.com/1.1/statuses/show.json?id=${e.matched(1)}', function(data) {
-						cb({
-							title: null,
-							author: data.author.name,
-							images: [],
-							content: data.text
-						});
-					}, 'Bearer $TWITTER_KEY');
-				}
-				if(twitterToken != null)
-					get(twitterToken)
-				else
-					Reditn.getJSON('https://api.twitter.com/oauth2/token', function(data) {
-						trace(data);
-						get('${data.token_type} ${data.access_token}');
-					}, 'Basic ${TWITTER_KEY}', "application/x-www-form-urlencoded;charset=UTF-8", "grant_type=client_credentials");
 			}
 		},
 		{
