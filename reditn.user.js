@@ -2413,7 +2413,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 }},{ regex : new EReg("imgflip\\.com/i/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.imgflip.com/" + e.matched(1) + ".jpg", caption : null}]);
 }},{ regex : new EReg("xkcd.com/([0-9]*)",""), method : function(e,cb2) {
-	Reditn.getJSON("http://xkcd.com/" + e.matched(1) + "/info.0.json",function(data) {
+	Reditn.getJSON("http://www.xkcd.com/" + e.matched(1) + "/info.0.json",function(data) {
 		cb2([{ url : data.img, caption : data.title}]);
 	});
 }},{ regex : new EReg("explosm.net/comics/([0-9]*)",""), method : function(e1,cb3) {

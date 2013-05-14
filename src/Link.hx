@@ -98,7 +98,7 @@ class Link {
 		{
 			regex: ~/xkcd.com\/([0-9]*)/,
 			method: function(e, cb) {
-				Reditn.getJSON('http://xkcd.com/${e.matched(1)}/info.0.json', function(data:Dynamic) {
+				Reditn.getJSON('http://www.xkcd.com/${e.matched(1)}/info.0.json', function(data:Dynamic) {
 					cb([{
 						url: data.img, 
 						caption: data.title
