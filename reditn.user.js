@@ -50,7 +50,7 @@ DuplicateHider.init = function() {
 		var link = _g1[_g];
 		++_g;
 		if(link.nodeName.toLowerCase() != "a") continue;
-		if(Lambda.has(seen,link.href)) Reditn.show(link.parentNode.parentNode.parentNode,false); else seen.push(link.href);
+		if(Lambda.has(seen,link.href)) Reditn.show(link.parentElement.parentElement.parentElement,false); else seen.push(link.href);
 	}
 }
 var EReg = function(r,opt) {
@@ -127,9 +127,9 @@ Expand.init = function() {
 		l[0].onchange = (function(l) {
 			return function(_) {
 				var site = Link.resolve(l[0].href);
-				if(site == null) Expand.defaultButton(l[0].parentNode.parentNode.parentNode); else site.method(site.regex,(function(l) {
+				if(site == null) Expand.defaultButton(l[0].parentElement.parentElement.parentElement); else site.method(site.regex,(function(l) {
 					return function(data) {
-						var e = l[0].parentNode.parentNode.parentNode;
+						var e = l[0].parentElement.parentElement.parentElement;
 						var exp = js.Browser.document.createElement("div");
 						exp.className = "expando";
 						exp.style.display = "none";
@@ -186,7 +186,7 @@ Expand.init = function() {
 							exp.appendChild(div);
 						} else Expand.defaultButton(e);
 						var s = Expand.createButton(e,name,l[0].href);
-						var pn = s.parentNode;
+						var pn = s.parentElement;
 						var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
 						while(_g2 < _g3.length) {
 							var ep = _g3[_g2];
@@ -203,11 +203,15 @@ Expand.init = function() {
 	}
 }
 Expand.defaultButton = function(cont) {
+	var one = false;
 	var _g = 0, _g1 = cont.getElementsByClassName("expando-button");
 	while(_g < _g1.length) {
 		var be = _g1[_g];
 		++_g;
-		if(be != null) Expand.buttons.push(Expand.adaptButton(be));
+		if(one) be.parentNode.removeChild(be); else {
+			if(be != null) Expand.buttons.push(Expand.adaptButton(be));
+			one = true;
+		}
 	}
 }
 Expand.adaptButton = function(exp) {
@@ -228,7 +232,7 @@ Expand.createButton = function(e,extra,url) {
 	}, toggle : function(v) {
 		isToggled = v;
 		d.className = cn + (isToggled?"expanded":"collapsed");
-		var entry = d.parentNode;
+		var entry = d.parentElement;
 		var expandos = entry.getElementsByClassName("expando");
 		var _g = 0;
 		while(_g < expandos.length) {
@@ -249,7 +253,7 @@ Expand.createButton = function(e,extra,url) {
 }
 Expand.refresh = function() {
 	if(Expand.button != null) {
-		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " all (" + Expand.buttons.length + ")";
+		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " all";
 		var np = [];
 		var n = js.Browser.document.body.getElementsByClassName("next");
 		var p = js.Browser.document.body.getElementsByClassName("prev");
@@ -409,7 +413,7 @@ var Keyboard = function() { }
 $hxClasses["Keyboard"] = Keyboard;
 Keyboard.__name__ = ["Keyboard"];
 Keyboard.get_highlighted = function() {
-	return Keyboard.current == null?null:Reditn.links[Keyboard.current].parentNode.parentNode.parentNode;
+	return Keyboard.current == null?null:Reditn.links[Keyboard.current].parentElement.parentElement.parentElement;
 }
 Keyboard.init = function() {
 	js.Browser.document.onkeydown = function(e) {
@@ -488,7 +492,7 @@ Reditn.init = function() {
 			while(_g1 < _g2.length) {
 				var l = [_g2[_g1]];
 				++_g1;
-				if(l[0].nodeName.toLowerCase() == "a" && l[0].parentNode.className != "parent") _g.push((function($this) {
+				if(l[0].nodeName.toLowerCase() == "a" && l[0].parentElement.className != "parent") _g.push((function($this) {
 					var $r;
 					Reditn.expandURL(l[0].href,(function(l) {
 						return function(url) {
@@ -724,7 +728,7 @@ Reditn.popUp = function(bs,el,x,y) {
 	el.style.left = "" + x + "px";
 	el.style.top = "" + (y - 30) + "px";
 	bs.onmouseout = el.onblur = function(e) {
-		el.parentNode.removeChild(el);
+		el.parentElement.removeChild(el);
 		bs.mouseover = false;
 	};
 	return el;
@@ -732,7 +736,7 @@ Reditn.popUp = function(bs,el,x,y) {
 Reditn.fullPopUp = function(el,y) {
 	if(y == null) y = 0;
 	var old = js.Browser.document.getElementsByClassName("popup")[0];
-	if(old != null) old.parentNode.removeChild(old);
+	if(old != null) old.parentElement.removeChild(old);
 	js.Browser.document.body.appendChild(el);
 	var close = js.Browser.document.createElement("a");
 	close.style.position = "absolute";
@@ -740,7 +744,7 @@ Reditn.fullPopUp = function(el,y) {
 	close.innerHTML = "<b>Close</b>";
 	close.href = "javascript:void(0);";
 	close.onclick = el.onblur = function(e) {
-		el.parentNode.removeChild(el);
+		el.parentElement.removeChild(el);
 	};
 	el.appendChild(close);
 	el.className = "popup";
@@ -1398,7 +1402,7 @@ Settings.init = function() {
 }
 Settings.settingsPopUp = function() {
 	var old = js.Browser.document.getElementById("reditn-config");
-	if(old != null) old.parentNode.removeChild(old);
+	if(old != null) old.parentElement.removeChild(old);
 	var e = js.Browser.document.createElement("div");
 	var h = js.Browser.document.createElement("h1");
 	h.innerHTML = "Reditn settings";
@@ -1590,13 +1594,13 @@ SubredditTagger.getTag = function(a) {
 			Settings.data.get("sub-tags").set(sub,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
 			Settings.save();
-			div.parentNode.removeChild(div);
+			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
 		Reditn.fullPopUp(div,link.offsetTop + link.offsetHeight);
 		box.focus();
 	};
-	a.parentNode.insertBefore(tag,a.nextSibling);
+	a.parentElement.insertBefore(tag,a.nextSibling);
 }
 var ValueType = $hxClasses["ValueType"] = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
 ValueType.TNull = ["TNull",0];
@@ -1756,13 +1760,13 @@ UserTagger.getTag = function(a) {
 			Settings.data.get("user-tags").set(user,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
 			Settings.save();
-			div.parentNode.removeChild(div);
+			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
 		Reditn.fullPopUp(div,link.offsetTop + link.offsetHeight);
 		box.focus();
 	};
-	a.parentNode.insertBefore(tag,a.nextSibling);
+	a.parentElement.insertBefore(tag,a.nextSibling);
 }
 haxe.Serializer = function() {
 	this.buf = new StringBuf();

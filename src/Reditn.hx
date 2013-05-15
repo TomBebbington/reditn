@@ -17,7 +17,7 @@ using StringTools;
 			Browser.window.onload = function(_) init();
 	}
 	public static inline function getLinkContainer(l:Element):Element {
-		return cast l.parentNode.parentNode.parentNode;
+		return l.parentElement.parentElement.parentElement;
 	}
 	public static inline function scroll(x:Int, y:Int):Void {
 		Browser.window.scrollBy(x - Browser.window.scrollX, y - Browser.window.scrollY);
@@ -27,7 +27,7 @@ using StringTools;
 			return;
 		fullPage = Browser.document.getElementsByClassName("tabmenu").length > 0;
 		links = cast Browser.document.body.getElementsByClassName("title");
-		links = [for(l in links) if(l.nodeName.toLowerCase() == "a" && untyped l.parentNode.className != "parent") {
+		links = [for(l in links) if(l.nodeName.toLowerCase() == "a" && untyped l.parentElement.className != "parent") {
 			Reditn.expandURL(l.href, function(url) {
 				l.href = url;
 				if(l.onchange != null)
@@ -118,10 +118,10 @@ using StringTools;
 			links.remove(untyped e.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
 	}
 	public static inline function remove(e:Element):Void {
-		e.parentNode.removeChild(e);
+		e.parentElement.removeChild(e);
 	}
 	public static inline function insertAfter(ref:Element, after:Element) {
-		after.parentNode.insertBefore(ref, after.nextSibling);
+		after.parentElement.insertBefore(ref, after.nextSibling);
 	}
 	public static function age(t:Float):String {
 		t = haxe.Timer.stamp() - t;

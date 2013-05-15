@@ -106,7 +106,7 @@ class Expand {
 						} else
 							defaultButton(e);
 						var s = createButton(e, name, l.href);
-						var pn:Element = cast s.parentNode;
+						var pn:Element = s.parentElement;
 						for(ep in pn.getElementsByClassName("expando"))
 							pn.removeChild(ep);
 						pn.appendChild(exp);
@@ -117,9 +117,15 @@ class Expand {
 		}
 	}
 	static inline function defaultButton(cont:Element):Void {
+		var one = false;
 		for(be in cont.getElementsByClassName("expando-button")) {
-			if(be != null)
-				buttons.push(adaptButton(cast be));
+			if(one)
+				be.parentNode.removeChild(be);
+			else {
+				if(be != null)
+					buttons.push(adaptButton(cast be));
+				one = true;
+			}
 		}
 	}
 	static function adaptButton(exp:DivElement):Button {
@@ -148,7 +154,7 @@ class Expand {
 			toggle: function(v) {
 				isToggled = v;
 				d.className = cn + (isToggled ? "expanded" : "collapsed");
-				var entry:Element = cast d.parentNode;
+				var entry:Element = d.parentElement;
 				var expandos:Array<Element> = cast entry.getElementsByClassName("expando");
 				for(e in expandos)
 					Reditn.show(e, v);
@@ -169,7 +175,7 @@ class Expand {
 	}
 	public static function refresh() {
 		if(button != null) {
-			button.innerHTML = '${toggled?"hide":"show"} all (${buttons.length})';
+			button.innerHTML = '${toggled?"hide":"show"} all';
 			var np = [];
 			var n:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("next");
 			var p:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("prev");
