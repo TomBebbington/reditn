@@ -122,8 +122,12 @@ class Expand {
 			if(one)
 				be.parentNode.removeChild(be);
 			else {
-				if(be != null)
-					buttons.push(adaptButton(cast be));
+				if(be != null) {
+					var b = adaptButton(cast be);
+					b.toggle(Expand.toggled);
+					buttons.push(b);
+				}
+
 				one = true;
 			}
 		}

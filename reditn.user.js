@@ -209,7 +209,11 @@ Expand.defaultButton = function(cont) {
 		var be = _g1[_g];
 		++_g;
 		if(one) be.parentNode.removeChild(be); else {
-			if(be != null) Expand.buttons.push(Expand.adaptButton(be));
+			if(be != null) {
+				var b = Expand.adaptButton(be);
+				b.toggle(Expand.toggled);
+				Expand.buttons.push(b);
+			}
 			one = true;
 		}
 	}
@@ -2707,7 +2711,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 			return $r;
 		}(this)));
 	});
-}},{ regex : new EReg("twitter.com/([^/]*)/status/([0-9]*)",""), method : function(e,cb13) {
+}},{ regex : new EReg("twitter.com/.*/status/([0-9]*)",""), method : function(e,cb13) {
 	Reditn.getJSON("https://api.twitter.com/1/statuses/oembed.json?id=" + e.matched(2),function(data) {
 		cb13({ title : null, author : data.author_name, content : Link.filterHTML(data.html), images : []});
 	});

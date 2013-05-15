@@ -377,7 +377,7 @@ class Link {
 			}
 		},
 		{
-			regex: ~/twitter.com\/([^\/]*)\/status\/([0-9]*)/,
+			regex: ~/twitter.com\/.*\/status\/([0-9]*)/,
 			method: function(e, cb) {
 				Reditn.getJSON('https://api.twitter.com/1/statuses/oembed.json?id=${e.matched(2)}', function(data) {
 					cb({
