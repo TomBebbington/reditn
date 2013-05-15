@@ -30,7 +30,7 @@ class Expand {
 		refresh();
 		button.onclick = function(e) {
 			toggle(!toggled);
-			Reditn.pushState(toggled ? "#showall":null);
+			Reditn.pushState(toggled ? "#showall":"#");
 		}
 		li.appendChild(button);
 		if(menu != null)
@@ -176,19 +176,17 @@ class Expand {
 	public static function refresh() {
 		if(button != null) {
 			button.innerHTML = '${toggled?"hide":"show"} all';
-			var np = [];
-			var n:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("next");
-			var p:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("prev");
-			for(nl in n)
-				np.push(nl);
-			for(pl in p)
-				np.push(pl);
+			var nextprev:Element = cast js.Browser.document.body.getElementsByClassName("nextprev")[0];
+			nextprev.getElementsByTagName("a");
+			var np:Array<js.html.AnchorElement> = [];
+			for(link in nextprev.getElementsByTagName("a"))
+				np.push(cast link);
 			for(i in np) {
 				if(i.nodeName.toLowerCase() != "a")
 					continue;
-				if(toggled && i.href.indexOf("#")==-1)
+				if(toggled && i.href.indexOf("#") == -1)
 					i.href += "#showall";
-				else if(!toggled && i.href.indexOf("#")!=-1)
+				else if(!toggled && i.href.indexOf("#") != -1)
 					i.href = i.href.substr(0, i.href.indexOf("#"));
 			}
 			Reditn.show(button, buttons.length > 0);

@@ -115,7 +115,7 @@ Expand.init = function() {
 	Expand.refresh();
 	Expand.button.onclick = function(e) {
 		Expand.toggle(!Expand.toggled);
-		js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
+		js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":"#");
 	};
 	li.appendChild(Expand.button);
 	if(menu != null) menu.appendChild(li);
@@ -254,20 +254,14 @@ Expand.createButton = function(e,extra,url) {
 Expand.refresh = function() {
 	if(Expand.button != null) {
 		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " all";
+		var nextprev = js.Browser.document.body.getElementsByClassName("nextprev")[0];
+		nextprev.getElementsByTagName("a");
 		var np = [];
-		var n = js.Browser.document.body.getElementsByClassName("next");
-		var p = js.Browser.document.body.getElementsByClassName("prev");
-		var _g = 0;
-		while(_g < n.length) {
-			var nl = n[_g];
+		var _g = 0, _g1 = nextprev.getElementsByTagName("a");
+		while(_g < _g1.length) {
+			var link = _g1[_g];
 			++_g;
-			np.push(nl);
-		}
-		var _g = 0;
-		while(_g < p.length) {
-			var pl = p[_g];
-			++_g;
-			np.push(pl);
+			np.push(link);
 		}
 		var _g = 0;
 		while(_g < np.length) {
