@@ -162,9 +162,9 @@ class Link {
 			}
 		},
 		{
-			regex: ~/flickr\.com(\/[^\/]*)*?\/([0-9@]*)\//,
+			regex: ~/flickr\.com\/photos\/.*/,
 			method: function(e, cb) {
-				Reditn.getJSON('http://www.flickr.com/services/oembed/?url=http://www.${StringTools.urlEncode(e.matched(0))}', function(data) {
+				Reditn.getJSON('http://www.flickr.com/services/oembed/?url=http://www.${StringTools.urlEncode(e.matched(0))}&format=json', function(data) {
 					cb([{
 						url: data.url,
 						caption: data.title,

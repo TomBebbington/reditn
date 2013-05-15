@@ -2477,8 +2477,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 	Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(e.matched(0)) + "&format=json",function(d) {
 		cb4([{ url : d.url, caption : d.title, author : d.author_name}]);
 	});
-}},{ regex : new EReg("flickr\\.com(/[^/]*)*?/([0-9@]*)/",""), method : function(e,cb5) {
-	Reditn.getJSON("http://www.flickr.com/services/oembed/?url=http://www." + StringTools.urlEncode(e.matched(0)),function(data) {
+}},{ regex : new EReg("flickr\\.com/photos/.*",""), method : function(e,cb5) {
+	Reditn.getJSON("http://www.flickr.com/services/oembed/?url=http://www." + StringTools.urlEncode(e.matched(0)) + "&format=json",function(data) {
 		cb5([{ url : data.url, caption : data.title, author : data.author_name}]);
 	});
 }},{ regex : new EReg("ebay\\.([a-zA-Z\\.]*)/itm(/[^/]*)?/([0-9]*)",""), method : function(e,cb6) {

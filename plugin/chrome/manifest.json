@@ -18,7 +18,7 @@
 		"http://www.explosm.net/comics/",
 		"http://livememe.com/*",
 		"http://backend.deviantart.com/*",
-		"http://api.flickr.com/*",
+		"http://www.flickr.com/services/*",
 		"http://open.ebay.com/*",
 		"http://public-api.wordpress.com/rest/v1/*",
 		"http://*.wikinews.org/w/*",
