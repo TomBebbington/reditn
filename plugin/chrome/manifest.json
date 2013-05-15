@@ -30,6 +30,8 @@
 		"http://www.webupd8.com/*",
 		"http://api.tumblr.com/v2/*",
 		"https://api.imgur.com/3/*",
-		"http://api.longurl.org/v2/*"
+		"http://api.longurl.org/v2/*",
+		"http://webservices.amazon.com/onca/*",
+		"http://www.doctorwho.tv/*"
 	]
 }

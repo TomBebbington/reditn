@@ -8,6 +8,7 @@ class Link {
 	public static inline var EBAY_API_KEY = "ThomasDa-1e6c-4d29-a156-85557acee70b";
 	public static inline var GITHUB_KEY = "39d85b9ac427f1176763";
 	public static inline var GITHUB_KEYS = "5117570b83363ca0c71a196edc5b348af150c25d";
+	public static inline var AMAZON_KEY = "AKIAJMR3XPXGBMZJE6IA";
 	static var LINK = ~/[src|href]="(\/([^\/]*))*?([^\/]*)"/;
 	static var HTML_IMG = ~/<img .*?src="([^"]*)"\/?>/;
 	static function noRel(html:String):String {
@@ -313,9 +314,9 @@ class Link {
 			}
 		},
 		{
-			regex: ~/(digitaltrends\.com|webupd8\.org)\/.*/,
+			regex: ~/(digitaltrends\.com|webupd8\.org|doctorwho\.tv)\/.*/,
 			method: function(e, cb) {
-				Reditn.getText('http://${e.matched(0)}', function(txt) {
+				Reditn.getText('http://www.${e.matched(0)}', function(txt) {
 					var t = ~/<title>(.*)<\/title>/;
 					if(t.match(txt)) {
 						var cont = txt;
@@ -386,6 +387,15 @@ class Link {
 						content: filterHTML(data.html),
 						images: []
 					});
+				});
+			}
+		},
+		{
+			regex: ~/amazon.[a-z\.]*\/gp\/product\/([0-9A-Z]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				Reditn.getXML('http://webservices.amazon.com/onca/xml?AWSAccessKeyId=${AMAZON_KEY}&Service=AWSECommerceService&Operation=ItemLookup&ItemId=${id}', function(data) {
+					trace(data);
 				});
 			}
 		}

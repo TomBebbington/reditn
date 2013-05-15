@@ -69,15 +69,7 @@ using StringTools;
 	static function wrap(fn:Void->Void, ?id:String) {
 		var d = id == null ? null : Settings.data.get(id);
 		if(id == null || d)
-			try
-				fn()
-			catch(d:Dynamic) {
-				#if debug
-					Browser.window.alert('Module $id has failed to load in Reditn due to the following error:\n $d');
-				#else
-					trace('Module $id has failed to load in Reditn due to the following error:\n $d');
-				#end
-			}
+			fn();
 	}
 	public static function formatNumber(n:Float):String {
 		return if (!Math.isFinite(n))
@@ -299,6 +291,13 @@ using StringTools;
 				try func(getData(untyped JSON.parse(data))) catch(e:Dynamic) {
 					trace('Error getting "${url}" - could not parse ${data}');
 				}
+			}
+		}, auth, type, postData);
+	}
+	public static function getXML<T>(url:String, func:T->Void, ?auth:String, type:String="application/json", ?postData:String):Void {
+		getText(url, function(data:String) {
+			try func(getData(Xml.parse(data))) catch(e:Dynamic) {
+				trace('Error getting "${url}" - could not parse ${data}');
 			}
 		}, auth, type, postData);
 	}
