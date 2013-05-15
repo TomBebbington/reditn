@@ -21,7 +21,7 @@
 		"http://api.flickr.com/*",
 		"http://open.ebay.com/*",
 		"http://public-api.wordpress.com/rest/v1/*",
-		"http://*.wikipedia.org/w/*",
+		"http://*.wikinews.org/w/*",
 		"http://*.wikia.com/*",
 		"https://api.github.com/*",
 		"http://sourceforge.net/api/*",
@@ -29,6 +29,7 @@
 		"http://www.digitaltrends.com/*",
 		"http://www.webupd8.com/*",
 		"http://api.tumblr.com/v2/*",
-		"https://api.imgur.com/3/*"
+		"https://api.imgur.com/3/*",
+		"http://api.longurl.org/v2/*"
 	]
 }

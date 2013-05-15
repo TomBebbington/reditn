@@ -78,10 +78,10 @@ class MediaWiki {
 				name = 'File:${name}';
 			a.push({
 				url: name,
-				caption: null
+				caption: null,
+				author: null
 			});
 		}
-		trace('Images: $a');
 		return a;
 	}
 }

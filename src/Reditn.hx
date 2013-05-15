@@ -224,8 +224,11 @@ using StringTools;
 				next.disabled = ind >= a.length-1;
 			}
 			Reditn.show(caption, i.caption != null);
-			if(i.caption != null) 
+			if(i.caption != null) {
 				caption.innerHTML = StringTools.htmlEscape(i.caption);
+				if(i.author != null)
+					caption.innerHTML += ' <em>by ${i.author}</em>';
+			}
 		}
 		switchImage(0);
 		if(prev != null) {

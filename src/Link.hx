@@ -19,7 +19,8 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://${e.matched(0)}',
-					caption: null
+					caption: null,
+					author: null
 				}]);
 			}
 		},
@@ -27,7 +28,8 @@ class Link {
 			regex: ~/imgur.com\/(a|gallery)\/([^\/]*)/,
 			method: function(e, cb) {
 				var id = e.matched(2);
-				var albumType = switch(e.matched(1)) {
+				trace(e.matched(1));
+				var albumType = switch(e.matched(1).toLowerCase()) {
 					case "a": "album";
 					case "gallery": "gallery/album";
 					default: "album";
@@ -37,13 +39,15 @@ class Link {
 					if(data.images_count <= 0)
 						album.push({
 							url: 'http://i.imgur.com/${data.id}.jpg',
-							caption: data.title
+							caption: data.title,
+							author: data.account_url
 						});
 					else
 						for(i in data.images)
 							album.push({
 								url: 'http://i.imgur.com/${i.id}.jpg',
-								caption: i.title
+								caption: i.title,
+								author: data.account_url
 							});
 					cb(album);
 				}, 'Client-ID ${IMGUR_KEY}');
@@ -55,7 +59,8 @@ class Link {
 				var id = e.matched(1) == null || e.matched(1).indexOf("/") != -1 ? e.matched(2) : e.matched(1);
 				cb([{
 					url: 'http://i.imgur.com/${id}.jpg',
-					caption: null
+					caption: null,
+					author: null
 				}]);
 			}
 		},
@@ -64,7 +69,8 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://i.qkme.me/${e.matched(2)}.jpg',
-					caption: null
+					caption: null,
+					author: null
 				}]);
 			}
 		},
@@ -73,7 +79,8 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://${e.matched(0)}/image.png',
-					caption: null
+					caption: null,
+					author: null
 				}]);
 			}
 		},
@@ -82,7 +89,8 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://cdn.memegenerator.net/instances/400x/${e.matched(1)}.jpg',
-					caption: null
+					caption: null,
+					author: null
 				}]);
 			}
 		},
@@ -91,7 +99,8 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://i.imgflip.com/${e.matched(1)}.jpg',
-					caption: null
+					caption: null,
+					author: null
 				}]);
 			}
 		},
@@ -107,7 +116,8 @@ class Link {
 				Reditn.getJSON('http://www.xkcd.com/${e.matched(1)}/info.0.json', function(data:Dynamic) {
 					cb([{
 						url: data.img, 
-						caption: data.title
+						caption: data.title,
+						author: null
 					}]);
 				});
 			}
@@ -120,7 +130,8 @@ class Link {
 					if(rg.match(txt)) {
 						cb([{
 							url: rg.matched(0).substring(1, rg.matched(0).length-1),
-							caption: null
+							caption: null,
+							author: null
 						}]);
 					}
 					else
@@ -133,7 +144,8 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://livememe.com/${e.matched(1)}.jpg',
-					caption: null
+					caption: null,
+					author: null
 				}]);
 			}
 		},
@@ -143,7 +155,8 @@ class Link {
 				Reditn.getJSON('http://backend.deviantart.com/oembed?url=${e.matched(0).urlEncode()}&format=json', function(d) {
 					cb([{
 						url: d.url,
-						caption: '${d.title} by ${d.author_name}'
+						caption: d.title,
+						author: d.author_name
 					}]);
 				});
 			}
@@ -151,14 +164,11 @@ class Link {
 		{
 			regex: ~/flickr\.com(\/[^\/]*)*?\/([0-9@]*)\//,
 			method: function(e, cb) {
-				Reditn.getJSON('http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=${FLICKR_KEY}&photo_id=${e.matched(2)}&format=json', function(d) {
-					if(d.sizes == null || d.sizes.size == null)
-						return;
-					var sizes:Array<Dynamic> = d.sizes.size;
-					var largest:String = sizes[sizes.length-1].source;
+				Reditn.getJSON('http://www.flickr.com/services/oembed/?url=http://www.${StringTools.urlEncode(e.matched(0))}', function(data) {
 					cb([{
-						url: largest,
-						caption: null
+						url: data.url,
+						caption: data.title,
+						author: data.author_name
 					}]);
 				});
 			}
@@ -171,7 +181,7 @@ class Link {
 				var url = 'http://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=${EBAY_API_KEY}&siteid=0&version=515&ItemID=${id}&IncludeSelector=TextDescription';
 				Reditn.getJSON(url, function(data) {
 					var imgs:Array<String> = data.Item.PictureURL;
-					var nalbum = imgs.map(function(i) return { url: i, caption: null });
+					var nalbum = imgs.map(function(i) return { url: i, caption: null , author: null});
 					cb({title: data.Item.Title, category: data.Item.PrimaryCategoryName, location: data.Item.Location + ", " + data.Item.Country, description: filterHTML(data.Item.Description), images: nalbum, price: Reditn.formatPrice(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
 				});
 			}
@@ -187,7 +197,7 @@ class Link {
 						for(f in Reflect.fields(att)) {
 							var img = Reflect.field(att, f);
 							if(img.mime_type.startsWith("image/"))
-								{url: img.URL, caption: null};
+								{url: img.URL, caption: null, author: data.author.name};
 						}
 					] catch(e:Dynamic) []});
 				});
@@ -226,7 +236,7 @@ class Link {
 											var page = Reflect.field(pages, p);
 											if(page != null && page.imageinfo != null) {
 												var url = untyped page.imageinfo[0].url;
-												nimages.push({url: url, caption: i.caption});
+												nimages.push({url: url, caption: i.caption, author: null});
 											} else {
 												trace('Error whilst rpocessing $page for ${i.url}');
 												images.remove(i);
@@ -264,7 +274,7 @@ class Link {
 								url = url.substr(1);
 							url = 'https://github.com/${author}/${repo}/raw/master/${url}';
 						}
-						album.push({ url: url, caption: imgs.matched(1)});
+						album.push({ url: url, caption: imgs.matched(1), author: ${author}});
 						tc = tc.substr(imgs.matchedPos().pos + imgs.matchedPos().len);
 					}
 					cb({
@@ -316,7 +326,8 @@ class Link {
 						while(HTML_IMG.match(cont)) {
 							images.push({
 								url: HTML_IMG.matched(1),
-								caption: null
+								caption: null,
+								author: null
 							});
 							cont = HTML_IMG.replace(cont, "");
 						}
@@ -343,7 +354,8 @@ class Link {
 						while(HTML_IMG.match(post.body)) {
 							images.push({
 								url: HTML_IMG.matched(1),
-								caption: null
+								caption: null,
+								author: data.blog.name
 							});
 							post.body = HTML_IMG.replace(post.body, "");
 						}
@@ -355,10 +367,24 @@ class Link {
 							[for(p in ps) {
 								{
 									url: p.original_size.url,
-									caption: p.caption
-								}
+									caption: p.caption,
+									author: data.blog.name
+								};
 							}];
 						default: null;
+					});
+				});
+			}
+		},
+		{
+			regex: ~/twitter.com\/([^\/]*)\/status\/([0-9]*)/,
+			method: function(e, cb) {
+				Reditn.getJSON('https://api.twitter.com/1/statuses/oembed.json?id=${e.matched(2)}', function(data) {
+					cb({
+						title: null,
+						author: data.author_name,
+						content: filterHTML(data.html),
+						images: []
 					});
 				});
 			}
@@ -402,9 +428,18 @@ class Link {
 		~/(<br><\/br>|<br ?\/>)(<br><\/br>|<br ?\/>)/g,
 		~/style ?= ?"[^"]*"/g
 	];
-	static function filterHTML(html:String):String {
+	static var HTML_CLEANERS:Array<parser.Entry> = [
+		{ from: ~/<blockquote class="twitter-tweet">(.*)<\/blockquote>/g, to: "$1"},
+		{ from: ~/(!|\.|,|\?)(^ \n\t\r)/g, to: "$1 $2" },
+		{ from: ~/(!|\.|,|\?)( *)/g, to: "$1 "}
+	];
+	static function filterHTML(h:String):String {
 		for(f in HTML_FILTERS)
-			html = f.replace(html, "");
-		return html;
+			h = f.replace(h, "");
+		for(c in HTML_CLEANERS)
+			h = c.from.replace(h, c.to);
+		if(h.startsWith("<br>"))
+			h = h.substr(4);
+		return h;
 	}
 }
