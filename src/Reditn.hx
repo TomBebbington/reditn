@@ -11,10 +11,10 @@ using StringTools;
 	public static var links:Array<AnchorElement> = null;
 	public static var fullPage:Bool = true;
 	static function main() {
-		if(untyped document.readyState=="complete")
-			init();
-		else
-			Browser.window.onload = function(_) init();
+		switch(Browser.document.readyState) {
+			case "complete": init();
+			default: Browser.window.onload = function(_) init();
+		}
 	}
 	public static inline function getLinkContainer(l:Element):Element {
 		return l.parentElement.parentElement.parentElement;
@@ -106,8 +106,10 @@ using StringTools;
 	}
 	public static inline function show(e:Element, shown:Bool):Void {
 		e.style.display = shown ? "": "none";
-		if(e.className.indexOf("link") != -1)
-			links.remove(untyped e.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+		if(e.className.indexOf("link") != -1 && !shown) {
+			var en:Element = cast e.getElementsByClassName("entry")[0];
+			links.remove(cast en.getElementsByTagName("a")[0]);
+		}
 	}
 	public static inline function remove(e:Element):Void {
 		e.parentElement.removeChild(e);
@@ -287,23 +289,17 @@ using StringTools;
 		getText(url, function(data:String) {
 			if(data.startsWith("jsonFlickrApi(") && data.endsWith(")"))
 				data = data.substring(14, data.length - 1);
-			try func(getData(haxe.Json.parse(data))) catch(e:Dynamic) {
-				try func(getData(untyped JSON.parse(data))) catch(e:Dynamic) {
-					trace('Error getting "${url}" - could not parse ${data}');
-				}
-			}
+			func(getData(haxe.Json.parse(data)));
 		}, auth, type, postData);
 	}
 	public static function getXML<T>(url:String, func:T->Void, ?auth:String, type:String="application/json", ?postData:String):Void {
 		getText(url, function(data:String) {
-			try func(getData(Xml.parse(data))) catch(e:Dynamic) {
-				trace('Error getting "${url}" - could not parse ${data}');
-			}
+			func(getData(Xml.parse(data)));
 		}, auth, type, postData);
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
 		Browser.document.body.appendChild(el);
-		el.className="popup";
+		el.className = "popup";
 		el.style.position = "absolute";
 		el.style.width = Std.int(Browser.window.innerWidth*0.25)+"px";
 		el.style.left = '${x}px';

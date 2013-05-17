@@ -2,45 +2,37 @@ import js.html.*;
 import js.*;
 import data.*;
 class Keyboard {
-	static var current(default, null):Null<Int> = null;
+	static var current(default, null):Int = null;
 	public static var highlighted(get, null):Element;
-	static function get_highlighted():Element {
-		return current == null ? null : Reditn.getLinkContainer(Reditn.links[current]);
+	static inline function get_highlighted():Element {
+		return Reditn.links[current] != null ? Reditn.getLinkContainer(Reditn.links[current]) : null;
 	}
 	public static function init() {
 		Browser.document.onkeydown = function(e) keyDown(untyped e.keyCode);
 	}
 	static function unhighlight() {
-		var h = highlighted;
-		if(h != null) {
-			h.style.border = "";
-		}
+		if(highlighted != null)
+			highlighted.style.border = "";
 	}
 	static function highlight(dir:Int) {
 		unhighlight();
-		if(current != null && untyped Reditn.links[current + dir])
+		if(current != null && current + dir < Reditn.links.length)
 			current += dir;
 		else
 			dir = 0;
 		if(current == null)
 			current = 0;
-		var h = highlighted;
-		h.style.border = "3px solid grey";
-		h.scrollIntoView(true);
-		h.focus();
+		highlighted.style.border = "3px solid grey";
+		highlighted.scrollIntoViewIfNeeded(true);
 	}
 	static function show(s:Bool=true) {
-		var h = highlighted;
-		var tg:AnchorElement = cast h.getElementsByClassName("toggle")[0];
-		if(untyped tg.toggle != null)
-			untyped tg.toggle(s);
-		else {
-			var btn:Element = cast h.getElementsByClassName("expando-button")[0];
-			if(btn != null && (s ? btn.className.indexOf("expanded") == -1 : btn.className.indexOf("expanded") != -1))
-				btn.onclick(null);
-		}
-		h.scrollIntoView(true);
-		h.focus();
+		var btn = highlighted.getElementsByClassName("expando-button")[0];
+		for(b in Expand.buttons)
+			if(b.element == btn) {
+				b.toggle(s);
+				break;
+			}
+
 	}
 	static var keys:Array<Int> = [];
 	static var konami:Array<Int> = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
@@ -49,17 +41,15 @@ class Keyboard {
 		while(keys.length > konami.length)
 			keys.remove(keys[0]);
 		var isKon = keys.length >= konami.length;
+		for(i in 0...keys.length) {
+			if(keys[i] != konami[i]) {
+				isKon = false;
+				break;
+			}
+		}
 		if(isKon)
-			for(i in 0...keys.length) {
-				if(keys[i] != konami[i]) {
-					isKon = false;
-					break;
-				}
-			}
+			Konami.run();
 		switch(c) {
-			case _ if(isKon): {
-				Konami.run();
-			}
 			case 39: // right
 				show(true);
 			case 37: // left

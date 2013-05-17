@@ -188,17 +188,18 @@ class Link {
 			}
 		},
 		{
-			regex: ~/[^\.]*\.wordpress\.com\/[0-9\/]*([^\/]*)\/?/,
+			regex: ~/([^\.]*\.wordpress\.com)\/[0-9\/]*\/([^\/]*)?/,
 			method: function(e, cb) {
 				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).urlEncode()}/posts/slug:${e.matched(2).urlEncode()}';
 				Reditn.getJSON(url, function(data) {
+					trace(data);
 					var att = data.attachments;
 					cb({title: StringTools.htmlUnescape(data.title), content: filterHTML(data.content), author: data.author.name, images: 
 					try [
 						for(f in Reflect.fields(att)) {
 							var img = Reflect.field(att, f);
 							if(img.mime_type.startsWith("image/"))
-								{url: img.URL, caption: null, author: data.author.name};
+								{url: img.URL.urlDecode(), caption: null, author: data.author.name};
 						}
 					] catch(e:Dynamic) []});
 				});
@@ -239,7 +240,7 @@ class Link {
 												var url = untyped page.imageinfo[0].url;
 												nimages.push({url: url, caption: i.caption, author: null});
 											} else {
-												trace('Error whilst rpocessing $page for ${i.url}');
+												trace('Error whilst processing $page for ${i.url}');
 												images.remove(i);
 											}
 										}

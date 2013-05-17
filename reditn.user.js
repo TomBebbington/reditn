@@ -28,10 +28,7 @@ Adblock.init = function() {
 		Reditn.show(link,false);
 	}
 	var sidebarAd = js.Browser.document.getElementById("ad-frame");
-	if(sidebarAd != null) {
-		sidebarAd.style.display = "none";
-		if(sidebarAd.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,sidebarAd.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
-	}
+	if(sidebarAd != null) Reditn.show(sidebarAd,false);
 }
 Adblock.hideAll = function(a) {
 	var _g1 = 0, _g = a.length;
@@ -133,8 +130,7 @@ Expand.init = function() {
 						var exp = js.Browser.document.createElement("div");
 						exp.className = "expando";
 						exp.style.display = "none";
-						exp.style.display = Expand.toggled?"":"none";
-						if(exp.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,exp.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+						Reditn.show(exp,Expand.toggled);
 						var name = "selftext";
 						if(Reflect.hasField(data,"price")) {
 							var i = data;
@@ -242,8 +238,7 @@ Expand.createButton = function(e,extra,url) {
 		while(_g < expandos.length) {
 			var e1 = expandos[_g];
 			++_g;
-			e1.style.display = v?"":"none";
-			if(e1.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,e1.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+			Reditn.show(e1,v);
 		}
 	}, url : url, element : d};
 	d.onclick = function(_) {
@@ -419,53 +414,48 @@ HxOverrides.iter = function(a) {
 var Keyboard = function() { }
 $hxClasses["Keyboard"] = Keyboard;
 Keyboard.__name__ = ["Keyboard"];
-Keyboard.get_highlighted = function() {
-	return Keyboard.current == null?null:Reditn.links[Keyboard.current].parentElement.parentElement.parentElement;
-}
 Keyboard.init = function() {
 	js.Browser.document.onkeydown = function(e) {
 		Keyboard.keyDown(e.keyCode);
 	};
 }
 Keyboard.unhighlight = function() {
-	var h = Keyboard.get_highlighted();
-	if(h != null) h.style.border = "";
+	if((Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null) != null) (Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null).style.border = "";
 }
 Keyboard.highlight = function(dir) {
 	Keyboard.unhighlight();
-	if(Keyboard.current != null && Reditn.links[Keyboard.current + dir]) Keyboard.current += dir; else dir = 0;
+	if(Keyboard.current != null && Keyboard.current + dir < Reditn.links.length) Keyboard.current += dir; else dir = 0;
 	if(Keyboard.current == null) Keyboard.current = 0;
-	var h = Keyboard.get_highlighted();
-	h.style.border = "3px solid grey";
-	h.scrollIntoView(true);
-	h.focus();
+	(Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null).style.border = "3px solid grey";
+	(Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null).scrollIntoViewIfNeeded(true);
 }
 Keyboard.show = function(s) {
 	if(s == null) s = true;
-	var h = Keyboard.get_highlighted();
-	var tg = h.getElementsByClassName("toggle")[0];
-	if(tg.toggle != null) tg.toggle(s); else {
-		var btn = h.getElementsByClassName("expando-button")[0];
-		if(btn != null && (s?btn.className.indexOf("expanded") == -1:btn.className.indexOf("expanded") != -1)) btn.onclick(null);
+	var btn = (Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null).getElementsByClassName("expando-button")[0];
+	var _g = 0, _g1 = Expand.buttons;
+	while(_g < _g1.length) {
+		var b = _g1[_g];
+		++_g;
+		if(b.element == btn) {
+			b.toggle(s);
+			break;
+		}
 	}
-	h.scrollIntoView(true);
-	h.focus();
 }
 Keyboard.keyDown = function(c) {
 	Keyboard.keys.push(c);
 	while(Keyboard.keys.length > Keyboard.konami.length) HxOverrides.remove(Keyboard.keys,Keyboard.keys[0]);
 	var isKon = Keyboard.keys.length >= Keyboard.konami.length;
-	if(isKon) {
-		var _g1 = 0, _g = Keyboard.keys.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			if(Keyboard.keys[i] != Keyboard.konami[i]) {
-				isKon = false;
-				break;
-			}
+	var _g1 = 0, _g = Keyboard.keys.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(Keyboard.keys[i] != Keyboard.konami[i]) {
+			isKon = false;
+			break;
 		}
 	}
-	if(isKon) Konami.run(); else switch(c) {
+	if(isKon) Konami.run();
+	switch(c) {
 	case 39:
 		Keyboard.show(true);
 		break;
@@ -542,9 +532,16 @@ $hxClasses["Reditn"] = Reditn;
 $hxExpose(Reditn, "Reditn");
 Reditn.__name__ = ["Reditn"];
 Reditn.main = function() {
-	if(document.readyState == "complete") Reditn.init(); else js.Browser.window.onload = function(_) {
+	var _g = js.Browser;
+	switch(_g.document.readyState) {
+	case "complete":
 		Reditn.init();
-	};
+		break;
+	default:
+		js.Browser.window.onload = function(_) {
+			Reditn.init();
+		};
+	}
 }
 Reditn.init = function() {
 	if(js.Browser.window.location.href.indexOf("reddit.") == -1) return;
@@ -635,7 +632,10 @@ Reditn.formatPrice = function(n) {
 }
 Reditn.show = function(e,shown) {
 	e.style.display = shown?"":"none";
-	if(e.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,e.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+	if(e.className.indexOf("link") != -1 && !shown) {
+		var en = e.getElementsByClassName("entry")[0];
+		HxOverrides.remove(Reditn.links,en.getElementsByTagName("a")[0]);
+	}
 }
 Reditn.age = function(t) {
 	t = haxe.Timer.stamp() - t;
@@ -718,8 +718,7 @@ Reditn.embedAlbum = function(a) {
 		var i = a[ind];
 		var height = null;
 		if(img != null) {
-			img.style.display = "none";
-			if(img.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,img.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+			Reditn.show(img,false);
 			height = Std.parseInt(img.style.height);
 		}
 		img = imgs[ind];
@@ -737,8 +736,7 @@ Reditn.embedAlbum = function(a) {
 			prev.disabled = ind <= 0;
 			next.disabled = ind >= a.length - 1;
 		}
-		caption.style.display = i.caption != null?"":"none";
-		if(caption.className.indexOf("link") != -1) HxOverrides.remove(Reditn.links,caption.getElementsByClassName("entry")[0].getElementsByTagName("a")[0]);
+		Reditn.show(caption,i.caption != null);
 		if(i.caption != null) {
 			caption.innerHTML = StringTools.htmlEscape(i.caption);
 			if(i.author != null) caption.innerHTML += " <em>by " + i.author + "</em>";
@@ -772,25 +770,13 @@ Reditn.getJSON = function(url,func,auth,type,postData) {
 	if(type == null) type = "application/json";
 	Reditn.getText(url,function(data) {
 		if(StringTools.startsWith(data,"jsonFlickrApi(") && StringTools.endsWith(data,")")) data = data.substring(14,data.length - 1);
-		try {
-			func(Reditn.getData(haxe.Json.parse(data)));
-		} catch( e ) {
-			try {
-				func(Reditn.getData(JSON.parse(data)));
-			} catch( e1 ) {
-				console.log("Error getting \"" + url + "\" - could not parse " + data);
-			}
-		}
+		func(Reditn.getData(haxe.Json.parse(data)));
 	},auth,type,postData);
 }
 Reditn.getXML = function(url,func,auth,type,postData) {
 	if(type == null) type = "application/json";
 	Reditn.getText(url,function(data) {
-		try {
-			func(Reditn.getData(Xml.parse(data)));
-		} catch( e ) {
-			console.log("Error getting \"" + url + "\" - could not parse " + data);
-		}
+		func(Reditn.getData(Xml.parse(data)));
 	},auth,type,postData);
 }
 Reditn.popUp = function(bs,el,x,y) {
@@ -2922,9 +2908,10 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		});
 		cb6({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : Link.filterHTML(data.Item.Description), images : nalbum, price : Reditn.formatPrice(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
 	});
-}},{ regex : new EReg("[^\\.]*\\.wordpress\\.com/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
+}},{ regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*/([^/]*)?",""), method : function(e,cb7) {
 	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.urlEncode(e.matched(1)) + "/posts/slug:" + StringTools.urlEncode(e.matched(2));
 	Reditn.getJSON(url,function(data) {
+		console.log(data);
 		var att = data.attachments;
 		cb7({ title : StringTools.htmlUnescape(data.title), content : Link.filterHTML(data.content), author : data.author.name, images : (function($this) {
 			var $r;
@@ -2940,7 +2927,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 							_g.push((function($this) {
 								var $r;
 								var img = Reflect.field(att,f);
-								$r = img.mime_type.startsWith("image/")?{ url : img.URL, caption : null, author : data.author.name}:null;
+								$r = img.mime_type.startsWith("image/")?{ url : img.URL.urlDecode(), caption : null, author : data.author.name}:null;
 								return $r;
 							}($this)));
 						}
@@ -2996,7 +2983,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 											var url = page1.imageinfo[0].url;
 											nimages[0].push({ url : url, caption : i1[0].caption, author : null});
 										} else {
-											console.log("Error whilst rpocessing " + Std.string(page1) + " for " + i1[0].url);
+											console.log("Error whilst processing " + Std.string(page1) + " for " + i1[0].url);
 											HxOverrides.remove(images[0],i1[0]);
 										}
 									}
