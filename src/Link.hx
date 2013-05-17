@@ -192,7 +192,6 @@ class Link {
 			method: function(e, cb) {
 				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).urlEncode()}/posts/slug:${e.matched(2).urlEncode()}';
 				Reditn.getJSON(url, function(data) {
-					trace(data);
 					var att = data.attachments;
 					cb({title: StringTools.htmlUnescape(data.title), content: filterHTML(data.content), author: data.author.name, images: 
 					try [
