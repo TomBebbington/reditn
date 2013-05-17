@@ -241,27 +241,29 @@ Expand.refresh = function() {
 	if(Expand.button != null) {
 		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " all";
 		Reditn.show(Expand.button,Expand.buttons.length > 0);
-		if(js.Browser.document.body.getElementsByClassName("nextprev").length > 0) {
-			var nextprev = js.Browser.document.body.getElementsByClassName("nextprev")[0];
-			nextprev.getElementsByTagName("a");
-			var np = (function($this) {
+		var nps = js.Browser.document.body.getElementsByClassName("nextprev");
+		var _g = 0;
+		while(_g < nps.length) {
+			var np = nps[_g];
+			++_g;
+			var np1 = (function($this) {
 				var $r;
-				var _g = [];
+				var _g1 = [];
 				{
-					var _g1 = 0, _g2 = nextprev.getElementsByTagName("a");
-					while(_g1 < _g2.length) {
-						var l = _g2[_g1];
-						++_g1;
-						_g.push(l);
+					var _g2 = 0, _g3 = np.getElementsByTagName("a");
+					while(_g2 < _g3.length) {
+						var l = _g3[_g2];
+						++_g2;
+						_g1.push(l);
 					}
 				}
-				$r = _g;
+				$r = _g1;
 				return $r;
 			}(this));
-			var _g1 = 0;
-			while(_g1 < np.length) {
-				var i = np[_g1];
-				++_g1;
+			var _g2 = 0;
+			while(_g2 < np1.length) {
+				var i = np1[_g2];
+				++_g2;
 				if(i.nodeName.toLowerCase() != "a") continue;
 				if(Expand.toggled && i.href.indexOf("#") == -1) i.href += "#showall"; else if(!Expand.toggled && i.href.indexOf("#") != -1) i.href = HxOverrides.substr(i.href,0,i.href.indexOf("#"));
 			}
