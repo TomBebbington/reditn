@@ -59,9 +59,7 @@ class MediaWiki {
 				level = sections.matched(1).length;
 				break;
 			}
-			trace('Pos: $pos level: $level name: ${sections.matched(1)}');
 		}
-			trace('MATCHED IN SECCCTIYSHION: ${sections.matched(1)}');
 		if(level != null) {
 			h = h.substr(pos.pos + pos.len);
 			h = h.substr(0, h.indexOf('<h${level}>'));
@@ -74,8 +72,8 @@ class MediaWiki {
 			var p = IMAGES.matchedPos();
 			s = s.substr(p.pos + p.len);
 			var name = IMAGES.matched(2) + "." + IMAGES.matched(3);
-			if(!name.startsWith("File:"))
-				name = 'File:${name}';
+			if(name.startsWith("File:"))
+				name = name.substr(5);
 			a.push({
 				url: name,
 				caption: null,

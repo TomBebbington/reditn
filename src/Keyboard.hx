@@ -42,8 +42,24 @@ class Keyboard {
 		h.scrollIntoView(true);
 		h.focus();
 	}
+	static var keys:Array<Int> = [];
+	static var konami:Array<Int> = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
 	static function keyDown(c:Int) {
+		keys.push(c);
+		while(keys.length > konami.length)
+			keys.remove(keys[0]);
+		var isKon = keys.length >= konami.length;
+		if(isKon)
+			for(i in 0...keys.length) {
+				if(keys[i] != konami[i]) {
+					isKon = false;
+					break;
+				}
+			}
 		switch(c) {
+			case _ if(isKon): {
+				Konami.run();
+			}
 			case 39: // right
 				show(true);
 			case 37: // left
@@ -52,6 +68,7 @@ class Keyboard {
 				highlight(-1);
 			case 40: //down
 				highlight(1);
+			default:
 		}
 	}
 }

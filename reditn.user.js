@@ -452,7 +452,20 @@ Keyboard.show = function(s) {
 	h.focus();
 }
 Keyboard.keyDown = function(c) {
-	switch(c) {
+	Keyboard.keys.push(c);
+	while(Keyboard.keys.length > Keyboard.konami.length) HxOverrides.remove(Keyboard.keys,Keyboard.keys[0]);
+	var isKon = Keyboard.keys.length >= Keyboard.konami.length;
+	if(isKon) {
+		var _g1 = 0, _g = Keyboard.keys.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(Keyboard.keys[i] != Keyboard.konami[i]) {
+				isKon = false;
+				break;
+			}
+		}
+	}
+	if(isKon) Konami.run(); else switch(c) {
 	case 39:
 		Keyboard.show(true);
 		break;
@@ -465,6 +478,52 @@ Keyboard.keyDown = function(c) {
 	case 40:
 		Keyboard.highlight(1);
 		break;
+	default:
+	}
+}
+var Konami = function() { }
+$hxClasses["Konami"] = Konami;
+Konami.__name__ = ["Konami"];
+Konami.combo = function() {
+	var len = Std.random(6) + 2;
+	var s = "";
+	var _g = 0;
+	while(_g < len) {
+		var i = _g++;
+		s += Konami.words[Std.random(Konami.words.length)] + " ";
+	}
+	s = HxOverrides.substr(s,0,s.length - 1);
+	s = s.charAt(0).toUpperCase() + HxOverrides.substr(s,1,null);
+	return s;
+}
+Konami.run = function() {
+	js.Browser.document.title = "Dubbit - the front page of the wubbanet";
+	var _g = 0, _g1 = Reditn.links;
+	while(_g < _g1.length) {
+		var l = _g1[_g];
+		++_g;
+		l.innerHTML = Konami.combo();
+	}
+	var _g = 0, _g1 = js.Browser.document.body.getElementsByClassName("author");
+	while(_g < _g1.length) {
+		var a = _g1[_g];
+		++_g;
+		var a1 = a;
+		a1.innerHTML = "dubstep";
+	}
+	var _g = 0, _g1 = js.Browser.document.body.getElementsByClassName("subreddit");
+	while(_g < _g1.length) {
+		var s = _g1[_g];
+		++_g;
+		var s1 = s;
+		s1.innerHTML = "people with brains";
+	}
+	var _g = 0, _g1 = js.Browser.document.body.getElementsByClassName("score");
+	while(_g < _g1.length) {
+		var s = _g1[_g];
+		++_g;
+		var s1 = s;
+		s1.innerHTML = "-&infin;";
 	}
 }
 var Lambda = function() { }
@@ -1025,6 +1084,9 @@ Std.parseInt = function(x) {
 Std.parseFloat = function(x) {
 	return parseFloat(x);
 }
+Std.random = function(x) {
+	return x <= 0?0:Math.floor(Math.random() * x);
+}
 var js = {}
 js.Boot = function() { }
 $hxClasses["js.Boot"] = js.Boot;
@@ -1202,9 +1264,7 @@ parser.MediaWiki.trimTo = function(h,s) {
 			level = parser.MediaWiki.sections.matched(1).length;
 			break;
 		}
-		console.log("Pos: " + Std.string(pos) + " level: " + level + " name: " + parser.MediaWiki.sections.matched(1));
 	}
-	console.log("MATCHED IN SECCCTIYSHION: " + parser.MediaWiki.sections.matched(1));
 	if(level != null) {
 		h = HxOverrides.substr(h,pos.pos + pos.len,null);
 		h = HxOverrides.substr(h,0,h.indexOf("<h" + level + ">"));
@@ -1217,7 +1277,7 @@ parser.MediaWiki.getAlbum = function(s) {
 		var p = parser.MediaWiki.IMAGES.matchedPos();
 		s = HxOverrides.substr(s,p.pos + p.len,null);
 		var name = parser.MediaWiki.IMAGES.matched(2) + "." + parser.MediaWiki.IMAGES.matched(3);
-		if(!StringTools.startsWith(name,"File:")) name = "File:" + name;
+		if(StringTools.startsWith(name,"File:")) name = HxOverrides.substr(name,5,null);
 		a.push({ url : name, caption : null, author : null});
 	}
 	return a;
@@ -1634,7 +1694,7 @@ Link.filterHTML = function(h) {
 	while(_g < _g1.length) {
 		var f = _g1[_g];
 		++_g;
-		h = f.replace(h,"");
+		while(f.match(h)) h = f.replace(h,"");
 	}
 	var _g = 0, _g1 = Link.HTML_CLEANERS;
 	while(_g < _g1.length) {
@@ -1643,6 +1703,7 @@ Link.filterHTML = function(h) {
 		h = c.from.replace(h,c.to);
 	}
 	if(StringTools.startsWith(h,"<br>")) h = HxOverrides.substr(h,4,null);
+	if(StringTools.endsWith(h,"<br>")) h = HxOverrides.substr(h,0,h.length - 4);
 	return h;
 }
 var List = function() {
@@ -2759,6 +2820,9 @@ Xml.DocType = "doctype";
 Xml.ProcessingInstruction = "processingInstruction";
 Xml.Document = "document";
 Expand.buttons = [];
+Keyboard.keys = [];
+Keyboard.konami = [38,38,40,40,37,39,37,39,66,65];
+Konami.words = ["wubba","mcwubber","dubba","dadubber"];
 Reditn.fullPage = true;
 parser.MediaWiki.regex = [{ from : new EReg("\\[\\[Category:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("\\[\\[([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\n]*)\\|([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("<gallery>(.|\n|\n\r)*</gallery>",""), to : ""},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("(=*) ?(References|Gallery) ?\\1.*\\1?",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{convert\\|([0-9]*)\\|([^\\|]*)([^\\}]*)\\}\\}",""), to : "$1 $2"},{ from : new EReg("\\{\\{([^\\}]*)\\}\\}",""), to : ""},{ from : new EReg("\\{\\|(.|\n|\n\r)*\\|\\}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n\r?\n\r?",""), to : "<br>"},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""},{ from : new EReg("\\[\\]",""), to : ""}];
 parser.MediaWiki.sections = new EReg("'=(=*)([^=]*)=\\\\1\n\r?(.|\n|\n\r)*(\\\\1)?'","");
@@ -2766,7 +2830,7 @@ parser.MediaWiki.IMAGES = new EReg("(File:|img=|Image:)([^\\.\\|\\]\\}\\{\\[<>=]
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 parser.Markdown.images = new EReg("!\\[([^\\]]*)\\]\\(([^\\)\\.]+\\.(jpg|bmp|png|jpeg|gif))\\)","");
-parser.Markdown.regex = [{ from : new EReg("(\\*\\*|__)([^\\1\n]*?)\\1",""), to : "<b>$2</b>"},{ from : new EReg("(\\*|_)([^\\1\n]*?)\\1",""), to : "<em>$2</em>"},{ from : new EReg("^[\\*|+|-] (.*)$","m"), to : "<ul><li>$1</li></ul>"},{ from : new EReg("</ul><ul>",""), to : ""},{ from : new EReg("\n> (?=[^\n\r]*)",""), to : "<blockquote>$1</blockquote>"},{ from : new EReg("</blockquote>\n?\r?<blockquote>$",""), to : ""},{ from : new EReg("~~([^~]*?)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]+)",""), to : "<sup>$1</sup>"},{ from : new EReg(":\"([^:\"]*?)\":",""), to : "<q>$1</q>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\[]+)\\]\\(([^\\)]+)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("^#####([^#\n]+)(#####)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^####([^#\n]+)(####)?$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^###([^#\n]+)(###)?$","m"), to : "<h4>$1</h4>"},{ from : new EReg("^##([^#\n]+)(##)?$","m"), to : "<h5>$1</h5>"},{ from : new EReg("^#([^#\n]+)(#)?$","m"), to : "<h6>$1</h6>"},{ from : new EReg("^(#*)([^#\n])\\1?$","m"), to : "<h2>$2</h2>"},{ from : new EReg("(.*)\n\r?(?==+)\n",""), to : "<h3>$1</h3>"},{ from : new EReg("(.*)\n\r?(?=(-|#)+)\n",""), to : "<h2>$1</h2>"},{ from : new EReg("(```*|\")([^`\"\"]+)\\1","m"), to : "<code>$2</code>"},{ from : new EReg("<pre>(.*)\n\n(.*)</pre>",""), to : "<pre>$1\n$2</pre>"},{ from : new EReg("\n\n",""), to : "<br>\n"}];
+parser.Markdown.regex = [{ from : new EReg("(\\*\\*|__)([^\\1\n]*?)\\1",""), to : "<b>$2</b>"},{ from : new EReg("(\\*|_)([^\\1\n]*?)\\1",""), to : "<em>$2</em>"},{ from : new EReg("^[\\*|+|-] (.*)$","m"), to : "<ul><li>$1</li></ul>"},{ from : new EReg("</ul><ul>",""), to : ""},{ from : new EReg("\n> ([^\n\r]*)",""), to : "<blockquote>$1</blockquote>"},{ from : new EReg("</blockquote>\n?\r?<blockquote>$",""), to : ""},{ from : new EReg("~~([^~]*?)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]+)",""), to : "<sup>$1</sup>"},{ from : new EReg(":\"([^:\"]*?)\":",""), to : "<q>$1</q>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\[]+)\\]\\(([^\\)]+)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("^#####([^#\n]+)(#####)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^####([^#\n]+)(####)?$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^###([^#\n]+)(###)?$","m"), to : "<h4>$1</h4>"},{ from : new EReg("^##([^#\n]+)(##)?$","m"), to : "<h5>$1</h5>"},{ from : new EReg("^#([^#\n]+)(#)?$","m"), to : "<h6>$1</h6>"},{ from : new EReg("^(#*)([^#\n])\\1?$","m"), to : "<h2>$2</h2>"},{ from : new EReg("(.*)\n\r?(?==+)\n",""), to : "<h3>$1</h3>"},{ from : new EReg("(.*)\n\r?(?=(-|#)+)\n",""), to : "<h2>$1</h2>"},{ from : new EReg("(```*|\")([^`\"\"]+)\\1","m"), to : "<code>$2</code>"},{ from : new EReg("<pre>(.*)\n\n(.*)</pre>",""), to : "<pre>$1\n$2</pre>"},{ from : new EReg("\n\n",""), to : "<br>\n"}];
 haxe.xml.Parser.escapes = (function($this) {
 	var $r;
 	var h = new haxe.ds.StringMap();
@@ -2840,12 +2904,12 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 }},{ regex : new EReg("livememe.com/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://livememe.com/" + e.matched(1) + ".jpg", caption : null, author : null}]);
 }},{ regex : new EReg("(([^\\.]*\\.)?deviantart\\.com/art|fav\\.me)/.*",""), method : function(e,cb4) {
-	Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(e.matched(0)) + "&format=json",function(d) {
-		cb4([{ url : d.url, caption : d.title, author : d.author_name}]);
+	Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(e.matched(0)) + "&format=json",function(e1) {
+		cb4([{ url : e1.url, caption : e1.title, author : e1.author_name}]);
 	});
 }},{ regex : new EReg("flickr\\.com/photos/.*",""), method : function(e,cb5) {
-	Reditn.getJSON("http://www.flickr.com/services/oembed/?url=http://www." + StringTools.urlEncode(e.matched(0)) + "&format=json",function(data) {
-		cb5([{ url : data.url, caption : data.title, author : data.author_name}]);
+	Reditn.getJSON("http://www.flickr.com/services/oembed/?url=http://www." + StringTools.urlEncode(e.matched(0)) + "&format=json",function(e1) {
+		cb5([{ url : e1.url, caption : e1.title, author : e1.author_name}]);
 	});
 }},{ regex : new EReg("ebay\\.([a-zA-Z\\.]*)/itm(/[^/]*)?/([0-9]*)",""), method : function(e,cb6) {
 	var domain = e.matched(1);
@@ -2858,8 +2922,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		});
 		cb6({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : Link.filterHTML(data.Item.Description), images : nalbum, price : Reditn.formatPrice(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
 	});
-}},{ regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
-	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.htmlEscape(e.matched(1)) + "/posts/slug:" + StringTools.htmlEscape(e.matched(2));
+}},{ regex : new EReg("[^\\.]*\\.wordpress\\.com/[0-9/]*([^/]*)/?",""), method : function(e,cb7) {
+	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.urlEncode(e.matched(1)) + "/posts/slug:" + StringTools.urlEncode(e.matched(2));
 	Reditn.getJSON(url,function(data) {
 		var att = data.attachments;
 		cb7({ title : StringTools.htmlUnescape(data.title), content : Link.filterHTML(data.content), author : data.author.name, images : (function($this) {
@@ -3014,13 +3078,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 			cont = HxOverrides.substr(cont,cont.indexOf("<article"),null);
 			cont = HxOverrides.substr(cont,cont.indexOf(">") + 1,null);
 			cont = HxOverrides.substr(cont,0,cont.indexOf("</article>"));
-			var images = [];
-			while(Link.HTML_IMG.match(cont)) {
-				images.push({ url : Link.HTML_IMG.matched(1), caption : null, author : null});
-				cont = Link.HTML_IMG.replace(cont,"");
-			}
 			cont = Link.filterHTML(cont);
-			cb11({ title : t.matched(1), content : cont, author : null, images : images});
+			cb11({ title : t.matched(1), content : cont, author : null, images : []});
 		}
 	},null,null,null);
 }},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb12) {
@@ -3083,7 +3142,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		console.log(data);
 	});
 }}];
-Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("(<br></br>|<br ?/>)(<br></br>|<br ?/>)","g"),new EReg("style ?= ?\"[^\"]*\"","g")];
+Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("(<br></br>|<br/>|<br />)(<br></br>|<br/>|<br />)","g"),new EReg("style ?= ?\"[^\"]*\"","g")];
 Link.HTML_CLEANERS = [{ from : new EReg("<blockquote class=\"twitter-tweet\">(.*)</blockquote>","g"), to : "$1"},{ from : new EReg("(!|\\.|,|\\?)(^ \n\t\r)","g"), to : "$1 $2"},{ from : new EReg("(!|\\.|,|\\?)( *)","g"), to : "$1 "}];
 Settings.DESC = (function($this) {
 	var $r;

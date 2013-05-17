@@ -10,7 +10,7 @@ class Markdown {
 		{ from: ~/(\*|_)([^\1\n]*?)\1/, to: "<em>$2</em>" },
 		{ from: ~/^[\*|+|-] (.*)$/m, to: "<ul><li>$1</li></ul>"},
 		{ from: ~/<\/ul><ul>/, to: ""},
-		{ from: ~/\n> (?=[^\n\r]*)/, to: "<blockquote>$1</blockquote>"},
+		{ from: ~/\n> ([^\n\r]*)/, to: "<blockquote>$1</blockquote>"},
 		{ from: ~/<\/blockquote>\n?\r?<blockquote>$/, to: ""},
 		{ from: ~/~~([^~]*?)~~/, to: "<del>$1</del>" },
 		{ from: ~/\^([^\^]+)/, to: "<sup>$1</sup>" },

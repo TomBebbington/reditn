@@ -153,11 +153,11 @@ class Link {
 		{
 			regex: ~/(([^\.]*\.)?deviantart\.com\/art|fav\.me)\/.*/,
 			method: function(e, cb) {
-				Reditn.getJSON('http://backend.deviantart.com/oembed?url=${e.matched(0).urlEncode()}&format=json', function(d) {
+				Reditn.getJSON('http://backend.deviantart.com/oembed?url=${e.matched(0).urlEncode()}&format=json', function(e:OEmbed) {
 					cb([{
-						url: d.url,
-						caption: d.title,
-						author: d.author_name
+						url: e.url,
+						caption: e.title,
+						author: e.author_name
 					}]);
 				});
 			}
@@ -165,11 +165,11 @@ class Link {
 		{
 			regex: ~/flickr\.com\/photos\/.*/,
 			method: function(e, cb) {
-				Reditn.getJSON('http://www.flickr.com/services/oembed/?url=http://www.${StringTools.urlEncode(e.matched(0))}&format=json', function(data) {
+				Reditn.getJSON('http://www.flickr.com/services/oembed/?url=http://www.${StringTools.urlEncode(e.matched(0))}&format=json', function(e:OEmbed) {
 					cb([{
-						url: data.url,
-						caption: data.title,
-						author: data.author_name
+						url: e.url,
+						caption: e.title,
+						author: e.author_name
 					}]);
 				});
 			}
@@ -188,9 +188,9 @@ class Link {
 			}
 		},
 		{
-			regex: ~/([^\.]*\.wordpress\.com)\/[0-9\/]*([^\/]*)\/?/,
+			regex: ~/[^\.]*\.wordpress\.com\/[0-9\/]*([^\/]*)\/?/,
 			method: function(e, cb) {
-				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).htmlEscape()}/posts/slug:${e.matched(2).htmlEscape()}';
+				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).urlEncode()}/posts/slug:${e.matched(2).urlEncode()}';
 				Reditn.getJSON(url, function(data) {
 					var att = data.attachments;
 					cb({title: StringTools.htmlUnescape(data.title), content: filterHTML(data.content), author: data.author.name, images: 
@@ -323,21 +323,12 @@ class Link {
 						cont = cont.substr(cont.indexOf("<article"));
 						cont = cont.substr(cont.indexOf(">")+1);
 						cont = cont.substr(0, cont.indexOf("</article>"));
-						var images = [];
-						while(HTML_IMG.match(cont)) {
-							images.push({
-								url: HTML_IMG.matched(1),
-								caption: null,
-								author: null
-							});
-							cont = HTML_IMG.replace(cont, "");
-						}
 						cont = filterHTML(cont);
 						cb({
 							title: t.matched(1),
 							content: cont,
 							author: null,
-							images: images
+							images: []
 						});
 					}
 				});
@@ -380,7 +371,7 @@ class Link {
 		{
 			regex: ~/twitter.com\/.*\/status\/([0-9]*)/,
 			method: function(e, cb) {
-				Reditn.getJSON('https://api.twitter.com/1/statuses/oembed.json?id=${e.matched(2)}', function(data) {
+				Reditn.getJSON('https://api.twitter.com/1/statuses/oembed.json?id=${e.matched(2)}', function(data:OEmbed) {
 					cb({
 						title: null,
 						author: data.author_name,
@@ -395,7 +386,7 @@ class Link {
 			method: function(e, cb) {
 				var id = e.matched(1);
 				Reditn.getXML('http://webservices.amazon.com/onca/xml?AWSAccessKeyId=${AMAZON_KEY}&Service=AWSECommerceService&Operation=ItemLookup&ItemId=${id}', function(data) {
-					trace(data);
+					trace(data); // does it even lift?
 				});
 			}
 		}
@@ -435,7 +426,7 @@ class Link {
 		~/<([^>]*)( [^>]*)?><\/\1>/g,
 		~/<script[^>\/]*\/>/g,
 		~/<script[^>\/]*><\/script>/g,
-		~/(<br><\/br>|<br ?\/>)(<br><\/br>|<br ?\/>)/g,
+		~/(<br><\/br>|<br\/>|<br \/>)(<br><\/br>|<br\/>|<br \/>)/g,
 		~/style ?= ?"[^"]*"/g
 	];
 	static var HTML_CLEANERS:Array<parser.Entry> = [
@@ -445,11 +436,14 @@ class Link {
 	];
 	static function filterHTML(h:String):String {
 		for(f in HTML_FILTERS)
-			h = f.replace(h, "");
+			while(f.match(h))
+				h = f.replace(h, "");
 		for(c in HTML_CLEANERS)
 			h = c.from.replace(h, c.to);
 		if(h.startsWith("<br>"))
 			h = h.substr(4);
+		if(h.endsWith("<br>"))
+			h = h.substr(0, h.length-4);
 		return h;
 	}
 }
