@@ -1,4 +1,5 @@
 package data;
 typedef State = {
-	allExpanded:Bool
+	allExpanded:Bool,
+	expanded:Map<String, Bool>
 }

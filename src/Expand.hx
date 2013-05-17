@@ -124,7 +124,7 @@ class Expand {
 			else {
 				if(be != null) {
 					var b = adaptButton(cast be);
-					b.toggle(Expand.toggled);
+					b.toggle(Expand.toggled, false);
 					buttons.push(b);
 				}
 
@@ -137,10 +137,12 @@ class Expand {
 			toggled: function():Bool {
 				return exp.className.indexOf("expanded") != -1;
 			},
-			toggle: function(v) {
+			toggle: function(v, ps) {
 				var c = exp.className.indexOf("expanded") != -1;
 				if(v != c)
 					exp.onclick(null);
+				if(ps)
+					Reditn.pushState();
 			},
 			url: cast(exp.parentElement.getElementsByTagName("a")[0], js.html.AnchorElement).href,
 			element: exp
@@ -155,26 +157,27 @@ class Expand {
 			toggled: function():Bool {
 				return isToggled;
 			},
-			toggle: function(v) {
+			toggle: function(v, ps) {
 				isToggled = v;
 				d.className = cn + (isToggled ? "expanded" : "collapsed");
 				var entry:Element = d.parentElement;
 				var expandos:Array<Element> = cast entry.getElementsByClassName("expando");
 				for(e in expandos)
 					Reditn.show(e, v);
+				if(ps)
+					Reditn.pushState();
 			},
 			url: url,
 			element: d
 		};
 		d.onclick = function(_) {
-			btn.toggle(!isToggled);
+			btn.toggle(!isToggled, true);
 		}
 		var tagline:Element = untyped e.getElementsByClassName("tagline")[0];
 		tagline.parentNode.insertBefore(d, tagline);
 		buttons.push(btn);
-
 		if(Expand.toggled)
-			btn.toggle(true);
+			btn.toggle(true, false);
 		return d;
 	}
 	public static function refresh() {
@@ -199,7 +202,7 @@ class Expand {
 	public static function toggle(t:Bool) {
 		toggled = t;
 		for(btn in buttons)
-			btn.toggle(t);
+			btn.toggle(t, false);
 		refresh();
 	}
 	public static function preload(url) {

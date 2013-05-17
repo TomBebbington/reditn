@@ -207,7 +207,7 @@ Expand.defaultButton = function(cont) {
 		if(one) be.parentNode.removeChild(be); else {
 			if(be != null) {
 				var b = Expand.adaptButton(be);
-				b.toggle(Expand.toggled);
+				b.toggle(Expand.toggled,false);
 				Expand.buttons.push(b);
 			}
 			one = true;
@@ -217,9 +217,10 @@ Expand.defaultButton = function(cont) {
 Expand.adaptButton = function(exp) {
 	return { toggled : function() {
 		return exp.className.indexOf("expanded") != -1;
-	}, toggle : function(v) {
+	}, toggle : function(v,ps) {
 		var c = exp.className.indexOf("expanded") != -1;
 		if(v != c) exp.onclick(null);
+		if(ps) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
 	}, url : (js.Boot.__cast(exp.parentElement.getElementsByTagName("a")[0] , HTMLAnchorElement)).href, element : exp};
 }
 Expand.createButton = function(e,extra,url) {
@@ -229,7 +230,7 @@ Expand.createButton = function(e,extra,url) {
 	var isToggled = false;
 	var btn = { toggled : function() {
 		return isToggled;
-	}, toggle : function(v) {
+	}, toggle : function(v,ps) {
 		isToggled = v;
 		d.className = cn + (isToggled?"expanded":"collapsed");
 		var entry = d.parentElement;
@@ -240,14 +241,15 @@ Expand.createButton = function(e,extra,url) {
 			++_g;
 			Reditn.show(e1,v);
 		}
+		if(ps) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
 	}, url : url, element : d};
 	d.onclick = function(_) {
-		btn.toggle(!isToggled);
+		btn.toggle(!isToggled,true);
 	};
 	var tagline = e.getElementsByClassName("tagline")[0];
 	tagline.parentNode.insertBefore(d,tagline);
 	Expand.buttons.push(btn);
-	if(Expand.toggled) btn.toggle(true);
+	if(Expand.toggled) btn.toggle(true,false);
 	return d;
 }
 Expand.refresh = function() {
@@ -287,7 +289,7 @@ Expand.toggle = function(t) {
 	while(_g < _g1.length) {
 		var btn = _g1[_g];
 		++_g;
-		btn.toggle(t);
+		btn.toggle(t,false);
 	}
 	Expand.refresh();
 }
@@ -437,7 +439,8 @@ Keyboard.show = function(s) {
 		var b = _g1[_g];
 		++_g;
 		if(b.element == btn) {
-			b.toggle(s);
+			b.toggle(s,true);
+			(Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null).scrollIntoViewIfNeeded(true);
 			break;
 		}
 	}
@@ -589,10 +592,24 @@ Reditn.init = function() {
 		if(s == null) return;
 		var state = haxe.Unserializer.run(s);
 		if(state.allExpanded != Expand.toggled) Expand.toggle(state.allExpanded);
+		var _g1 = 0, _g2 = Expand.buttons;
+		while(_g1 < _g2.length) {
+			var btn = _g2[_g1];
+			++_g1;
+			var ex = state.expanded;
+			if(ex.exists(btn.url)) btn.toggle(ex.get(btn.url),false);
+		}
 	};
 }
 Reditn.state = function() {
-	return { allExpanded : Expand.toggled};
+	var exp = new haxe.ds.StringMap();
+	var _g = 0, _g1 = Expand.buttons;
+	while(_g < _g1.length) {
+		var btn = _g1[_g];
+		++_g;
+		if(btn.toggled() != Expand.toggled) exp.set(btn.url,btn.toggled());
+	}
+	return { allExpanded : Expand.toggled, expanded : exp};
 }
 Reditn.wrap = function(fn,id) {
 	var d = id == null?null:Settings.data.get(id);
@@ -2911,7 +2928,6 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 }},{ regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*/([^/]*)?",""), method : function(e,cb7) {
 	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.urlEncode(e.matched(1)) + "/posts/slug:" + StringTools.urlEncode(e.matched(2));
 	Reditn.getJSON(url,function(data) {
-		console.log(data);
 		var att = data.attachments;
 		cb7({ title : StringTools.htmlUnescape(data.title), content : Link.filterHTML(data.content), author : data.author.name, images : (function($this) {
 			var $r;

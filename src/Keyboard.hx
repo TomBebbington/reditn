@@ -29,7 +29,8 @@ class Keyboard {
 		var btn = highlighted.getElementsByClassName("expando-button")[0];
 		for(b in Expand.buttons)
 			if(b.element == btn) {
-				b.toggle(s);
+				b.toggle(s, true);
+				highlighted.scrollIntoViewIfNeeded(true);
 				break;
 			}
 

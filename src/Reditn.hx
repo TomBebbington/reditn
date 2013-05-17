@@ -56,11 +56,22 @@ using StringTools;
 			var state:State = haxe.Unserializer.run(s);
 			if(state.allExpanded != Expand.toggled)
 				Expand.toggle(state.allExpanded);
+			for(btn in Expand.buttons) {
+				var ex = state.expanded;
+				if(ex.exists(btn.url))
+					btn.toggle(ex.get(btn.url), false);
+			}
 		}
 	}
 	static function state():State {
+		var exp = new Map();
+		for(btn in Expand.buttons){
+			if(btn.toggled() != Expand.toggled)
+				exp.set(btn.url, btn.toggled());
+		}
 		return {
-			allExpanded: Expand.toggled
+			allExpanded: Expand.toggled,
+			expanded: exp
 		};
 	}
 	public static inline function pushState(?url:String) {
