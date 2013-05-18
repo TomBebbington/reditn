@@ -70,6 +70,15 @@ EReg.prototype = {
 		if(this.r.m == null) throw "No string matched";
 		return { pos : this.r.m.index, len : this.r.m[0].length};
 	}
+	,matchedRight: function() {
+		if(this.r.m == null) throw "No string matched";
+		var sz = this.r.m.index + this.r.m[0].length;
+		return this.r.s.substr(sz,this.r.s.length - sz);
+	}
+	,matchedLeft: function() {
+		if(this.r.m == null) throw "No string matched";
+		return this.r.s.substr(0,this.r.m.index);
+	}
 	,matched: function(n) {
 		return this.r.m != null && n >= 0 && n < this.r.m.length?this.r.m[n]:(function($this) {
 			var $r;
@@ -425,7 +434,7 @@ Keyboard.unhighlight = function() {
 Keyboard.highlight = function(dir) {
 	Keyboard.unhighlight();
 	if(Keyboard.current != null && Keyboard.current + dir < Reditn.links.length) Keyboard.current += dir; else dir = 0;
-	if(Keyboard.current == null) Keyboard.current = 0;
+	if(Keyboard.current == null || (Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null) == null) Keyboard.current = 0;
 	(Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null).style.border = "3px solid grey";
 	(Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null).scrollIntoViewIfNeeded(true);
 }
@@ -475,25 +484,24 @@ Keyboard.keyDown = function(c) {
 var Konami = function() { }
 $hxClasses["Konami"] = Konami;
 Konami.__name__ = ["Konami"];
-Konami.combo = function() {
-	var len = Std.random(6) + 2;
-	var s = "";
-	var _g = 0;
-	while(_g < len) {
-		var i = _g++;
-		s += Konami.words[Std.random(Konami.words.length)] + " ";
+Konami.translate = function(p) {
+	var pos = 0;
+	while(Konami.filter.matchSub(p,pos)) {
+		var mp = Konami.filter.matchedPos();
+		var word = Konami.words[Std.random(Konami.words.length)];
+		console.log(word);
+		pos = mp.pos + word.length;
+		p = Konami.filter.matchedLeft() + word + Konami.filter.matchedRight();
 	}
-	s = HxOverrides.substr(s,0,s.length - 1);
-	s = s.charAt(0).toUpperCase() + HxOverrides.substr(s,1,null);
-	return s;
+	return p;
 }
 Konami.run = function() {
-	js.Browser.document.title = "Dubbit - the front page of the wubbanet";
+	js.Browser.document.title = "Dubbit - the back page of the wubbanet";
 	var _g = 0, _g1 = Reditn.links;
 	while(_g < _g1.length) {
 		var l = _g1[_g];
 		++_g;
-		l.innerHTML = Konami.combo();
+		l.innerHTML = Konami.translate(l.innerHTML);
 	}
 	var _g = 0, _g1 = js.Browser.document.body.getElementsByClassName("author");
 	while(_g < _g1.length) {
@@ -515,6 +523,14 @@ Konami.run = function() {
 		++_g;
 		var s1 = s;
 		s1.innerHTML = "-&infin;";
+	}
+	var _g = 0, _g1 = js.Browser.document.body.getElementsByTagName("p");
+	while(_g < _g1.length) {
+		var p = _g1[_g];
+		++_g;
+		var p1 = p;
+		if(p1.className == "parent") continue;
+		p1.innerHTML = Konami.translate(p1.innerHTML);
 	}
 }
 var Lambda = function() { }
@@ -2930,14 +2946,15 @@ Expand.queue = 0;
 Keyboard.keys = [];
 Keyboard.konami = [38,38,40,40,37,39,37,39,66,65];
 Konami.words = ["wubba","mcwubber","dubba","dadubber"];
+Konami.filter = new EReg("[a-zA-Z]*","");
 Reditn.fullPage = true;
 parser.MediaWiki.regex = [{ from : new EReg("\\[\\[Category:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("\\[\\[([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("\\[\\[([^\\]\n]*)\\|([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("<gallery>(.|\n|\n\r)*</gallery>",""), to : ""},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("(=*) ?(References|Gallery) ?\\1.*\\1?",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{convert\\|([0-9]*)\\|([^\\|]*)([^\\}]*)\\}\\}",""), to : "$1 $2"},{ from : new EReg("\\{\\{([^\\}]*)\\}\\}",""), to : ""},{ from : new EReg("\\{\\|(.|\n|\n\r)*\\|\\}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n\r?\n\r?",""), to : "<br>"},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""},{ from : new EReg("\\[\\]",""), to : ""}];
 parser.MediaWiki.sections = new EReg("'=(=*)([^=]*)=\\\\1\n\r?(.|\n|\n\r)*(\\\\1)?'","");
 parser.MediaWiki.IMAGES = new EReg("(File:|img=|Image:)([^\\.\\|\\]\\}\\{\\[<>=]*)\\.(gif|jpg|jpeg|bmp|png|webp|svg|raw)(\\|([^\\)]*))?","");
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
-parser.Markdown.images = new EReg("!\\[([^\\]]*)\\]\\(([^\\)\\.]+\\.(jpg|bmp|png|jpeg|gif))\\)","");
-parser.Markdown.regex = [{ from : new EReg("(\\*\\*|__)([^\\1\n]*?)\\1",""), to : "<b>$2</b>"},{ from : new EReg("(\\*|_)([^\\1\n]*?)\\1",""), to : "<em>$2</em>"},{ from : new EReg("^[\\*|+|-] (.*)$","m"), to : "<ul><li>$1</li></ul>"},{ from : new EReg("</ul><ul>",""), to : ""},{ from : new EReg("\n> ([^\n\r]*)",""), to : "<blockquote>$1</blockquote>"},{ from : new EReg("</blockquote>\n?\r?<blockquote>$",""), to : ""},{ from : new EReg("~~([^~]*?)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]+)",""), to : "<sup>$1</sup>"},{ from : new EReg(":\"([^:\"]*?)\":",""), to : "<q>$1</q>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\[]+)\\]\\(([^\\)]+)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("^#####([^#\n]+)(#####)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^####([^#\n]+)(####)?$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^###([^#\n]+)(###)?$","m"), to : "<h4>$1</h4>"},{ from : new EReg("^##([^#\n]+)(##)?$","m"), to : "<h5>$1</h5>"},{ from : new EReg("^#([^#\n]+)(#)?$","m"), to : "<h6>$1</h6>"},{ from : new EReg("^(#*)([^#\n])\\1?$","m"), to : "<h2>$2</h2>"},{ from : new EReg("(.*)\n\r?(?==+)\n",""), to : "<h3>$1</h3>"},{ from : new EReg("(.*)\n\r?(?=(-|#)+)\n",""), to : "<h2>$1</h2>"},{ from : new EReg("(```*|\")([^`\"\"]+)\\1","m"), to : "<code>$2</code>"},{ from : new EReg("<pre>(.*)\n\n(.*)</pre>",""), to : "<pre>$1\n$2</pre>"},{ from : new EReg("\n\n",""), to : "<br>\n"}];
+parser.Markdown.images = new EReg("!\\[([^\\]\\(]*)]\\(([^\\)]*)\\)","");
+parser.Markdown.regex = [{ from : new EReg("(\\*\\*|__)([^\\1\n]*?)\\1",""), to : "<b>$2</b>"},{ from : new EReg("(\\*|_)([^\\1\n]*?)\\1",""), to : "<em>$2</em>"},{ from : new EReg("^[\\*|+|-] (.*)$","m"), to : "<ul><li>$1</li></ul>"},{ from : new EReg("</ul><ul>",""), to : ""},{ from : new EReg("\n> ([^\n\r]*)",""), to : "<blockquote>$1</blockquote>"},{ from : new EReg("</blockquote>\n?\r?<blockquote>$",""), to : ""},{ from : new EReg("~~([^~]*?)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]+)",""), to : "<sup>$1</sup>"},{ from : new EReg(":\"([^:\"]*?)\":",""), to : "<q>$1</q>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\]\\(]*)]\\(([^\\)]*)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("!\\[([^\\]\\(]*)]\\(([^\\)]*)\\)",""), to : ""},{ from : new EReg("^#####([^#\n]+)(#####)?$","m"), to : "<h2>$1</h2>"},{ from : new EReg("^####([^#\n]+)(####)?$","m"), to : "<h3>$1</h3>"},{ from : new EReg("^###([^#\n]+)(###)?$","m"), to : "<h4>$1</h4>"},{ from : new EReg("^##([^#\n]+)(##)?$","m"), to : "<h5>$1</h5>"},{ from : new EReg("^#([^#\n]+)(#)?$","m"), to : "<h6>$1</h6>"},{ from : new EReg("^(#*)([^#\n])\\1?$","m"), to : "<h2>$2</h2>"},{ from : new EReg("(.*)\n\r?(?==+)\n",""), to : "<h3>$1</h3>"},{ from : new EReg("(.*)\n\r?(?=(-|#)+)\n",""), to : "<h2>$1</h2>"},{ from : new EReg("(```*)([^`]+)\\1","m"), to : "<code>$2</code>"},{ from : new EReg("<pre>(.*)\n\n(.*)</pre>",""), to : "<pre>$1\n$2</pre>"},{ from : new EReg("\n\n",""), to : "<br>\n"}];
 haxe.xml.Parser.escapes = (function($this) {
 	var $r;
 	var h = new haxe.ds.StringMap();

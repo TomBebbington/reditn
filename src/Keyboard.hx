@@ -20,7 +20,7 @@ class Keyboard {
 			current += dir;
 		else
 			dir = 0;
-		if(current == null)
+		if(current == null || highlighted == null)
 			current = 0;
 		highlighted.style.border = "3px solid grey";
 		highlighted.scrollIntoViewIfNeeded(true);

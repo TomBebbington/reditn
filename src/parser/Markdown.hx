@@ -4,7 +4,7 @@ import js.html.*;
 import data.*;
 using StringTools;
 class Markdown {
-	public static var images:EReg = ~/!\[([^\]]*)\]\(([^\)\.]+\.(jpg|bmp|png|jpeg|gif))\)/;
+	public static var images:EReg = ~/!\[([^\]\(]*)]\(([^\)]*)\)/;
 	static var regex = [ // adapted from Slimdown
 		{ from: ~/(\*\*|__)([^\1\n]*?)\1/, to: "<b>$2</b>" },
 		{ from: ~/(\*|_)([^\1\n]*?)\1/, to: "<em>$2</em>" },
@@ -16,7 +16,8 @@ class Markdown {
 		{ from: ~/\^([^\^]+)/, to: "<sup>$1</sup>" },
 		{ from: ~/:"([^:"]*?)":/, to: "<q>$1</q>"},
 		{ from: images, to: "" },
-		{ from: ~/\[([^\[]+)\]\(([^\)]+)\)/, to: "<a href=\"$2\">$1</a>" },
+		{ from: ~/\[([^\]\(]*)]\(([^\)]*)\)/, to: "<a href=\"$2\">$1</a>" },
+		{ from: ~/!\[([^\]\(]*)]\(([^\)]*)\)/, to: "" },
 		{ from: ~/^#####([^#\n]+)(#####)?$/m, to: "<h2>$1</h2>" },
 		{ from: ~/^####([^#\n]+)(####)?$/m, to: "<h3>$1</h3>" },
 		{ from: ~/^###([^#\n]+)(###)?$/m, to: "<h4>$1</h4>" },
@@ -25,7 +26,7 @@ class Markdown {
 		{ from: ~/^(#*)([^#\n])\1?$/m, to: "<h2>$2</h2>"},
 		{ from: ~/(.*)\n\r?(?==+)\n/, to: "<h3>$1</h3>"},
 		{ from: ~/(.*)\n\r?(?=(-|#)+)\n/, to: "<h2>$1</h2>"},
-		{ from: ~/(```*|")([^`""]+)\1/m, to: "<code>$2</code>"},
+		{ from: ~/(```*)([^`]+)\1/m, to: "<code>$2</code>"},
 		{ from: ~/<pre>(.*)\n\n(.*)<\/pre>/, to: "<pre>$1\n$2</pre>"},
 		{ from: ~/\n\n/, to: "<br>\n"}
 	];

@@ -1,20 +1,24 @@
 import js.html.*;
 import js.*;
+using StringTools;
 class Konami {
 	static var words = ["wubba", "mcwubber", "dubba", "dadubber"];
-	static function combo() {
-		var len = Std.random(6) + 2;
-		var s = "";
-		for(i in 0...len)
-			s += words[Std.random(words.length)] + " ";
-		s = s.substr(0, s.length-1);
-		s = s.charAt(0).toUpperCase() + s.substr(1);
-		return s;
+	static var filter:EReg = ~/[a-zA-Z]*/;
+	static function translate(p:String):String {
+		var pos = 0;
+		while(filter.matchSub(p, pos)) {
+			var mp = filter.matchedPos();
+			var word = words[Std.random(words.length)];
+			trace(word);
+			pos = mp.pos + word.length;
+			p = filter.matchedLeft() + word + filter.matchedRight();
+		}
+		return p;
 	}
 	public static function run() {
-		Browser.document.title = "Dubbit - the front page of the wubbanet";
+		Browser.document.title = "Dubbit - the back page of the wubbanet";
 		for(l in Reditn.links)
-			l.innerHTML = combo();
+			l.innerHTML = translate(l.innerHTML);
 		for(a in Browser.document.body.getElementsByClassName("author")) {
 			var a:Element = cast a;
 			a.innerHTML = "dubstep";
@@ -26,6 +30,12 @@ class Konami {
 		for(s in Browser.document.body.getElementsByClassName("score")) {
 			var s:Element = cast s;
 			s.innerHTML = "-&infin;";
+		}
+		for(p in js.Browser.document.body.getElementsByTagName("p")) {
+			var p:Element = cast p;
+			if(p.className == "parent")
+				continue;
+			p.innerHTML = translate(p.innerHTML);
 		}
 	}
 }
