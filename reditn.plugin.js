@@ -852,12 +852,14 @@ Reditn.embedMap = function(m) {
 	var $it0 = m.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		var keye = js.Browser.document.createElement("dt");
-		keye.innerHTML = k;
-		e.appendChild(keye);
-		var keyv = js.Browser.document.createElement("dd");
-		keyv.innerHTML = m.get(k);
-		e.appendChild(keyv);
+		if(m.get(k) != null && m.get(k).length > 0) {
+			var keye = js.Browser.document.createElement("dt");
+			keye.innerHTML = k;
+			e.appendChild(keye);
+			var keyv = js.Browser.document.createElement("dd");
+			keyv.innerHTML = m.get(k);
+			e.appendChild(keyv);
+		}
 	}
 	e.className = "md reditn-table";
 	return e;
@@ -2118,7 +2120,7 @@ $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
 	var s = js.Browser.document.createElement("style");
-	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n\t\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n\t\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
+	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
 	js.Browser.document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
@@ -3328,16 +3330,20 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 			return $r;
 		}(this)));
 	});
-}},{ regex : new EReg("twitter.com/.*/status/([0-9]*)",""), method : function(e,cb13) {
+}},{ regex : new EReg(".*\\.tumblr\\.com",""), method : function(e,cb13) {
+	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + StringTools.urlEncode(e.matched(0)) + "/info?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE",function(data) {
+		cb13({ urls : new haxe.ds.StringMap(), name : data.blog.title, description : Link.filterHTML(data.blog.description), album : []});
+	});
+}},{ regex : new EReg("twitter.com/.*/status/([0-9]*)",""), method : function(e,cb14) {
 	Reditn.getJSON("https://api.twitter.com/1/statuses/oembed.json?id=" + e.matched(2),function(data) {
-		cb13({ title : null, author : data.author_name, content : Link.filterHTML(data.html), images : []});
+		cb14({ title : null, author : data.author_name, content : Link.filterHTML(data.html), images : []});
 	});
 }},{ regex : new EReg("amazon\\.[a-z\\.]*/gp/product/([0-9A-Z]*)",""), method : function(e,cb) {
 	var id = e.matched(1);
 	Reditn.getXML("http://webservices.amazon.com/onca/xml?AWSAccessKeyId=" + "AKIAJMR3XPXGBMZJE6IA" + "&Service=AWSECommerceService&Operation=ItemLookup&ItemId=" + id,function(data) {
 		console.log(data);
 	});
-}},{ regex : new EReg("plus\\.google\\.com/([0-9]*)/posts/([a-zA-Z]*)",""), method : function(e2,cb14) {
+}},{ regex : new EReg("plus\\.google\\.com/([0-9]*)/posts/([a-zA-Z]*)",""), method : function(e2,cb15) {
 	var pid = e2.matched(1), id1 = e2.matched(2), num = 0, title1 = new EReg("<b>([^>]*)</b><br />","");
 	var nextPage = (function($this) {
 		var $r;
@@ -3360,12 +3366,12 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 								var titl = title1.matched(1);
 								cont = title1.replace(cont,"");
 								cont = Link.filterHTML(cont);
-								cb14({ title : titl, author : name, content : cont, images : []});
+								cb15({ title : titl, author : name, content : cont, images : []});
 								break;
 							default:
 								console.log(data1);
 								var att = data1.object.attachments;
-								cb14((function($this) {
+								cb15((function($this) {
 									var $r;
 									var _g1 = [];
 									{
@@ -3397,7 +3403,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 }},{ regex : new EReg("facebook\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
 	var id = e.matched(1);
 	cb({ album : [{ url : "https://graph.facebook.com/" + id + "/picture?type=large", caption : null, author : null}], urls : new haxe.ds.StringMap()});
-}},{ regex : new EReg("plus\\.google.com/u?/[0-9]*/([0-9]*)",""), method : function(e,cb15) {
+}},{ regex : new EReg("plus\\.google.com/u?/[0-9]*/([0-9]*)",""), method : function(e,cb16) {
 	var id = e.matched(1);
 	Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + id + "?key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(data) {
 		var urls = data.urls;
@@ -3411,12 +3417,12 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 				aurls.set(key,value);
 			}
 		}
-		if(data.urls != null && data.displayName != null && data.aboutMe != null) cb15({ urls : aurls, name : data.displayName, description : data.aboutMe, album : [{ url : data.image.url, caption : null, author : data.displayName}]});
+		if(data.urls != null && data.displayName != null && data.aboutMe != null) cb16({ urls : aurls, name : data.displayName, description : data.aboutMe, album : [{ url : data.image.url, caption : null, author : data.displayName}]});
 	});
-}},{ regex : new EReg("reddit\\.com/r/([a-zA-Z0-9]*)",""), method : function(e,cb16) {
+}},{ regex : new EReg("reddit\\.com/r/([a-zA-Z0-9]*)",""), method : function(e,cb17) {
 	console.log(e.matched(1));
 	Reditn.getJSON("http://www." + e.matched(0) + "/about.json",function(s) {
-		cb16(s);
+		cb17(s);
 	});
 }}];
 Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("style ?= ?\"[^\"]*\"","g")];

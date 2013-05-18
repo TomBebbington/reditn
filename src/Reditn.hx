@@ -299,12 +299,14 @@ using StringTools;
 	public static function embedMap(m:Map<String, String>):js.html.DListElement {
 		var e = js.Browser.document.createDListElement();
 		for(k in m.keys()) {
-			var keye = Browser.document.createElement("dt");
-			keye.innerHTML = k;
-			e.appendChild(keye);
-			var keyv = Browser.document.createElement("dd");
-			keyv.innerHTML = m.get(k);
-			e.appendChild(keyv);
+			if(m.get(k) != null && m.get(k).length > 0) {
+				var keye = Browser.document.createElement("dt");
+				keye.innerHTML = k;
+				e.appendChild(keye);
+				var keyv = Browser.document.createElement("dd");
+				keyv.innerHTML = m.get(k);
+				e.appendChild(keyv);
+			}
 		}
 		e.className = "md reditn-table";
 		return e;
