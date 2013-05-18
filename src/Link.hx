@@ -438,7 +438,7 @@ class Link {
 					trace(data);
 					cb([{
 						caption: data.name,
-						url: data.source,
+						url: data.source,http://graph.facebook.com/{ID of object}/picture?type=large
 						author: data.from.name
 					}]);
 				});	*/
@@ -478,14 +478,8 @@ class Link {
 		{
 			regex: ~/reddit\.com\/r\/([a-zA-Z0-9]*)/,
 			method: function(e, cb) {
-				Reditn.getJSON('http://www.${e.matched(0)}/about.json', function(s:data.Subreddit) {
-					cb({
-						author: null,
-						title: s.display_name,
-						content: Markdown.parse(s.description),
-						images: []
-					});
-				});
+				trace(e.matched(1));
+				Reditn.getJSON('http://www.${e.matched(0)}/about.json', function(s:data.Subreddit) cb(s));
 			}
 		}
 	];
@@ -513,6 +507,8 @@ class Link {
 			url = url.substr(0, url.indexOf("?"));
 		if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1)
 			url = url.substr(0, url.indexOf("#"));
+		if(url.endsWith("/"))
+			url = url.substr(0, url.length-1);
 		return url;
 	}
 	static var HTML_FILTERS:Array<EReg> = [

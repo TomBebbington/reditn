@@ -296,6 +296,19 @@ using StringTools;
 		}, year = Std.string(d.getFullYear());
 		return '$month, $year';
 	}
+	public static function embedMap(m:Map<String, String>):js.html.DListElement {
+		var e = js.Browser.document.createDListElement();
+		for(k in m.keys()) {
+			var keye = Browser.document.createElement("dt");
+			keye.innerHTML = k;
+			e.appendChild(keye);
+			var keyv = Browser.document.createElement("dd");
+			keyv.innerHTML = m.get(k);
+			e.appendChild(keyv);
+		}
+		e.className = "md reditn-table";
+		return e;
+	}
 	public static function getJSON<T>(url:String, func:T->Void, ?auth:String, type:String="application/json", ?postData:String):Void {
 		getText(url, function(data:String) {
 			if(data.startsWith("jsonFlickrApi(") && data.endsWith(")"))

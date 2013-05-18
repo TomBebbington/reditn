@@ -38,3 +38,19 @@
 	background-position:-48px -23px;
 	background-repeat:no-repeat
 }
+
+dl.reditn-table {
+	width: 100%;
+	float: left;
+	padding: 0;
+}
+	
+.reditn-table dt {
+	float:left;
+	width: 15%;
+	font-weight: bold;
+	
+.reditn-table dd {
+	float: right;
+	padding: 5px;
+}

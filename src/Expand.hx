@@ -57,16 +57,15 @@ class Expand {
 							div.className = "usertext";
 							exp.appendChild(div);
 							var content = Browser.document.createDivElement();
-							var inner = Browser.document.createSpanElement();
-							inner.innerHTML = '<b>Name:</b> ${data.name}<br>'+
-							'<b>Description:</b> ${data.description}<br>'+
-							'<b>URLS:</b> <ul>${urls.join("")}</ul>';
-							content.appendChild(inner);
+							content.appendChild(Reditn.embedMap([
+								"Name" => data.name,
+								"Description" => data.description,
+								"Links" => urls.join("")
+							]));
 							if(p.album.length > 0) {
 								content.appendChild(Browser.document.createBRElement());
 								content.appendChild(Reditn.embedAlbum(p.album));
 							}
-							content.className = "md";
 							div.appendChild(content);
 						} else if(Reflect.hasField(data, "price")) {
 							var i:ShopItem = data;
@@ -74,17 +73,27 @@ class Expand {
 							div.className = "usertext";
 							exp.appendChild(div);
 							var cont = Browser.document.createDivElement();
-							var inner = Browser.document.createSpanElement();
-							inner.innerHTML = //'<h2>${i.title.htmlEscape()}</h2><br>' + 
-							'<b>Category:</b> ${i.category.htmlEscape()}<br>' + 
-							'<b>Location:</b> ${i.location.htmlEscape()}<br>' + 
-							'<b>Price:</b> ${i.price.htmlEscape()}<br>' +
-							'<p>${i.description}</p>';
-							cont.appendChild(inner);
-							cont.className = "md";
+							cont.appendChild(Reditn.embedMap([
+								"Category" => i.category.htmlEscape(),
+								"Location" => i.location.htmlEscape(),
+								"Price" => i.price.htmlEscape(),
+								"Description" => i.description
+							]));
 							cont.appendChild(Reditn.embedAlbum(i.images));
 							div.appendChild(cont);
 							name = "item";
+						} else if(Reflect.hasField(data, "subscribers")) { // subreddit
+							var s:data.Subreddit = data;
+							var div = Browser.document.createDivElement();
+							div.className = "usertext";
+							exp.appendChild(div);
+							var content = Reditn.embedMap([
+								"Age" => Reditn.age(s.created_utc),
+								"Subscribers" => Reditn.formatNumber(s.subscribers),
+								"Active users" => Reditn.formatNumber(s.accounts_active),
+								"Description" => parser.Markdown.parse(s.description)
+							]);
+							div.appendChild(content);
 						} else if(Reflect.hasField(data, "content")) { // article
 							var a:Article = data;
 							var div = Browser.document.createDivElement();
@@ -101,6 +110,7 @@ class Expand {
 							}
 							content.className = "md";
 							div.appendChild(content);
+
 						} else if(Std.is(data, Array) && Reflect.hasField(untyped data[0], "url")) {
 							var a:Album = data;
 							var div = Reditn.embedAlbum(a);
@@ -108,7 +118,6 @@ class Expand {
 							name = "image";
 						} else if(Reflect.hasField(data, "developers")) {
 							var r:Repo = data;
-							trace('Repository: $r');
 							var div = js.Browser.document.createDivElement();
 							div.className = "usertext";
 							var cont = Browser.document.createDivElement();
