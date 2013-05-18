@@ -19,7 +19,7 @@
 		"http://livememe.com/*",
 		"http://backend.deviantart.com/*",
 		"http://www.flickr.com/services/*",
-		"http://open.ebay.com/*",
+		"http://open.api.ebay.com/*",
 		"http://public-api.wordpress.com/rest/v1/*",
 		"http://*.wikinews.org/w/*",
 		"http://*.wikia.com/*",

@@ -39,18 +39,21 @@
 	background-repeat:no-repeat
 }
 
-dl.reditn-table {
-	width: 100%;
+dl.reditn-table  {
 	float: left;
+	width: 100%;
 	padding: 0;
 }
 	
 .reditn-table dt {
-	float:left;
-	width: 15%;
+	clear: left;
+	float: left;
+	width: 16%;
 	font-weight: bold;
+	text-align: right;
+}
 	
 .reditn-table dd {
-	float: right;
-	padding: 5px;
+	float: left;
+	text-align: left;
 }
