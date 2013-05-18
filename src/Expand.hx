@@ -132,7 +132,12 @@ class Expand {
 			}
 		}
 	}
+	static var queue:Int = 0;
+	static inline function delay():Int {
+		return queue * 1000;
+	}
 	static function adaptButton(exp:DivElement):Button {
+		var url = cast(exp.parentElement.getElementsByTagName("a")[0], js.html.AnchorElement).href;
 		return {
 			toggled: function():Bool {
 				return exp.className.indexOf("expanded") != -1;
@@ -141,10 +146,19 @@ class Expand {
 				var c = exp.className.indexOf("expanded") != -1;
 				if(v != c)
 					exp.onclick(null);
+				queue++;
+				function check() {
+					if(exp.parentElement.getElementsByClassName("error").length > 0) {
+						exp.onclick(null);
+						exp.onclick(null);
+					} else
+						queue--;
+				}
+				Timer.delay(function() check(), delay());
 				if(ps)
 					Reditn.pushState();
 			},
-			url: cast(exp.parentElement.getElementsByTagName("a")[0], js.html.AnchorElement).href,
+			url: url,
 			element: exp
 		};
 	}

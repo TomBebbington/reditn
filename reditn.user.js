@@ -215,13 +215,24 @@ Expand.defaultButton = function(cont) {
 	}
 }
 Expand.adaptButton = function(exp) {
+	var url = (js.Boot.__cast(exp.parentElement.getElementsByTagName("a")[0] , HTMLAnchorElement)).href;
 	return { toggled : function() {
 		return exp.className.indexOf("expanded") != -1;
 	}, toggle : function(v,ps) {
 		var c = exp.className.indexOf("expanded") != -1;
 		if(v != c) exp.onclick(null);
+		Expand.queue++;
+		var check = function() {
+			if(exp.parentElement.getElementsByClassName("error").length > 0) {
+				exp.onclick(null);
+				exp.onclick(null);
+			} else Expand.queue--;
+		};
+		haxe.Timer.delay(function() {
+			check();
+		},Expand.queue * 1000);
 		if(ps) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
-	}, url : (js.Boot.__cast(exp.parentElement.getElementsByTagName("a")[0] , HTMLAnchorElement)).href, element : exp};
+	}, url : url, element : exp};
 }
 Expand.createButton = function(e,extra,url) {
 	var d = js.Browser.document.createElement("div");
@@ -2442,6 +2453,14 @@ haxe.Timer = function(time_ms) {
 };
 $hxClasses["haxe.Timer"] = haxe.Timer;
 haxe.Timer.__name__ = ["haxe","Timer"];
+haxe.Timer.delay = function(f,time_ms) {
+	var t = new haxe.Timer(time_ms);
+	t.run = function() {
+		t.stop();
+		f();
+	};
+	return t;
+}
 haxe.Timer.stamp = function() {
 	return new Date().getTime() / 1000;
 }
@@ -2825,6 +2844,7 @@ Xml.DocType = "doctype";
 Xml.ProcessingInstruction = "processingInstruction";
 Xml.Document = "document";
 Expand.buttons = [];
+Expand.queue = 0;
 Keyboard.keys = [];
 Keyboard.konami = [38,38,40,40,37,39,37,39,66,65];
 Konami.words = ["wubba","mcwubber","dubba","dadubber"];
