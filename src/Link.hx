@@ -1,14 +1,16 @@
 import data.*;
+import parser.*;
 using StringTools;
 class Link {
 	public static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
 	public static inline var TUMBLR_KEY = "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE";
 	public static inline var IMGUR_KEY = "cc1f254578d6c52";
-	public static inline var GOOGLE_API_KEY = "95f055321ea256d1d8828674c62105ea3931ae08";
+	public static inline var GOOGLE_API_KEY = "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o";
 	public static inline var EBAY_API_KEY = "ThomasDa-1e6c-4d29-a156-85557acee70b";
 	public static inline var GITHUB_KEY = "39d85b9ac427f1176763";
 	public static inline var GITHUB_KEYS = "5117570b83363ca0c71a196edc5b348af150c25d";
 	public static inline var AMAZON_KEY = "AKIAJMR3XPXGBMZJE6IA";
+	public static inline var FACEBOOK_KEY = "CAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrCAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrf";
 	static var LINK = ~/[src|href]="(\/([^\/]*))*?([^\/]*)"/;
 	static var HTML_IMG = ~/<img .*?src="([^"]*)"\/?>/;
 	static function noRel(html:String):String {
@@ -382,11 +384,107 @@ class Link {
 			}
 		},
 		{
-			regex: ~/amazon.[a-z\.]*\/gp\/product\/([0-9A-Z]*)/,
+			regex: ~/amazon\.[a-z\.]*\/gp\/product\/([0-9A-Z]*)/,
 			method: function(e, cb) {
 				var id = e.matched(1);
 				Reditn.getXML('http://webservices.amazon.com/onca/xml?AWSAccessKeyId=${AMAZON_KEY}&Service=AWSECommerceService&Operation=ItemLookup&ItemId=${id}', function(data) {
 					trace(data); // does it even lift?
+				});
+			}
+		},
+		{
+			regex: ~/plus\.google\.com\/([0-9]*)\/posts\/([a-zA-Z]*)/,
+			method: function(e, cb) {
+				var pid = e.matched(1), id = e.matched(2), num = 0, title = ~/<b>([^>]*)<\/b><br \/>/;
+				function nextPage(?tk:String) {
+					tk = tk == null ? "" : '&requestToken=${tk}';
+					if(num > 8)
+						return;
+					Reditn.getJSON('https://www.googleapis.com/plus/v1/people/${pid}/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=${GOOGLE_API_KEY}${tk}', function(data) {
+						var items:Array<Dynamic> = data.items, url = e.matched(0);
+						for(i in items)
+							if(i.url.indexOf(id) != -1) {
+								Reditn.getJSON('https://www.googleapis.com/plus/v1/activities/${i.id}?fields=actor%2FdisplayName%2Cannotation%2Cobject(actor%2Cattachments%2Ccontent%2Cid%2CobjectType%2CoriginalContent%2Curl)&key=${GOOGLE_API_KEY}', function(data) {
+									var type:String = data.object.objectType, name:String = data.actor.actorName, cont:String = data.object.content;
+									title.match(cont);
+									switch(type) {
+										case "note":
+											var titl = title.matched(1);
+											cont = title.replace(cont, "");
+											cont = filterHTML(cont);
+											cb({title: titl, author: name, content: cont, images: []});
+										default:
+											trace(data);
+											var att:Array<Dynamic> = data.object.attachments;
+											cb([for(a in att) 
+												{url: a.image.url, caption: a.content.length == 0 ? data.object.content : a.content, author: null}]);
+									}
+								});
+								return;
+							}
+						if(data.items.length != 0)
+							nextPage(data.requestToken);
+					});
+				}
+				nextPage();
+			}
+		},
+		{
+			regex: ~/facebook.com\/photo\.php\?v=([0-9]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				/*
+				Reditn.getJSON('https://graph.facebook.com/${id}?access_token=${FACEBOOK_KEY}', function(data) {
+					trace(data);
+					cb([{
+						caption: data.name,
+						url: data.source,
+						author: data.from.name
+					}]);
+				});	*/
+				cb([{ caption: null, url: "http://graph.facebook.com/${id}/picture?type=small&access_token="+FACEBOOK_KEY, author: null}]);
+			}
+		},
+		{
+			regex: ~/facebook\.com\/([a-zA-Z0-9]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				cb({
+					album: [{url: "https://graph.facebook.com/"+id+"/picture?type=large", caption: null, author: null}],
+					urls: new Map<String, String>()
+				});
+			}
+		},
+		{
+			regex: ~/plus\.google.com\/u?\/[0-9]*\/([0-9]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				Reditn.getJSON('https://www.googleapis.com/plus/v1/people/${id}?key=${GOOGLE_API_KEY}', function(data) {
+					var urls:Array<Dynamic> = data.urls;
+					var aurls = new Map<String, String>();
+					if(urls != null)
+						for(u in urls)
+							aurls.set(u.label, u.value);
+					if(data.urls != null && data.displayName != null && data.aboutMe != null)
+						cb({
+							urls: aurls,
+							name: data.displayName,
+							description: data.aboutMe,
+							album: [{url: data.image.url, caption: null, author: data.displayName}]
+						});
+				});
+			}
+		},
+		{
+			regex: ~/reddit\.com\/r\/([a-zA-Z0-9]*)/,
+			method: function(e, cb) {
+				Reditn.getJSON('http://www.${e.matched(0)}/about.json', function(s:data.Subreddit) {
+					cb({
+						author: null,
+						title: s.display_name,
+						content: Markdown.parse(s.description),
+						images: []
+					});
 				});
 			}
 		}
@@ -395,7 +493,7 @@ class Link {
 		url = trimURL(url);
 		for(s in sites)
 			try {
-				if(s.regex.match(url))
+				if(s.regex.match(url) && s.regex.matchedPos().len == url.length)
 					return s;
 			} catch(d:Dynamic) {
 				trace('Error $d whilst processing regex ${s.regex}');
@@ -411,7 +509,7 @@ class Link {
 			url = url.substr(4);
 		if(url.indexOf("&") != -1)
 			url = url.substr(0, url.indexOf("&"));
-		if(url.indexOf("?") != -1)
+		if(url.indexOf("?") != -1 && !url.startsWith("facebook.com/"))
 			url = url.substr(0, url.indexOf("?"));
 		if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1)
 			url = url.substr(0, url.indexOf("#"));
@@ -426,13 +524,13 @@ class Link {
 		~/<([^>]*)( [^>]*)?><\/\1>/g,
 		~/<script[^>\/]*\/>/g,
 		~/<script[^>\/]*><\/script>/g,
-		~/(<br><\/br>|<br\/>|<br \/>)(<br><\/br>|<br\/>|<br \/>)/g,
 		~/style ?= ?"[^"]*"/g
 	];
 	static var HTML_CLEANERS:Array<parser.Entry> = [
 		{ from: ~/<blockquote class="twitter-tweet">(.*)<\/blockquote>/g, to: "$1"},
 		{ from: ~/(!|\.|,|\?)(^ \n\t\r)/g, to: "$1 $2" },
-		{ from: ~/(!|\.|,|\?)( *)/g, to: "$1 "}
+		{ from: ~/(!|\.|,|\?)( *)/g, to: "$1 "},
+		{ from: ~/(<br><\/br>|<br\/>|<br \/>)(<br><\/br>|<br\/>|<br \/>)/g, to: "<br/>"}
 	];
 	static function filterHTML(h:String):String {
 		for(f in HTML_FILTERS)
@@ -440,8 +538,8 @@ class Link {
 				h = f.replace(h, "");
 		for(c in HTML_CLEANERS)
 			h = c.from.replace(h, c.to);
-		if(h.startsWith("<br>"))
-			h = h.substr(4);
+		if(h.startsWith("<br>") || h.startsWith("<br />"))
+			h = h.substr(h.indexOf(">")+1);
 		if(h.endsWith("<br>"))
 			h = h.substr(0, h.length-4);
 		return h;

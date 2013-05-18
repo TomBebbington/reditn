@@ -50,18 +50,35 @@ class Expand {
 						exp.style.display = "none";
 						Reditn.show(exp, toggled);
 						var name = "selftext";
-						if(Reflect.hasField(data, "price")) {
+						if(Reflect.hasField(data, "urls")) { // profile
+							var p:data.Profile = data;
+							var urls = [for(uk in p.urls.keys()) '<li><a href="${p.urls.get(uk)}">${uk}</a></li>'];
+							var div = Browser.document.createDivElement();
+							div.className = "usertext";
+							exp.appendChild(div);
+							var content = Browser.document.createDivElement();
+							var inner = Browser.document.createSpanElement();
+							inner.innerHTML = '<b>Name:</b> ${data.name}<br>'+
+							'<b>Description:</b> ${data.description}<br>'+
+							'<b>URLS:</b> <ul>${urls.join("")}</ul>';
+							content.appendChild(inner);
+							if(p.album.length > 0) {
+								content.appendChild(Browser.document.createBRElement());
+								content.appendChild(Reditn.embedAlbum(p.album));
+							}
+							content.className = "md";
+							div.appendChild(content);
+						} else if(Reflect.hasField(data, "price")) {
 							var i:ShopItem = data;
 							var div = Browser.document.createDivElement();
 							div.className = "usertext";
 							exp.appendChild(div);
-							var head = null;
 							var cont = Browser.document.createDivElement();
 							var inner = Browser.document.createSpanElement();
-							inner.innerHTML = //'<h2>${StringTools.htmlEscape(i.title)}</h2><br>' + 
-							'<b>Category:</b> ${StringTools.htmlEscape(i.category)}<br>' + 
-							'<b>Location:</b> ${StringTools.htmlEscape(i.location)}<br>' + 
-							'<b>Price:</b> ${StringTools.htmlEscape(i.price)}<br>' +
+							inner.innerHTML = //'<h2>${i.title.htmlEscape()}</h2><br>' + 
+							'<b>Category:</b> ${i.category.htmlEscape()}<br>' + 
+							'<b>Location:</b> ${i.location.htmlEscape()}<br>' + 
+							'<b>Price:</b> ${i.price.htmlEscape()}<br>' +
 							'<p>${i.description}</p>';
 							cont.appendChild(inner);
 							cont.className = "md";
@@ -197,7 +214,6 @@ class Expand {
 	public static function refresh() {
 		if(button != null) {
 			button.innerHTML = '${toggled?"hide":"show"} all';
-			Reditn.show(button, buttons.length > 0);
 			var nps:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
 			for(np in nps) {
 				var np:Array<AnchorElement> = [for(l in np.getElementsByTagName("a")) cast l];

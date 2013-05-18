@@ -18,15 +18,21 @@ class Markdown {
 		{ from: images, to: "" },
 		{ from: ~/\[([^\]\(]*)]\(([^\)]*)\)/, to: "<a href=\"$2\">$1</a>" },
 		{ from: ~/!\[([^\]\(]*)]\(([^\)]*)\)/, to: "" },
-		{ from: ~/^([#|=]+)([^#=\n\r\[\]"]+)\1?$/m, to: "<h2>$2</h2>" },
-		{ from: ~/(.*)\n\r?(==+)\n/, to: "<h3>$1</h3>"},
-		{ from: ~/(.*)\n\r?((-|#)+)\n/, to: "<h2>$1</h2>"},
+		{ from: ~/(.*)\n\r?(==+)\n/, to: "<h2>$1</h2>"},
+		{ from: ~/(.*)\n\r?((-|#)+)\n/, to: "<h3>$1</h3>"},
 		{ from: ~/(```*)([^`]+)\1/m, to: "<code>$2</code>"},
 		{ from: ~/<pre>(.*)\n\n(.*)<\/pre>/, to: "<pre>$1\n$2</pre>"},
 		{ from: ~/\n\n+/, to: "<br>\n"}
 	];
+	static var header = ~/^([#|=]+)([^#=]+)\1?$/m;
 	static var quotes = ~/"([^"]*)"/;
 	public static function parse(s:String):String {
+		while(header.match(s)) {
+			var pos = header.matchedPos(), len = 1 + header.matched(1).length;
+			if(len > 6)
+				len = 6;
+			s = header.matchedLeft() + '<h${len}>${header.matched(2)}</h${len}>' + header.matchedRight();
+		}
 		for(r in regex)
 			while(r.from.match(s))
 				s = r.from.replace(s, r.to);

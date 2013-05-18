@@ -126,12 +126,37 @@ Expand.init = function() {
 						exp.style.display = "none";
 						Reditn.show(exp,Expand.toggled);
 						var name = "selftext";
-						if(Reflect.hasField(data,"price")) {
+						if(Reflect.hasField(data,"urls")) {
+							var p = data;
+							var urls = (function($this) {
+								var $r;
+								var _g2 = [];
+								var $it0 = p.urls.keys();
+								while( $it0.hasNext() ) {
+									var uk = $it0.next();
+									_g2.push("<li><a href=\"" + p.urls.get(uk) + "\">" + uk + "</a></li>");
+								}
+								$r = _g2;
+								return $r;
+							}(this));
+							var div = js.Browser.document.createElement("div");
+							div.className = "usertext";
+							exp.appendChild(div);
+							var content = js.Browser.document.createElement("div");
+							var inner = js.Browser.document.createElement("span");
+							inner.innerHTML = "<b>Name:</b> " + Std.string(data.name) + "<br>" + ("<b>Description:</b> " + Std.string(data.description) + "<br>") + ("<b>URLS:</b> <ul>" + urls.join("") + "</ul>");
+							content.appendChild(inner);
+							if(p.album.length > 0) {
+								content.appendChild(js.Browser.document.createElement("br"));
+								content.appendChild(Reditn.embedAlbum(p.album));
+							}
+							content.className = "md";
+							div.appendChild(content);
+						} else if(Reflect.hasField(data,"price")) {
 							var i = data;
 							var div = js.Browser.document.createElement("div");
 							div.className = "usertext";
 							exp.appendChild(div);
-							var head = null;
 							var cont = js.Browser.document.createElement("div");
 							var inner = js.Browser.document.createElement("span");
 							inner.innerHTML = "<b>Category:</b> " + StringTools.htmlEscape(i.category) + "<br>" + ("<b>Location:</b> " + StringTools.htmlEscape(i.location) + "<br>") + ("<b>Price:</b> " + StringTools.htmlEscape(i.price) + "<br>") + ("<p>" + i.description + "</p>");
@@ -260,7 +285,6 @@ Expand.createButton = function(e,extra,url) {
 Expand.refresh = function() {
 	if(Expand.button != null) {
 		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " all";
-		Reditn.show(Expand.button,Expand.buttons.length > 0);
 		var nps = js.Browser.document.body.getElementsByClassName("nextprev");
 		var _g = 0;
 		while(_g < nps.length) {
@@ -1432,6 +1456,11 @@ parser.Markdown = function() { }
 $hxClasses["parser.Markdown"] = parser.Markdown;
 parser.Markdown.__name__ = ["parser","Markdown"];
 parser.Markdown.parse = function(s) {
+	while(parser.Markdown.header.match(s)) {
+		var pos = parser.Markdown.header.matchedPos(), len = 1 + parser.Markdown.header.matched(1).length;
+		if(len > 6) len = 6;
+		s = parser.Markdown.header.matchedLeft() + ("<h" + len + ">" + parser.Markdown.header.matched(2) + "</h" + len + ">") + parser.Markdown.header.matchedRight();
+	}
 	var _g = 0, _g1 = parser.Markdown.regex;
 	while(_g < _g1.length) {
 		var r = _g1[_g];
@@ -1788,7 +1817,7 @@ Link.resolve = function(url) {
 		var s = _g1[_g];
 		++_g;
 		try {
-			if(s.regex.match(url)) return s;
+			if(s.regex.match(url) && s.regex.matchedPos().len == url.length) return s;
 		} catch( d ) {
 			console.log("Error " + Std.string(d) + " whilst processing regex " + Std.string(s.regex));
 		}
@@ -1799,7 +1828,7 @@ Link.trimURL = function(url) {
 	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
 	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null);
 	if(url.indexOf("&") != -1) url = HxOverrides.substr(url,0,url.indexOf("&"));
-	if(url.indexOf("?") != -1) url = HxOverrides.substr(url,0,url.indexOf("?"));
+	if(url.indexOf("?") != -1 && !StringTools.startsWith(url,"facebook.com/")) url = HxOverrides.substr(url,0,url.indexOf("?"));
 	if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1) url = HxOverrides.substr(url,0,url.indexOf("#"));
 	return url;
 }
@@ -1816,7 +1845,7 @@ Link.filterHTML = function(h) {
 		++_g;
 		h = c.from.replace(h,c.to);
 	}
-	if(StringTools.startsWith(h,"<br>")) h = HxOverrides.substr(h,4,null);
+	if(StringTools.startsWith(h,"<br>") || StringTools.startsWith(h,"<br />")) h = HxOverrides.substr(h,h.indexOf(">") + 1,null);
 	if(StringTools.endsWith(h,"<br>")) h = HxOverrides.substr(h,0,h.length - 4);
 	return h;
 }
@@ -2954,7 +2983,8 @@ parser.MediaWiki.IMAGES = new EReg("(File:|img=|Image:)([^\\.\\|\\]\\}\\{\\[<>=]
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 parser.Markdown.images = new EReg("!\\[([^\\]\\(]*)]\\(([^\\)]*)\\)","");
-parser.Markdown.regex = [{ from : new EReg("(\\*\\*|__)([^\\1\n]*?)\\1",""), to : "<b>$2</b>"},{ from : new EReg("(\\*|_)([^\\1\n]*?)\\1",""), to : "<em>$2</em>"},{ from : new EReg("^[\\*|+|-] (.*)$","m"), to : "<ul><li>$1</li></ul>"},{ from : new EReg("</ul><ul>",""), to : ""},{ from : new EReg("\n> ([^\n\r]*)",""), to : "<blockquote>$1</blockquote>"},{ from : new EReg("</blockquote>\n?\r?<blockquote>$",""), to : ""},{ from : new EReg("~~([^~]*?)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]+)",""), to : "<sup>$1</sup>"},{ from : new EReg(":\"([^:\"]*?)\":",""), to : "<q>$1</q>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\]\\(]*)]\\(([^\\)]*)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("!\\[([^\\]\\(]*)]\\(([^\\)]*)\\)",""), to : ""},{ from : new EReg("^([#|=]+)([^#=\n\r\\[\\]\"]+)\\1?$","m"), to : "<h2>$2</h2>"},{ from : new EReg("(.*)\n\r?(==+)\n",""), to : "<h3>$1</h3>"},{ from : new EReg("(.*)\n\r?((-|#)+)\n",""), to : "<h2>$1</h2>"},{ from : new EReg("(```*)([^`]+)\\1","m"), to : "<code>$2</code>"},{ from : new EReg("<pre>(.*)\n\n(.*)</pre>",""), to : "<pre>$1\n$2</pre>"},{ from : new EReg("\n\n+",""), to : "<br>\n"}];
+parser.Markdown.regex = [{ from : new EReg("(\\*\\*|__)([^\\1\n]*?)\\1",""), to : "<b>$2</b>"},{ from : new EReg("(\\*|_)([^\\1\n]*?)\\1",""), to : "<em>$2</em>"},{ from : new EReg("^[\\*|+|-] (.*)$","m"), to : "<ul><li>$1</li></ul>"},{ from : new EReg("</ul><ul>",""), to : ""},{ from : new EReg("\n> ([^\n\r]*)",""), to : "<blockquote>$1</blockquote>"},{ from : new EReg("</blockquote>\n?\r?<blockquote>$",""), to : ""},{ from : new EReg("~~([^~]*?)~~",""), to : "<del>$1</del>"},{ from : new EReg("\\^([^\\^]+)",""), to : "<sup>$1</sup>"},{ from : new EReg(":\"([^:\"]*?)\":",""), to : "<q>$1</q>"},{ from : parser.Markdown.images, to : ""},{ from : new EReg("\\[([^\\]\\(]*)]\\(([^\\)]*)\\)",""), to : "<a href=\"$2\">$1</a>"},{ from : new EReg("!\\[([^\\]\\(]*)]\\(([^\\)]*)\\)",""), to : ""},{ from : new EReg("(.*)\n\r?(==+)\n",""), to : "<h2>$1</h2>"},{ from : new EReg("(.*)\n\r?((-|#)+)\n",""), to : "<h3>$1</h3>"},{ from : new EReg("(```*)([^`]+)\\1","m"), to : "<code>$2</code>"},{ from : new EReg("<pre>(.*)\n\n(.*)</pre>",""), to : "<pre>$1\n$2</pre>"},{ from : new EReg("\n\n+",""), to : "<br>\n"}];
+parser.Markdown.header = new EReg("^([#|=]+)([^#=]+)\\1?$","m");
 haxe.xml.Parser.escapes = (function($this) {
 	var $r;
 	var h = new haxe.ds.StringMap();
@@ -3260,14 +3290,94 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 	Reditn.getJSON("https://api.twitter.com/1/statuses/oembed.json?id=" + e.matched(2),function(data) {
 		cb13({ title : null, author : data.author_name, content : Link.filterHTML(data.html), images : []});
 	});
-}},{ regex : new EReg("amazon.[a-z\\.]*/gp/product/([0-9A-Z]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("amazon\\.[a-z\\.]*/gp/product/([0-9A-Z]*)",""), method : function(e,cb) {
 	var id = e.matched(1);
 	Reditn.getXML("http://webservices.amazon.com/onca/xml?AWSAccessKeyId=" + "AKIAJMR3XPXGBMZJE6IA" + "&Service=AWSECommerceService&Operation=ItemLookup&ItemId=" + id,function(data) {
 		console.log(data);
 	});
+}},{ regex : new EReg("plus\\.google\\.com/([0-9]*)/posts/([a-zA-Z]*)",""), method : function(e2,cb14) {
+	var pid = e2.matched(1), id1 = e2.matched(2), num = 0, title1 = new EReg("<b>([^>]*)</b><br />","");
+	var nextPage = (function($this) {
+		var $r;
+		var nextPage1 = null;
+		nextPage1 = function(tk) {
+			tk = tk == null?"":"&requestToken=" + tk;
+			if(num > 8) return;
+			Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + pid + "/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o" + tk,function(data) {
+				var items = data.items, url = e2.matched(0);
+				var _g = 0;
+				while(_g < items.length) {
+					var i = items[_g];
+					++_g;
+					if(i.url.indexOf(id1) != -1) {
+						Reditn.getJSON("https://www.googleapis.com/plus/v1/activities/" + Std.string(i.id) + "?fields=actor%2FdisplayName%2Cannotation%2Cobject(actor%2Cattachments%2Ccontent%2Cid%2CobjectType%2CoriginalContent%2Curl)&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(data1) {
+							var type = data1.object.objectType, name = data1.actor.actorName, cont = data1.object.content;
+							title1.match(cont);
+							switch(type) {
+							case "note":
+								var titl = title1.matched(1);
+								cont = title1.replace(cont,"");
+								cont = Link.filterHTML(cont);
+								cb14({ title : titl, author : name, content : cont, images : []});
+								break;
+							default:
+								console.log(data1);
+								var att = data1.object.attachments;
+								cb14((function($this) {
+									var $r;
+									var _g1 = [];
+									{
+										var _g2 = 0;
+										while(_g2 < att.length) {
+											var a = att[_g2];
+											++_g2;
+											_g1.push({ url : a.image.url, caption : a.content.length == 0?data1.object.content:a.content, author : null});
+										}
+									}
+									$r = _g1;
+									return $r;
+								}(this)));
+							}
+						});
+						return;
+					}
+				}
+				if(data.items.length != 0) nextPage1(data.requestToken);
+			});
+		};
+		$r = nextPage1;
+		return $r;
+	}(this));
+	nextPage();
+}},{ regex : new EReg("facebook.com/photo\\.php\\?v=([0-9]*)",""), method : function(e,cb) {
+	var id = e.matched(1);
+	cb([{ caption : null, url : "http://graph.facebook.com/${id}/picture?type=small&access_token=" + "CAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrCAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrf", author : null}]);
+}},{ regex : new EReg("facebook\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
+	var id = e.matched(1);
+	cb({ album : [{ url : "https://graph.facebook.com/" + id + "/picture?type=large", caption : null, author : null}], urls : new haxe.ds.StringMap()});
+}},{ regex : new EReg("plus\\.google.com/u?/[0-9]*/([0-9]*)",""), method : function(e,cb15) {
+	var id = e.matched(1);
+	Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + id + "?key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(data) {
+		var urls = data.urls;
+		var aurls = new haxe.ds.StringMap();
+		if(urls != null) {
+			var _g = 0;
+			while(_g < urls.length) {
+				var u = urls[_g];
+				++_g;
+				var key = u.label, value = u.value;
+				aurls.set(key,value);
+			}
+		}
+		if(data.urls != null && data.displayName != null && data.aboutMe != null) cb15({ urls : aurls, name : data.displayName, description : data.aboutMe, album : [{ url : data.image.url, caption : null, author : data.displayName}]});
+	});
+}},{ regex : new EReg("reddit\\.com/r/([a-zA-Z0-9]*)",""), method : function(e,cb16) {
+	Reditn.getJSON("http://www." + e.matched(0) + "/about.json",function(s) {
+		cb16({ author : null, title : s.display_name, content : parser.Markdown.parse(s.description), images : []});
+	});
 }}];
-Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("(<br></br>|<br/>|<br />)(<br></br>|<br/>|<br />)","g"),new EReg("style ?= ?\"[^\"]*\"","g")];
-Link.HTML_CLEANERS = [{ from : new EReg("<blockquote class=\"twitter-tweet\">(.*)</blockquote>","g"), to : "$1"},{ from : new EReg("(!|\\.|,|\\?)(^ \n\t\r)","g"), to : "$1 $2"},{ from : new EReg("(!|\\.|,|\\?)( *)","g"), to : "$1 "}];
+Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("style ?= ?\"[^\"]*\"","g")];
+Link.HTML_CLEANERS = [{ from : new EReg("<blockquote class=\"twitter-tweet\">(.*)</blockquote>","g"), to : "$1"},{ from : new EReg("(!|\\.|,|\\?)(^ \n\t\r)","g"), to : "$1 $2"},{ from : new EReg("(!|\\.|,|\\?)( *)","g"), to : "$1 "},{ from : new EReg("(<br></br>|<br/>|<br />)(<br></br>|<br/>|<br />)","g"), to : "<br/>"}];
 Settings.DESC = (function($this) {
 	var $r;
 	var _g = new haxe.ds.StringMap();
