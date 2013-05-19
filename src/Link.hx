@@ -18,7 +18,7 @@ class Link {
 	}
 	static var sites:Array<Site> = [
 		{
-			regex: ~/.*\.(jpeg|gif|jpg|bmp|png)/,
+			regex: ~/.*\.(jpeg|gif|jpg|bmp|png|webp)/i,
 			method: function(e, cb) {
 				cb([{
 					url: 'http://${e.matched(0)}',
@@ -28,7 +28,7 @@ class Link {
 			}
 		},
 		{
-			regex: ~/imgur.com\/(a|gallery)\/([^\/]*)/,
+			regex: ~/i?\.?imgur.com\/(a|gallery)\/([^\/]*)/,
 			method: function(e, cb) {
 				var id = e.matched(2);
 				var albumType = switch(e.matched(1).toLowerCase()) {
@@ -56,10 +56,11 @@ class Link {
 			}
 		},
 		{
-			regex: ~/imgur\.com\/(r\/[^\/]*\/)?([a-zA-Z0-9]*)/,
+			regex: ~/imgur\.com\/(r\/[^\/]*\/)?([a-zA-Z0-9,]*)/,
 			method: function(e, cb) {
 				var id = e.matched(1) == null || e.matched(1).indexOf("/") != -1 ? e.matched(2) : e.matched(1);
-				cb([{
+				var ids = id.split(",");
+				cb([for(id in ids) {
 					url: 'http://i.imgur.com/${id}.jpg',
 					caption: null,
 					author: null
@@ -207,15 +208,16 @@ class Link {
 		{
 			regex: ~/(.*)\/wiki\/([^#]*)(#.*)?/,
 			method: function(e, cb) {
-				var urlroot = e.matched(1), title = e.matched(2), to = e.matched(3);
+				var aroot = 'http://${e.matched(1)}', title = e.matched(2), to = e.matched(3);
 				if(to != null)
 					to = StringTools.trim(to.substr(1));
 				if(to != null && to.length == 0)
 					to = null;
+				var urlroot = aroot;
 				if(!urlroot.endsWith(".wikia.com"))
 					urlroot += "/w";
 				function getWikiPage(name:String) {
-					Reditn.getJSON('http://${urlroot}/api.php?format=json&prop=revisions&action=query&titles=${name}&rvprop=content', function(data) {
+					Reditn.getJSON('${urlroot}/api.php?format=json&prop=revisions&action=query&titles=${name}&rvprop=content', function(data) {
 						var pages:Dynamic = data.query.pages;
 						for(p in Reflect.fields(pages)) {
 							var page = Reflect.field(pages, p);
@@ -227,11 +229,11 @@ class Link {
 							var images = parser.MediaWiki.getAlbum(cont);
 							if(to != null)
 								cont = parser.MediaWiki.trimTo(cont, to);
-							cont = parser.MediaWiki.parse(cont, urlroot);
+							cont = parser.MediaWiki.parse(cont, aroot);
 							if(images.length > 0) {
 								var nimages = [];
 								for(i in images)
-									Reditn.getJSON('http://${urlroot}/api.php?action=query&titles=${StringTools.urlEncode(i.url)}&prop=imageinfo&iiprop=url&format=json', function(data) {
+									Reditn.getJSON('${urlroot}/api.php?action=query&titles=${StringTools.urlEncode(i.url)}&prop=imageinfo&iiprop=url&format=json', function(data) {
 										var pages:Dynamic = data.query.pages;
 										for(p in Reflect.fields(pages)) {
 											var page = Reflect.field(pages, p);
@@ -338,6 +340,7 @@ class Link {
 			regex: ~/([^\.]*)\.tumblr\.com\/(post|image)\/([0-9]*)/,
 			method: function(e, cb) {
 				var author = e.matched(1), id = e.matched(3);
+				trace(author+", "+id);
 				Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data) {
 					var post:Dynamic = untyped data.posts[0];
 					cb(switch(post.type) {

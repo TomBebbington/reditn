@@ -179,8 +179,9 @@ using StringTools;
 		var span = Browser.document.createSpanElement();
 		span.style.textAlign = "center";
 		span.className = "expando";
-		var imgs = [for(i in a) {
-			var i = Expand.loadImage(i.url);
+		var imgs = [for(im in a) {
+			var i = Expand.loadImage(im.url);
+			i.title = (im.caption != null ? im.caption + " " : "") + (im.author != null ? 'by ${im.author}' : "");
 			span.appendChild(i);
 			Reditn.show(cast i, false);
 			i;

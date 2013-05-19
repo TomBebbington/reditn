@@ -786,14 +786,15 @@ Reditn.embedAlbum = function(a) {
 		{
 			var _g1 = 0;
 			while(_g1 < a.length) {
-				var i = a[_g1];
+				var im = a[_g1];
 				++_g1;
 				_g.push((function($this) {
 					var $r;
-					var i1 = Expand.loadImage(i.url);
-					span.appendChild(i1);
-					Reditn.show(i1,false);
-					$r = i1;
+					var i = Expand.loadImage(im.url);
+					i.title = (im.caption != null?im.caption + " ":"") + (im.author != null?"by " + im.author:"");
+					span.appendChild(i);
+					Reditn.show(i,false);
+					$r = i;
 					return $r;
 				}($this)));
 			}
@@ -1359,7 +1360,7 @@ parser.MediaWiki.parse = function(s,base) {
 			var p = r.from.matchedPos();
 		}
 	}
-	s = StringTools.replace(s,"$BASE","http://" + base);
+	s = StringTools.replace(s,"$BASE",base);
 	if(StringTools.startsWith(s,"<br>")) s = HxOverrides.substr(s,4,null);
 	if(s.split("{{").length < s.split("}}").length) s = HxOverrides.substr(s,s.indexOf("}}") + 2,null);
 	return s;
@@ -2971,9 +2972,9 @@ haxe.xml.Parser.escapes = (function($this) {
 	return $r;
 }(this));
 Link.HTML_IMG = new EReg("<img .*?src=\"([^\"]*)\"/?>","");
-Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : function(e,cb) {
+Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null, author : null}]);
-}},{ regex : new EReg("imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
+}},{ regex : new EReg("i?\\.?imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
 	var id = e.matched(2);
 	var albumType = (function($this) {
 		var $r;
@@ -3006,9 +3007,23 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		}
 		cb1(album);
 	},"Client-ID " + "cc1f254578d6c52");
-}},{ regex : new EReg("imgur\\.com/(r/[^/]*/)?([a-zA-Z0-9]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("imgur\\.com/(r/[^/]*/)?([a-zA-Z0-9,]*)",""), method : function(e,cb) {
 	var id = e.matched(1) == null || e.matched(1).indexOf("/") != -1?e.matched(2):e.matched(1);
-	cb([{ url : "http://i.imgur.com/" + id + ".jpg", caption : null, author : null}]);
+	var ids = id.split(",");
+	cb((function($this) {
+		var $r;
+		var _g = [];
+		{
+			var _g1 = 0;
+			while(_g1 < ids.length) {
+				var id1 = ids[_g1];
+				++_g1;
+				_g.push({ url : "http://i.imgur.com/" + id1 + ".jpg", caption : null, author : null});
+			}
+		}
+		$r = _g;
+		return $r;
+	}(this)));
 }},{ regex : new EReg("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", caption : null, author : null}]);
 }},{ regex : new EReg("memecrunch.com/meme/([^/]*)/([^/]*)",""), method : function(e,cb) {
@@ -3056,15 +3071,16 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		cb7({ author : data.author_name, content : Link.filterHTML(data.html), images : imgs});
 	});
 }},{ regex : new EReg("(.*)/wiki/([^#]*)(#.*)?",""), method : function(e,cb8) {
-	var urlroot = e.matched(1), title = e.matched(2), to = e.matched(3);
+	var aroot = "http://" + e.matched(1), title = e.matched(2), to = e.matched(3);
 	if(to != null) to = StringTools.trim(HxOverrides.substr(to,1,null));
 	if(to != null && to.length == 0) to = null;
+	var urlroot = aroot;
 	if(!StringTools.endsWith(urlroot,".wikia.com")) urlroot += "/w";
 	var getWikiPage = (function($this) {
 		var $r;
 		var getWikiPage1 = null;
 		getWikiPage1 = function(name) {
-			Reditn.getJSON("http://" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(data) {
+			Reditn.getJSON("" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(data) {
 				var pages = data.query.pages;
 				var _g = 0, _g1 = Reflect.fields(pages);
 				while(_g < _g1.length) {
@@ -3078,14 +3094,14 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 					}
 					var images = [parser.MediaWiki.getAlbum(cont[0])];
 					if(to != null) cont[0] = parser.MediaWiki.trimTo(cont[0],to);
-					cont[0] = parser.MediaWiki.parse(cont[0],urlroot);
+					cont[0] = parser.MediaWiki.parse(cont[0],aroot);
 					if(images[0].length > 0) {
 						var nimages = [[]];
 						var _g2 = 0;
 						while(_g2 < images[0].length) {
 							var i1 = [images[0][_g2]];
 							++_g2;
-							Reditn.getJSON("http://" + urlroot + "/api.php?action=query&titles=" + StringTools.urlEncode(i1[0].url) + "&prop=imageinfo&iiprop=url&format=json",(function(i1,nimages,images,cont,page) {
+							Reditn.getJSON("" + urlroot + "/api.php?action=query&titles=" + StringTools.urlEncode(i1[0].url) + "&prop=imageinfo&iiprop=url&format=json",(function(i1,nimages,images,cont,page) {
 								return function(data1) {
 									var pages1 = data1.query.pages;
 									var _g3 = 0, _g4 = Reflect.fields(pages1);
@@ -3185,6 +3201,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 	},null,null,null);
 }},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb12) {
 	var author = e.matched(1), id = e.matched(3);
+	console.log(author + ", " + id);
 	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
 		var post = data.posts[0];
 		cb12((function($this) {
@@ -3247,7 +3264,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		console.log(data);
 	});
 }},{ regex : new EReg("plus\\.google\\.com/([0-9]*)/posts/([a-zA-Z]*)",""), method : function(e2,cb15) {
-	var pid = e2.matched(1), id1 = e2.matched(2), num = 0, title1 = new EReg("<b>([^>]*)</b><br />","");
+	var pid = e2.matched(1), id2 = e2.matched(2), num = 0, title1 = new EReg("<b>([^>]*)</b><br />","");
 	var nextPage = (function($this) {
 		var $r;
 		var nextPage1 = null;
@@ -3260,7 +3277,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 				while(_g < items.length) {
 					var i = items[_g];
 					++_g;
-					if(i.url.indexOf(id1) != -1) {
+					if(i.url.indexOf(id2) != -1) {
 						Reditn.getJSON("https://www.googleapis.com/plus/v1/activities/" + Std.string(i.id) + "?fields=actor%2FdisplayName%2Cannotation%2Cobject(actor%2Cattachments%2Ccontent%2Cid%2CobjectType%2CoriginalContent%2Curl)&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(data1) {
 							var type = data1.object.objectType, name = data1.actor.actorName, cont = data1.object.content;
 							title1.match(cont);

@@ -42,7 +42,7 @@ class MediaWiki {
 				var p = r.from.matchedPos();
 			}
 		}
-		s = s.replace("$BASE", 'http://${base}');
+		s = s.replace("$BASE", base);
 		if(s.startsWith("<br>"))
 			s = s.substr(4);
 		if(s.split("{{").length < s.split("}}").length)

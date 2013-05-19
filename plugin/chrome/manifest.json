@@ -13,7 +13,6 @@
 		}
 	],
 	"permissions": [
-	/*
 		"http://*.reddit.com/*",
 		"http://www.xkcd.com/*",
 		"http://www.explosm.net/comics/",
@@ -36,7 +35,6 @@
 		"http://webservices.amazon.com/onca/*",
 		"http://www.doctorwho.tv/*",
 		"http://gamejolt.com/service/*",
-		"http://bbcamerica.com/"*/
-		"*"
+		"http://bbcamerica.com/"
 	]
 }
