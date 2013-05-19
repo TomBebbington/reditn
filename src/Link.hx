@@ -189,7 +189,7 @@ class Link {
 			}
 		},
 		{
-			regex: ~/([^\.]*\.wordpress\.com|techcrunch\.com|news\.blogs\.cnn\.com)\/(.*)?/,
+			regex: ~/([^\.]*\.wordpress\.com|wp\.me|techcrunch\.com|news\.blogs\.cnn\.com|snoopdogg\.com|usainbolt\.com|katiecouric\.com|rollingstones\.com|variety\.com|bbcamerica\.com)\/(.*)?/,
 			method: function(e, cb) {
 				var url = "http://"+e.matched(0);
 				Reditn.getJSON('http://public-api.wordpress.com/oembed/?url=${url.urlEncode()}&for=Reditn', function(data:data.OEmbed) {
@@ -467,7 +467,7 @@ class Link {
 			}
 		},
 		{
-			regex: ~/plus\.google.com\/u?\/[0-9]*\/([0-9]*)/,
+			regex: ~/plus\.google.com\/u?\/?[0-9]*\/([0-9]*)(\/about)?/,
 			method: function(e, cb) {
 				var id = e.matched(1);
 				Reditn.getJSON('https://www.googleapis.com/plus/v1/people/${id}?key=${GOOGLE_API_KEY}', function(data) {

@@ -376,33 +376,46 @@ Expand.loadImage = function(url) {
 	};
 	return img;
 }
-Expand.initResize = function(e) {
-	var drx = 0.0, dry = 0.0, rt = 1.0;
+Expand.initResize = function(i) {
+	var drx = 0.0, dry = 0.0, rt = 0.0, ow = 0, oh = 0;
 	var drag = false;
-	e.onmousedown = function(ev) {
-		drag = true;
-		var ev1 = ev;
-		drx = e.offsetWidth / ev1.clientX;
-		dry = e.offsetHeight / ev1.clientY;
-		rt = e.offsetWidth / e.offsetHeight;
-		ev1.preventDefault();
-	};
-	e.onmousemove = function(ev) {
-		var ev1 = ev;
-		if(drag) {
-			var nw = ev1.clientX * drx;
-			var nwh = nw / rt;
-			var nh = ev1.clientY * dry;
-			var nhw = nh * rt;
-			e.width = (nwh > nh?nw:nhw) | 0;
-			e.height = (nwh > nh?nwh:nh) | 0;
+	i.addEventListener("mousedown",function(ev) {
+		if(!ev.altKey && !ev.ctrlKey && !ev.metaKey) {
+			drag = true;
+			var cr = i.getBoundingClientRect();
+			var relx = ev.clientX - cr.left, rely = ev.clientY - cr.top;
+			var ev1 = ev;
+			drx = i.offsetWidth / relx;
+			dry = i.offsetHeight / rely;
+			rt = i.offsetWidth / i.offsetHeight;
+			ev1.preventDefault();
 		}
-		ev1.preventDefault();
-	};
-	e.onmouseup = e.onmouseout = function(ev) {
+	});
+	i.addEventListener("mousemove",function(ev) {
+		if(drag) {
+			var cr = i.getBoundingClientRect();
+			var relx = ev.clientX - cr.left, rely = ev.clientY - cr.top;
+			var nw = relx * drx;
+			var nwh = nw / rt;
+			var nh = rely * dry;
+			var nhw = nh * rt;
+			i.width = (nwh > nh || nw > nhw?nw:nhw) | 0;
+			i.height = (nwh > nh || nw > nhw?nwh:nh) | 0;
+			ev.preventDefault();
+		}
+	});
+	i.addEventListener("dblclick",function(e) {
+		i.width = i.naturalWidth;
+		i.height = i.naturalHeight;
+	});
+	i.addEventListener("mouseup",function(e) {
 		drag = false;
-		ev.preventDefault();
-	};
+		e.preventDefault();
+	});
+	i.addEventListener("mouseout",function(e) {
+		drag = false;
+		e.preventDefault();
+	});
 }
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
@@ -3118,7 +3131,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		});
 		cb6({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : Link.filterHTML(data.Item.Description), images : nalbum, price : Reditn.formatPrice(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
 	});
-}},{ regex : new EReg("([^\\.]*\\.wordpress\\.com|techcrunch\\.com|news\\.blogs\\.cnn\\.com)/(.*)?",""), method : function(e,cb7) {
+}},{ regex : new EReg("([^\\.]*\\.wordpress\\.com|wp\\.me|techcrunch\\.com|news\\.blogs\\.cnn\\.com|snoopdogg\\.com|usainbolt\\.com|katiecouric\\.com|rollingstones\\.com|variety\\.com|bbcamerica\\.com)/(.*)?",""), method : function(e,cb7) {
 	var url = "http://" + e.matched(0);
 	Reditn.getJSON("http://public-api.wordpress.com/oembed/?url=" + StringTools.urlEncode(url) + "&for=Reditn",function(data) {
 		var imgs = [];
@@ -3376,7 +3389,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 }},{ regex : new EReg("facebook\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
 	var id = e.matched(1);
 	cb({ album : [{ url : "https://graph.facebook.com/" + id + "/picture?type=large", caption : null, author : null}], urls : new haxe.ds.StringMap()});
-}},{ regex : new EReg("plus\\.google.com/u?/[0-9]*/([0-9]*)",""), method : function(e,cb16) {
+}},{ regex : new EReg("plus\\.google.com/u?/?[0-9]*/([0-9]*)(/about)?",""), method : function(e,cb16) {
 	var id = e.matched(1);
 	Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + id + "?key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(data) {
 		var urls = data.urls;

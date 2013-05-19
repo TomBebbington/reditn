@@ -275,32 +275,45 @@ class Expand {
 		}
 		return img;
 	}
-	public static function initResize(e:ImageElement):Void {
-		var drx = 0.0, dry = 0.0, rt = 1.0;
+	public static function initResize(i:ImageElement):Void {
+		var drx = 0.0, dry = 0.0, rt = 0.0, ow = 0, oh = 0;
 		var drag = false;
-		e.onmousedown = function(ev) {
-			drag = true;
-			var ev:MouseEvent = cast ev;
-			drx = e.offsetWidth/ev.clientX;
-			dry = e.offsetHeight/ev.clientY;
-			rt = e.offsetWidth/e.offsetHeight;
-			ev.preventDefault();
-		}
-		e.onmousemove = function(ev) {
-			var ev:MouseEvent = cast ev;
-			if(drag) {
-				var nw = ev.clientX * drx;
-				var nwh = nw / rt;
-				var nh = ev.clientY * dry;
-				var nhw = nh * rt;
-				e.width = Std.int(nwh > nh ? nw : nhw);
-				e.height = Std.int(nwh > nh ? nwh : nh);
+		i.addEventListener("mousedown", function(ev:MouseEvent) {
+			if(!ev.altKey && !ev.ctrlKey && !ev.metaKey) {
+				drag = true;
+				var cr = i.getBoundingClientRect();
+				var relx = ev.clientX - cr.left, rely = ev.clientY - cr.top;
+				var ev:MouseEvent = cast ev;
+				drx = i.offsetWidth / relx;
+				dry = i.offsetHeight / rely;
+				rt = i.offsetWidth / i.offsetHeight;
+				ev.preventDefault();
 			}
-			ev.preventDefault();
-		}
-		e.onmouseup = e.onmouseout = function(ev) {
+		});
+		i.addEventListener("mousemove", function(ev:MouseEvent) {
+			if(drag) {
+				var cr = i.getBoundingClientRect();
+				var relx = ev.clientX - cr.left, rely = ev.clientY - cr.top;
+				var nw = relx * drx;
+				var nwh = nw / rt;
+				var nh = rely * dry;
+				var nhw = nh * rt;
+				i.width = Std.int(nwh > nh || nw > nhw ? nw : nhw);
+				i.height = Std.int(nwh > nh|| nw > nhw ? nwh : nh);
+				ev.preventDefault();
+			}
+		});
+		i.addEventListener("dblclick", function(e:MouseEvent) {
+			i.width = i.naturalWidth;
+			i.height = i.naturalHeight;
+		});
+		i.addEventListener("mouseup", function(e:MouseEvent) {
 			drag = false;
-			ev.preventDefault();
-		}
+			e.preventDefault();
+		});
+		i.addEventListener("mouseout", function(e:MouseEvent) {
+			drag = false;
+			e.preventDefault();
+		});
 	}
 }
