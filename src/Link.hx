@@ -31,7 +31,6 @@ class Link {
 			regex: ~/imgur.com\/(a|gallery)\/([^\/]*)/,
 			method: function(e, cb) {
 				var id = e.matched(2);
-				trace(e.matched(1));
 				var albumType = switch(e.matched(1).toLowerCase()) {
 					case "a": "album";
 					case "gallery": "gallery/album";
@@ -190,19 +189,18 @@ class Link {
 			}
 		},
 		{
-			regex: ~/([^\.]*\.wordpress\.com)\/[0-9\/]*\/([^\/]*)?/,
+			regex: ~/([^\.]*\.wordpress\.com|techcrunch\.com|news\.blogs\.cnn\.com)\/(.*)?/,
 			method: function(e, cb) {
-				var url = 'http://public-api.wordpress.com/rest/v1/sites/${e.matched(1).urlEncode()}/posts/slug:${e.matched(2).urlEncode()}';
-				Reditn.getJSON(url, function(data) {
-					var att = data.attachments;
-					cb({title: StringTools.htmlUnescape(data.title), content: filterHTML(data.content), author: data.author.name, images: 
-					try [
-						for(f in Reflect.fields(att)) {
-							var img = Reflect.field(att, f);
-							if(img.mime_type.startsWith("image/"))
-								{url: img.URL.urlDecode(), caption: null, author: data.author.name};
-						}
-					] catch(e:Dynamic) []});
+				var url = "http://"+e.matched(0);
+				Reditn.getJSON('http://public-api.wordpress.com/oembed/?url=${url.urlEncode()}&for=Reditn', function(data:data.OEmbed) {
+					var imgs:Album = [];
+					if(data.thumbnail_url != null)
+						imgs.push({caption: null, url: data.thumbnail_url, author: null});
+					cb({
+						author: data.author_name,
+						content: filterHTML(data.html),
+						images: imgs
+					});
 				});
 			}
 		},
@@ -494,6 +492,15 @@ class Link {
 				trace(e.matched(1));
 				Reditn.getJSON('http://www.${e.matched(0)}/about.json', function(s:data.Subreddit) cb(s));
 			}
+		},
+		{
+			regex: ~/gamejolt.com\/games\/[^\/]*\/[^\/]*\/([0-9]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				Reditn.getJSON('http://gamejolt.com/service/games/${id}?format=json', function(data) {
+					trace(data);
+				});
+			}
 		}
 	];
 	public static function resolve(url:String) {
@@ -514,6 +521,8 @@ class Link {
 			url = url.substr(8);
 		if(url.startsWith("www."))
 			url = url.substr(4);
+		else if(url.startsWith("m."))
+			url = url.substr(2);
 		if(url.indexOf("&") != -1)
 			url = url.substr(0, url.indexOf("&"));
 		if(url.indexOf("?") != -1 && !url.startsWith("facebook.com/"))

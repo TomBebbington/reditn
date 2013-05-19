@@ -734,6 +734,7 @@ Reditn.show = function(e,shown) {
 	}
 }
 Reditn.age = function(t) {
+	if(t < 86400) return "less than a day";
 	t = haxe.Timer.stamp() - t;
 	var days = t / 86400 % 30.4375 | 0;
 	var months = t / 2629800 % 12 | 0;
@@ -855,7 +856,7 @@ Reditn.getData = function(o) {
 	return o;
 }
 Reditn.getText = function(url,func,auth,type,postData) {
-	var heads = { };
+	var heads = { 'User-Agent' : "Reditn - the basic reddit plugin"};
 	if(auth != null) heads.Authorization = auth;
 	if(type != null) heads["Content-Type"] = type;
 	GM_xmlhttpRequest({ method : postData != null?"POST":"GET", headers : heads, data : postData, url : url, onload : function(rsp) {
@@ -937,9 +938,6 @@ StringTools.urlDecode = function(s) {
 StringTools.htmlEscape = function(s,quotes) {
 	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
 	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
-}
-StringTools.htmlUnescape = function(s) {
-	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
 }
 StringTools.startsWith = function(s,start) {
 	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
@@ -1787,7 +1785,7 @@ Link.resolve = function(url) {
 }
 Link.trimURL = function(url) {
 	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
-	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null);
+	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null); else if(StringTools.startsWith(url,"m.")) url = HxOverrides.substr(url,2,null);
 	if(url.indexOf("&") != -1) url = HxOverrides.substr(url,0,url.indexOf("&"));
 	if(url.indexOf("?") != -1 && !StringTools.startsWith(url,"facebook.com/")) url = HxOverrides.substr(url,0,url.indexOf("?"));
 	if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1) url = HxOverrides.substr(url,0,url.indexOf("#"));
@@ -2964,7 +2962,6 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 	cb([{ url : "http://" + e.matched(0), caption : null, author : null}]);
 }},{ regex : new EReg("imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
 	var id = e.matched(2);
-	console.log(e.matched(1));
 	var albumType = (function($this) {
 		var $r;
 		var _g = e.matched(1).toLowerCase();
@@ -3038,37 +3035,12 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 		});
 		cb6({ title : data.Item.Title, category : data.Item.PrimaryCategoryName, location : data.Item.Location + ", " + data.Item.Country, description : Link.filterHTML(data.Item.Description), images : nalbum, price : Reditn.formatPrice(data.Item.ConvertedCurrentPrice.Value) + " " + data.Item.ConvertedCurrentPrice.CurrencyID});
 	});
-}},{ regex : new EReg("([^\\.]*\\.wordpress\\.com)/[0-9/]*/([^/]*)?",""), method : function(e,cb7) {
-	var url = "http://public-api.wordpress.com/rest/v1/sites/" + StringTools.urlEncode(e.matched(1)) + "/posts/slug:" + StringTools.urlEncode(e.matched(2));
-	Reditn.getJSON(url,function(data) {
-		var att = data.attachments;
-		cb7({ title : StringTools.htmlUnescape(data.title), content : Link.filterHTML(data.content), author : data.author.name, images : (function($this) {
-			var $r;
-			try {
-				$r = (function($this) {
-					var $r;
-					var _g = [];
-					{
-						var _g1 = 0, _g2 = Reflect.fields(att);
-						while(_g1 < _g2.length) {
-							var f = _g2[_g1];
-							++_g1;
-							_g.push((function($this) {
-								var $r;
-								var img = Reflect.field(att,f);
-								$r = img.mime_type.startsWith("image/")?{ url : img.URL.urlDecode(), caption : null, author : data.author.name}:null;
-								return $r;
-							}($this)));
-						}
-					}
-					$r = _g;
-					return $r;
-				}($this));
-			} catch( e1 ) {
-				$r = [];
-			}
-			return $r;
-		}(this))});
+}},{ regex : new EReg("([^\\.]*\\.wordpress\\.com|techcrunch\\.com|news\\.blogs\\.cnn\\.com)/(.*)?",""), method : function(e,cb7) {
+	var url = "http://" + e.matched(0);
+	Reditn.getJSON("http://public-api.wordpress.com/oembed/?url=" + StringTools.urlEncode(url) + "&for=Reditn",function(data) {
+		var imgs = [];
+		if(data.thumbnail_url != null) imgs.push({ caption : null, url : data.thumbnail_url, author : null});
+		cb7({ author : data.author_name, content : Link.filterHTML(data.html), images : imgs});
 	});
 }},{ regex : new EReg("(.*)/wiki/([^#]*)(#.*)?",""), method : function(e,cb8) {
 	var urlroot = e.matched(1), title = e.matched(2), to = e.matched(3);
@@ -3341,6 +3313,11 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png)",""), method : fun
 	console.log(e.matched(1));
 	Reditn.getJSON("http://www." + e.matched(0) + "/about.json",function(s) {
 		cb17(s);
+	});
+}},{ regex : new EReg("gamejolt.com/games/[^/]*/[^/]*/([0-9]*)",""), method : function(e,cb) {
+	var id = e.matched(1);
+	Reditn.getJSON("http://gamejolt.com/service/games/" + id + "?format=json",function(data) {
+		console.log(data);
 	});
 }}];
 Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("style ?= ?\"[^\"]*\"","g")];

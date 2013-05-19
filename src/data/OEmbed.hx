@@ -4,5 +4,6 @@ typedef OEmbed = {
 	title: String,
 	author_name: String,
 	url: String,
-	html: String
+	html: String,
+	thumbnail_url:String
 }

@@ -4,6 +4,7 @@ import data.*;
 import haxe.Json;
 using StringTools;
 @:expose class Reditn {
+	static inline var USER_AGENT = "Reditn - the basic reddit plugin";
 	static inline var year = 31557600;
 	static inline var month = 2629800;
 	static inline var day = 86400;
@@ -129,6 +130,8 @@ using StringTools;
 		after.parentElement.insertBefore(ref, after.nextSibling);
 	}
 	public static function age(t:Float):String {
+		if(t < day)
+			return "less than a day";
 		t = haxe.Timer.stamp() - t;
 		var days = Std.int((t / day) % (month / day));
 		var months = Std.int((t / month) % 12);
@@ -256,12 +259,14 @@ using StringTools;
 				h.setHeader("Authorization", auth);
 			if(type != null)
 				h.setHeader("Content-Type", type);
+			h.setHeader("User-Agent", USER_AGENT);
 			h.onData = func;
 			if(postData != null)
 				h.setPostData(postData);
 			h.request(postData != null);
 		#else
 			var heads:Dynamic = {
+				"User-Agent": USER_AGENT
 			};
 			if(auth != null)
 				heads.Authorization = auth;

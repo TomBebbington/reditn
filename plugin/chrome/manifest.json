@@ -20,9 +20,10 @@
 		"http://backend.deviantart.com/*",
 		"http://www.flickr.com/services/*",
 		"http://open.api.ebay.com/*",
-		"http://public-api.wordpress.com/rest/v1/*",
+		"http://public-api.wordpress.com/*",
 		"http://*.wikinews.org/w/*",
 		"http://*.wikia.com/*",
+		"http://en.wikipedia.org/w/*",
 		"https://api.github.com/*",
 		"http://sourceforge.net/api/*",
 		"https://api.twitter.com/*",
@@ -32,6 +33,7 @@
 		"https://api.imgur.com/3/*",
 		"http://api.longurl.org/v2/*",
 		"http://webservices.amazon.com/onca/*",
-		"http://www.doctorwho.tv/*"
+		"http://www.doctorwho.tv/*",
+		"http://gamejolt.com/service/*"
 	]
 }
