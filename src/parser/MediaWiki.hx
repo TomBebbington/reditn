@@ -6,8 +6,8 @@ using StringTools;
 class MediaWiki {
 	static var regex:Array<Entry> = [
 		{ from: ~/\[\[Category:([^\]]*)\]\]/, to: ""},
-		{ from: ~/\[\[([^\]\|\n]*)\]\]/, to: "<a href=\"$BASE/wiki/$1\">$1</a>"},
 		{ from: ~/\[\[([^\]\n]*)\|([^\]\|\n]*)\]\]/, to: "<a href=\"$BASE/wiki/$1\">$2</a>"},
+		{ from: ~/\[\[([^\]\|\n]*)\]\]/, to: "<a href=\"$BASE/wiki/$1\">$1</a>"},
 		{ from: ~/<gallery>(.|\n|\n\r)*<\/gallery>/, to: ""},
 		{ from: ~/\[\[File:([^\]]*)\]\]/, to: "" },
 		{ from: ~/(=*) ?(References|Gallery) ?\1.*\1?/, to: ""},
@@ -50,7 +50,6 @@ class MediaWiki {
 		return s;
 	}
 	public static function trimTo(h:String, s:String) {
-		trace("Trimming...");
 		s = s.replace("_", " ").trim();
 		var pos = {pos:0, len:0}, level = null;
 		while(sections.matchSub(h, pos.pos + pos.len)) {
