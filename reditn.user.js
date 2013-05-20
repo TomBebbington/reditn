@@ -37,6 +37,28 @@ Adblock.hideAll = function(a) {
 		Reditn.show(a[i],false);
 	}
 }
+var CommentExpand = function() { }
+$hxClasses["CommentExpand"] = CommentExpand;
+CommentExpand.__name__ = ["CommentExpand"];
+CommentExpand.init = function() {
+	var comments = js.Browser.document.body.getElementsByClassName("comment");
+	var _g = 0;
+	while(_g < comments.length) {
+		var c = comments[_g];
+		++_g;
+		var ac = c.getElementsByClassName("md")[0];
+		var links = ac.getElementsByTagName("a");
+		var _g1 = 0;
+		while(_g1 < links.length) {
+			var l = links[_g1];
+			++_g1;
+			var btn = Link.createButton(l.href,l.parentElement);
+			l.parentNode.insertBefore(btn,l);
+			l.parentNode.removeChild(l);
+			btn.parentNode.insertBefore(l,btn);
+		}
+	}
+}
 var DuplicateHider = function() { }
 $hxClasses["DuplicateHider"] = DuplicateHider;
 DuplicateHider.__name__ = ["DuplicateHider"];
@@ -127,135 +149,21 @@ Expand.init = function() {
 	if(menu != null) menu.appendChild(li);
 	var _g = 0, _g1 = Reditn.links;
 	while(_g < _g1.length) {
-		var l = [_g1[_g]];
+		var l = _g1[_g];
 		++_g;
-		if(l[0].nodeName.toLowerCase() != "a") continue;
-		l[0].onchange = (function(l) {
-			return function(_) {
-				var site = Link.resolve(l[0].href);
-				if(site == null) Expand.defaultButton(l[0].parentElement.parentElement.parentElement); else site.method(site.regex,(function(l) {
-					return function(data) {
-						var e = l[0].parentElement.parentElement.parentElement;
-						var exp = js.Browser.document.createElement("div");
-						exp.className = "expando";
-						exp.style.display = "none";
-						Reditn.show(exp,Expand.toggled);
-						var name = "selftext";
-						if(Reflect.hasField(data,"urls")) {
-							var p = data;
-							var urls = (function($this) {
-								var $r;
-								var _g2 = [];
-								var $it0 = p.urls.keys();
-								while( $it0.hasNext() ) {
-									var uk = $it0.next();
-									_g2.push("<li><a href=\"" + p.urls.get(uk) + "\">" + uk + "</a></li>");
-								}
-								$r = _g2;
-								return $r;
-							}(this));
-							var div = js.Browser.document.createElement("div");
-							div.className = "usertext";
-							exp.appendChild(div);
-							var content = js.Browser.document.createElement("div");
-							content.appendChild(Reditn.embedMap((function($this) {
-								var $r;
-								var _g3 = new haxe.ds.StringMap();
-								_g3.set("Name",data.name);
-								_g3.set("Description",data.description);
-								_g3.set("Links",urls.join(""));
-								$r = _g3;
-								return $r;
-							}(this))));
-							if(p.album.length > 0) {
-								content.appendChild(js.Browser.document.createElement("br"));
-								content.appendChild(Reditn.embedAlbum(p.album));
-							}
-							div.appendChild(content);
-						} else if(Reflect.hasField(data,"price")) {
-							var i = data;
-							var div = js.Browser.document.createElement("div");
-							div.className = "usertext";
-							exp.appendChild(div);
-							var cont = js.Browser.document.createElement("div");
-							cont.appendChild(Reditn.embedMap((function($this) {
-								var $r;
-								var _g2 = new haxe.ds.StringMap();
-								_g2.set("Category",StringTools.htmlEscape(i.category));
-								_g2.set("Location",StringTools.htmlEscape(i.location));
-								_g2.set("Price",StringTools.htmlEscape(i.price));
-								_g2.set("Description",i.description);
-								$r = _g2;
-								return $r;
-							}(this))));
-							cont.appendChild(Reditn.embedAlbum(i.images));
-							div.appendChild(cont);
-							name = "item";
-						} else if(Reflect.hasField(data,"subscribers")) {
-							var s = data;
-							var div = js.Browser.document.createElement("div");
-							div.className = "usertext";
-							exp.appendChild(div);
-							var content = Reditn.embedMap((function($this) {
-								var $r;
-								var _g2 = new haxe.ds.StringMap();
-								_g2.set("Age",Reditn.age(s.created_utc));
-								_g2.set("Subscribers",Reditn.formatNumber(s.subscribers));
-								_g2.set("Active users",Reditn.formatNumber(s.accounts_active));
-								_g2.set("Description",parser.Markdown.parse(s.description));
-								$r = _g2;
-								return $r;
-							}(this)));
-							div.appendChild(content);
-						} else if(Reflect.hasField(data,"content")) {
-							var a = data;
-							var div = js.Browser.document.createElement("div");
-							div.className = "usertext";
-							exp.appendChild(div);
-							var head = null;
-							var content = js.Browser.document.createElement("div");
-							var inner = js.Browser.document.createElement("span");
-							inner.innerHTML = a.content;
-							content.appendChild(inner);
-							if(a.images.length > 0) {
-								content.appendChild(js.Browser.document.createElement("br"));
-								content.appendChild(Reditn.embedAlbum(a.images));
-							}
-							content.className = "md";
-							div.appendChild(content);
-						} else if(js.Boot.__instanceof(data,Array) && Reflect.hasField(data[0],"url")) {
-							var a = data;
-							var div = Reditn.embedAlbum(a);
-							exp.appendChild(div);
-							name = "image";
-						} else if(Reflect.hasField(data,"developers")) {
-							var r = data;
-							var div = js.Browser.document.createElement("div");
-							div.className = "usertext";
-							var cont = js.Browser.document.createElement("div");
-							var inner = js.Browser.document.createElement("span");
-							inner.innerHTML = "" + Std.string(data.description) + "<br><a href=\"" + Std.string(data.url) + "\"><b>Clone repo</b></a><br>";
-							if(r.album != null && r.album.length > 0) inner.appendChild(Reditn.embedAlbum(r.album));
-							cont.appendChild(inner);
-							cont.className = "md";
-							div.appendChild(cont);
-							exp.appendChild(div);
-						} else Expand.defaultButton(e);
-						var s = Expand.createButton(e,name,l[0].href);
-						var pn = s.parentElement;
-						var _g2 = 0, _g3 = pn.getElementsByClassName("expando");
-						while(_g2 < _g3.length) {
-							var ep = _g3[_g2];
-							++_g2;
-							pn.removeChild(ep);
-						}
-						pn.appendChild(exp);
-					};
-				})(l));
-				Expand.refresh();
-			};
-		})(l);
-		l[0].onchange(null);
+		if(l.nodeName.toLowerCase() != "a") continue;
+		var e = l.parentElement.parentElement.parentElement.getElementsByClassName("entry")[0];
+		var btn = Link.createButton(l.href,e);
+		if(btn == null) Expand.defaultButton(e); else {
+			var _g2 = 0, _g3 = e.getElementsByClassName("expando");
+			while(_g2 < _g3.length) {
+				var ep = _g3[_g2];
+				++_g2;
+				ep.parentNode.removeChild(ep);
+			}
+			e.appendChild(btn);
+			e.insertBefore(btn,e.getElementsByClassName("tagline")[0]);
+		}
 	}
 }
 Expand.defaultButton = function(cont) {
@@ -276,6 +184,7 @@ Expand.defaultButton = function(cont) {
 }
 Expand.adaptButton = function(exp) {
 	var url = (js.Boot.__cast(exp.parentElement.getElementsByTagName("a")[0] , HTMLAnchorElement)).href;
+	exp.style.width = exp.style.height = "23px";
 	return { toggled : function() {
 		return exp.className.indexOf("expanded") != -1;
 	}, toggle : function(v,ps) {
@@ -293,35 +202,6 @@ Expand.adaptButton = function(exp) {
 		},Expand.queue * 1000);
 		if(ps) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
 	}, url : url, element : exp};
-}
-Expand.createButton = function(e,extra,url) {
-	var d = js.Browser.document.createElement("div");
-	var cn = "expando-button " + extra + " ";
-	d.className = "" + cn + " collapsed";
-	var isToggled = false;
-	var btn = { toggled : function() {
-		return isToggled;
-	}, toggle : function(v,ps) {
-		isToggled = v;
-		d.className = cn + (isToggled?"expanded":"collapsed");
-		var entry = d.parentElement;
-		var expandos = entry.getElementsByClassName("expando");
-		var _g = 0;
-		while(_g < expandos.length) {
-			var e1 = expandos[_g];
-			++_g;
-			Reditn.show(e1,v);
-		}
-		if(ps) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
-	}, url : url, element : d};
-	d.onclick = function(_) {
-		btn.toggle(!isToggled,true);
-	};
-	var tagline = e.getElementsByClassName("tagline")[0];
-	tagline.parentNode.insertBefore(d,tagline);
-	Expand.buttons.push(btn);
-	if(Expand.toggled) btn.toggle(true,false);
-	return d;
 }
 Expand.refresh = function() {
 	if(Expand.button != null) {
@@ -648,19 +528,9 @@ Reditn.init = function() {
 		{
 			var _g1 = 0, _g2 = Reditn.links;
 			while(_g1 < _g2.length) {
-				var l = [_g2[_g1]];
+				var l = _g2[_g1];
 				++_g1;
-				if(l[0].nodeName.toLowerCase() == "a" && l[0].parentElement.className != "parent") _g.push((function($this) {
-					var $r;
-					Reditn.expandURL(l[0].href,(function(l) {
-						return function(url) {
-							l[0].href = url;
-							if(l[0].onchange != null) l[0].onchange(null);
-						};
-					})(l));
-					$r = l[0];
-					return $r;
-				}($this)));
+				if(l.nodeName.toLowerCase() == "a" && l.parentElement.className != "parent") _g.push(l);
 			}
 		}
 		$r = _g;
@@ -672,6 +542,7 @@ Reditn.init = function() {
 	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
 	Style.init();
 	Reditn.wrap(Expand.init,"expand");
+	Reditn.wrap(CommentExpand.init,"cm-expand");
 	Reditn.wrap(Keyboard.init,"keys");
 	Reditn.wrap(Preview.init,"preview");
 	Reditn.wrap(SubredditInfo.init,"subinfo");
@@ -760,26 +631,9 @@ Reditn.age = function(t) {
 	while(s.indexOf(", , ") != -1) s = StringTools.replace(s,", , ",", ");
 	return s;
 }
-Reditn.expandURL = function(ourl,cb) {
-	var url = Link.trimURL(ourl);
-	if(url.indexOf("/") == -1) cb(ourl); else {
-		url = HxOverrides.substr(url,0,url.indexOf("/"));
-		switch(url) {
-		case "0rz.tw":case "1link.in":case "1url.com":case "2.gp":case "2big.at":case "2tu.us":case "3.ly":case "307.to":case "4ms.me":case "4sq.com":case "4url.cc":case "6url.com":case "7.ly":case "a.gg":case "a.nf":case "aa.cx":case "abcurl.net":case "ad.vu":case "adf.ly":case "adjix.com":case "afx.cc":case "all.fuseurl.com":case "alturl.com":case "amzn.to":case "ar.gy":case "arst.ch":case "atu.ca":case "azc.cc":case "b23.ru":case "b2l.me":case "bacn.me":case "bcool.bz":case "binged.it":case "bit.ly":case "bizj.us":case "bloat.me":case "bravo.ly":case "bsa.ly":case "budurl.com":case "canurl.com":case "chilp.it":case "chzb.gr":case "cl.lk":case "cl.ly":case "clck.ru":case "cli.gs":case "cliccami.info":case "clickthru.ca":case "clop.in":case "conta.cc":case "cort.as":case "cot.ag":case "crks.me":case "ctvr.us":case "cutt.us":case "dai.ly":case "decenturl.com":case "dfl8.me":case "digbig.com":case "digg.com":case "disq.us":case "dld.bz":case "dlvr.it":case "do.my":case "doiop.com":case "dopen.us":case "easyuri.com":case "easyurl.net":case "eepurl.com":case "eweri.com":case "fa.by":case "fav.me":case "fb.me":case "fbshare.me":case "ff.im":case "fff.to":case "fire.to":case "firsturl.de":case "firsturl.net":case "flic.kr":case "flq.us":case "fly2.ws":case "fon.gs":case "freak.to":case "fuseurl.com":case "fuzzy.to":case "fwd4.me":case "fwib.net":case "g.ro.lt":case "gizmo.do":case "gl.am":case "go.9nl.com":case "go.ign.com":case "go.usa.gov":case "goo.gl":case "goshrink.com":case "gurl.es":case "hex.io":case "hiderefer.com":case "hmm.ph":case "href.in":case "hsblinks.com":case "htxt.it":case "huff.to":case "hulu.com":case "hurl.me":case "hurl.ws":case "icanhaz.com":case "idek.net":case "ilix.in":case "is.gd":case "its.my":case "ix.lt":case "j.mp":case "jijr.com":case "kl.am":case "klck.me":case "korta.nu":case "krunchd.com":case "l9k.net":case "lat.ms":case "liip.to":case "liltext.com":case "linkbee.com":case "linkbun.ch":case "liurl.cn":case "ln-s.net":case "ln-s.ru":case "lnk.gd":case "lnk.ms":case "lnkd.in":case "lnkurl.com":case "lru.jp":case "lt.tl":case "lurl.no":case "macte.ch":case "mash.to":case "merky.de":case "migre.me":case "miniurl.com":case "minurl.fr":case "mke.me":case "moby.to":case "moourl.com":case "mrte.ch":case "myloc.me":case "myurl.in":case "n.pr":case "nbc.co":case "nblo.gs":case "nn.nf":case "not.my":case "notlong.com":case "nsfw.in":case "nutshellurl.com":case "nxy.in":case "nyti.ms":case "o-x.fr":case "oc1.us":case "om.ly":case "omf.gd":case "omoikane.net":case "on.cnn.com":case "on.mktw.net":case "onforb.es":case "orz.se":case "ow.ly":case "ping.fm":case "pli.gs":case "pnt.me":case "politi.co":case "post.ly":case "pp.gg":case "profile.to":case "ptiturl.com":case "pub.vitrue.com":case "qlnk.net":case "qte.me":case "qu.tc":case "qy.fi":case "r.im":case "rb6.me":case "read.bi":case "readthis.ca":case "reallytinyurl.com":case "redir.ec":case "redirects.ca":case "redirx.com":case "retwt.me":case "ri.ms":case "rickroll.it":case "riz.gd":case "rt.nu":case "ru.ly":case "rubyurl.com":case "rurl.org":case "rww.tw":case "s4c.in":case "s7y.us":case "safe.mn":case "sameurl.com":case "sdut.us":case "shar.es":case "shink.de":case "shorl.com":case "short.ie":case "short.to":case "shortlinks.co.uk":case "shorturl.com":case "shout.to":case "show.my":case "shrinkify.com":case "shrinkr.com":case "shrt.fr":case "shrt.st":case "shrten.com":case "shrunkin.com":case "simurl.com":case "slate.me":case "smallr.com":case "smsh.me":case "smurl.name":case "sn.im":case "snipr.com":case "snipurl.com":case "snurl.com":case "sp2.ro":case "spedr.com":case "srnk.net":case "srs.li":case "starturl.com":case "su.pr":case "surl.co.uk":case "surl.hu":case "t.cn":case "t.co":case "t.lh.com":case "ta.gd":case "tbd.ly":case "tcrn.ch":case "tgr.me":case "tgr.ph":case "tighturl.com":case "tiniuri.com":case "tiny.cc":case "tiny.ly":case "tiny.pl":case "tinylink.in":case "tinyuri.ca":case "tinyurl.com":case "tk.":case "tl.gd":case "tmi.me":case "tnij.org":case "tnw.to":case "tny.com":case "to.":case "to.ly":case "togoto.us":case "totc.us":case "toysr.us":case "tpm.ly":case "tr.im":case "tra.kz":case "trunc.it":case "twhub.com":case "twirl.at":case "twitclicks.com":case "twitterurl.net":case "twitterurl.org":case "twiturl.de":case "twurl.cc":case "twurl.nl":case "u.mavrev.com":case "u.nu":case "u76.org":case "ub0.cc":case "ulu.lu":case "updating.me":case "ur1.ca":case "url.az":case "url.co.uk":case "url.ie":case "url360.me":case "url4.eu":case "urlborg.com":case "urlbrief.com":case "urlcover.com":case "urlcut.com":case "urlenco.de":case "urli.nl":case "urls.im":case "urlshorteningservicefortwitter.com":case "urlx.ie":case "urlzen.com":case "usat.ly":case "use.my":case "vb.ly":case "vgn.am":case "vl.am":case "vm.lc":case "w55.de":case "wapo.st":case "wapurl.co.uk":case "wipi.es":case "wp.me":case "x.vu":case "xr.com":case "xrl.in":case "xrl.us":case "xurl.es":case "xurl.jp":case "y.ahoo.it":case "yatuc.com":case "ye.pe":case "yep.it":case "yfrog.com":case "yhoo.it":case "yiyd.com":case "youtu.be":case "yuarel.com":case "z0p.de":case "zi.ma":case "zi.mu":case "zipmyurl.com":case "zud.me":case "zurl.ws":case "zz.gd":case "zzang.kr":case "r.ebay.com":
-			var surl = StringTools.urlEncode(ourl);
-			Reditn.getJSON("http://api.longurl.org/v2/expand?url=" + surl + "&format=json&User-Agent=Reditn",function(data) {
-				cb(Reflect.field(data,"long-url"));
-			});
-			break;
-		default:
-			cb(ourl);
-		}
-	}
-}
 Reditn.embedAlbum = function(a) {
 	var span = js.Browser.document.createElement("span");
 	span.style.textAlign = "center";
-	span.className = "expando";
 	var imgs = (function($this) {
 		var $r;
 		var _g = [];
@@ -1822,6 +1676,161 @@ Link.filterHTML = function(h) {
 	if(StringTools.endsWith(h,"<br>")) h = HxOverrides.substr(h,0,h.length - 4);
 	return h;
 }
+Link.createButton = function(url,cont) {
+	var site = Link.resolve(url);
+	var btn = null;
+	if(site != null) {
+		var b = js.Browser.document.createElement("div");
+		var cn = "expando-button ";
+		cont.insertBefore(b,cont.childNodes[0]);
+		var isToggled = Expand.toggled;
+		var cl = isToggled?"expanded":"collapsed";
+		b.className = "" + cn + " " + cl;
+		btn = { toggled : function() {
+			return isToggled;
+		}, toggle : function(v,ps) {
+			isToggled = v;
+			b.className = cn + (cl = isToggled?"expanded":"collapsed");
+			var entry = b.parentElement;
+			var expandos = entry.getElementsByClassName("expando");
+			var _g = 0;
+			while(_g < expandos.length) {
+				var e = expandos[_g];
+				++_g;
+				Reditn.show(e,v);
+			}
+			if(ps) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
+		}, url : url, element : b};
+		b.onclick = function(_) {
+			btn.toggle(!isToggled,true);
+		};
+		site.method(site.regex,function(d) {
+			var name = "selftext";
+			var content = Reflect.hasField(d,"urls")?(function($this) {
+				var $r;
+				var p = d;
+				var urls = (function($this) {
+					var $r;
+					var _g = [];
+					var $it0 = p.urls.keys();
+					while( $it0.hasNext() ) {
+						var uk = $it0.next();
+						_g.push("<li><a href=\"" + p.urls.get(uk) + "\">" + uk + "</a></li>");
+					}
+					$r = _g;
+					return $r;
+				}($this));
+				var div = js.Browser.document.createElement("div");
+				div.className = "usertext";
+				var content1 = js.Browser.document.createElement("div");
+				content1.appendChild(Reditn.embedMap((function($this) {
+					var $r;
+					var _g1 = new haxe.ds.StringMap();
+					_g1.set("Name",d.name);
+					_g1.set("Description",d.description);
+					_g1.set("Links",urls.join(""));
+					$r = _g1;
+					return $r;
+				}($this))));
+				if(p.album.length > 0) {
+					content1.appendChild(js.Browser.document.createElement("br"));
+					content1.appendChild(Reditn.embedAlbum(p.album));
+				}
+				div.appendChild(content1);
+				$r = div;
+				return $r;
+			}(this)):Reflect.hasField(d,"price")?(function($this) {
+				var $r;
+				var i = d;
+				var div = js.Browser.document.createElement("div");
+				div.className = "usertext";
+				var cont1 = js.Browser.document.createElement("div");
+				cont1.appendChild(Reditn.embedMap((function($this) {
+					var $r;
+					var _g = new haxe.ds.StringMap();
+					_g.set("Category",StringTools.htmlEscape(i.category));
+					_g.set("Location",StringTools.htmlEscape(i.location));
+					_g.set("Price",StringTools.htmlEscape(i.price));
+					_g.set("Description",i.description);
+					$r = _g;
+					return $r;
+				}($this))));
+				cont1.appendChild(Reditn.embedAlbum(i.images));
+				div.appendChild(cont1);
+				name = "item";
+				$r = div;
+				return $r;
+			}(this)):Reflect.hasField(d,"subscribers")?(function($this) {
+				var $r;
+				var s = d;
+				var div = js.Browser.document.createElement("div");
+				div.className = "usertext";
+				div.appendChild(Reditn.embedMap((function($this) {
+					var $r;
+					var _g = new haxe.ds.StringMap();
+					_g.set("Age",Reditn.age(s.created_utc));
+					_g.set("Subscribers",Reditn.formatNumber(s.subscribers));
+					_g.set("Active users",Reditn.formatNumber(s.accounts_active));
+					_g.set("Description",parser.Markdown.parse(s.description));
+					$r = _g;
+					return $r;
+				}($this))));
+				$r = div;
+				return $r;
+			}(this)):Reflect.hasField(d,"content")?(function($this) {
+				var $r;
+				var a = d;
+				var div = js.Browser.document.createElement("div");
+				div.className = "usertext";
+				var head = null;
+				var art = js.Browser.document.createElement("div");
+				var inner = js.Browser.document.createElement("span");
+				inner.innerHTML = a.content;
+				art.appendChild(inner);
+				if(a.images != null && a.images.length > 0) {
+					art.appendChild(js.Browser.document.createElement("br"));
+					art.appendChild(Reditn.embedAlbum(a.images));
+				}
+				art.className = "md";
+				div.appendChild(art);
+				$r = div;
+				return $r;
+			}(this)):js.Boot.__instanceof(d,Array) && Reflect.hasField(d[0],"url")?(function($this) {
+				var $r;
+				var a = d;
+				var div = Reditn.embedAlbum(a);
+				name = "image";
+				$r = div;
+				return $r;
+			}(this)):Reflect.hasField(d,"developers")?(function($this) {
+				var $r;
+				var r = d;
+				var div = js.Browser.document.createElement("div");
+				div.className = "usertext";
+				var cont1 = js.Browser.document.createElement("div");
+				var inner = js.Browser.document.createElement("span");
+				inner.innerHTML = "" + Std.string(d.description) + "<br><a href=\"" + Std.string(d.url) + "\"><b>Clone repo</b></a><br>";
+				if(r.album != null && r.album.length > 0) inner.appendChild(Reditn.embedAlbum(r.album));
+				cont1.appendChild(inner);
+				cont1.className = "md";
+				div.appendChild(cont1);
+				$r = div;
+				return $r;
+			}(this)):null;
+			if(content == null) b.parentNode.removeChild(b); else {
+				var exp = js.Browser.document.createElement("div");
+				exp.className = "expando";
+				exp.appendChild(content);
+				cont.appendChild(exp);
+				cn += "" + name + " ";
+				b.className = "" + cn + " " + cl;
+				Expand.buttons.push(btn);
+				Reditn.show(exp,isToggled);
+			}
+		});
+	}
+	return btn != null?btn.element:null;
+}
 var List = function() {
 	this.length = 0;
 };
@@ -2049,7 +2058,7 @@ $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
 	var s = js.Browser.document.createElement("style");
-	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
+	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
 	js.Browser.document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
@@ -2994,14 +3003,14 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		}($this));
 		return $r;
 	}(this));
-	Reditn.getJSON("https://api.imgur.com/3/" + albumType + "/" + id,function(data) {
+	Reditn.getJSON("https://api.imgur.com/3/" + albumType + "/" + id,function(d) {
 		var album = [];
-		if(data.images_count <= 0) album.push({ url : "http://i.imgur.com/" + data.id + ".jpg", caption : data.title, author : data.account_url}); else {
-			var _g1 = 0, _g2 = data.images;
+		if(d.images_count <= 0) album.push({ url : "http://i.imgur.com/" + d.id + ".jpg", caption : d.title, author : d.account_url}); else {
+			var _g1 = 0, _g2 = d.images;
 			while(_g1 < _g2.length) {
 				var i = _g2[_g1];
 				++_g1;
-				album.push({ url : "http://i.imgur.com/" + i.id + ".jpg", caption : i.title, author : data.account_url});
+				album.push({ url : "http://i.imgur.com/" + i.id + ".jpg", caption : i.title, author : d.account_url});
 			}
 		}
 		cb1(album);
@@ -3033,8 +3042,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 	cb([{ url : "http://i.imgflip.com/" + e.matched(1) + ".jpg", caption : null, author : null}]);
 }},{ regex : new EReg("what-if.xkcd.com/([0-9]*)",""), method : function(e,cb) {
 }},{ regex : new EReg("xkcd.com/([0-9]*)",""), method : function(e,cb2) {
-	Reditn.getJSON("http://www.xkcd.com/" + e.matched(1) + "/info.0.json",function(data) {
-		cb2([{ url : data.img, caption : data.title, author : null}]);
+	Reditn.getJSON("http://www.xkcd.com/" + e.matched(1) + "/info.0.json",function(d) {
+		cb2([{ url : d.img, caption : d.title, author : null}]);
 	});
 }},{ regex : new EReg("explosm.net/comics/([0-9]*)",""), method : function(e1,cb3) {
 	Reditn.getText("http://www." + e1.matched(0),function(txt) {
@@ -3064,10 +3073,10 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 	});
 }},{ regex : new EReg("([^\\.]*\\.wordpress\\.com|wp\\.me|techcrunch\\.com|news\\.blogs\\.cnn\\.com|snoopdogg\\.com|usainbolt\\.com|katiecouric\\.com|rollingstones\\.com|variety\\.com|bbcamerica\\.com)/(.*)?",""), method : function(e,cb7) {
 	var url = "http://" + e.matched(0);
-	Reditn.getJSON("http://public-api.wordpress.com/oembed/?url=" + StringTools.urlEncode(url) + "&for=Reditn",function(data) {
+	Reditn.getJSON("http://public-api.wordpress.com/oembed/?url=" + StringTools.urlEncode(url) + "&for=Reditn",function(d) {
 		var imgs = [];
-		if(data.thumbnail_url != null) imgs.push({ caption : null, url : data.thumbnail_url, author : null});
-		cb7({ author : data.author_name, content : Link.filterHTML(data.html), images : imgs});
+		if(d.thumbnail_url != null) imgs.push({ caption : null, url : d.thumbnail_url, author : null});
+		cb7({ author : d.author_name, content : Link.filterHTML(d.html), images : imgs});
 	});
 }},{ regex : new EReg("(.*)/wiki/([^#]*)(#.*)?",""), method : function(e,cb8) {
 	var aroot = "http://" + e.matched(1), title = e.matched(2), to = e.matched(3);
@@ -3079,8 +3088,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		var $r;
 		var getWikiPage1 = null;
 		getWikiPage1 = function(name) {
-			Reditn.getJSON("" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(data) {
-				var pages = data.query.pages;
+			Reditn.getJSON("" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(d) {
+				var pages = d.query.pages;
 				var _g = 0, _g1 = Reflect.fields(pages);
 				while(_g < _g1.length) {
 					var p = _g1[_g];
@@ -3101,8 +3110,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 							var i1 = [images[0][_g2]];
 							++_g2;
 							Reditn.getJSON("" + urlroot + "/api.php?action=query&titles=" + StringTools.urlEncode(i1[0].url) + "&prop=imageinfo&iiprop=url&format=json",(function(i1,nimages,images,cont,page) {
-								return function(data1) {
-									var pages1 = data1.query.pages;
+								return function(d1) {
+									var pages1 = d1.query.pages;
 									var _g3 = 0, _g4 = Reflect.fields(pages1);
 									while(_g3 < _g4.length) {
 										var p1 = _g4[_g3];
@@ -3130,9 +3139,9 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 	getWikiPage(title);
 }},{ regex : new EReg("github\\.com/([^/]*)/([^/]*)",""), method : function(e,cb9) {
 	var author = e.matched(1), repo = e.matched(2);
-	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/readme?client_id=" + "39d85b9ac427f1176763" + "&client_secret=" + "5117570b83363ca0c71a196edc5b348af150c25d",function(data) {
-		if(data.content == null) return;
-		var c = data.content;
+	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/readme?client_id=" + "39d85b9ac427f1176763" + "&client_secret=" + "5117570b83363ca0c71a196edc5b348af150c25d",function(d) {
+		if(d.content == null) return;
+		var c = d.content;
 		c = StringTools.replace(c,"\n","");
 		c = StringTools.trim(c);
 		c = js.Browser.window.atob(c);
@@ -3162,7 +3171,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 				while(_g1 < devs.length) {
 					var d = devs[_g1];
 					++_g1;
-					_g.push(d.name);
+					_g.push(data.name);
 				}
 			}
 			$r = _g;
@@ -3198,11 +3207,10 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 			cb11({ title : t.matched(1), content : cont, author : null, images : []});
 		}
 	},null,null,null);
-}},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)",""), method : function(e,cb12) {
+}},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)(/.*)?",""), method : function(e,cb12) {
 	var author = e.matched(1), id = e.matched(3);
-	console.log(author + ", " + id);
-	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(data) {
-		var post = data.posts[0];
+	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(d) {
+		var post = d.posts[0];
 		cb12((function($this) {
 			var $r;
 			switch(post.type) {
@@ -3211,16 +3219,16 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 					var $r;
 					var images = [];
 					while(Link.HTML_IMG.match(post.body)) {
-						images.push({ url : Link.HTML_IMG.matched(1), caption : null, author : data.blog.name});
+						images.push({ url : Link.HTML_IMG.matched(1), caption : null, author : d.blog.name});
 						post.body = Link.HTML_IMG.replace(post.body,"");
 					}
 					post.body = Link.filterHTML(post.body);
-					$r = { title : post.title, content : post.body, author : data.blog.name, images : images};
+					$r = { title : post.title, content : post.body, author : d.blog.name, images : images};
 					return $r;
 				}($this));
 				break;
 			case "quote":
-				$r = { title : null, content : Std.string(post.text) + "<br/><b>" + Std.string(post.source) + "</b>", author : data.blog.name, images : []};
+				$r = { title : null, content : Std.string(post.text) + "<br/><b>" + Std.string(post.source) + "</b>", author : d.blog.name, images : []};
 				break;
 			case "photo":
 				$r = (function($this) {
@@ -3234,7 +3242,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 							while(_g1 < ps.length) {
 								var p = ps[_g1];
 								++_g1;
-								_g.push({ url : p.original_size.url, caption : p.caption, author : data.blog.name});
+								_g.push({ url : p.original_size.url, caption : p.caption, author : d.blog.name});
 							}
 						}
 						$r = _g;
@@ -3250,17 +3258,17 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		}(this)));
 	});
 }},{ regex : new EReg(".*\\.tumblr\\.com",""), method : function(e,cb13) {
-	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + StringTools.urlEncode(e.matched(0)) + "/info?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE",function(data) {
-		cb13({ urls : new haxe.ds.StringMap(), name : data.blog.title, description : Link.filterHTML(data.blog.description), album : []});
+	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + StringTools.urlEncode(e.matched(0)) + "/info?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE",function(d) {
+		cb13({ urls : new haxe.ds.StringMap(), name : d.blog.title, description : Link.filterHTML(d.blog.description), album : []});
 	});
 }},{ regex : new EReg("twitter.com/.*/status/([0-9]*)",""), method : function(e,cb14) {
-	Reditn.getJSON("https://api.twitter.com/1/statuses/oembed.json?id=" + e.matched(2),function(data) {
-		cb14({ title : null, author : data.author_name, content : Link.filterHTML(data.html), images : []});
+	Reditn.getJSON("https://api.twitter.com/1/statuses/oembed.json?id=" + e.matched(1),function(d) {
+		cb14({ title : null, author : d.author_name, content : Link.filterHTML(d.html), images : []});
 	});
 }},{ regex : new EReg("amazon\\.[a-z\\.]*/gp/product/([0-9A-Z]*)",""), method : function(e,cb) {
 	var id = e.matched(1);
-	Reditn.getXML("http://webservices.amazon.com/onca/xml?AWSAccessKeyId=" + "AKIAJMR3XPXGBMZJE6IA" + "&Service=AWSECommerceService&Operation=ItemLookup&ItemId=" + id,function(data) {
-		console.log(data);
+	Reditn.getXML("http://webservices.amazon.com/onca/xml?AWSAccessKeyId=" + "AKIAJMR3XPXGBMZJE6IA" + "&Service=AWSECommerceService&Operation=ItemLookup&ItemId=" + id,function(d) {
+		console.log(d);
 	});
 }},{ regex : new EReg("plus\\.google\\.com/([0-9]*)/posts/([a-zA-Z]*)",""), method : function(e2,cb15) {
 	var pid = e2.matched(1), id2 = e2.matched(2), num = 0, title1 = new EReg("<b>([^>]*)</b><br />","");
@@ -3270,15 +3278,15 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		nextPage1 = function(tk) {
 			tk = tk == null?"":"&requestToken=" + tk;
 			if(num > 8) return;
-			Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + pid + "/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o" + tk,function(data) {
-				var items = data.items, url = e2.matched(0);
+			Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + pid + "/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o" + tk,function(d) {
+				var items = d.items, url = e2.matched(0);
 				var _g = 0;
 				while(_g < items.length) {
 					var i = items[_g];
 					++_g;
 					if(i.url.indexOf(id2) != -1) {
-						Reditn.getJSON("https://www.googleapis.com/plus/v1/activities/" + Std.string(i.id) + "?fields=actor%2FdisplayName%2Cannotation%2Cobject(actor%2Cattachments%2Ccontent%2Cid%2CobjectType%2CoriginalContent%2Curl)&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(data1) {
-							var type = data1.object.objectType, name = data1.actor.actorName, cont = data1.object.content;
+						Reditn.getJSON("https://www.googleapis.com/plus/v1/activities/" + Std.string(i.id) + "?fields=actor%2FdisplayName%2Cannotation%2Cobject(actor%2Cattachments%2Ccontent%2Cid%2CobjectType%2CoriginalContent%2Curl)&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(d1) {
+							var type = d1.object.objectType, name = d1.actor.actorName, cont = d1.object.content;
 							title1.match(cont);
 							switch(type) {
 							case "note":
@@ -3288,8 +3296,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 								cb15({ title : titl, author : name, content : cont, images : []});
 								break;
 							default:
-								console.log(data1);
-								var att = data1.object.attachments;
+								var att = d1.object.attachments;
 								cb15((function($this) {
 									var $r;
 									var _g1 = [];
@@ -3298,7 +3305,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 										while(_g2 < att.length) {
 											var a = att[_g2];
 											++_g2;
-											_g1.push({ url : a.image.url, caption : a.content.length == 0?data1.object.content:a.content, author : null});
+											_g1.push({ url : a.image.url, caption : a.content.length == 0?d1.object.content:a.content, author : null});
 										}
 									}
 									$r = _g1;
@@ -3309,7 +3316,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 						return;
 					}
 				}
-				if(data.items.length != 0) nextPage1(data.requestToken);
+				if(d.items.length != 0) nextPage1(d.requestToken);
 			});
 		};
 		$r = nextPage1;
@@ -3324,8 +3331,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 	cb({ album : [{ url : "https://graph.facebook.com/" + id + "/picture?type=large", caption : null, author : null}], urls : new haxe.ds.StringMap()});
 }},{ regex : new EReg("plus\\.google.com/u?/?[0-9]*/([0-9]*)(/about)?",""), method : function(e,cb16) {
 	var id = e.matched(1);
-	Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + id + "?key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(data) {
-		var urls = data.urls;
+	Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + id + "?key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(d) {
+		var urls = d.urls;
 		var aurls = new haxe.ds.StringMap();
 		if(urls != null) {
 			var _g = 0;
@@ -3336,17 +3343,23 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 				aurls.set(key,value);
 			}
 		}
-		if(data.urls != null && data.displayName != null && data.aboutMe != null) cb16({ urls : aurls, name : data.displayName, description : data.aboutMe, album : [{ url : data.image.url, caption : null, author : data.displayName}]});
+		if(d.urls != null && d.displayName != null && d.aboutMe != null) cb16({ urls : aurls, name : d.displayName, description : d.aboutMe, album : [{ url : d.image.url, caption : null, author : d.displayName}]});
 	});
 }},{ regex : new EReg("reddit\\.com/r/([a-zA-Z0-9]*)",""), method : function(e,cb17) {
-	console.log(e.matched(1));
 	Reditn.getJSON("http://www." + e.matched(0) + "/about.json",function(s) {
 		cb17(s);
 	});
 }},{ regex : new EReg("gamejolt.com/games/[^/]*/[^/]*/([0-9]*)",""), method : function(e,cb) {
 	var id = e.matched(1);
-	Reditn.getJSON("http://gamejolt.com/service/games/" + id + "?format=json",function(data) {
-		console.log(data);
+	Reditn.getJSON("http://gamejolt.com/service/games/" + id + "?format=json",function(d) {
+		console.log(d);
+	});
+}},{ regex : new EReg("(0rz\\.tw|1link\\.in|1url\\.com|2\\.gp|2big\\.at|2tu\\.us|3\\.ly|307\\.to|4ms\\.me|4sq\\.com|4url\\.cc|6url\\.com|7\\.ly|a\\.gg|a\\.nf|aa\\.cx|abcurl\\.net|ad\\.vu|adf\\.ly|adjix\\.com|afx\\.cc|all\\.fuseurl\\.com|alturl\\.com|amzn\\.to|ar\\.gy|arst\\.ch|atu\\.ca|azc\\.cc|b23\\.ru|b2l\\.me|bacn\\.me|bcool\\.bz|binged\\.it|bit\\.ly|bizj\\.us|bloat\\.me|bravo\\.ly|bsa\\.ly|budurl\\.com|canurl\\.com|chilp\\.it|chzb\\.gr|cl\\.lk|cl\\.ly|clck\\.ru|cli\\.gs|cliccami\\.info|clickthru\\.ca|clop\\.in|conta\\.cc|cort\\.as|cot\\.ag|crks\\.me|ctvr\\.us|cutt\\.us|dai\\.ly|decenturl\\.com|dfl8\\.me|digbig\\.com|digg\\.com|disq\\.us|dld\\.bz|dlvr\\.it|do\\.my|doiop\\.com|dopen\\.us|easyuri\\.com|easyurl\\.net|eepurl\\.com|eweri\\.com|fa\\.by|fav\\.me|fb\\.me|fbshare\\.me|ff\\.im|fff\\.to|fire\\.to|firsturl\\.de|firsturl\\.net|flic\\.kr|flq\\.us|fly2\\.ws|fon\\.gs|freak\\.to|fuseurl\\.com|fuzzy\\.to|fwd4\\.me|fwib\\.net|g\\.ro\\.lt|gizmo\\.do|gl\\.am|go\\.9nl\\.com|go\\.ign\\.com|go\\.usa\\.gov|goo\\.gl|goshrink\\.com|gurl\\.es|hex\\.io|hiderefer\\.com|hmm\\.ph|href\\.in|hsblinks\\.com|htxt\\.it|huff\\.to|hulu\\.com|hurl\\.me|hurl\\.ws|icanhaz\\.com|idek\\.net|ilix\\.in|is\\.gd|its\\.my|ix\\.lt|j\\.mp|jijr\\.com|kl\\.am|klck\\.me|korta\\.nu|krunchd\\.com|l9k\\.net|lat\\.ms|liip\\.to|liltext\\.com|linkbee\\.com|linkbun\\.ch|liurl\\.cn|ln-s\\.net|ln-s\\.ru|lnk\\.gd|lnk\\.ms|lnkd\\.in|lnkurl\\.com|lru\\.jp|lt\\.tl|lurl\\.no|macte\\.ch|mash\\.to|merky\\.de|migre\\.me|miniurl\\.com|minurl\\.fr|mke\\.me|moby\\.to|moourl\\.com|mrte\\.ch|myloc\\.me|myurl\\.in|n\\.pr|nbc\\.co|nblo\\.gs|nn\\.nf|not\\.my|notlong\\.com|nsfw\\.in|nutshellurl\\.com|nxy\\.in|nyti\\.ms|o-x\\.fr|oc1\\.us|om\\.ly|omf\\.gd|omoikane\\.net|on\\.cnn\\.com|on\\.mktw\\.net|onforb\\.es|orz\\.se|ow\\.ly|ping\\.fm|pli\\.gs|pnt\\.me|politi\\.co|post\\.ly|pp\\.gg|profile\\.to|ptiturl\\.com|pub\\.vitrue\\.com|qlnk\\.net|qte\\.me|qu\\.tc|qy\\.fi|r\\.im|rb6\\.me|read\\.bi|readthis\\.ca|reallytinyurl\\.com|redir\\.ec|redirects\\.ca|redirx\\.com|retwt\\.me|ri\\.ms|rickroll\\.it|riz\\.gd|rt\\.nu|ru\\.ly|rubyurl\\.com|rurl\\.org|rww\\.tw|s4c\\.in|s7y\\.us|safe\\.mn|sameurl\\.com|sdut\\.us|shar\\.es|shink\\.de|shorl\\.com|short\\.ie|short\\.to|shortlinks\\.co\\.uk|shorturl\\.com|shout\\.to|show\\.my|shrinkify\\.com|shrinkr\\.com|shrt\\.fr|shrt\\.st|shrten\\.com|shrunkin\\.com|simurl\\.com|slate\\.me|smallr\\.com|smsh\\.me|smurl\\.name|sn\\.im|snipr\\.com|snipurl\\.com|snurl\\.com|sp2\\.ro|spedr\\.com|srnk\\.net|srs\\.li|starturl\\.com|su\\.pr|surl\\.co\\.uk|surl\\.hu|t\\.cn|t\\.co|t\\.lh\\.com|ta\\.gd|tbd\\.ly|tcrn\\.ch|tgr\\.me|tgr\\.ph|tighturl\\.com|tiniuri\\.com|tiny\\.cc|tiny\\.ly|tiny\\.pl|tinylink\\.in|tinyuri\\.ca|tinyurl\\.com|tk\\.|tl\\.gd|tmi\\.me|tnij\\.org|tnw\\.to|tny\\.com|to\\.|to\\.ly|togoto\\.us|totc\\.us|toysr\\.us|tpm\\.ly|tr\\.im|tra\\.kz|trunc\\.it|twhub\\.com|twirl\\.at|twitclicks\\.com|twitterurl\\.net|twitterurl\\.org|twiturl\\.de|twurl\\.cc|twurl\\.nl|u\\.mavrev\\.com|u\\.nu|u76\\.org|ub0\\.cc|ulu\\.lu|updating\\.me|ur1\\.ca|url\\.az|url\\.co\\.uk|url\\.ie|url360\\.me|url4\\.eu|urlborg\\.com|urlbrief\\.com|urlcover\\.com|urlcut\\.com|urlenco\\.de|urli\\.nl|urls\\.im|urlshorteningservicefortwitter\\.com|urlx\\.ie|urlzen\\.com|usat\\.ly|use\\.my|vb\\.ly|vgn\\.am|vl\\.am|vm\\.lc|w55\\.de|wapo\\.st|wapurl\\.co\\.uk|wipi\\.es|wp\\.me|x\\.vu|xr\\.com|xrl\\.in|xrl\\.us|xurl\\.es|xurl\\.jp|y\\.ahoo\\.it|yatuc\\.com|ye\\.pe|yep\\.it|yfrog\\.com|yhoo\\.it|yiyd\\.com|youtu\\.be|yuarel\\.com|z0p\\.de|zi\\.ma|zi\\.mu|zipmyurl\\.com|zud\\.me|zurl\\.ws|zz\\.gd|zzang\\.kr|r\\.ebay\\.com)/.*",""), method : function(e,cb18) {
+	var surl = StringTools.urlEncode("http://" + e.matched(0));
+	Reditn.getJSON("http://api.longurl.org/v2/expand?url=" + surl + "&format=json&User-Agent=Reditn",function(data) {
+		var url = Reflect.field(data,"long-url");
+		var r = Link.resolve(url);
+		if(r != null) r.method(r.regex,cb18);
 	});
 }}];
 Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("style ?= ?\"[^\"]*\"","g")];
@@ -3358,6 +3371,7 @@ Settings.DESC = (function($this) {
 	_g.set("userinfo","Show information about a user upon hover");
 	_g.set("subinfo","Show information about a subreddit upon hover");
 	_g.set("expand","Allow expansion of images, articles, etc");
+	_g.set("cm-expand","Allow expansion of images, articles etc found in comment bodies for easy viewing");
 	_g.set("dup-hider","Hide duplicate links");
 	_g.set("user-tag","Tag users");
 	_g.set("sub-tag","Tag subreddits");
@@ -3375,11 +3389,12 @@ Settings.DEFAULTS = (function($this) {
 	_g.set("subinfo",true);
 	_g.set("expand",true);
 	_g.set("dup-hider",true);
+	_g.set("cm-expand",true);
 	_g.set("user-tag",true);
 	_g.set("sub-tag",true);
 	_g.set("preview",true);
 	_g.set("keys",true);
-	_g.set("nsfw-filter",true);
+	_g.set("nsfw-filter",false);
 	_g.set("user-tags",new haxe.ds.StringMap());
 	_g.set("sub-tags",new haxe.ds.StringMap());
 	$r = _g;

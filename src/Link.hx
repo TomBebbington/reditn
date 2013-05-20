@@ -1,5 +1,8 @@
 import data.*;
 import parser.*;
+import js.*;
+import js.html.*;
+import js.Browser.*;
 using StringTools;
 class Link {
 	public static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
@@ -36,20 +39,20 @@ class Link {
 					case "gallery": "gallery/album";
 					default: "album";
 				};
-				Reditn.getJSON('https://api.imgur.com/3/${albumType}/${id}', function(data:data.imgur.Album) {
+				Reditn.getJSON('https://api.imgur.com/3/${albumType}/${id}', function(d:data.imgur.Album) {
 					var album = [];
-					if(data.images_count <= 0)
+					if(d.images_count <= 0)
 						album.push({
-							url: 'http://i.imgur.com/${data.id}.jpg',
-							caption: data.title,
-							author: data.account_url
+							url: 'http://i.imgur.com/${d.id}.jpg',
+							caption: d.title,
+							author: d.account_url
 						});
 					else
-						for(i in data.images)
+						for(i in d.images)
 							album.push({
 								url: 'http://i.imgur.com/${i.id}.jpg',
 								caption: i.title,
-								author: data.account_url
+								author: d.account_url
 							});
 					cb(album);
 				}, 'Client-ID ${IMGUR_KEY}');
@@ -116,10 +119,10 @@ class Link {
 		{
 			regex: ~/xkcd.com\/([0-9]*)/,
 			method: function(e, cb) {
-				Reditn.getJSON('http://www.xkcd.com/${e.matched(1)}/info.0.json', function(data:Dynamic) {
+				Reditn.getJSON('http://www.xkcd.com/${e.matched(1)}/info.0.json', function(d:Dynamic) {
 					cb([{
-						url: data.img, 
-						caption: data.title,
+						url: d.img, 
+						caption: d.title,
 						author: null
 					}]);
 				});
@@ -193,13 +196,13 @@ class Link {
 			regex: ~/([^\.]*\.wordpress\.com|wp\.me|techcrunch\.com|news\.blogs\.cnn\.com|snoopdogg\.com|usainbolt\.com|katiecouric\.com|rollingstones\.com|variety\.com|bbcamerica\.com)\/(.*)?/,
 			method: function(e, cb) {
 				var url = "http://"+e.matched(0);
-				Reditn.getJSON('http://public-api.wordpress.com/oembed/?url=${url.urlEncode()}&for=Reditn', function(data:data.OEmbed) {
+				Reditn.getJSON('http://public-api.wordpress.com/oembed/?url=${url.urlEncode()}&for=Reditn', function(d:data.OEmbed) {
 					var imgs:Album = [];
-					if(data.thumbnail_url != null)
-						imgs.push({caption: null, url: data.thumbnail_url, author: null});
+					if(d.thumbnail_url != null)
+						imgs.push({caption: null, url: d.thumbnail_url, author: null});
 					cb({
-						author: data.author_name,
-						content: filterHTML(data.html),
+						author: d.author_name,
+						content: filterHTML(d.html),
 						images: imgs
 					});
 				});
@@ -217,8 +220,8 @@ class Link {
 				if(!urlroot.endsWith(".wikia.com"))
 					urlroot += "/w";
 				function getWikiPage(name:String) {
-					Reditn.getJSON('${urlroot}/api.php?format=json&prop=revisions&action=query&titles=${name}&rvprop=content', function(data) {
-						var pages:Dynamic = data.query.pages;
+					Reditn.getJSON('${urlroot}/api.php?format=json&prop=revisions&action=query&titles=${name}&rvprop=content', function(d) {
+						var pages:Dynamic = d.query.pages;
 						for(p in Reflect.fields(pages)) {
 							var page = Reflect.field(pages, p);
 							var cont:String = Reflect.field(untyped page.revisions[0], "*");
@@ -233,8 +236,8 @@ class Link {
 							if(images.length > 0) {
 								var nimages = [];
 								for(i in images)
-									Reditn.getJSON('${urlroot}/api.php?action=query&titles=${StringTools.urlEncode(i.url)}&prop=imageinfo&iiprop=url&format=json', function(data) {
-										var pages:Dynamic = data.query.pages;
+									Reditn.getJSON('${urlroot}/api.php?action=query&titles=${StringTools.urlEncode(i.url)}&prop=imageinfo&iiprop=url&format=json', function(d) {
+										var pages:Dynamic = d.query.pages;
 										for(p in Reflect.fields(pages)) {
 											var page = Reflect.field(pages, p);
 											if(page != null && page.imageinfo != null) {
@@ -260,10 +263,10 @@ class Link {
 			regex: ~/github\.com\/([^\/]*)\/([^\/]*)/,
 			method: function(e, cb) {
 				var author = e.matched(1), repo = e.matched(2);
-				Reditn.getJSON('https://api.github.com/repos/${author}/${repo}/readme?client_id=${GITHUB_KEY}&client_secret=${GITHUB_KEYS}', function(data) {
-					if(data.content == null)
+				Reditn.getJSON('https://api.github.com/repos/${author}/${repo}/readme?client_id=${GITHUB_KEY}&client_secret=${GITHUB_KEYS}', function(d) {
+					if(d.content == null)
 						return;
-					var c:String = data.content;
+					var c:String = d.content;
 					c = c.replace("\n", "");
 					c = StringTools.trim(c);
 					c = js.Browser.window.atob(c);
@@ -299,7 +302,7 @@ class Link {
 					cb({
 						name: data.name,
 						description: data.description,
-						developers: [for(d in devs) d.name],
+						developers: [for(d in devs) data.name],
 						url: {
 							var u = Reflect.field(data, "download-page");
 							for(f in Reflect.fields(data))
@@ -337,12 +340,11 @@ class Link {
 			}
 		},
 		{
-			regex: ~/([^\.]*)\.tumblr\.com\/(post|image)\/([0-9]*)/,
+			regex: ~/([^\.]*)\.tumblr\.com\/(post|image)\/([0-9]*)(\/.*)?/,
 			method: function(e, cb) {
 				var author = e.matched(1), id = e.matched(3);
-				trace(author+", "+id);
-				Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(data) {
-					var post:Dynamic = untyped data.posts[0];
+				Reditn.getJSON('http://api.tumblr.com/v2/blog/${author}.tumblr.com/posts/json?api_key=${TUMBLR_KEY}&id=${id}', function(d) {
+					var post:Dynamic = untyped d.posts[0];
 					cb(switch(post.type) {
 						case "text":
 						var images = [];
@@ -350,20 +352,20 @@ class Link {
 							images.push({
 								url: HTML_IMG.matched(1),
 								caption: null,
-								author: data.blog.name
+								author: d.blog.name
 							});
 							post.body = HTML_IMG.replace(post.body, "");
 						}
 						post.body = filterHTML(post.body);
-						{title: post.title, content: post.body, author: data.blog.name, images: images};
-						case "quote": {title: null, content: post.text+"<br/><b>"+post.source+"</b>", author: data.blog.name, images: []};
+						{title: post.title, content: post.body, author: d.blog.name, images: images};
+						case "quote": {title: null, content: post.text+"<br/><b>"+post.source+"</b>", author: d.blog.name, images: []};
 						case "photo":
 							var ps:Array<Dynamic> = post.photos;
 							[for(p in ps) {
 								{
 									url: p.original_size.url,
 									caption: p.caption,
-									author: data.blog.name
+									author: d.blog.name
 								};
 							}];
 						default: null;
@@ -374,11 +376,11 @@ class Link {
 		{
 			regex: ~/.*\.tumblr\.com/,
 			method: function(e, cb) {
-				Reditn.getJSON('http://api.tumblr.com/v2/blog/${e.matched(0).urlEncode()}/info?api_key=${TUMBLR_KEY}', function(data) {
+				Reditn.getJSON('http://api.tumblr.com/v2/blog/${e.matched(0).urlEncode()}/info?api_key=${TUMBLR_KEY}', function(d) {
 					cb({
 						urls: new Map<String, String>(),
-						name: data.blog.title,
-						description: filterHTML(data.blog.description),
+						name: d.blog.title,
+						description: filterHTML(d.blog.description),
 						album: []
 					});
 				});
@@ -387,11 +389,11 @@ class Link {
 		{
 			regex: ~/twitter.com\/.*\/status\/([0-9]*)/,
 			method: function(e, cb) {
-				Reditn.getJSON('https://api.twitter.com/1/statuses/oembed.json?id=${e.matched(2)}', function(data:OEmbed) {
+				Reditn.getJSON('https://api.twitter.com/1/statuses/oembed.json?id=${e.matched(1)}', function(d:OEmbed) {
 					cb({
 						title: null,
-						author: data.author_name,
-						content: filterHTML(data.html),
+						author: d.author_name,
+						content: filterHTML(d.html),
 						images: []
 					});
 				});
@@ -401,8 +403,8 @@ class Link {
 			regex: ~/amazon\.[a-z\.]*\/gp\/product\/([0-9A-Z]*)/,
 			method: function(e, cb) {
 				var id = e.matched(1);
-				Reditn.getXML('http://webservices.amazon.com/onca/xml?AWSAccessKeyId=${AMAZON_KEY}&Service=AWSECommerceService&Operation=ItemLookup&ItemId=${id}', function(data) {
-					trace(data); // does it even lift?
+				Reditn.getXML('http://webservices.amazon.com/onca/xml?AWSAccessKeyId=${AMAZON_KEY}&Service=AWSECommerceService&Operation=ItemLookup&ItemId=${id}', function(d) {
+					trace(d); // does it even lift?
 				});
 			}
 		},
@@ -414,12 +416,12 @@ class Link {
 					tk = tk == null ? "" : '&requestToken=${tk}';
 					if(num > 8)
 						return;
-					Reditn.getJSON('https://www.googleapis.com/plus/v1/people/${pid}/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=${GOOGLE_API_KEY}${tk}', function(data) {
-						var items:Array<Dynamic> = data.items, url = e.matched(0);
+					Reditn.getJSON('https://www.googleapis.com/plus/v1/people/${pid}/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=${GOOGLE_API_KEY}${tk}', function(d) {
+						var items:Array<Dynamic> = d.items, url = e.matched(0);
 						for(i in items)
 							if(i.url.indexOf(id) != -1) {
-								Reditn.getJSON('https://www.googleapis.com/plus/v1/activities/${i.id}?fields=actor%2FdisplayName%2Cannotation%2Cobject(actor%2Cattachments%2Ccontent%2Cid%2CobjectType%2CoriginalContent%2Curl)&key=${GOOGLE_API_KEY}', function(data) {
-									var type:String = data.object.objectType, name:String = data.actor.actorName, cont:String = data.object.content;
+								Reditn.getJSON('https://www.googleapis.com/plus/v1/activities/${i.id}?fields=actor%2FdisplayName%2Cannotation%2Cobject(actor%2Cattachments%2Ccontent%2Cid%2CobjectType%2CoriginalContent%2Curl)&key=${GOOGLE_API_KEY}', function(d) {
+									var type:String = d.object.objectType, name:String = d.actor.actorName, cont:String = d.object.content;
 									title.match(cont);
 									switch(type) {
 										case "note":
@@ -428,16 +430,15 @@ class Link {
 											cont = filterHTML(cont);
 											cb({title: titl, author: name, content: cont, images: []});
 										default:
-											trace(data);
-											var att:Array<Dynamic> = data.object.attachments;
+											var att:Array<Dynamic> = d.object.attachments;
 											cb([for(a in att) 
-												{url: a.image.url, caption: a.content.length == 0 ? data.object.content : a.content, author: null}]);
+												{url: a.image.url, caption: a.content.length == 0 ? d.object.content : a.content, author: null}]);
 									}
 								});
 								return;
 							}
-						if(data.items.length != 0)
-							nextPage(data.requestToken);
+						if(d.items.length != 0)
+							nextPage(d.requestToken);
 					});
 				}
 				nextPage();
@@ -448,12 +449,12 @@ class Link {
 			method: function(e, cb) {
 				var id = e.matched(1);
 				/*
-				Reditn.getJSON('https://graph.facebook.com/${id}?access_token=${FACEBOOK_KEY}', function(data) {
-					trace(data);
+				Reditn.getJSON('https://graph.facebook.com/${id}?access_token=${FACEBOOK_KEY}', function(d) {
+					trace(d);
 					cb([{
-						caption: data.name,
-						url: data.source,http://graph.facebook.com/{ID of object}/picture?type=large
-						author: data.from.name
+						caption: d.name,
+						url: d.source,http://graph.facebook.com/{ID of object}/picture?type=large
+						author: d.from.name
 					}]);
 				});	*/
 				cb([{ caption: null, url: "http://graph.facebook.com/${id}/picture?type=small&access_token="+FACEBOOK_KEY, author: null}]);
@@ -473,18 +474,18 @@ class Link {
 			regex: ~/plus\.google.com\/u?\/?[0-9]*\/([0-9]*)(\/about)?/,
 			method: function(e, cb) {
 				var id = e.matched(1);
-				Reditn.getJSON('https://www.googleapis.com/plus/v1/people/${id}?key=${GOOGLE_API_KEY}', function(data) {
-					var urls:Array<Dynamic> = data.urls;
+				Reditn.getJSON('https://www.googleapis.com/plus/v1/people/${id}?key=${GOOGLE_API_KEY}', function(d) {
+					var urls:Array<Dynamic> = d.urls;
 					var aurls = new Map<String, String>();
 					if(urls != null)
 						for(u in urls)
 							aurls.set(u.label, u.value);
-					if(data.urls != null && data.displayName != null && data.aboutMe != null)
+					if(d.urls != null && d.displayName != null && d.aboutMe != null)
 						cb({
 							urls: aurls,
-							name: data.displayName,
-							description: data.aboutMe,
-							album: [{url: data.image.url, caption: null, author: data.displayName}]
+							name: d.displayName,
+							description: d.aboutMe,
+							album: [{url: d.image.url, caption: null, author: d.displayName}]
 						});
 				});
 			}
@@ -492,7 +493,6 @@ class Link {
 		{
 			regex: ~/reddit\.com\/r\/([a-zA-Z0-9]*)/,
 			method: function(e, cb) {
-				trace(e.matched(1));
 				Reditn.getJSON('http://www.${e.matched(0)}/about.json', function(s:data.Subreddit) cb(s));
 			}
 		},
@@ -500,8 +500,20 @@ class Link {
 			regex: ~/gamejolt.com\/games\/[^\/]*\/[^\/]*\/([0-9]*)/,
 			method: function(e, cb) {
 				var id = e.matched(1);
-				Reditn.getJSON('http://gamejolt.com/service/games/${id}?format=json', function(data) {
-					trace(data);
+				Reditn.getJSON('http://gamejolt.com/service/games/${id}?format=json', function(d) {
+					trace(d);
+				});
+			}
+		},
+		{
+			regex: ~/(0rz\.tw|1link\.in|1url\.com|2\.gp|2big\.at|2tu\.us|3\.ly|307\.to|4ms\.me|4sq\.com|4url\.cc|6url\.com|7\.ly|a\.gg|a\.nf|aa\.cx|abcurl\.net|ad\.vu|adf\.ly|adjix\.com|afx\.cc|all\.fuseurl\.com|alturl\.com|amzn\.to|ar\.gy|arst\.ch|atu\.ca|azc\.cc|b23\.ru|b2l\.me|bacn\.me|bcool\.bz|binged\.it|bit\.ly|bizj\.us|bloat\.me|bravo\.ly|bsa\.ly|budurl\.com|canurl\.com|chilp\.it|chzb\.gr|cl\.lk|cl\.ly|clck\.ru|cli\.gs|cliccami\.info|clickthru\.ca|clop\.in|conta\.cc|cort\.as|cot\.ag|crks\.me|ctvr\.us|cutt\.us|dai\.ly|decenturl\.com|dfl8\.me|digbig\.com|digg\.com|disq\.us|dld\.bz|dlvr\.it|do\.my|doiop\.com|dopen\.us|easyuri\.com|easyurl\.net|eepurl\.com|eweri\.com|fa\.by|fav\.me|fb\.me|fbshare\.me|ff\.im|fff\.to|fire\.to|firsturl\.de|firsturl\.net|flic\.kr|flq\.us|fly2\.ws|fon\.gs|freak\.to|fuseurl\.com|fuzzy\.to|fwd4\.me|fwib\.net|g\.ro\.lt|gizmo\.do|gl\.am|go\.9nl\.com|go\.ign\.com|go\.usa\.gov|goo\.gl|goshrink\.com|gurl\.es|hex\.io|hiderefer\.com|hmm\.ph|href\.in|hsblinks\.com|htxt\.it|huff\.to|hulu\.com|hurl\.me|hurl\.ws|icanhaz\.com|idek\.net|ilix\.in|is\.gd|its\.my|ix\.lt|j\.mp|jijr\.com|kl\.am|klck\.me|korta\.nu|krunchd\.com|l9k\.net|lat\.ms|liip\.to|liltext\.com|linkbee\.com|linkbun\.ch|liurl\.cn|ln-s\.net|ln-s\.ru|lnk\.gd|lnk\.ms|lnkd\.in|lnkurl\.com|lru\.jp|lt\.tl|lurl\.no|macte\.ch|mash\.to|merky\.de|migre\.me|miniurl\.com|minurl\.fr|mke\.me|moby\.to|moourl\.com|mrte\.ch|myloc\.me|myurl\.in|n\.pr|nbc\.co|nblo\.gs|nn\.nf|not\.my|notlong\.com|nsfw\.in|nutshellurl\.com|nxy\.in|nyti\.ms|o-x\.fr|oc1\.us|om\.ly|omf\.gd|omoikane\.net|on\.cnn\.com|on\.mktw\.net|onforb\.es|orz\.se|ow\.ly|ping\.fm|pli\.gs|pnt\.me|politi\.co|post\.ly|pp\.gg|profile\.to|ptiturl\.com|pub\.vitrue\.com|qlnk\.net|qte\.me|qu\.tc|qy\.fi|r\.im|rb6\.me|read\.bi|readthis\.ca|reallytinyurl\.com|redir\.ec|redirects\.ca|redirx\.com|retwt\.me|ri\.ms|rickroll\.it|riz\.gd|rt\.nu|ru\.ly|rubyurl\.com|rurl\.org|rww\.tw|s4c\.in|s7y\.us|safe\.mn|sameurl\.com|sdut\.us|shar\.es|shink\.de|shorl\.com|short\.ie|short\.to|shortlinks\.co\.uk|shorturl\.com|shout\.to|show\.my|shrinkify\.com|shrinkr\.com|shrt\.fr|shrt\.st|shrten\.com|shrunkin\.com|simurl\.com|slate\.me|smallr\.com|smsh\.me|smurl\.name|sn\.im|snipr\.com|snipurl\.com|snurl\.com|sp2\.ro|spedr\.com|srnk\.net|srs\.li|starturl\.com|su\.pr|surl\.co\.uk|surl\.hu|t\.cn|t\.co|t\.lh\.com|ta\.gd|tbd\.ly|tcrn\.ch|tgr\.me|tgr\.ph|tighturl\.com|tiniuri\.com|tiny\.cc|tiny\.ly|tiny\.pl|tinylink\.in|tinyuri\.ca|tinyurl\.com|tk\.|tl\.gd|tmi\.me|tnij\.org|tnw\.to|tny\.com|to\.|to\.ly|togoto\.us|totc\.us|toysr\.us|tpm\.ly|tr\.im|tra\.kz|trunc\.it|twhub\.com|twirl\.at|twitclicks\.com|twitterurl\.net|twitterurl\.org|twiturl\.de|twurl\.cc|twurl\.nl|u\.mavrev\.com|u\.nu|u76\.org|ub0\.cc|ulu\.lu|updating\.me|ur1\.ca|url\.az|url\.co\.uk|url\.ie|url360\.me|url4\.eu|urlborg\.com|urlbrief\.com|urlcover\.com|urlcut\.com|urlenco\.de|urli\.nl|urls\.im|urlshorteningservicefortwitter\.com|urlx\.ie|urlzen\.com|usat\.ly|use\.my|vb\.ly|vgn\.am|vl\.am|vm\.lc|w55\.de|wapo\.st|wapurl\.co\.uk|wipi\.es|wp\.me|x\.vu|xr\.com|xrl\.in|xrl\.us|xurl\.es|xurl\.jp|y\.ahoo\.it|yatuc\.com|ye\.pe|yep\.it|yfrog\.com|yhoo\.it|yiyd\.com|youtu\.be|yuarel\.com|z0p\.de|zi\.ma|zi\.mu|zipmyurl\.com|zud\.me|zurl\.ws|zz\.gd|zzang\.kr|r\.ebay\.com)\/.*/,
+			method: function(e, cb) {
+				var surl = StringTools.urlEncode('http://${e.matched(0)}');
+				Reditn.getJSON('http://api.longurl.org/v2/expand?url=${surl}&format=json&User-Agent=Reditn', function(data) {
+					var url:String = Reflect.field(data, "long-url");
+					var r = resolve(url);
+					if(r != null)
+						r.method(r.regex, cb);
 				});
 			}
 		}
@@ -564,5 +576,131 @@ class Link {
 		if(h.endsWith("<br>"))
 			h = h.substr(0, h.length-4);
 		return h;
+	}
+	public static function createButton(url:String, cont:Element):DivElement {
+		var site = Link.resolve(url);
+		var btn = null;
+		if(site != null) {
+			var b = document.createDivElement();
+			var cn = "expando-button ";
+			cont.insertBefore(b, cont.childNodes[0]);
+			var isToggled = Expand.toggled;
+			var cl = isToggled ? "expanded" : "collapsed";
+			b.className = '$cn $cl';
+			btn = {
+				toggled: function():Bool {
+					return isToggled;
+				},
+				toggle: function(v, ps) {
+					isToggled = v;
+					b.className = cn + (cl = isToggled ? "expanded" : "collapsed");
+					var entry:Element = b.parentElement;
+					var expandos:Array<Element> = cast entry.getElementsByClassName("expando");
+					for(e in expandos)
+						Reditn.show(e, v);
+					if(ps)
+						Reditn.pushState();
+				},
+				url: url,
+				element: b
+			};
+			b.onclick = function(_) {
+				btn.toggle(!isToggled, true);
+			}
+			site.method(site.regex, function(d:Dynamic) {
+				var name = "selftext";
+				var content = if(Reflect.hasField(d, "urls")) { // profile
+					var p:data.Profile = d;
+					var urls = [for(uk in p.urls.keys()) '<li><a href="${p.urls.get(uk)}">${uk}</a></li>'];
+					var div = Browser.document.createDivElement();
+					div.className = "usertext";
+					var content = Browser.document.createDivElement();
+					content.appendChild(Reditn.embedMap([
+						"Name" => d.name,
+						"Description" => d.description,
+						"Links" => urls.join("")
+					]));
+					if(p.album.length > 0) {
+						content.appendChild(Browser.document.createBRElement());
+						content.appendChild(Reditn.embedAlbum(p.album));
+					}
+					div.appendChild(content);
+					div;
+				} else if(Reflect.hasField(d, "price")) {
+					var i:ShopItem = d;
+					var div = Browser.document.createDivElement();
+					div.className = "usertext";
+					var cont = Browser.document.createDivElement();
+					cont.appendChild(Reditn.embedMap([
+						"Category" => i.category.htmlEscape(),
+						"Location" => i.location.htmlEscape(),
+						"Price" => i.price.htmlEscape(),
+						"Description" => i.description
+					]));
+					cont.appendChild(Reditn.embedAlbum(i.images));
+					div.appendChild(cont);
+					name = "item";
+					div;
+				} else if(Reflect.hasField(d, "subscribers")) { // subreddit
+					var s:data.Subreddit = d;
+					var div = Browser.document.createDivElement();
+					div.className = "usertext";
+					div.appendChild(Reditn.embedMap([
+						"Age" => Reditn.age(s.created_utc),
+						"Subscribers" => Reditn.formatNumber(s.subscribers),
+						"Active users" => Reditn.formatNumber(s.accounts_active),
+						"Description" => parser.Markdown.parse(s.description)
+					]));
+					div;
+				} else if(Reflect.hasField(d, "content")) { // article
+					var a:Article = d;
+					var div = Browser.document.createDivElement();
+					div.className = "usertext";
+					var head = null;
+					var art = Browser.document.createDivElement();
+					var inner = Browser.document.createSpanElement();
+					inner.innerHTML = a.content;
+					art.appendChild(inner);
+					if(a.images != null && a.images.length > 0) {
+						art.appendChild(Browser.document.createBRElement());
+						art.appendChild(Reditn.embedAlbum(a.images));
+					}
+					art.className = "md";
+					div.appendChild(art);
+					div;
+				} else if(Std.is(d, Array) && Reflect.hasField(untyped d[0], "url")) {
+					var a:Album = d;
+					var div = Reditn.embedAlbum(a);
+					name = "image";
+					div;
+				} else if(Reflect.hasField(d, "developers")) {
+					var r:Repo = d;
+					var div = js.Browser.document.createDivElement();
+					div.className = "usertext";
+					var cont = Browser.document.createDivElement();
+					var inner = Browser.document.createSpanElement();
+					inner.innerHTML = '${d.description}<br><a href="${d.url}"><b>Clone repo</b></a><br>';
+					if(r.album != null && r.album.length > 0)
+						inner.appendChild(Reditn.embedAlbum(r.album));
+					cont.appendChild(inner);
+					cont.className = "md";
+					div.appendChild(cont);
+					div;
+				} else null;
+				if(content == null) {
+					b.parentNode.removeChild(b);
+				} else {
+					var exp = document.createDivElement();
+					exp.className = "expando";
+					exp.appendChild(content);
+					cont.appendChild(exp);
+					cn += '$name ';
+					b.className = '$cn $cl';
+					Expand.buttons.push(btn);
+					Reditn.show(exp, isToggled);
+				}
+			});
+		}
+		return btn != null ? btn.element : null;
 	}
 }

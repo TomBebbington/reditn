@@ -38,6 +38,14 @@
 	background-position:-48px -23px;
 	background-repeat:no-repeat
 }
+.expando-button.collapsed {
+	padding: 0px;
+}
+p .expando-button {
+	display: inline-block;
+	float: none;
+	margin: 0px;
+}
 dl.reditn-table  {
 	float: left;
 	width: 100%;

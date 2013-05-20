@@ -22,7 +22,6 @@ class Expand {
 	}
 	public static function init() {
 		toggled = Browser.window.location.hash == "#showall";
-
 		var menu = Browser.document.getElementsByClassName("tabmenu")[0];
 		var li:LIElement = Browser.document.createLIElement();
 		button = Browser.document.createAnchorElement();
@@ -38,108 +37,16 @@ class Expand {
 		for(l in Reditn.links) {
 			if(l.nodeName.toLowerCase()!="a")
 				continue;
-			l.onchange = function(_) {
-				var site = Link.resolve(l.href);
-				if(site == null)
-					defaultButton(Reditn.getLinkContainer(l));
-				else
-					site.method(site.regex, function(data:Dynamic) {
-						var e = Reditn.getLinkContainer(l);
-						var exp = Browser.document.createDivElement();
-						exp.className = "expando";
-						exp.style.display = "none";
-						Reditn.show(exp, toggled);
-						var name = "selftext";
-						if(Reflect.hasField(data, "urls")) { // profile
-							var p:data.Profile = data;
-							var urls = [for(uk in p.urls.keys()) '<li><a href="${p.urls.get(uk)}">${uk}</a></li>'];
-							var div = Browser.document.createDivElement();
-							div.className = "usertext";
-							exp.appendChild(div);
-							var content = Browser.document.createDivElement();
-							content.appendChild(Reditn.embedMap([
-								"Name" => data.name,
-								"Description" => data.description,
-								"Links" => urls.join("")
-							]));
-							if(p.album.length > 0) {
-								content.appendChild(Browser.document.createBRElement());
-								content.appendChild(Reditn.embedAlbum(p.album));
-							}
-							div.appendChild(content);
-						} else if(Reflect.hasField(data, "price")) {
-							var i:ShopItem = data;
-							var div = Browser.document.createDivElement();
-							div.className = "usertext";
-							exp.appendChild(div);
-							var cont = Browser.document.createDivElement();
-							cont.appendChild(Reditn.embedMap([
-								"Category" => i.category.htmlEscape(),
-								"Location" => i.location.htmlEscape(),
-								"Price" => i.price.htmlEscape(),
-								"Description" => i.description
-							]));
-							cont.appendChild(Reditn.embedAlbum(i.images));
-							div.appendChild(cont);
-							name = "item";
-						} else if(Reflect.hasField(data, "subscribers")) { // subreddit
-							var s:data.Subreddit = data;
-							var div = Browser.document.createDivElement();
-							div.className = "usertext";
-							exp.appendChild(div);
-							var content = Reditn.embedMap([
-								"Age" => Reditn.age(s.created_utc),
-								"Subscribers" => Reditn.formatNumber(s.subscribers),
-								"Active users" => Reditn.formatNumber(s.accounts_active),
-								"Description" => parser.Markdown.parse(s.description)
-							]);
-							div.appendChild(content);
-						} else if(Reflect.hasField(data, "content")) { // article
-							var a:Article = data;
-							var div = Browser.document.createDivElement();
-							div.className = "usertext";
-							exp.appendChild(div);
-							var head = null;
-							var content = Browser.document.createDivElement();
-							var inner = Browser.document.createSpanElement();
-							inner.innerHTML = a.content;
-							content.appendChild(inner);
-							if(a.images.length > 0) {
-								content.appendChild(Browser.document.createBRElement());
-								content.appendChild(Reditn.embedAlbum(a.images));
-							}
-							content.className = "md";
-							div.appendChild(content);
-
-						} else if(Std.is(data, Array) && Reflect.hasField(untyped data[0], "url")) {
-							var a:Album = data;
-							var div = Reditn.embedAlbum(a);
-							exp.appendChild(div);
-							name = "image";
-						} else if(Reflect.hasField(data, "developers")) {
-							var r:Repo = data;
-							var div = js.Browser.document.createDivElement();
-							div.className = "usertext";
-							var cont = Browser.document.createDivElement();
-							var inner = Browser.document.createSpanElement();
-							inner.innerHTML = '${data.description}<br><a href="${data.url}"><b>Clone repo</b></a><br>';
-							if(r.album != null && r.album.length > 0)
-								inner.appendChild(Reditn.embedAlbum(r.album));
-							cont.appendChild(inner);
-							cont.className = "md";
-							div.appendChild(cont);
-							exp.appendChild(div);
-						} else
-							defaultButton(e);
-						var s = createButton(e, name, l.href);
-						var pn:Element = s.parentElement;
-						for(ep in pn.getElementsByClassName("expando"))
-							pn.removeChild(ep);
-						pn.appendChild(exp);
-					});
-				refresh();
-			};
-			l.onchange(null);
+			var e:Element = cast Reditn.getLinkContainer(l).getElementsByClassName("entry")[0];
+			var btn = Link.createButton(l.href, e);
+			if(btn == null)
+				defaultButton(e);
+			else {
+				for(ep in e.getElementsByClassName("expando"))
+					ep.parentNode.removeChild(ep);
+				e.appendChild(btn);
+				e.insertBefore(btn, e.getElementsByClassName("tagline")[0]);
+			}
 		}
 	}
 	static inline function defaultButton(cont:Element):Void {
@@ -164,6 +71,7 @@ class Expand {
 	}
 	static function adaptButton(exp:DivElement):Button {
 		var url = cast(exp.parentElement.getElementsByTagName("a")[0], js.html.AnchorElement).href;
+		exp.style.width = exp.style.height = "23px";
 		return {
 			toggled: function():Bool {
 				return exp.className.indexOf("expanded") != -1;
@@ -187,38 +95,6 @@ class Expand {
 			url: url,
 			element: exp
 		};
-	}
-	static function createButton(e:Element, extra:String, url:String):DivElement {
-		var d = js.Browser.document.createDivElement();
-		var cn = 'expando-button $extra ';
-		d.className = '$cn collapsed';
-		var isToggled = false;
-		var btn = {
-			toggled: function():Bool {
-				return isToggled;
-			},
-			toggle: function(v, ps) {
-				isToggled = v;
-				d.className = cn + (isToggled ? "expanded" : "collapsed");
-				var entry:Element = d.parentElement;
-				var expandos:Array<Element> = cast entry.getElementsByClassName("expando");
-				for(e in expandos)
-					Reditn.show(e, v);
-				if(ps)
-					Reditn.pushState();
-			},
-			url: url,
-			element: d
-		};
-		d.onclick = function(_) {
-			btn.toggle(!isToggled, true);
-		}
-		var tagline:Element = untyped e.getElementsByClassName("tagline")[0];
-		tagline.parentNode.insertBefore(d, tagline);
-		buttons.push(btn);
-		if(Expand.toggled)
-			btn.toggle(true, false);
-		return d;
 	}
 	public static function refresh() {
 		if(button != null) {
