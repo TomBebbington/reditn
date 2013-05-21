@@ -36,7 +36,7 @@ using StringTools;
 		Style.init();
 		
 		wrap(Expand.init, Settings.EXPAND);
-		wrap(CommentExpand.init, Settings.COMMENT_EXPAND);
+		wrap(TextExpand.init, Settings.TEXT_EXPAND);
 		wrap(Keyboard.init, Settings.KEYBOARD);
 		wrap(Preview.init, Settings.PREVIEW);
 		wrap(SubredditInfo.init, Settings.SUBINFO);

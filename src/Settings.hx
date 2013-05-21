@@ -17,14 +17,14 @@ class Settings {
 	public static inline var USER_TAGS = "user-tags";
 	public static inline var SUBREDDIT_TAGS = "sub-tags";
 	public static inline var FILTER_NSFW = "nsfw-filter";
-	public static inline var COMMENT_EXPAND = "cm-expand";
+	public static inline var TEXT_EXPAND = "text-expand";
 	static var SAVE_BASE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=/";
 	static var DESC = [
 		ADBLOCK => "Block advertisements and sponsors",
 		USERINFO => "Show information about a user upon hover",
 		SUBINFO => "Show information about a subreddit upon hover",
 		EXPAND => "Allow expansion of images, articles, etc",
-		COMMENT_EXPAND => "Allow expansion of images, articles etc found in comment bodies for easy viewing",
+		TEXT_EXPAND => "Allow expansion of images, articles etc found in comments and posts for easy viewing",
 		DUPLICATE_HIDER => "Hide duplicate links",
 		USER_TAGGER => "Tag users",
 		SUBREDDIT_TAGGER => "Tag subreddits",
@@ -38,7 +38,7 @@ class Settings {
 		SUBINFO => true,
 		EXPAND => true,
 		DUPLICATE_HIDER => true,
-		COMMENT_EXPAND => true,
+		TEXT_EXPAND => true,
 		USER_TAGGER => true,
 		SUBREDDIT_TAGGER => true,
 		PREVIEW => true,

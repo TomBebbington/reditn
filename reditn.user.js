@@ -37,28 +37,6 @@ Adblock.hideAll = function(a) {
 		Reditn.show(a[i],false);
 	}
 }
-var CommentExpand = function() { }
-$hxClasses["CommentExpand"] = CommentExpand;
-CommentExpand.__name__ = ["CommentExpand"];
-CommentExpand.init = function() {
-	var comments = js.Browser.document.body.getElementsByClassName("comment");
-	var _g = 0;
-	while(_g < comments.length) {
-		var c = comments[_g];
-		++_g;
-		var ac = c.getElementsByClassName("md")[0];
-		var links = ac.getElementsByTagName("a");
-		var _g1 = 0;
-		while(_g1 < links.length) {
-			var l = links[_g1];
-			++_g1;
-			var btn = Link.createButton(l.href,l.parentElement);
-			l.parentNode.insertBefore(btn,l);
-			l.parentNode.removeChild(l);
-			btn.parentNode.insertBefore(l,btn);
-		}
-	}
-}
 var DuplicateHider = function() { }
 $hxClasses["DuplicateHider"] = DuplicateHider;
 DuplicateHider.__name__ = ["DuplicateHider"];
@@ -542,7 +520,7 @@ Reditn.init = function() {
 	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
 	Style.init();
 	Reditn.wrap(Expand.init,"expand");
-	Reditn.wrap(CommentExpand.init,"cm-expand");
+	Reditn.wrap(TextExpand.init,"text-expand");
 	Reditn.wrap(Keyboard.init,"keys");
 	Reditn.wrap(Preview.init,"preview");
 	Reditn.wrap(SubredditInfo.init,"subinfo");
@@ -2137,6 +2115,58 @@ SubredditTagger.getTag = function(a) {
 	};
 	a.parentElement.insertBefore(tag,a.nextSibling);
 }
+var TextExpand = function() { }
+$hxClasses["TextExpand"] = TextExpand;
+TextExpand.__name__ = ["TextExpand"];
+TextExpand.init = function() {
+	var comments = js.Browser.document.body.getElementsByClassName("comment");
+	var posts = js.Browser.document.body.getElementsByClassName("usertext-body");
+	var all = ((function($this) {
+		var $r;
+		var _g = [];
+		{
+			var _g1 = 0;
+			while(_g1 < comments.length) {
+				var c = comments[_g1];
+				++_g1;
+				_g.push(c);
+			}
+		}
+		$r = _g;
+		return $r;
+	}(this))).concat((function($this) {
+		var $r;
+		var _g1 = [];
+		{
+			var _g2 = 0;
+			while(_g2 < posts.length) {
+				var p = posts[_g2];
+				++_g2;
+				_g1.push(p);
+			}
+		}
+		$r = _g1;
+		return $r;
+	}(this)));
+	var _g2 = 0;
+	while(_g2 < all.length) {
+		var c = all[_g2];
+		++_g2;
+		var ac = c.getElementsByClassName("md")[0];
+		var links = ac.getElementsByTagName("a");
+		var _g3 = 0;
+		while(_g3 < links.length) {
+			var l = links[_g3];
+			++_g3;
+			var btn = Link.createButton(l.href,l.parentElement);
+			if(btn != null) {
+				l.parentNode.insertBefore(btn,l);
+				l.parentNode.removeChild(l);
+				btn.parentNode.insertBefore(l,btn);
+			}
+		}
+	}
+}
 var ValueType = $hxClasses["ValueType"] = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
 ValueType.TNull = ["TNull",0];
 ValueType.TNull.toString = $estr;
@@ -3371,7 +3401,7 @@ Settings.DESC = (function($this) {
 	_g.set("userinfo","Show information about a user upon hover");
 	_g.set("subinfo","Show information about a subreddit upon hover");
 	_g.set("expand","Allow expansion of images, articles, etc");
-	_g.set("cm-expand","Allow expansion of images, articles etc found in comment bodies for easy viewing");
+	_g.set("text-expand","Allow expansion of images, articles etc found in comments and posts for easy viewing");
 	_g.set("dup-hider","Hide duplicate links");
 	_g.set("user-tag","Tag users");
 	_g.set("sub-tag","Tag subreddits");
@@ -3389,7 +3419,7 @@ Settings.DEFAULTS = (function($this) {
 	_g.set("subinfo",true);
 	_g.set("expand",true);
 	_g.set("dup-hider",true);
-	_g.set("cm-expand",true);
+	_g.set("text-expand",true);
 	_g.set("user-tag",true);
 	_g.set("sub-tag",true);
 	_g.set("preview",true);
