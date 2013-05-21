@@ -690,7 +690,6 @@ Reditn.getText = function(url,func,auth,type,postData) {
 	var h = new haxe.Http(url);
 	if(auth != null) h.setHeader("Authorization",auth);
 	if(type != null) h.setHeader("Content-Type",type);
-	h.setHeader("User-Agent","Reditn - the basic reddit plugin");
 	h.onData = func;
 	if(postData != null) h.setPostData(postData);
 	h.request(postData != null);
@@ -1737,13 +1736,12 @@ Link.filterHTML = function(h) {
 	if(StringTools.endsWith(h,"<br>")) h = HxOverrides.substr(h,0,h.length - 4);
 	return h;
 }
-Link.createButton = function(url,cont) {
+Link.createButton = function(url,cont,align) {
 	var site = Link.resolve(url);
 	var btn = null;
 	if(site != null) {
 		var b = js.Browser.document.createElement("div");
 		var cn = "expando-button ";
-		cont.insertBefore(b,cont.childNodes[0]);
 		var isToggled = Expand.toggled;
 		var cl = isToggled?"expanded":"collapsed";
 		b.className = "" + cn + " " + cl;
@@ -1865,6 +1863,7 @@ Link.createButton = function(url,cont) {
 				return $r;
 			}(this)):Reflect.hasField(d,"developers")?(function($this) {
 				var $r;
+				console.log(url);
 				var r = d;
 				var div = js.Browser.document.createElement("div");
 				div.className = "usertext";
@@ -1878,15 +1877,16 @@ Link.createButton = function(url,cont) {
 				$r = div;
 				return $r;
 			}(this)):null;
-			if(content == null) b.parentNode.removeChild(b); else {
+			if(content != null) {
 				var exp = js.Browser.document.createElement("div");
 				exp.className = "expando";
 				exp.appendChild(content);
-				cont.appendChild(exp);
 				cn += "" + name + " ";
 				b.className = "" + cn + " " + cl;
 				Expand.buttons.push(btn);
 				Reditn.show(exp,isToggled);
+				if(align == null) cont.appendChild(exp); else cont.insertBefore(exp,align.nextSibling);
+				cont.insertBefore(b,exp);
 			}
 		});
 	}
@@ -2119,7 +2119,7 @@ $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
 	var s = js.Browser.document.createElement("style");
-	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
+	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
 	js.Browser.document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
@@ -2202,51 +2202,18 @@ var TextExpand = function() { }
 $hxClasses["TextExpand"] = TextExpand;
 TextExpand.__name__ = ["TextExpand"];
 TextExpand.init = function() {
-	var comments = js.Browser.document.body.getElementsByClassName("comment");
 	var posts = js.Browser.document.body.getElementsByClassName("usertext-body");
-	var all = ((function($this) {
-		var $r;
-		var _g = [];
-		{
-			var _g1 = 0;
-			while(_g1 < comments.length) {
-				var c = comments[_g1];
-				++_g1;
-				_g.push(c);
-			}
-		}
-		$r = _g;
-		return $r;
-	}(this))).concat((function($this) {
-		var $r;
-		var _g1 = [];
-		{
-			var _g2 = 0;
-			while(_g2 < posts.length) {
-				var p = posts[_g2];
-				++_g2;
-				_g1.push(p);
-			}
-		}
-		$r = _g1;
-		return $r;
-	}(this)));
-	var _g2 = 0;
-	while(_g2 < all.length) {
-		var c = all[_g2];
-		++_g2;
-		var ac = c.getElementsByClassName("md")[0];
+	var _g = 0;
+	while(_g < posts.length) {
+		var c = posts[_g];
+		++_g;
+		var ac = (js.Boot.__cast(c , Element)).getElementsByClassName("md")[0];
 		var links = ac.getElementsByTagName("a");
-		var _g3 = 0;
-		while(_g3 < links.length) {
-			var l = links[_g3];
-			++_g3;
-			var btn = Link.createButton(l.href,l.parentElement);
-			if(btn != null) {
-				l.parentNode.insertBefore(btn,l);
-				l.parentNode.removeChild(l);
-				btn.parentNode.insertBefore(l,btn);
-			}
+		var _g1 = 0;
+		while(_g1 < links.length) {
+			var l = links[_g1];
+			++_g1;
+			var btn = Link.createButton(l.href,l.parentElement,l);
 		}
 	}
 }

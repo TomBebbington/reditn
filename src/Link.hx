@@ -577,13 +577,12 @@ class Link {
 			h = h.substr(0, h.length-4);
 		return h;
 	}
-	public static function createButton(url:String, cont:Element):DivElement {
+	public static function createButton(url:String, cont:Element, ?align:Element):DivElement {
 		var site = Link.resolve(url);
 		var btn = null;
 		if(site != null) {
 			var b = document.createDivElement();
 			var cn = "expando-button ";
-			cont.insertBefore(b, cont.childNodes[0]);
 			var isToggled = Expand.toggled;
 			var cl = isToggled ? "expanded" : "collapsed";
 			b.className = '$cn $cl';
@@ -674,6 +673,7 @@ class Link {
 					name = "image";
 					div;
 				} else if(Reflect.hasField(d, "developers")) {
+					trace(url);
 					var r:Repo = d;
 					var div = js.Browser.document.createDivElement();
 					div.className = "usertext";
@@ -687,17 +687,19 @@ class Link {
 					div.appendChild(cont);
 					div;
 				} else null;
-				if(content == null) {
-					b.parentNode.removeChild(b);
-				} else {
+				if(content != null) {
 					var exp = document.createDivElement();
 					exp.className = "expando";
 					exp.appendChild(content);
-					cont.appendChild(exp);
 					cn += '$name ';
 					b.className = '$cn $cl';
 					Expand.buttons.push(btn);
 					Reditn.show(exp, isToggled);
+					if(align == null)
+						cont.appendChild(exp);
+					else
+						cont.insertBefore(exp, align.nextSibling);
+					cont.insertBefore(b, exp);
 				}
 			});
 		}

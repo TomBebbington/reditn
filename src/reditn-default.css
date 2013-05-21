@@ -45,6 +45,7 @@ p .expando-button {
 	display: inline-block;
 	float: none;
 	margin: 0px;
+	padding: 0px;
 }
 dl.reditn-table  {
 	float: left;

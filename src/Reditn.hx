@@ -238,14 +238,14 @@ using StringTools;
 				h.setHeader("Authorization", auth);
 			if(type != null)
 				h.setHeader("Content-Type", type);
-			h.setHeader("User-Agent", USER_AGENT);
+			//h.setHeader("User-Agent", USER_AGENT);
 			h.onData = func;
 			if(postData != null)
 				h.setPostData(postData);
 			h.request(postData != null);
 		#else
 			var heads:Dynamic = {
-				"User-Agent": USER_AGENT
+				//"User-Agent": USER_AGENT
 			};
 			if(auth != null)
 				heads.Authorization = auth;
