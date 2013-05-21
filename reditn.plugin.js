@@ -116,16 +116,8 @@ Expand.init = function() {
 		++_g;
 		if(l.nodeName.toLowerCase() != "a") continue;
 		var e = l.parentElement.parentElement.parentElement.getElementsByClassName("entry")[0];
-		var btn = Link.createButton(l.href,e);
+		var btn = Link.createButton(l.href,e,e.getElementsByClassName("title")[0],e.getElementsByClassName("tagline")[0]);
 		if(btn == null) Expand.defaultButton(e); else {
-			var _g2 = 0, _g3 = e.getElementsByClassName("expando");
-			while(_g2 < _g3.length) {
-				var ep = _g3[_g2];
-				++_g2;
-				ep.parentNode.removeChild(ep);
-			}
-			e.appendChild(btn);
-			e.insertBefore(btn,e.getElementsByClassName("tagline")[0]);
 		}
 	}
 }
@@ -482,6 +474,7 @@ Reditn.main = function() {
 	}
 }
 Reditn.init = function() {
+	console.log("REDITN INIT");
 	if(js.Browser.window.location.href.indexOf("reddit.") == -1) return;
 	Reditn.fullPage = js.Browser.document.getElementsByClassName("tabmenu").length > 0;
 	Reditn.links = js.Browser.document.body.getElementsByClassName("title");
@@ -1736,10 +1729,16 @@ Link.filterHTML = function(h) {
 	if(StringTools.endsWith(h,"<br>")) h = HxOverrides.substr(h,0,h.length - 4);
 	return h;
 }
-Link.createButton = function(url,cont,align) {
+Link.createButton = function(url,cont,align,expalign) {
 	var site = Link.resolve(url);
 	var btn = null;
 	if(site != null) {
+		var _g = 0, _g1 = cont.getElementsByClassName("error");
+		while(_g < _g1.length) {
+			var e = _g1[_g];
+			++_g;
+			e.parentNode.removeChild(e);
+		}
 		var b = js.Browser.document.createElement("div");
 		var cn = "expando-button ";
 		var isToggled = Expand.toggled;
@@ -1801,6 +1800,7 @@ Link.createButton = function(url,cont,align) {
 			}(this)):Reflect.hasField(d,"price")?(function($this) {
 				var $r;
 				var i = d;
+				console.log(i);
 				var div = js.Browser.document.createElement("div");
 				div.className = "usertext";
 				var cont1 = js.Browser.document.createElement("div");
@@ -1841,7 +1841,6 @@ Link.createButton = function(url,cont,align) {
 				var a = d;
 				var div = js.Browser.document.createElement("div");
 				div.className = "usertext";
-				var head = null;
 				var art = js.Browser.document.createElement("div");
 				var inner = js.Browser.document.createElement("span");
 				inner.innerHTML = a.content;
@@ -1876,7 +1875,12 @@ Link.createButton = function(url,cont,align) {
 				div.appendChild(cont1);
 				$r = div;
 				return $r;
-			}(this)):null;
+			}(this)):(function($this) {
+				var $r;
+				console.log("Unknown value: " + Std.string(d));
+				$r = null;
+				return $r;
+			}(this));
 			if(content != null) {
 				var exp = js.Browser.document.createElement("div");
 				exp.className = "expando";
@@ -1885,8 +1889,8 @@ Link.createButton = function(url,cont,align) {
 				b.className = "" + cn + " " + cl;
 				Expand.buttons.push(btn);
 				Reditn.show(exp,isToggled);
-				if(align == null) cont.appendChild(exp); else cont.insertBefore(exp,align.nextSibling);
-				cont.insertBefore(b,exp);
+				if(align == null) cont.appendChild(exp); else cont.insertBefore(exp,align);
+				cont.insertBefore(b,expalign == null?exp:expalign);
 			}
 		});
 	}
@@ -1992,6 +1996,7 @@ Settings.init = function() {
 	}(this));
 	Settings.fixMissing();
 	var h = js.Browser.document.getElementById("header-bottom-right");
+	if(h == null) return;
 	var prefs = h.getElementsByTagName("ul")[0];
 	var d = js.Browser.document.createElement("a");
 	d.innerHTML = "reditn";
@@ -2119,7 +2124,7 @@ $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
 	var s = js.Browser.document.createElement("style");
-	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
+	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button {\n\tfloat: left;\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
 	js.Browser.document.head.appendChild(s);
 }
 var SubredditInfo = function() { }

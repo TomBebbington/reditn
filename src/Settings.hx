@@ -71,7 +71,9 @@ class Settings {
 			Settings.data = try haxe.Unserializer.run(dt) catch(e:Dynamic) data;
 		fixMissing();
 		var h = Browser.document.getElementById("header-bottom-right");
-		var prefs = untyped h.getElementsByTagName("ul")[0];
+		if(h == null)
+			return;
+		var prefs:Element = cast h.getElementsByTagName("ul")[0];
 		var d = Browser.document.createAnchorElement();
 		d.innerHTML = "reditn";
 		d.className = "pref-lang";

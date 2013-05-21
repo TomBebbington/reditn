@@ -38,6 +38,9 @@
 	background-position:-48px -23px;
 	background-repeat:no-repeat
 }
+.expando-button {
+	float: left;
+}
 .expando-button.collapsed {
 	padding: 0px;
 }

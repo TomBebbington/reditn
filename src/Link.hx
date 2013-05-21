@@ -577,10 +577,12 @@ class Link {
 			h = h.substr(0, h.length-4);
 		return h;
 	}
-	public static function createButton(url:String, cont:Element, ?align:Element):DivElement {
+	public static function createButton(url:String, cont:Element, ?align:Element, ?expalign:Element):DivElement {
 		var site = Link.resolve(url);
 		var btn = null;
 		if(site != null) {
+			for(e in cont.getElementsByClassName("error"))
+				e.parentNode.removeChild(e);
 			var b = document.createDivElement();
 			var cn = "expando-button ";
 			var isToggled = Expand.toggled;
@@ -625,8 +627,9 @@ class Link {
 					}
 					div.appendChild(content);
 					div;
-				} else if(Reflect.hasField(d, "price")) {
+				} else if(Reflect.hasField(d, "price")) { // shop item
 					var i:ShopItem = d;
+					trace(i);
 					var div = Browser.document.createDivElement();
 					div.className = "usertext";
 					var cont = Browser.document.createDivElement();
@@ -655,7 +658,6 @@ class Link {
 					var a:Article = d;
 					var div = Browser.document.createDivElement();
 					div.className = "usertext";
-					var head = null;
 					var art = Browser.document.createDivElement();
 					var inner = Browser.document.createSpanElement();
 					inner.innerHTML = a.content;
@@ -686,7 +688,10 @@ class Link {
 					cont.className = "md";
 					div.appendChild(cont);
 					div;
-				} else null;
+				} else {
+					trace('Unknown value: $d');
+					null;
+				}
 				if(content != null) {
 					var exp = document.createDivElement();
 					exp.className = "expando";
@@ -698,8 +703,8 @@ class Link {
 					if(align == null)
 						cont.appendChild(exp);
 					else
-						cont.insertBefore(exp, align.nextSibling);
-					cont.insertBefore(b, exp);
+						cont.insertBefore(exp, align);
+					cont.insertBefore(b, expalign == null ? exp : expalign);
 				}
 			});
 		}

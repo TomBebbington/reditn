@@ -6,9 +6,9 @@ build:
 	haxe build.hxml
 plugin: chrome
 
-chrome: minify-plugin
+chrome: build
 	cp icon128.png plugin/chrome/icon.png
-	cp reditn.min.plugin.js plugin/chrome/reditn.js
+	cp reditn.plugin.js plugin/chrome/reditn.js
 chrome-full: chrome
 	chromium-browser --pack-extension=plugin/chrome --pack-extension-key=plugin/chrome.pem
 minify: build

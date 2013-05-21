@@ -24,6 +24,7 @@ using StringTools;
 		Browser.window.scrollBy(x - Browser.window.scrollX, y - Browser.window.scrollY);
 	}
 	static function init() {
+		trace("REDITN INIT");
 		if(Browser.window.location.href.indexOf("reddit.") == -1)
 			return;
 		fullPage = Browser.document.getElementsByClassName("tabmenu").length > 0;
