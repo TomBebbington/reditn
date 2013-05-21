@@ -38,7 +38,7 @@ class Expand {
 			if(l.nodeName.toLowerCase()!="a")
 				continue;
 			var e:Element = cast Reditn.getLinkContainer(l).getElementsByClassName("entry")[0];
-			var btn = Link.createButton(l.href, e, cast e.getElementsByClassName("title")[0], cast e.getElementsByClassName("tagline")[0]);
+			var btn = Link.createButton(l.href, e, cast e.getElementsByClassName("tagline")[0], cast e.getElementsByClassName("buttons")[0].nextSibling);
 			if(btn == null)
 				defaultButton(e);
 			else {

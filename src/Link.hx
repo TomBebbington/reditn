@@ -700,11 +700,14 @@ class Link {
 					b.className = '$cn $cl';
 					Expand.buttons.push(btn);
 					Reditn.show(exp, isToggled);
-					if(align == null)
-						cont.appendChild(exp);
-					else
+					if(expalign == null)
 						cont.insertBefore(exp, align);
-					cont.insertBefore(b, expalign == null ? exp : expalign);
+					else
+						cont.insertBefore(exp, expalign);
+					if(align == null)
+						cont.appendChild(b);
+					else
+						cont.insertBefore(b, align);
 				}
 			});
 		}

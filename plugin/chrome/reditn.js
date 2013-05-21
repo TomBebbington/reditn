@@ -116,7 +116,7 @@ Expand.init = function() {
 		++_g;
 		if(l.nodeName.toLowerCase() != "a") continue;
 		var e = l.parentElement.parentElement.parentElement.getElementsByClassName("entry")[0];
-		var btn = Link.createButton(l.href,e,e.getElementsByClassName("title")[0],e.getElementsByClassName("tagline")[0]);
+		var btn = Link.createButton(l.href,e,e.getElementsByClassName("tagline")[0],e.getElementsByClassName("buttons")[0].nextSibling);
 		if(btn == null) Expand.defaultButton(e); else {
 		}
 	}
@@ -1889,8 +1889,8 @@ Link.createButton = function(url,cont,align,expalign) {
 				b.className = "" + cn + " " + cl;
 				Expand.buttons.push(btn);
 				Reditn.show(exp,isToggled);
-				if(align == null) cont.appendChild(exp); else cont.insertBefore(exp,align);
-				cont.insertBefore(b,expalign == null?exp:expalign);
+				if(expalign == null) cont.insertBefore(exp,align); else cont.insertBefore(exp,expalign);
+				if(align == null) cont.appendChild(b); else cont.insertBefore(b,align);
 			}
 		});
 	}
