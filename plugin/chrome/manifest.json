@@ -1,6 +1,6 @@
 {
 	"name": "Reditn",
-	"version": "1.6.2",
+	"version": "1.6.3",
 	"manifest_version": 2,
 	"description": "Reddit plugin that adds much-needed functionality such as image toggle buttons, advert blocking and more!",
 	"icons": {

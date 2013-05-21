@@ -1,14 +1,14 @@
 SERVICE_URL=http://closure-compiler.appspot.com/compile
-all: build plugin
+all: build chrome
 clean:
 	rm reditn.*.js
 build:
 	haxe build.hxml
 plugin: chrome
 
-chrome:
+chrome: minify-plugin
 	cp icon128.png plugin/chrome/icon.png
-	cp reditn.plugin.js plugin/chrome/reditn.js
+	cp reditn.min.plugin.js plugin/chrome/reditn.js
 chrome-full: chrome
 	chromium-browser --pack-extension=plugin/chrome --pack-extension-key=plugin/chrome.pem
 minify: build
