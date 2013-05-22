@@ -1,3 +1,4 @@
+
 import data.*;
 import parser.*;
 import js.*;
@@ -31,7 +32,7 @@ class Link {
 			}
 		},
 		{
-			regex: ~/i?\.?imgur.com\/(a|gallery)\/([^\/]*)/,
+			regex: ~/i?\.?imgur.com\/(a|gallery)\/([^\/]*)(\/.*)?/,
 			method: function(e, cb) {
 				var id = e.matched(2);
 				var albumType = switch(e.matched(1).toLowerCase()) {
@@ -71,7 +72,7 @@ class Link {
 			}
 		},
 		{
-			regex: ~/(qkme\.me|quickmeme\.com\/meme|m\.quickmeme.com\/meme)\/([^\/]*)/,
+			regex: ~/(qkme\.me\/3piqes\?id=|qkme\.me\/|quickmeme\.com\/meme\/|m\.quickmeme.com\/meme\/)([^\/]*)/,
 			method: function(e, cb) {
 				cb([{
 					url: 'http://i.qkme.me/${e.matched(2)}.jpg',
@@ -581,10 +582,10 @@ class Link {
 		var site = Link.resolve(url);
 		var btn = null;
 		if(site != null) {
-			for(e in cont.getElementsByClassName("error"))
+			for(e in cont.getElementsByClassName("expando"))
 				e.parentNode.removeChild(e);
 			var b = document.createDivElement();
-			var cn = "expando-button ";
+			var cn = "expando-button reditn-expando-button ";
 			var isToggled = Expand.toggled;
 			var cl = isToggled ? "expanded" : "collapsed";
 			b.className = '$cn $cl';
@@ -700,8 +701,8 @@ class Link {
 					b.className = '$cn $cl';
 					Expand.buttons.push(btn);
 					Reditn.show(exp, isToggled);
-					if(expalign == null)
-						cont.insertBefore(exp, align);
+					if(expalign == null) 
+						cont.appendChild(exp);
 					else
 						cont.insertBefore(exp, expalign);
 					if(align == null)

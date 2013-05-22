@@ -9,7 +9,7 @@ class Expand {
 	public static var maxHeight(get, null):Int;
 	public static var maxArea(get, null):Int;
 	public static var buttons:Array<Button> = [];
-	public static var toggled(default, null):Bool;
+	public static var toggled(default, null):Bool = false;
 	public static var button(default, null):AnchorElement = null;
 	static inline function get_maxWidth():Int {
 		return Std.int(Browser.window.innerWidth*0.7);
@@ -26,7 +26,6 @@ class Expand {
 		var li:LIElement = Browser.document.createLIElement();
 		button = Browser.document.createAnchorElement();
 		button.href = "javascript:void(0);";
-		refresh();
 		button.onclick = function(e) {
 			toggle(!toggled);
 			Reditn.pushState(toggled ? "#showall":"#");
@@ -34,17 +33,7 @@ class Expand {
 		li.appendChild(button);
 		if(menu != null)
 			menu.appendChild(li);
-		for(l in Reditn.links) {
-			if(l.nodeName.toLowerCase()!="a")
-				continue;
-			var e:Element = cast Reditn.getLinkContainer(l).getElementsByClassName("entry")[0];
-			var btn = Link.createButton(l.href, e, cast e.getElementsByClassName("tagline")[0], cast e.getElementsByClassName("buttons")[0].nextSibling);
-			if(btn == null)
-				defaultButton(e);
-			else {
-
-			}
-		}
+		refresh();
 	}
 	static inline function defaultButton(cont:Element):Void {
 		var one = false;
@@ -93,7 +82,7 @@ class Expand {
 			element: exp
 		};
 	}
-	public static function refresh() {
+	public static function refresh(check:Bool = false, ?e:Element) {
 		if(button != null) {
 			button.innerHTML = '${toggled?"hide":"show"} all';
 			var nps:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
@@ -109,18 +98,31 @@ class Expand {
 				}
 			}
 		}
+		for(l in (e == null ? Reditn.links : cast e.getElementsByClassName("title"))) {
+			if(l.nodeName.toLowerCase()!="a")
+				continue;
+			var q = false;
+			if(check) {
+				for(b in buttons)
+					if(b.url == l.href) {
+						q = true;
+						break;
+					}
+				if(q) continue;
+			}
+			var e:Element = cast Reditn.getLinkContainer(l).getElementsByClassName("entry")[0];
+			if(e.getElementsByClassName("reditn-expando-button").length == 0) {
+				var btn = Link.createButton(l.href, e, cast e.getElementsByClassName("tagline")[0]);
+				if(btn == null)
+					defaultButton(e);
+			}
+		}
 	}
 	public static function toggle(t:Bool) {
 		toggled = t;
 		for(btn in buttons)
 			btn.toggle(t, false);
 		refresh();
-	}
-	public static function preload(url) {
-		var link:LinkElement = Browser.document.createLinkElement();
-		link.href = url;
-		link.rel = "preload";
-		Browser.document.head.appendChild(link);
 	}
 	public static function loadImage(url:String):ImageElement {
 		var img = Browser.document.createImageElement();

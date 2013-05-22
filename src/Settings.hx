@@ -18,6 +18,7 @@ class Settings {
 	public static inline var SUBREDDIT_TAGS = "sub-tags";
 	public static inline var FILTER_NSFW = "nsfw-filter";
 	public static inline var TEXT_EXPAND = "text-expand";
+	public static inline var AUTO_SCROLL = "autoscroll";
 	static var SAVE_BASE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=/";
 	static var DESC = [
 		ADBLOCK => "Block advertisements and sponsors",
@@ -28,6 +29,7 @@ class Settings {
 		DUPLICATE_HIDER => "Hide duplicate links",
 		USER_TAGGER => "Tag users",
 		SUBREDDIT_TAGGER => "Tag subreddits",
+		AUTO_SCROLL => "Automatically load pages",
 		PREVIEW => "Preview comments and posts",
 		KEYBOARD => "Keyboard shortcuts",
 		FILTER_NSFW => "Hide NSFW content"
@@ -41,6 +43,7 @@ class Settings {
 		TEXT_EXPAND => true,
 		USER_TAGGER => true,
 		SUBREDDIT_TAGGER => true,
+		AUTO_SCROLL => true,
 		PREVIEW => true,
 		KEYBOARD => true,
 		FILTER_NSFW => false,

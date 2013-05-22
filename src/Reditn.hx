@@ -23,19 +23,29 @@ using StringTools;
 	public static inline function scroll(x:Int, y:Int):Void {
 		Browser.window.scrollBy(x - Browser.window.scrollX, y - Browser.window.scrollY);
 	}
-	static function init() {
-		trace("REDITN INIT");
-		if(Browser.window.location.href.indexOf("reddit.") == -1)
-			return;
-		fullPage = Browser.document.getElementsByClassName("tabmenu").length > 0;
+	public static function getThingId(e:Node):String {
+		var cn:String = untyped e.className;
+		for(v in cn.split(" "))
+			if(v.startsWith("id-"))
+				return v.substr(3);
+		return null;
+	}
+	public static function refreshLinks() {
 		links = cast Browser.document.body.getElementsByClassName("title");
 		links = [for(l in links) if(l.nodeName.toLowerCase() == "a" && untyped l.parentElement.className != "parent") l ];
+	}
+	static function init() {
+		if(Browser.window.location.href.indexOf("reddit.") == -1)
+			return;
+		links = [];
+		fullPage = Browser.document.getElementsByClassName("tabmenu").length > 0;
 		wrap(Settings.init);
 		wrap(Adblock.init, Settings.ADBLOCK);
 		wrap(DuplicateHider.init, Settings.DUPLICATE_HIDER);
 		wrap(NSFWFilter.init, Settings.FILTER_NSFW);
+		refreshLinks();
 		Style.init();
-		
+		wrap(AutoScroll.init, Settings.AUTO_SCROLL);
 		wrap(Expand.init, Settings.EXPAND);
 		wrap(TextExpand.init, Settings.TEXT_EXPAND);
 		wrap(Keyboard.init, Settings.KEYBOARD);

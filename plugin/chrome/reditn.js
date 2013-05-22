@@ -22,19 +22,6 @@ Adblock.hideAll = function(a) {
 		Reditn.show(a[i],false);
 	}
 }
-var DuplicateHider = function() { }
-$hxClasses["DuplicateHider"] = DuplicateHider;
-DuplicateHider.__name__ = ["DuplicateHider"];
-DuplicateHider.init = function() {
-	var seen = [];
-	var _g = 0, _g1 = Reditn.links;
-	while(_g < _g1.length) {
-		var link = _g1[_g];
-		++_g;
-		if(link.nodeName.toLowerCase() != "a") continue;
-		if(Lambda.has(seen,link.href)) Reditn.show(link.parentElement.parentElement.parentElement,false); else seen.push(link.href);
-	}
-}
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -94,6 +81,77 @@ EReg.prototype = {
 	}
 	,__class__: EReg
 }
+var AutoScroll = function() { }
+$hxClasses["AutoScroll"] = AutoScroll;
+AutoScroll.__name__ = ["AutoScroll"];
+AutoScroll.getLastId = function() {
+	var t = js.Browser.document.body.getElementsByClassName("thing");
+	return Reditn.getThingId(t[t.length - 1]);
+}
+AutoScroll.init = function() {
+	if(AutoScroll.regex.match(js.Browser.window.location.href)) AutoScroll.count = Std.parseInt(AutoScroll.regex.matched(1));
+	AutoScroll.nextBtn = js.Browser.document.body.getElementsByClassName("nextprev")[0];
+	AutoScroll.refresh();
+	AutoScroll.last = js.Browser.document.body.getElementsByClassName("sitetable")[0];
+	js.Browser.window.addEventListener("scroll",function(e) {
+		var bottom = js.Browser.window.scrollY + js.Browser.window.innerHeight, h = js.Browser.document.body.offsetHeight;
+		if(bottom > h * 0.8 && AutoScroll.canLoad) AutoScroll.loadNext();
+	});
+}
+AutoScroll.loadNext = function() {
+	if(AutoScroll.nextBtn == null) return;
+	AutoScroll.canLoad = false;
+	AutoScroll.count += 50;
+	Reditn.getText(AutoScroll.next,function(data) {
+		var temp = js.Browser.document.createElement("div");
+		temp.innerHTML = data;
+		temp = temp.getElementsByClassName("sitetable")[0];
+		AutoScroll.last.parentNode.appendChild(temp);
+		AutoScroll.last = temp;
+		AutoScroll.refresh();
+		AutoScroll.canLoad = true;
+		AutoScroll.nextBtn.parentNode.removeChild(AutoScroll.nextBtn);
+		temp.parentNode.appendChild(AutoScroll.nextBtn);
+		Reditn.refreshLinks();
+		if(Settings.data.get("expand")) Expand.refresh(null,temp);
+		js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,AutoScroll.next);
+	},null,null,null);
+}
+AutoScroll.refresh = function() {
+	if(AutoScroll.nextBtn != null) {
+		var root = js.Browser.window.location.href;
+		if(root.indexOf("?") != -1) root = HxOverrides.substr(root,0,root.indexOf("?"));
+		if(StringTools.endsWith(root,"/")) root = HxOverrides.substr(root,0,root.length - 1);
+		var hash = root.indexOf("#") != -1?(function($this) {
+			var $r;
+			root = HxOverrides.substr(root,0,root.indexOf("#"));
+			$r = js.Browser.window.location.hash;
+			return $r;
+		}(this)):"";
+		var after = AutoScroll.getLastId();
+		AutoScroll.next = "" + root + "/?count=" + AutoScroll.count + "&after=" + after + hash;
+		var _g = 0, _g1 = AutoScroll.nextBtn.childNodes;
+		while(_g < _g1.length) {
+			var i = _g1[_g];
+			++_g;
+			var i1 = i;
+			if(i1.nodeName.toLowerCase() == "a" && i1.rel.indexOf("next") != -1) i1.href = AutoScroll.next;
+		}
+	}
+}
+var DuplicateHider = function() { }
+$hxClasses["DuplicateHider"] = DuplicateHider;
+DuplicateHider.__name__ = ["DuplicateHider"];
+DuplicateHider.init = function() {
+	var seen = [];
+	var _g = 0, _g1 = Reditn.links;
+	while(_g < _g1.length) {
+		var link = _g1[_g];
+		++_g;
+		if(link.nodeName.toLowerCase() != "a") continue;
+		if(Lambda.has(seen,link.href)) Reditn.show(link.parentElement.parentElement.parentElement,false); else seen.push(link.href);
+	}
+}
 var Expand = function() { }
 $hxClasses["Expand"] = Expand;
 Expand.__name__ = ["Expand"];
@@ -103,23 +161,13 @@ Expand.init = function() {
 	var li = js.Browser.document.createElement("li");
 	Expand.button = js.Browser.document.createElement("a");
 	Expand.button.href = "javascript:void(0);";
-	Expand.refresh();
 	Expand.button.onclick = function(e) {
 		Expand.toggle(!Expand.toggled);
 		js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":"#");
 	};
 	li.appendChild(Expand.button);
 	if(menu != null) menu.appendChild(li);
-	var _g = 0, _g1 = Reditn.links;
-	while(_g < _g1.length) {
-		var l = _g1[_g];
-		++_g;
-		if(l.nodeName.toLowerCase() != "a") continue;
-		var e = l.parentElement.parentElement.parentElement.getElementsByClassName("entry")[0];
-		var btn = Link.createButton(l.href,e,e.getElementsByClassName("tagline")[0],e.getElementsByClassName("buttons")[0].nextSibling);
-		if(btn == null) Expand.defaultButton(e); else {
-		}
-	}
+	Expand.refresh();
 }
 Expand.defaultButton = function(cont) {
 	var one = false;
@@ -158,7 +206,8 @@ Expand.adaptButton = function(exp) {
 		if(ps) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
 	}, url : url, element : exp};
 }
-Expand.refresh = function() {
+Expand.refresh = function(check,e) {
+	if(check == null) check = false;
 	if(Expand.button != null) {
 		Expand.button.innerHTML = "" + (Expand.toggled?"hide":"show") + " all";
 		var nps = js.Browser.document.body.getElementsByClassName("nextprev");
@@ -187,6 +236,30 @@ Expand.refresh = function() {
 				if(i.nodeName.toLowerCase() != "a") continue;
 				if(Expand.toggled && i.href.indexOf("#") == -1) i.href += "#showall"; else if(!Expand.toggled && i.href.indexOf("#") != -1) i.href = HxOverrides.substr(i.href,0,i.href.indexOf("#"));
 			}
+		}
+	}
+	var _g = 0, _g1 = e == null?Reditn.links:e.getElementsByClassName("title");
+	while(_g < _g1.length) {
+		var l = _g1[_g];
+		++_g;
+		if(l.nodeName.toLowerCase() != "a") continue;
+		var q = false;
+		if(check) {
+			var _g2 = 0, _g3 = Expand.buttons;
+			while(_g2 < _g3.length) {
+				var b = _g3[_g2];
+				++_g2;
+				if(b.url == l.href) {
+					q = true;
+					break;
+				}
+			}
+			if(q) continue;
+		}
+		var e1 = l.parentElement.parentElement.parentElement.getElementsByClassName("entry")[0];
+		if(e1.getElementsByClassName("reditn-expando-button").length == 0) {
+			var btn = Link.createButton(l.href,e1,e1.getElementsByClassName("tagline")[0]);
+			if(btn == null) Expand.defaultButton(e1);
 		}
 	}
 }
@@ -473,10 +546,17 @@ Reditn.main = function() {
 		};
 	}
 }
-Reditn.init = function() {
-	console.log("REDITN INIT");
-	if(js.Browser.window.location.href.indexOf("reddit.") == -1) return;
-	Reditn.fullPage = js.Browser.document.getElementsByClassName("tabmenu").length > 0;
+Reditn.getThingId = function(e) {
+	var cn = e.className;
+	var _g = 0, _g1 = cn.split(" ");
+	while(_g < _g1.length) {
+		var v = _g1[_g];
+		++_g;
+		if(StringTools.startsWith(v,"id-")) return HxOverrides.substr(v,3,null);
+	}
+	return null;
+}
+Reditn.refreshLinks = function() {
 	Reditn.links = js.Browser.document.body.getElementsByClassName("title");
 	Reditn.links = (function($this) {
 		var $r;
@@ -492,11 +572,18 @@ Reditn.init = function() {
 		$r = _g;
 		return $r;
 	}(this));
+}
+Reditn.init = function() {
+	if(js.Browser.window.location.href.indexOf("reddit.") == -1) return;
+	Reditn.links = [];
+	Reditn.fullPage = js.Browser.document.getElementsByClassName("tabmenu").length > 0;
 	Reditn.wrap(Settings.init);
 	Reditn.wrap(Adblock.init,"adblock");
 	Reditn.wrap(DuplicateHider.init,"dup-hider");
 	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
+	Reditn.refreshLinks();
 	Style.init();
+	Reditn.wrap(AutoScroll.init,"autoscroll");
 	Reditn.wrap(Expand.init,"expand");
 	Reditn.wrap(TextExpand.init,"text-expand");
 	Reditn.wrap(Keyboard.init,"keys");
@@ -511,10 +598,10 @@ Reditn.init = function() {
 		if(s == null) return;
 		var state = haxe.Unserializer.run(s);
 		if(state.allExpanded != Expand.toggled) Expand.toggle(state.allExpanded);
-		var _g1 = 0, _g2 = Expand.buttons;
-		while(_g1 < _g2.length) {
-			var btn = _g2[_g1];
-			++_g1;
+		var _g = 0, _g1 = Expand.buttons;
+		while(_g < _g1.length) {
+			var btn = _g1[_g];
+			++_g;
 			var ex = state.expanded;
 			if(ex.exists(btn.url)) btn.toggle(ex.get(btn.url),false);
 		}
@@ -1733,14 +1820,14 @@ Link.createButton = function(url,cont,align,expalign) {
 	var site = Link.resolve(url);
 	var btn = null;
 	if(site != null) {
-		var _g = 0, _g1 = cont.getElementsByClassName("error");
+		var _g = 0, _g1 = cont.getElementsByClassName("expando");
 		while(_g < _g1.length) {
 			var e = _g1[_g];
 			++_g;
 			e.parentNode.removeChild(e);
 		}
 		var b = js.Browser.document.createElement("div");
-		var cn = "expando-button ";
+		var cn = "expando-button reditn-expando-button ";
 		var isToggled = Expand.toggled;
 		var cl = isToggled?"expanded":"collapsed";
 		b.className = "" + cn + " " + cl;
@@ -1889,7 +1976,7 @@ Link.createButton = function(url,cont,align,expalign) {
 				b.className = "" + cn + " " + cl;
 				Expand.buttons.push(btn);
 				Reditn.show(exp,isToggled);
-				if(expalign == null) cont.insertBefore(exp,align); else cont.insertBefore(exp,expalign);
+				if(expalign == null) cont.appendChild(exp); else cont.insertBefore(exp,expalign);
 				if(align == null) cont.appendChild(b); else cont.insertBefore(b,align);
 			}
 		});
@@ -2218,7 +2305,7 @@ TextExpand.init = function() {
 		while(_g1 < links.length) {
 			var l = links[_g1];
 			++_g1;
-			var btn = Link.createButton(l.href,l.parentElement,l);
+			var btn = Link.createButton(l.href,l.parentElement,l,l.nextSibling);
 		}
 	}
 }
@@ -3037,14 +3124,18 @@ Xml.Comment = "comment";
 Xml.DocType = "doctype";
 Xml.ProcessingInstruction = "processingInstruction";
 Xml.Document = "document";
+AutoScroll.regex = new EReg("\\?count=([0-9]*)&after=([a-z0-9_]*)","");
+AutoScroll.count = 50;
+AutoScroll.canLoad = true;
 Expand.buttons = [];
+Expand.toggled = false;
 Expand.queue = 0;
 Keyboard.keys = [];
 Keyboard.konami = [38,38,40,40,37,39,37,39,66,65];
 Konami.words = ["wubba","mcwubber","dubba","dadubber"];
 Konami.filter = new EReg("[a-zA-Z]*","");
 Reditn.fullPage = true;
-parser.MediaWiki.regex = [{ from : new EReg("\\[\\[Category:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("\\[\\[([^\\]\n]*)\\|([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("<gallery>(.|\n|\n\r)*</gallery>",""), to : ""},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("(=*) ?(References|Gallery) ?\\1.*\\1?",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("\\{\\{convert\\|([0-9]*)\\|([^\\|]*)([^\\}]*)\\}\\}",""), to : "$1 $2"},{ from : new EReg("\\{\\{([^\\}]*)\\}\\}",""), to : ""},{ from : new EReg("\\{\\|(.|\n|\n\r)*\\|\\}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n\r?\n\r?",""), to : "<br>"},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""},{ from : new EReg("\\[\\]",""), to : ""}];
+parser.MediaWiki.regex = [{ from : new EReg("\\[\\[Category:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("\\[\\[([^\\]\n]*)\\|([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$2</a>"},{ from : new EReg("\\[\\[([^\\]\\|\n]*)\\]\\]",""), to : "<a href=\"$BASE/wiki/$1\">$1</a>"},{ from : new EReg("<gallery>(.|\n|\n\r)*</gallery>",""), to : ""},{ from : new EReg("\\[\\[File:([^\\]]*)\\]\\]",""), to : ""},{ from : new EReg("(=*) ?(References|Gallery) ?\\1.*\\1?",""), to : ""},{ from : new EReg("{{spaced ndash}}",""), to : " - "},{ from : new EReg("{{HMS\\|([^\\|]*)\\|[0-9]*\\|[0-9]*}}",""), to : "$1"},{ from : new EReg("\\{\\{convert\\|([0-9]*)\\|([^\\|]*)([^\\}]*)\\}\\}",""), to : "$1 $2"},{ from : new EReg("\\{\\{([^\\}]*)\\}\\}",""), to : ""},{ from : new EReg("\\{\\|(.|\n|\n\r)*\\|\\}",""), to : ""},{ from : new EReg("\\[([^ \\[\\]]*) ([^\\[\\]]*)\\]",""), to : ""},{ from : new EReg("'''([^']*)'''",""), to : "<b>$1</b>"},{ from : new EReg("''([^']*)''",""), to : "<em>$1</em>"},{ from : new EReg("======([^=]*)======",""), to : "<h6>$1</h6>"},{ from : new EReg("=====([^=]*)=====",""), to : "<h5>$1</h5>"},{ from : new EReg("====([^=]*)====",""), to : "<h4>$1</h4>"},{ from : new EReg("===([^=]*)===",""), to : "<h3>$1</h3>"},{ from : new EReg("==([^=]*)==",""), to : "<h2>$1</h2>"},{ from : new EReg("\n\\* ?([^\n]*)",""), to : "<li>$1</li>"},{ from : new EReg("<ref>[^<>]*</ref>",""), to : ""},{ from : new EReg("\n\r?\n\r?",""), to : "<br>"},{ from : new EReg("\n",""), to : ""},{ from : new EReg("<br><br>",""), to : "<br>"},{ from : new EReg("<!--Interwiki links-->.*",""), to : ""},{ from : new EReg("\\[\\]",""), to : ""}];
 parser.MediaWiki.sections = new EReg("'=(=*)([^=]*)=\\\\1\n\r?(.|\n|\n\r)*(\\\\1)?'","");
 parser.MediaWiki.IMAGES = new EReg("(File:|img=|Image:)([^\\.\\|\\]\\}\\{\\[<>=]*)\\.(gif|jpg|jpeg|bmp|png|webp|svg|raw)(\\|([^\\)]*))?","");
 js.Browser.window = typeof window != "undefined" ? window : null;
@@ -3067,7 +3158,7 @@ haxe.xml.Parser.escapes = (function($this) {
 Link.HTML_IMG = new EReg("<img .*?src=\"([^\"]*)\"/?>","");
 Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null, author : null}]);
-}},{ regex : new EReg("i?\\.?imgur.com/(a|gallery)/([^/]*)",""), method : function(e,cb1) {
+}},{ regex : new EReg("i?\\.?imgur.com/(a|gallery)/([^/]*)(/.*)?",""), method : function(e,cb1) {
 	var id = e.matched(2);
 	var albumType = (function($this) {
 		var $r;
@@ -3117,7 +3208,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		$r = _g;
 		return $r;
 	}(this)));
-}},{ regex : new EReg("(qkme\\.me|quickmeme\\.com/meme|m\\.quickmeme.com/meme)/([^/]*)",""), method : function(e,cb) {
+}},{ regex : new EReg("(qkme\\.me/3piqes\\?id=|qkme\\.me/|quickmeme\\.com/meme/|m\\.quickmeme.com/meme/)([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", caption : null, author : null}]);
 }},{ regex : new EReg("memecrunch.com/meme/([^/]*)/([^/]*)",""), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0) + "/image.png", caption : null, author : null}]);
@@ -3460,6 +3551,7 @@ Settings.DESC = (function($this) {
 	_g.set("dup-hider","Hide duplicate links");
 	_g.set("user-tag","Tag users");
 	_g.set("sub-tag","Tag subreddits");
+	_g.set("autoscroll","Automatically load pages");
 	_g.set("preview","Preview comments and posts");
 	_g.set("keys","Keyboard shortcuts");
 	_g.set("nsfw-filter","Hide NSFW content");
@@ -3477,6 +3569,7 @@ Settings.DEFAULTS = (function($this) {
 	_g.set("text-expand",true);
 	_g.set("user-tag",true);
 	_g.set("sub-tag",true);
+	_g.set("autoscroll",true);
 	_g.set("preview",true);
 	_g.set("keys",true);
 	_g.set("nsfw-filter",false);
