@@ -35,8 +35,9 @@ using StringTools;
 		links = [for(l in links) if(l.nodeName.toLowerCase() == "a" && untyped l.parentElement.className != "parent") l ];
 	}
 	static function init() {
-		if(Browser.window.location.href.indexOf("reddit.") == -1)
+		if(Browser.window.location.href.indexOf("reddit.") == -1 || untyped window.reditn_loaded)
 			return;
+		untyped window.reditn_loaded = true;
 		links = [];
 		fullPage = Browser.document.getElementsByClassName("tabmenu").length > 0;
 		wrap(Settings.init);

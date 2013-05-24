@@ -1,5 +1,5 @@
 SERVICE_URL=http://closure-compiler.appspot.com/compile
-all: build chrome
+all: build chrome opera
 clean:
 	rm reditn.*.js
 build:
@@ -9,6 +9,11 @@ plugin: chrome
 chrome: build
 	cp icon128.png plugin/chrome/icon.png
 	cp reditn.plugin.js plugin/chrome/reditn.js
+	zip -r plugin/chrome.zip plugin/chrome
+opera: build
+	cp icon128.png plugin/opera/icons/icon.png
+	cp reditn.user.js plugin/opera/includes/reditn.user.js
+	cd plugin/opera && zip -r ../opera.oex .
 chrome-full: chrome
 	chromium-browser --pack-extension=plugin/chrome --pack-extension-key=plugin/chrome.pem
 minify: build

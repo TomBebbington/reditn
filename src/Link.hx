@@ -517,6 +517,43 @@ class Link {
 						r.method(r.regex, cb);
 				});
 			}
+		},
+		{
+			regex: ~/(youtube\.com\/watch|youtu\.be\/).*/,
+			method: function(e, cb) {
+				var url = "http://www." + e.matched(0);
+				Reditn.getJSON('http://www.youtube.com/oembed?url=${url.urlEncode()}', function(data:data.OEmbed) {
+					cb({
+						title: data.title,
+						html: data.html,
+						author: data.author_name
+					});
+				});
+			}
+		},
+		{
+			regex: ~/vine\.co\/v\/(.*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				cb({
+					title: null,
+					author: null,
+					html: '<iframe class="vine-embed" src="https://vine.co/v/${id}/embed/simple" width="610" height="348" frameborder="0"></iframe><script async src="//platform.vine.co/static/scripts/embed.js" charset="utf-8"></script>'
+				});
+			}
+		},
+		{
+			regex: ~/vimeo\.com\/([0-9]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				Reditn.getJSON('http://vimeo.com/api/oembed.json?url=http%3A//vimeo.com/${id}&maxwidth=500',function(data:Dynamic) {
+					cb({
+						title: null,
+						author: null,
+						html: data.html
+					});
+				});
+			}
 		}
 	];
 	public static function resolve(url:String) {
@@ -541,7 +578,7 @@ class Link {
 			url = url.substr(2);
 		if(url.indexOf("&") != -1)
 			url = url.substr(0, url.indexOf("&"));
-		if(url.indexOf("?") != -1 && !url.startsWith("facebook.com/"))
+		if(url.indexOf("?") != -1 && !url.startsWith("facebook.com/") && url.indexOf("youtube") == -1)
 			url = url.substr(0, url.indexOf("?"));
 		if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1)
 			url = url.substr(0, url.indexOf("#"));
@@ -578,7 +615,7 @@ class Link {
 			h = h.substr(0, h.length-4);
 		return h;
 	}
-	public static function createButton(url:String, cont:Element, ?align:Element, ?expalign:Element):DivElement {
+	public static function createButton(url:String, cont:Element, ?expalign:Element, ?btnalign:Element):DivElement {
 		var site = Link.resolve(url);
 		var btn = null;
 		if(site != null) {
@@ -588,6 +625,7 @@ class Link {
 			var cn = "expando-button reditn-expando-button ";
 			var isToggled = Expand.toggled;
 			var cl = isToggled ? "expanded" : "collapsed";
+			var exp = null;
 			b.className = '$cn $cl';
 			btn = {
 				toggled: function():Bool {
@@ -596,10 +634,8 @@ class Link {
 				toggle: function(v, ps) {
 					isToggled = v;
 					b.className = cn + (cl = isToggled ? "expanded" : "collapsed");
-					var entry:Element = b.parentElement;
-					var expandos:Array<Element> = cast entry.getElementsByClassName("expando");
-					for(e in expandos)
-						Reditn.show(e, v);
+					if(exp != null)
+						Reditn.show(exp, v);
 					if(ps)
 						Reditn.pushState();
 				},
@@ -655,6 +691,12 @@ class Link {
 						"Description" => parser.Markdown.parse(s.description)
 					]));
 					div;
+				} else if(Reflect.hasField(d, "html")) { // video
+					var v:Video = d;
+					var div = Browser.document.createDivElement();
+					div.innerHTML = v.html;
+					name = "video";
+					div;
 				} else if(Reflect.hasField(d, "content")) { // article
 					var a:Article = d;
 					var div = Browser.document.createDivElement();
@@ -694,7 +736,7 @@ class Link {
 					null;
 				}
 				if(content != null) {
-					var exp = document.createDivElement();
+					exp = document.createDivElement();
 					exp.className = "expando";
 					exp.appendChild(content);
 					cn += '$name ';
@@ -705,10 +747,10 @@ class Link {
 						cont.appendChild(exp);
 					else
 						cont.insertBefore(exp, expalign);
-					if(align == null)
-						cont.appendChild(b);
+					if(btnalign == null)
+						cont.insertBefore(b, exp);
 					else
-						cont.insertBefore(b, align);
+						cont.insertBefore(b, btnalign);
 				}
 			});
 		}

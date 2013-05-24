@@ -35,6 +35,8 @@
 		"http://webservices.amazon.com/onca/*",
 		"http://www.doctorwho.tv/*",
 		"http://gamejolt.com/service/*",
-		"http://bbcamerica.com/"
+		"http://bbcamerica.com/",
+		"http://www.youtube.com/oembed",
+		"http://www.vimeo.com/oembed"
 	]
 }

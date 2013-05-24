@@ -36,19 +36,11 @@ class Expand {
 		refresh();
 	}
 	static inline function defaultButton(cont:Element):Void {
-		var one = false;
-		for(be in cont.getElementsByClassName("expando-button")) {
-			if(one)
-				be.parentNode.removeChild(be);
-			else {
-				if(be != null) {
-					var b = adaptButton(cast be);
-					b.toggle(Expand.toggled, false);
-					buttons.push(b);
-				}
-
-				one = true;
-			}
+		var list = cont.getElementsByClassName("expando-button");
+		if(list.length > 0) {
+			var b = adaptButton(cast list[0]);
+			b.toggle(Expand.toggled, false);
+			buttons.push(b);
 		}
 	}
 	static var queue:Int = 0;
@@ -111,11 +103,10 @@ class Expand {
 				if(q) continue;
 			}
 			var e:Element = cast Reditn.getLinkContainer(l).getElementsByClassName("entry")[0];
-			if(e.getElementsByClassName("reditn-expando-button").length == 0) {
-				var btn = Link.createButton(l.href, e, cast e.getElementsByClassName("tagline")[0]);
-				if(btn == null)
-					defaultButton(e);
-			}
+			if(e.getElementsByClassName("expando-button").length == 0)
+				Link.createButton(l.href, e, null, cast e.getElementsByClassName("tagline")[0]);
+			else
+				defaultButton(e);
 		}
 	}
 	public static function toggle(t:Bool) {

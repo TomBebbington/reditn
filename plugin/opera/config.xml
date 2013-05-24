@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" id="http://www.github.com/TopHattedCoder/reditn">
+	<name>Reditn</name>
+	<description>The comprehensive Reddit plugin.</description>
+	<author href="http://github.com/TopHattedCoder" email="tophattedcoder@gmail.com">Tom Bebbington</author>
+	<icon src="icons/icon.png"/>
+</widget>

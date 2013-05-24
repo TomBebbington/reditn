@@ -95,7 +95,7 @@ AutoScroll.init = function() {
 	AutoScroll.last = js.Browser.document.body.getElementsByClassName("sitetable")[0];
 	js.Browser.window.addEventListener("scroll",function(e) {
 		var bottom = js.Browser.window.scrollY + js.Browser.window.innerHeight, h = js.Browser.document.body.offsetHeight;
-		if(bottom > h * 0.8 && AutoScroll.canLoad) AutoScroll.loadNext();
+		if(bottom > h - js.Browser.window.innerHeight && AutoScroll.canLoad) AutoScroll.loadNext();
 	});
 }
 AutoScroll.loadNext = function() {
@@ -170,19 +170,11 @@ Expand.init = function() {
 	Expand.refresh();
 }
 Expand.defaultButton = function(cont) {
-	var one = false;
-	var _g = 0, _g1 = cont.getElementsByClassName("expando-button");
-	while(_g < _g1.length) {
-		var be = _g1[_g];
-		++_g;
-		if(one) be.parentNode.removeChild(be); else {
-			if(be != null) {
-				var b = Expand.adaptButton(be);
-				b.toggle(Expand.toggled,false);
-				Expand.buttons.push(b);
-			}
-			one = true;
-		}
+	var list = cont.getElementsByClassName("expando-button");
+	if(list.length > 0) {
+		var b = Expand.adaptButton(list[0]);
+		b.toggle(Expand.toggled,false);
+		Expand.buttons.push(b);
 	}
 }
 Expand.adaptButton = function(exp) {
@@ -257,10 +249,7 @@ Expand.refresh = function(check,e) {
 			if(q) continue;
 		}
 		var e1 = l.parentElement.parentElement.parentElement.getElementsByClassName("entry")[0];
-		if(e1.getElementsByClassName("reditn-expando-button").length == 0) {
-			var btn = Link.createButton(l.href,e1,e1.getElementsByClassName("tagline")[0]);
-			if(btn == null) Expand.defaultButton(e1);
-		}
+		if(e1.getElementsByClassName("expando-button").length == 0) Link.createButton(l.href,e1,null,e1.getElementsByClassName("tagline")[0]); else Expand.defaultButton(e1);
 	}
 }
 Expand.toggle = function(t) {
@@ -574,7 +563,8 @@ Reditn.refreshLinks = function() {
 	}(this));
 }
 Reditn.init = function() {
-	if(js.Browser.window.location.href.indexOf("reddit.") == -1) return;
+	if(js.Browser.window.location.href.indexOf("reddit.") == -1 || window.reditn_loaded) return;
+	window.reditn_loaded = true;
 	Reditn.links = [];
 	Reditn.fullPage = js.Browser.document.getElementsByClassName("tabmenu").length > 0;
 	Reditn.wrap(Settings.init);
@@ -1794,7 +1784,7 @@ Link.trimURL = function(url) {
 	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
 	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null); else if(StringTools.startsWith(url,"m.")) url = HxOverrides.substr(url,2,null);
 	if(url.indexOf("&") != -1) url = HxOverrides.substr(url,0,url.indexOf("&"));
-	if(url.indexOf("?") != -1 && !StringTools.startsWith(url,"facebook.com/")) url = HxOverrides.substr(url,0,url.indexOf("?"));
+	if(url.indexOf("?") != -1 && !StringTools.startsWith(url,"facebook.com/") && url.indexOf("youtube") == -1) url = HxOverrides.substr(url,0,url.indexOf("?"));
 	if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1) url = HxOverrides.substr(url,0,url.indexOf("#"));
 	if(StringTools.endsWith(url,"/")) url = HxOverrides.substr(url,0,url.length - 1);
 	return url;
@@ -1816,7 +1806,7 @@ Link.filterHTML = function(h) {
 	if(StringTools.endsWith(h,"<br>")) h = HxOverrides.substr(h,0,h.length - 4);
 	return h;
 }
-Link.createButton = function(url,cont,align,expalign) {
+Link.createButton = function(url,cont,expalign,btnalign) {
 	var site = Link.resolve(url);
 	var btn = null;
 	if(site != null) {
@@ -1830,20 +1820,14 @@ Link.createButton = function(url,cont,align,expalign) {
 		var cn = "expando-button reditn-expando-button ";
 		var isToggled = Expand.toggled;
 		var cl = isToggled?"expanded":"collapsed";
+		var exp = null;
 		b.className = "" + cn + " " + cl;
 		btn = { toggled : function() {
 			return isToggled;
 		}, toggle : function(v,ps) {
 			isToggled = v;
 			b.className = cn + (cl = isToggled?"expanded":"collapsed");
-			var entry = b.parentElement;
-			var expandos = entry.getElementsByClassName("expando");
-			var _g = 0;
-			while(_g < expandos.length) {
-				var e = expandos[_g];
-				++_g;
-				Reditn.show(e,v);
-			}
+			if(exp != null) Reditn.show(exp,v);
 			if(ps) js.Browser.window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
 		}, url : url, element : b};
 		b.onclick = function(_) {
@@ -1923,6 +1907,14 @@ Link.createButton = function(url,cont,align,expalign) {
 				}($this))));
 				$r = div;
 				return $r;
+			}(this)):Reflect.hasField(d,"html")?(function($this) {
+				var $r;
+				var v = d;
+				var div = js.Browser.document.createElement("div");
+				div.innerHTML = v.html;
+				name = "video";
+				$r = div;
+				return $r;
 			}(this)):Reflect.hasField(d,"content")?(function($this) {
 				var $r;
 				var a = d;
@@ -1969,7 +1961,7 @@ Link.createButton = function(url,cont,align,expalign) {
 				return $r;
 			}(this));
 			if(content != null) {
-				var exp = js.Browser.document.createElement("div");
+				exp = js.Browser.document.createElement("div");
 				exp.className = "expando";
 				exp.appendChild(content);
 				cn += "" + name + " ";
@@ -1977,7 +1969,7 @@ Link.createButton = function(url,cont,align,expalign) {
 				Expand.buttons.push(btn);
 				Reditn.show(exp,isToggled);
 				if(expalign == null) cont.appendChild(exp); else cont.insertBefore(exp,expalign);
-				if(align == null) cont.appendChild(b); else cont.insertBefore(b,align);
+				if(btnalign == null) cont.insertBefore(b,exp); else cont.insertBefore(b,btnalign);
 			}
 		});
 	}
@@ -2299,13 +2291,22 @@ TextExpand.init = function() {
 	while(_g < posts.length) {
 		var c = posts[_g];
 		++_g;
-		var ac = (js.Boot.__cast(c , Element)).getElementsByClassName("md")[0];
+		var ac = (function($this) {
+			var $r;
+			try {
+				$r = (js.Boot.__cast(c , Element)).getElementsByClassName("md")[0];
+			} catch( e ) {
+				$r = null;
+			}
+			return $r;
+		}(this));
+		if(ac == null) continue;
 		var links = ac.getElementsByTagName("a");
 		var _g1 = 0;
 		while(_g1 < links.length) {
 			var l = links[_g1];
 			++_g1;
-			var btn = Link.createButton(l.href,l.parentElement,l,l.nextSibling);
+			Link.createButton(l.href,l.parentElement,l.nextSibling);
 		}
 	}
 }
@@ -3536,6 +3537,19 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		var url = Reflect.field(data,"long-url");
 		var r = Link.resolve(url);
 		if(r != null) r.method(r.regex,cb18);
+	});
+}},{ regex : new EReg("(youtube\\.com/watch|youtu\\.be/).*",""), method : function(e,cb19) {
+	var url = "http://www." + e.matched(0);
+	Reditn.getJSON("http://www.youtube.com/oembed?url=" + StringTools.urlEncode(url),function(data) {
+		cb19({ title : data.title, html : data.html, author : data.author_name});
+	});
+}},{ regex : new EReg("vine\\.co/v/(.*)",""), method : function(e,cb) {
+	var id = e.matched(1);
+	cb({ title : null, author : null, html : "<iframe class=\"vine-embed\" src=\"https://vine.co/v/" + id + "/embed/simple\" width=\"610\" height=\"348\" frameborder=\"0\"></iframe><script async src=\"//platform.vine.co/static/scripts/embed.js\" charset=\"utf-8\"></script>"});
+}},{ regex : new EReg("vimeo\\.com/([0-9]*)",""), method : function(e,cb20) {
+	var id = e.matched(1);
+	Reditn.getJSON("http://vimeo.com/api/oembed.json?url=http%3A//vimeo.com/" + id + "&maxwidth=500",function(data) {
+		cb20({ title : null, author : null, html : data.html});
 	});
 }}];
 Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("style ?= ?\"[^\"]*\"","g")];
