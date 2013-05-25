@@ -171,7 +171,7 @@ class Link {
 		{
 			regex: ~/flickr\.com\/photos\/.*/,
 			method: function(e, cb) {
-				Reditn.getJSON('http://www.flickr.com/services/oembed/?url=http://www.${StringTools.urlEncode(e.matched(0))}&format=json', function(e:OEmbed) {
+				Reditn.getJSON('http://www.flickr.com/services/oembed/?url=${StringTools.urlEncode("http://www."+e.matched(0))}&format=json', function(e:OEmbed) {
 					cb([{
 						url: e.url,
 						caption: e.title,
@@ -550,8 +550,51 @@ class Link {
 					cb({
 						title: null,
 						author: null,
-						html: data.html
+						html: data.html,
+						images: null
 					});
+				});
+			}
+		},
+		{
+			regex: ~/reddit\.com\/r\/[^\/]*\/comments\/[0-9a-zA-Z]*\/[^\/]*\/([0-9a-zA-Z]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				Reditn.getJSON('http://www.${e.matched(0)}.json', function(data:Dynamic) {
+					var cs:Array<Dynamic> = untyped data[0].data.children;
+					var data = cs[0].data;
+					if(data != null && data.selftext_html != null) {
+						var c= StringTools.htmlUnescape(data.selftext_html);
+						c = c.substring(c.indexOf(">")+1, c.lastIndexOf("<")-1);
+						cb({
+							title: data.title,
+							author: data.author,
+							content: c,
+							images: null
+						});
+					}
+				});
+			}
+		},
+		{
+			regex: ~/reddit\.com\/r\/[^\/]*\/comments\/([0-9a-zA-Z]*)/,
+			method: function(e, cb) {
+				Reditn.getJSON('http://www.${e.matched(0)}.json', function(data:Dynamic) {
+					var data:Post = untyped data[0].data.children[0].data;
+					if(data.selftext_html == null) {
+						var l = Link.resolve(data.url);
+						if(l != null)
+							l.method(l.regex, cb);
+					} else {
+						var c= StringTools.htmlUnescape(data.selftext_html);
+						c = c.substring(c.indexOf(">")+1, c.lastIndexOf("<")-1);
+						cb({
+							title: data.title,
+							author: data.author,
+							content: c,
+							images: null
+						});
+					}
 				});
 			}
 		}
@@ -578,7 +621,7 @@ class Link {
 			url = url.substr(2);
 		if(url.indexOf("&") != -1)
 			url = url.substr(0, url.indexOf("&"));
-		if(url.indexOf("?") != -1 && !url.startsWith("facebook.com/") && url.indexOf("youtube") == -1)
+		if(url.indexOf("?") != -1 && !url.startsWith("facebook.com/") && !url.startsWith("youtube.com/"))
 			url = url.substr(0, url.indexOf("?"));
 		if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1)
 			url = url.substr(0, url.indexOf("#"));
@@ -598,6 +641,7 @@ class Link {
 		~/style ?= ?"[^"]*"/g
 	];
 	static var HTML_CLEANERS:Array<parser.Entry> = [
+		{ from: ~/<div class="md">(.*)<\/div>/g, to: "$1"},
 		{ from: ~/<blockquote class="twitter-tweet">(.*)<\/blockquote>/g, to: "$1"},
 		{ from: ~/(!|\.|,|\?)(^ \n\t\r)/g, to: "$1 $2" },
 		{ from: ~/(!|\.|,|\?)( *)/g, to: "$1 "},
@@ -619,8 +663,6 @@ class Link {
 		var site = Link.resolve(url);
 		var btn = null;
 		if(site != null) {
-			for(e in cont.getElementsByClassName("expando"))
-				e.parentNode.removeChild(e);
 			var b = document.createDivElement();
 			var cn = "expando-button reditn-expando-button ";
 			var isToggled = Expand.toggled;

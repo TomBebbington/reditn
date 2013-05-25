@@ -11,6 +11,22 @@ using StringTools;
 	static inline var hour = 3600;
 	public static var links:Array<AnchorElement> = null;
 	public static var fullPage:Bool = true;
+	public static function buildType(v:Dynamic):String {
+		return [for(f in Reflect.fields(v)) f + ": "+switch(Type.typeof(Reflect.field(v, f))) {
+			case TObject if(Std.is(v, Array)):
+				var v:Array<Dynamic> = Reflect.field(v, f);
+				"Array<"+(v.length > 0 ? buildType(v[0]) : "Dynamic") + ">";
+			case TObject if(Std.is(v, String)): "String";
+			case TObject: "{ "+buildType(Reflect.field(v, f))+" }";
+			case TClass(c): Type.getClassName(c);
+			case TFloat: "Float";
+			case TInt: "Int";
+			case TFunction: "Dynamic -> Dynamic";
+			case TBool: "Bool";
+			case TNull: "Null<Dynamic>";
+			case _: "Dynamic";
+		}].join(",\n");
+	}
 	static function main() {
 		switch(Browser.document.readyState) {
 			case "complete": init();
@@ -244,18 +260,7 @@ using StringTools;
 		return o;
 	}
 	public static inline function getText(url:String, func:String->Void, ?auth:String, ?type:String, ?postData:String):Void {
-		#if plugin
-			var h = new haxe.Http(url);
-			if(auth != null)
-				h.setHeader("Authorization", auth);
-			if(type != null)
-				h.setHeader("Content-Type", type);
-			//h.setHeader("User-Agent", USER_AGENT);
-			h.onData = func;
-			if(postData != null)
-				h.setPostData(postData);
-			h.request(postData != null);
-		#else
+		#if userscript
 			var heads:Dynamic = {
 				//"User-Agent": USER_AGENT
 			};
@@ -272,6 +277,17 @@ using StringTools;
 					func(rsp.responseText);
 				}
 			});
+		#else
+			var h = new haxe.Http(url);
+			if(auth != null)
+				h.setHeader("Authorization", auth);
+			if(type != null)
+				h.setHeader("Content-Type", type);
+			//h.setHeader("User-Agent", USER_AGENT);
+			h.onData = func;
+			if(postData != null)
+				h.setPostData(postData);
+			h.request(postData != null);
 		#end
 	}
 	public static function getMonthYear(d:Date):String {

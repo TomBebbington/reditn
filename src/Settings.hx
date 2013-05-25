@@ -167,6 +167,8 @@ class Settings {
 					"datetime";
 				else if(Std.is(d, Int))
 					"number";
+				else
+					"text";
 				if(Std.is(d, Bool))
 					input.checked = data.get(k);
 				else input.value = data.get(k);

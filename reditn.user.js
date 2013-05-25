@@ -855,6 +855,9 @@ StringTools.htmlEscape = function(s,quotes) {
 	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
 	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
 }
+StringTools.htmlUnescape = function(s) {
+	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
+}
 StringTools.startsWith = function(s,start) {
 	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
 }
@@ -1185,30 +1188,30 @@ js.Boot.__interfLoop = function(cc,cl) {
 	return js.Boot.__interfLoop(cc.__super__,cl);
 }
 js.Boot.__instanceof = function(o,cl) {
-	try {
-		if(o instanceof cl) {
-			if(cl == Array) return o.__enum__ == null;
-			return true;
-		}
-		if(js.Boot.__interfLoop(o.__class__,cl)) return true;
-	} catch( e ) {
-		if(cl == null) return false;
-	}
+	if(cl == null) return false;
 	switch(cl) {
 	case Int:
-		return Math.ceil(o%2147483648.0) === o;
+		return (o|0) === o;
 	case Float:
 		return typeof(o) == "number";
 	case Bool:
-		return o === true || o === false;
+		return typeof(o) == "boolean";
 	case String:
 		return typeof(o) == "string";
 	case Dynamic:
 		return true;
 	default:
-		if(o == null) return false;
-		if(cl == Class && o.__name__ != null) return true; else null;
-		if(cl == Enum && o.__ename__ != null) return true; else null;
+		if(o != null) {
+			if(typeof(cl) == "function") {
+				if(o instanceof cl) {
+					if(cl == Array) return o.__enum__ == null;
+					return true;
+				}
+				if(js.Boot.__interfLoop(o.__class__,cl)) return true;
+			}
+		} else return false;
+		if(cl == Class && o.__name__ != null) return true;
+		if(cl == Enum && o.__ename__ != null) return true;
 		return o.__enum__ == cl;
 	}
 }
@@ -1234,7 +1237,7 @@ Reflect.fields = function(o) {
 	if(o != null) {
 		var hasOwnProperty = Object.prototype.hasOwnProperty;
 		for( var f in o ) {
-		if(f != "__id__" && hasOwnProperty.call(o,f)) a.push(f);
+		if(f != "__id__" && f != "hx__closures__" && hasOwnProperty.call(o,f)) a.push(f);
 		}
 	}
 	return a;
@@ -1702,7 +1705,7 @@ Link.trimURL = function(url) {
 	if(StringTools.startsWith(url,"http://")) url = HxOverrides.substr(url,7,null); else if(StringTools.startsWith(url,"https://")) url = HxOverrides.substr(url,8,null);
 	if(StringTools.startsWith(url,"www.")) url = HxOverrides.substr(url,4,null); else if(StringTools.startsWith(url,"m.")) url = HxOverrides.substr(url,2,null);
 	if(url.indexOf("&") != -1) url = HxOverrides.substr(url,0,url.indexOf("&"));
-	if(url.indexOf("?") != -1 && !StringTools.startsWith(url,"facebook.com/") && url.indexOf("youtube") == -1) url = HxOverrides.substr(url,0,url.indexOf("?"));
+	if(url.indexOf("?") != -1 && !StringTools.startsWith(url,"facebook.com/") && !StringTools.startsWith(url,"youtube.com/")) url = HxOverrides.substr(url,0,url.indexOf("?"));
 	if(url.indexOf("#") != -1 && url.indexOf("/wiki/") == -1) url = HxOverrides.substr(url,0,url.indexOf("#"));
 	if(StringTools.endsWith(url,"/")) url = HxOverrides.substr(url,0,url.length - 1);
 	return url;
@@ -1728,12 +1731,6 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 	var site = Link.resolve(url);
 	var btn = null;
 	if(site != null) {
-		var _g = 0, _g1 = cont.getElementsByClassName("expando");
-		while(_g < _g1.length) {
-			var e = _g1[_g];
-			++_g;
-			e.parentNode.removeChild(e);
-		}
 		var b = js.Browser.document.createElement("div");
 		var cn = "expando-button reditn-expando-button ";
 		var isToggled = Expand.toggled;
@@ -2091,7 +2088,7 @@ Settings.settingsPopUp = function() {
 			input.name = k;
 			form.appendChild(input);
 			form.appendChild(js.Browser.document.createElement("br"));
-			input.type = js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":null;
+			input.type = js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":"text";
 			if(js.Boot.__instanceof(d,Bool)) input.checked = Settings.data.get(k); else input.value = Settings.data.get(k);
 		}
 	}
@@ -2436,13 +2433,13 @@ haxe.Serializer.prototype = {
 			this.buf.b += Std.string(v?"t":"f");
 			break;
 		case 6:
-			var _g_eTClass_0 = $e[2];
-			if(_g_eTClass_0 == String) {
+			var c = $e[2];
+			if(c == String) {
 				this.serializeString(v);
 				return;
 			}
 			if(this.useCache && this.serializeRef(v)) return;
-			switch(_g_eTClass_0) {
+			switch(c) {
 			case Array:
 				var ucount = 0;
 				this.buf.b += "a";
@@ -2557,13 +2554,13 @@ haxe.Serializer.prototype = {
 				this.cache.pop();
 				if(v.hxSerialize != null) {
 					this.buf.b += "C";
-					this.serializeString(Type.getClassName(_g_eTClass_0));
+					this.serializeString(Type.getClassName(c));
 					this.cache.push(v);
 					v.hxSerialize(this);
 					this.buf.b += "g";
 				} else {
 					this.buf.b += "c";
-					this.serializeString(Type.getClassName(_g_eTClass_0));
+					this.serializeString(Type.getClassName(c));
 					this.cache.push(v);
 					this.serializeFields(v);
 				}
@@ -2575,11 +2572,11 @@ haxe.Serializer.prototype = {
 			this.serializeFields(v);
 			break;
 		case 7:
-			var _g_eTEnum_0 = $e[2];
+			var e = $e[2];
 			if(this.useCache && this.serializeRef(v)) return;
 			this.cache.pop();
 			this.buf.b += Std.string(this.useEnumIndex?"j":"w");
-			this.serializeString(Type.getEnumName(_g_eTEnum_0));
+			this.serializeString(Type.getEnumName(e));
 			if(this.useEnumIndex) {
 				this.buf.b += ":";
 				this.buf.b += Std.string(v[1]);
@@ -3002,14 +2999,14 @@ haxe.io.Bytes.prototype = {
 	__class__: haxe.io.Bytes
 }
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
-var $_;
-function $bind(o,m) { var f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; return f; };
+var $_, $fid = 0;
+function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; };
 if(Array.prototype.indexOf) HxOverrides.remove = function(a,o) {
 	var i = a.indexOf(o);
 	if(i == -1) return false;
 	a.splice(i,1);
 	return true;
-}; else null;
+};
 if(typeof(JSON) != "undefined") haxe.Json = JSON;
 String.prototype.__class__ = $hxClasses.String = String;
 String.__name__ = ["String"];
@@ -3152,7 +3149,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		cb4([{ url : e1.url, caption : e1.title, author : e1.author_name}]);
 	});
 }},{ regex : new EReg("flickr\\.com/photos/.*",""), method : function(e,cb5) {
-	Reditn.getJSON("http://www.flickr.com/services/oembed/?url=http://www." + StringTools.urlEncode(e.matched(0)) + "&format=json",function(e1) {
+	Reditn.getJSON("http://www.flickr.com/services/oembed/?url=" + StringTools.urlEncode("http://www." + e.matched(0)) + "&format=json",function(e1) {
 		cb5([{ url : e1.url, caption : e1.title, author : e1.author_name}]);
 	});
 }},{ regex : new EReg("ebay\\.([a-zA-Z\\.]*)/itm(/[^/]*)?/([0-9]*)",""), method : function(e,cb6) {
@@ -3467,11 +3464,34 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 }},{ regex : new EReg("vimeo\\.com/([0-9]*)",""), method : function(e,cb20) {
 	var id = e.matched(1);
 	Reditn.getJSON("http://vimeo.com/api/oembed.json?url=http%3A//vimeo.com/" + id + "&maxwidth=500",function(data) {
-		cb20({ title : null, author : null, html : data.html});
+		cb20({ title : null, author : null, html : data.html, images : null});
+	});
+}},{ regex : new EReg("reddit\\.com/r/[^/]*/comments/[0-9a-zA-Z]*/[^/]*/([0-9a-zA-Z]*)",""), method : function(e,cb21) {
+	var id = e.matched(1);
+	Reditn.getJSON("http://www." + e.matched(0) + ".json",function(data) {
+		var cs = data[0].data.children;
+		var data1 = cs[0].data;
+		if(data1 != null && data1.selftext_html != null) {
+			var c = StringTools.htmlUnescape(data1.selftext_html);
+			c = c.substring(c.indexOf(">") + 1,c.lastIndexOf("<") - 1);
+			cb21({ title : data1.title, author : data1.author, content : c, images : null});
+		}
+	});
+}},{ regex : new EReg("reddit\\.com/r/[^/]*/comments/([0-9a-zA-Z]*)",""), method : function(e,cb22) {
+	Reditn.getJSON("http://www." + e.matched(0) + ".json",function(data) {
+		var data1 = data[0].data.children[0].data;
+		if(data1.selftext_html == null) {
+			var l = Link.resolve(data1.url);
+			if(l != null) l.method(l.regex,cb22);
+		} else {
+			var c = StringTools.htmlUnescape(data1.selftext_html);
+			c = c.substring(c.indexOf(">") + 1,c.lastIndexOf("<") - 1);
+			cb22({ title : data1.title, author : data1.author, content : c, images : null});
+		}
 	});
 }}];
 Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("style ?= ?\"[^\"]*\"","g")];
-Link.HTML_CLEANERS = [{ from : new EReg("<blockquote class=\"twitter-tweet\">(.*)</blockquote>","g"), to : "$1"},{ from : new EReg("(!|\\.|,|\\?)(^ \n\t\r)","g"), to : "$1 $2"},{ from : new EReg("(!|\\.|,|\\?)( *)","g"), to : "$1 "},{ from : new EReg("(<br></br>|<br/>|<br />)(<br></br>|<br/>|<br />)","g"), to : "<br/>"}];
+Link.HTML_CLEANERS = [{ from : new EReg("<div class=\"md\">(.*)</div>","g"), to : "$1"},{ from : new EReg("<blockquote class=\"twitter-tweet\">(.*)</blockquote>","g"), to : "$1"},{ from : new EReg("(!|\\.|,|\\?)(^ \n\t\r)","g"), to : "$1 $2"},{ from : new EReg("(!|\\.|,|\\?)( *)","g"), to : "$1 "},{ from : new EReg("(<br></br>|<br/>|<br />)(<br></br>|<br/>|<br />)","g"), to : "<br/>"}];
 Settings.DESC = (function($this) {
 	var $r;
 	var _g = new haxe.ds.StringMap();

@@ -2,6 +2,7 @@
 -main Reditn
 -js reditn.user.js
 -dce full
+-D userscript
 --next
 --macro Script.generate()
 -cp src

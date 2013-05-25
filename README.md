@@ -7,6 +7,6 @@ The stable version is available [here](http://userscripts.org/scripts/show/15097
 Features
 --------
 + Hides sponsors and adverts.
-+ Adds toggle button to supported image, article, shopping, even repository links!
++ Adds toggle button to supported image, article, shopping, subreddit, post, and even repo links!
 + Shows information when you hover over a user or a subreddit.
-+ Shows a tab that allows quick showing or hiding of all links with supported toggle buttons on the page.
++ Shows a tab that allows quick showing or hiding of all toggleable buttons on the page.
