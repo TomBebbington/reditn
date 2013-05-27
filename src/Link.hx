@@ -3,7 +3,7 @@ import data.*;
 import parser.*;
 import js.*;
 import js.html.*;
-import js.Browser.*;
+import ext.Browser.*;
 using StringTools;
 class Link {
 	public static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
@@ -270,7 +270,7 @@ class Link {
 					var c:String = d.content;
 					c = c.replace("\n", "");
 					c = StringTools.trim(c);
-					c = js.Browser.window.atob(c);
+					c = ext.Browser.window.atob(c);
 					var imgs:EReg = parser.Markdown.images;
 					var album:Album = [];
 					var tc = c;
@@ -550,9 +550,20 @@ class Link {
 					cb({
 						title: null,
 						author: null,
-						html: data.html,
-						images: null
+						html: data.html
 					});
+				});
+			}
+		},
+		{
+			regex: ~/viewrz\.com\/video\/([a-z-A-Z0-9]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				trace(id);
+				cb({
+					title: null,
+					author: null,
+					html: '<iframe height="310" width="480"  src="http://viewrz.com/embed/$id" frameborder="0"></iframe>',
 				});
 			}
 		},
@@ -595,6 +606,35 @@ class Link {
 							images: null
 						});
 					}
+				});
+			}
+		},
+		{
+			regex: ~/imdb.com\/title\/([a-zA-Z0-9]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				Reditn.getJSON('http://www.omdbapi.com/?i=$id', function(d:Dynamic) {
+					var roles = new Map();
+					if(d.Writer != null)
+						roles.set("Writers", [cast d.Writer]);
+					if(d.Director != null)
+						roles.set("Director", [cast d.Director]);
+					if(d.Actors != null) {
+						var as:String = d.Actors;
+						roles.set("Actors", as.split(", "));
+					}
+					var m:Movie = {
+						title: d.Title,
+						year: d.Year,
+						certificate: d.Rated,
+						released: d.Released,
+						length: d.Duration,
+						roles: roles,
+						plot: d.Plot,
+						images: [{url: d.Poster}]
+					};
+					trace(m);
+					cb(m);
 				});
 			}
 		}
@@ -762,7 +802,7 @@ class Link {
 				} else if(Reflect.hasField(d, "developers")) {
 					trace(url);
 					var r:Repo = d;
-					var div = js.Browser.document.createDivElement();
+					var div = ext.Browser.document.createDivElement();
 					div.className = "usertext";
 					var cont = Browser.document.createDivElement();
 					var inner = Browser.document.createSpanElement();

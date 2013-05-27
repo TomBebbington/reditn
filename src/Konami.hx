@@ -31,7 +31,7 @@ class Konami {
 			var s:Element = cast s;
 			s.innerHTML = "-&infin;";
 		}
-		for(p in js.Browser.document.body.getElementsByTagName("p")) {
+		for(p in ext.Browser.document.body.getElementsByTagName("p")) {
 			var p:Element = cast p;
 			if(p.className == "parent")
 				continue;

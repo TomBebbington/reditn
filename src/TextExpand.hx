@@ -1,5 +1,5 @@
 import js.html.*;
-import js.Browser.*;
+import ext.Browser.*;
 class TextExpand {
 	public static function init() {
 		var posts = document.body.getElementsByClassName("usertext-body");

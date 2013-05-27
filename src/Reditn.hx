@@ -1,9 +1,9 @@
 import js.html.*;
-import js.Browser;
 import data.*;
 import haxe.Json;
+import ext.*;
 using StringTools;
-@:expose class Reditn {
+class Reditn {
 	static inline var USER_AGENT = "Reditn - the basic reddit plugin";
 	static inline var year = 31557600;
 	static inline var month = 2629800;
@@ -11,27 +11,55 @@ using StringTools;
 	static inline var hour = 3600;
 	public static var links:Array<AnchorElement> = null;
 	public static var fullPage:Bool = true;
-	public static function buildType(v:Dynamic):String {
-		return [for(f in Reflect.fields(v)) f + ": "+switch(Type.typeof(Reflect.field(v, f))) {
-			case TObject if(Std.is(v, Array)):
-				var v:Array<Dynamic> = Reflect.field(v, f);
-				"Array<"+(v.length > 0 ? buildType(v[0]) : "Dynamic") + ">";
-			case TObject if(Std.is(v, String)): "String";
-			case TObject: "{ "+buildType(Reflect.field(v, f))+" }";
-			case TClass(c): Type.getClassName(c);
-			case TFloat: "Float";
-			case TInt: "Int";
-			case TFunction: "Dynamic -> Dynamic";
-			case TBool: "Bool";
-			case TNull: "Null<Dynamic>";
-			case _: "Dynamic";
-		}].join(",\n");
-	}
 	static function main() {
-		switch(Browser.document.readyState) {
-			case "complete": init();
-			default: Browser.window.onload = function(_) init();
-		}
+		ext.Builder.build({
+			name: {
+				short: "reditn",
+				full: "Reditn - the comprehensive reddit plugin"
+			},
+			author: {
+				name: "Tom Bebbington",
+				username: "TopHattedCoder"
+			},
+			description: "The comprehensive reddit plugin - allows you to expand images, albums, articles, etc, tag users and comments, never stop scrolling, control it with your keyboard and more!",
+			version: "1.6.3",
+			sites: [
+				"*.reddit.com"
+			],
+			permissions: [
+				"*.reddit.com",
+				"xkcd.com",
+				"explosm.net",
+				"livememe.com",
+				"backend.deviantart.com",
+				"flickr.com",
+				"open.api.ebay.com",
+				"public-api.wordpress.com",
+				"*.wikinews.org",
+				"*.wikia.com",
+				"en.wikipedia.org",
+				"api.github.com",
+				"sourceforge.net",
+				"api.twitter.com",
+				"digitaltrends.com",
+				"webupd8.org",
+				"api.tumblr.com",
+				"api.imgur.com",
+				"api.longurl.org",
+				"webservices.amazon.com",
+				"doctorwho.tv",
+				"gamejolt.com",
+				"bbcamerica.com",
+				"youtube.com",
+				"vimeo.com",
+				"omdbapi.com"
+			],
+			icons: [
+				"128" => "icon128.png",
+				"64" => "icon64.png"
+			]
+		});
+		Browser.onload(init);
 	}
 	public static inline function getLinkContainer(l:Element):Element {
 		return l.parentElement.parentElement.parentElement;
@@ -57,20 +85,25 @@ using StringTools;
 		links = [];
 		fullPage = Browser.document.getElementsByClassName("tabmenu").length > 0;
 		wrap(Settings.init);
-		wrap(Adblock.init, Settings.ADBLOCK);
-		wrap(DuplicateHider.init, Settings.DUPLICATE_HIDER);
-		wrap(NSFWFilter.init, Settings.FILTER_NSFW);
+		wrap(Adblock.init, "adblock");
+		wrap(DuplicateHider.init, "dup-hider");
+		wrap(NSFWFilter.init, "nsfw-filter");
 		refreshLinks();
 		Style.init();
-		wrap(AutoScroll.init, Settings.AUTO_SCROLL);
-		wrap(Expand.init, Settings.EXPAND);
-		wrap(TextExpand.init, Settings.TEXT_EXPAND);
-		wrap(Keyboard.init, Settings.KEYBOARD);
-		wrap(Preview.init, Settings.PREVIEW);
-		wrap(SubredditInfo.init, Settings.SUBINFO);
-		wrap(UserInfo.init, Settings.USERINFO);
-		wrap(UserTagger.init, Settings.USER_TAGGER);
-		wrap(SubredditTagger.init, Settings.SUBREDDIT_TAGGER);
+		#if chrome
+		trace(untyped chrome);
+		trace(Reflect.fields(untyped chrome));
+		#end
+		Browser.notify({title: "Hello world!", message: "HELLO!", icon: "icon128.png"});
+		wrap(AutoScroll.init, "autoscroll");
+		wrap(Expand.init, "expand");
+		wrap(TextExpand.init, "text-expand");
+		wrap(Keyboard.init, "keyboard");
+		wrap(Preview.init, "preview");
+		wrap(SubredditInfo.init, "subinfo");
+		wrap(UserInfo.init, "useringo");
+		wrap(UserTagger.init, "user-tag");
+		wrap(SubredditTagger.init, "sub-tag");
 		Browser.window.history.replaceState(haxe.Serializer.run(state()), null, Expand.toggled ? "#showall" : null);
 		Browser.window.onpopstate = function(e:Dynamic) {
 			var s:String = e.state;
@@ -259,36 +292,17 @@ using StringTools;
 			o = o.response;
 		return o;
 	}
-	public static inline function getText(url:String, func:String->Void, ?auth:String, ?type:String, ?postData:String):Void {
-		#if userscript
-			var heads:Dynamic = {
-				//"User-Agent": USER_AGENT
-			};
-			if(auth != null)
-				heads.Authorization = auth;
-			if(type != null)
-				Reflect.setField(heads, "Content-Type", type);
-			untyped GM_xmlhttpRequest({
-				method: postData != null ? "POST" : "GET",
-				headers: heads,
-				data: postData,
-				url: url,
-				onload: function(rsp:Dynamic) {
-					func(rsp.responseText);
-				}
-			});
-		#else
-			var h = new haxe.Http(url);
-			if(auth != null)
-				h.setHeader("Authorization", auth);
-			if(type != null)
-				h.setHeader("Content-Type", type);
-			//h.setHeader("User-Agent", USER_AGENT);
-			h.onData = func;
-			if(postData != null)
-				h.setPostData(postData);
-			h.request(postData != null);
-		#end
+	public static function getText(url:String, func:String->Void, ?auth:String, ?type:String, ?postData:String):Void {
+		var h = new ext.Http(url);
+		if(auth != null)
+			h.setHeader("Authorization", auth);
+		if(type != null)
+			h.setHeader("Content-Type", type);
+		//h.setHeader("User-Agent", USER_AGENT);
+		h.onData = func;
+		if(postData != null)
+			h.setPostData(postData);
+		h.request(postData != null);
 	}
 	public static function getMonthYear(d:Date):String {
 		var month = switch(d.getMonth()) {
@@ -309,7 +323,7 @@ using StringTools;
 		return '$month, $year';
 	}
 	public static function embedMap(m:Map<String, String>):js.html.DListElement {
-		var e = js.Browser.document.createDListElement();
+		var e = ext.Browser.document.createDListElement();
 		for(k in m.keys()) {
 			if(m.get(k) != null && m.get(k).length > 0) {
 				var keye = Browser.document.createElement("dt");

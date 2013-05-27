@@ -6,7 +6,7 @@ using StringTools;
 class SubredditTagger {
 	public static var tags(get, null):StringMap<String>;
 	static inline function get_tags() {
-		return cast Settings.data.get(Settings.SUBREDDIT_TAGS);
+		return cast Settings.data.get("sub-tags");
 	}
 	public static function init() {
 		var d:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("subreddit");

@@ -1,0 +1,1 @@
+The comprehensive reddit plugin - allows you to expand images, albums, articles, etc, tag users and comments, never stop scrolling, control it with your keyboard and more!

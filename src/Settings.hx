@@ -3,75 +3,39 @@ import js.html.*;
 import data.*;
 import haxe.ds.StringMap;
 import haxe.crypto.BaseCode;
+import ext.Storage.*;
+import ext.*;
 class Settings {
 	static inline var NOTE_TEXT = "Close this dialog and refresh the page to see your changes in effect. Changes will be saved automatically.";
-	public static inline var ADBLOCK = "adblock";
-	public static inline var USERINFO = "userinfo";
-	public static inline var SUBINFO = "subinfo";
-	public static inline var EXPAND = "expand";
-	public static inline var DUPLICATE_HIDER = "dup-hider";
-	public static inline var USER_TAGGER = "user-tag";
-	public static inline var SUBREDDIT_TAGGER = "sub-tag";
-	public static inline var PREVIEW = "preview";
-	public static inline var KEYBOARD = "keys";
-	public static inline var USER_TAGS = "user-tags";
-	public static inline var SUBREDDIT_TAGS = "sub-tags";
-	public static inline var FILTER_NSFW = "nsfw-filter";
-	public static inline var TEXT_EXPAND = "text-expand";
-	public static inline var AUTO_SCROLL = "autoscroll";
-	static var SAVE_BASE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=/";
-	static var DESC = [
-		ADBLOCK => "Block advertisements and sponsors",
-		USERINFO => "Show information about a user upon hover",
-		SUBINFO => "Show information about a subreddit upon hover",
-		EXPAND => "Allow expansion of images, articles, etc",
-		TEXT_EXPAND => "Allow expansion of images, articles etc found in comments and posts for easy viewing",
-		DUPLICATE_HIDER => "Hide duplicate links",
-		USER_TAGGER => "Tag users",
-		SUBREDDIT_TAGGER => "Tag subreddits",
-		AUTO_SCROLL => "Automatically load pages",
-		PREVIEW => "Preview comments and posts",
-		KEYBOARD => "Keyboard shortcuts",
-		FILTER_NSFW => "Hide NSFW content"
+	static var settings:Map<String, Setting<Dynamic>> = [
+		"adblock" => { def: true, desc: "Block advertisements and sponsors" },
+		"userinfo" => { def: true, desc: "Show information about a user upon hover" },
+		"subinfo" => { def: true, desc: "Show information about a subreddit upon hover" },
+		"expand" => { def: true, desc: "Allow expansion of articles, images, albums and the like" },
+		"text-expand" => { def: true, desc: "Allow expansion of links found in comments and posts" },
+		"dup-hider" => { def: true, desc: "Hide duplicates" },
+		"user-tag" => { def: true, desc: "Tag users with nicknames" },
+		"sub-tag" => { def: true, desc: "Tag subreddits with nicknames" },
+		"autoscroll" => { def: true, desc: "Seamless scrolling between pages" },
+		"preview" => { def: true, desc: "Preview comments and self posts before they are publishes" },
+		"keyboard" => { def: false, desc: "Keyboard navigation of the links in the page" },
+		"nsfw-filter" => { def: false, desc: "Filter NSFW posts" },
+		"user-tags" => { def: new Map<String, String>(), desc: null },
+		"sub-tags" => { def: new Map<String, String>(), desc: null }
 	];
-	public static var DEFAULTS:StringMap<Dynamic> = untyped [
-		ADBLOCK => true,
-		USERINFO => true,
-		SUBINFO => true,
-		EXPAND => true,
-		DUPLICATE_HIDER => true,
-		TEXT_EXPAND => true,
-		USER_TAGGER => true,
-		SUBREDDIT_TAGGER => true,
-		AUTO_SCROLL => true,
-		PREVIEW => true,
-		KEYBOARD => true,
-		FILTER_NSFW => false,
-		USER_TAGS => new Map<String, String>(),
-		SUBREDDIT_TAGS => new Map<String, String>()
-	];
-	public static var data = new StringMap<Dynamic>();
-	static function optimisedData():String {
-		var e = new Map<String, Dynamic>();
-		for(k in data.keys()) {
-			var v:Dynamic = data.get(k);
-			if(DEFAULTS.get(k) != v)
-				e.set(k, v);
-		}
-		return haxe.Serializer.run(e);
+	public static var data(get, never):Map<String, Dynamic>;
+	static inline function get_data() {
+		return Storage.data;
 	}
-	public static function save() {
-		haxe.Serializer.USE_CACHE = false;
-		#if plugin
-			Browser.getLocalStorage().setItem("reditn", optimisedData());
-		#else
-			untyped GM_setValue("reditn", optimisedData());
-		#end
+	public static inline function save() {
+		Storage.flush();
+	}
+	static function fixMissing(def:Bool=false) {
+		for(k in settings.keys())
+			if(!data.exists(k) || def)
+				data.set(k, settings.get(k).def);
 	}
 	public static function init() {
-		var dt = #if plugin Browser.getLocalStorage().getItem("reditn") #else untyped GM_getValue("reditn") #end;
-		if(dt != null)
-			Settings.data = try haxe.Unserializer.run(dt) catch(e:Dynamic) data;
 		fixMissing();
 		var h = Browser.document.getElementById("header-bottom-right");
 		if(h == null)
@@ -119,37 +83,38 @@ class Settings {
 				}
 				data.set(i.name, val);
 			}
-			save();
+			flush();
 		}
 		var delb = Browser.document.createInputElement();
 		delb.type = "button";
 		delb.value = "Restore default settings";
 		delb.onclick = function(_) {
 			fixMissing(true);
-			save();
+			flush();
 			settingsPopUp();
 		}
 		form.appendChild(delb);
-		var export = makeButton("Export settings to text", function() Browser.window.alert(Browser.window.btoa(optimisedData())));
+		/*
+		var export = makeButton("Export settings to text", function() Browser.window.alert(Browser.window.btoa(data)));
 		form.appendChild(export);
 		var importbtn = makeButton("Import settings", function() {
-			data = haxe.Unserializer.run(Browser.window.atob(Browser.window.prompt("Settings to import", Browser.window.btoa(optimisedData()))));
+			data = haxe.Unserializer.run(Browser.window.atob(Browser.window.prompt("Settings to import", Browser.window.btoa(data))));
 			fixMissing();
-			save();
+			flush();
 			settingsPopUp();
 		});
-		form.appendChild(importbtn);
+		form.appendChild(importbtn);*/
 		form.appendChild(Browser.document.createBRElement());
-		for(k in data.keys()) {
+		for(k in settings.keys()) {
+			var s = settings.get(k);
 			var d = data.get(k);
-			if(!Std.is(d, StringMap) && DESC.exists(k)) {
-				var l = DESC.get(k);
+			if(s.desc != null) {
 				var label = Browser.document.createLabelElement();
 				label.setAttribute("for", k);
 				label.style.position = "absolute";
 				label.style.width = "46%";
 				label.style.textAlign = "right";
-				label.innerHTML = '$l ';
+				label.innerHTML = s.desc;
 				form.appendChild(label);
 				var input = Browser.document.createInputElement();
 				input.style.position = "absolute";
@@ -187,10 +152,8 @@ class Settings {
 		b.onclick = untyped fn;
 		return b;
 	}
-	static function fixMissing(all:Bool=false) {
-		for(k in DEFAULTS.keys()) {
-			if(all || !data.exists(k))
-				data.set(k, Std.is(DEFAULTS.get(k), StringMap) ? new StringMap() : DEFAULTS.get(k));
-		}
-	}
+}
+typedef Setting<T> = {
+	var desc:String;
+	var def:T;
 }

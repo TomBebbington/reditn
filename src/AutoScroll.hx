@@ -1,4 +1,4 @@
-import js.Browser.*;
+import ext.Browser.*;
 import js.html.*;
 using StringTools;
 class AutoScroll {
@@ -40,7 +40,7 @@ class AutoScroll {
 			nextBtn.parentNode.removeChild(nextBtn);
 			temp.parentNode.appendChild(nextBtn);
 			Reditn.refreshLinks();
-			if(Settings.data.get(Settings.EXPAND))
+			if(Settings.data.get("expand"))
 				Expand.refresh(temp);
 			Reditn.pushState(next);
 		});

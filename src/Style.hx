@@ -4,9 +4,9 @@ class Style {
 	}
 	#if !macro
 	public static function init() {
-		var s = js.Browser.document.createStyleElement();
+		var s = ext.Browser.document.createStyleElement();
 		s.innerHTML = getStyle();
-		js.Browser.document.head.appendChild(s);
+		ext.Browser.document.head.appendChild(s);
 	}
 	#end
 }

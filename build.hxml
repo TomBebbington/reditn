@@ -1,12 +1,23 @@
 -cp src
 -main Reditn
--js reditn.user.js
+-js test.js
+-D chrome
+-lib extend
 -dce full
--D userscript
+-cmd haxelib run extend
 --next
---macro Script.generate()
 -cp src
 -main Reditn
--js reditn.plugin.js
+-js test.js
+-D firefox
+-lib extend
 -dce full
--D plugin
+-cmd haxelib run extend
+--next
+-cp src
+-main Reditn
+-js test.js
+-D userscript
+-lib extend
+-dce full
+-cmd haxelib run extend

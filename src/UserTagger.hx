@@ -1,4 +1,4 @@
-import js.Browser;
+import ext.Browser;
 import js.html.*;
 import haxe.ds.StringMap;
 import data.*;
@@ -6,7 +6,7 @@ using StringTools;
 class UserTagger {
 	public static var tags(get, null):StringMap<String>;
 	static inline function get_tags() {
-		return Settings.data.get(Settings.USER_TAGS);
+		return Settings.data.get("user-tags");
 	}
 	public static function init() {
 		var authors:Array<AnchorElement> = cast Browser.document.body.getElementsByClassName("author");

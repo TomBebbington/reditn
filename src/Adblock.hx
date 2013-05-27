@@ -1,4 +1,4 @@
-import js.Browser;
+import ext.Browser;
 import js.html.*;
 import data.*;
 class Adblock {
