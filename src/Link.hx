@@ -1,4 +1,3 @@
-
 import data.*;
 import parser.*;
 import js.*;
@@ -60,7 +59,7 @@ class Link {
 			}
 		},
 		{
-			regex: ~/imgur\.com\/(r\/[^\/]*\/)?([a-zA-Z0-9,]*)/,
+			regex: ~/i?\.?imgur\.com\/(r\/[^\/]*\/)?([a-zA-Z0-9,]*)/,
 			method: function(e, cb) {
 				var id = e.matched(1) == null || e.matched(1).indexOf("/") != -1 ? e.matched(2) : e.matched(1);
 				var ids = id.split(",");
@@ -388,7 +387,7 @@ class Link {
 			}
 		},
 		{
-			regex: ~/twitter.com\/.*\/status\/([0-9]*)/,
+			regex: ~/twitter.com\/.*\/status\/([0-9]*)(\/.*)?/,
 			method: function(e, cb) {
 				Reditn.getJSON('https://api.twitter.com/1/statuses/oembed.json?id=${e.matched(1)}', function(d:OEmbed) {
 					cb({

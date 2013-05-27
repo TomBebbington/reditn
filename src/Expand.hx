@@ -48,7 +48,7 @@ class Expand {
 		return queue * 1000;
 	}
 	static function adaptButton(exp:DivElement):Button {
-		var url = cast(exp.parentElement.getElementsByTagName("a")[0], js.html.AnchorElement).href;
+		var url:String = untyped exp.parentElement.getElementsByTagName("a")[0].href;
 		exp.style.width = exp.style.height = "23px";
 		return {
 			toggled: function():Bool {
@@ -77,7 +77,7 @@ class Expand {
 	public static function refresh(check:Bool = false, ?e:Element) {
 		if(button != null) {
 			button.innerHTML = '${toggled?"hide":"show"} all';
-			var nps:Array<Element> = cast Browser.document.body.getElementsByClassName("nextprev");
+			var nps:Array<Element> = untyped Browser.document.body.getElementsByClassName("nextprev");
 			for(np in nps) {
 				var np:Array<AnchorElement> = [for(l in np.getElementsByTagName("a")) cast l];
 				for(i in np) {

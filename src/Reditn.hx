@@ -40,7 +40,7 @@ class Reditn {
 				"en.wikipedia.org",
 				"api.github.com",
 				"sourceforge.net",
-				"api.twitter.com",
+				"https://api.twitter.com",
 				"digitaltrends.com",
 				"webupd8.org",
 				"api.tumblr.com",
@@ -57,7 +57,8 @@ class Reditn {
 			icons: [
 				"128" => "icon128.png",
 				"64" => "icon64.png"
-			]
+			],
+			skip_compile: true
 		});
 		Browser.onload(init);
 	}
