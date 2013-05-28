@@ -3,5 +3,5 @@
 	<name>Reditn - the comprehensive reddit plugin</name>
 	<description>The comprehensive reddit plugin - allows you to expand images, albums, articles, etc, tag users and comments, never stop scrolling, control it with your keyboard and more!</description>
 	<author>Tom Bebbington (TopHattedCoder)</author>
-	<icon width="64" height="64">ip</icon><icon width="128" height="128">ip</icon>
+	<icon width="64" height="64" src="icons/icon64.png"/><icon width="128" height="128" src="icons/icon128.png"/>
 </widget>
