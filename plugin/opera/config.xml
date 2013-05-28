@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets">
+	<name>Reditn - the comprehensive reddit plugin</name>
+	<description>The comprehensive reddit plugin - allows you to expand images, albums, articles, etc, tag users and comments, never stop scrolling, control it with your keyboard and more!</description>
+	<author>Tom Bebbington (TopHattedCoder)</author>
+	<icon width="64" height="64">ip</icon><icon width="128" height="128">ip</icon>
+</widget>
