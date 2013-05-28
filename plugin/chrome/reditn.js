@@ -464,7 +464,6 @@ Konami.translate = function(p) {
 	while(Konami.filter.matchSub(p,pos)) {
 		var mp = Konami.filter.matchedPos();
 		var word = Konami.words[Std.random(Konami.words.length)];
-		console.log(word);
 		pos = mp.pos + word.length;
 		p = Konami.filter.matchedLeft() + word + Konami.filter.matchedRight();
 	}
@@ -523,6 +522,7 @@ var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
 Reditn.__name__ = ["Reditn"];
 Reditn.main = function() {
+	console.log({ 'short' : "reditn", full : "Reditn - the comprehensive reddit plugin"});
 	ext.Browser.onload(Reditn.init);
 }
 Reditn.getThingId = function(e) {
@@ -563,16 +563,13 @@ Reditn.init = function() {
 	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
 	Reditn.refreshLinks();
 	Style.init();
-	console.log(chrome);
-	console.log(Reflect.fields(chrome));
-	ext.Browser.notify({ title : "Hello world!", message : "HELLO!", icon : "icon128.png"});
 	Reditn.wrap(AutoScroll.init,"autoscroll");
 	Reditn.wrap(Expand.init,"expand");
 	Reditn.wrap(TextExpand.init,"text-expand");
 	Reditn.wrap(Keyboard.init,"keyboard");
 	Reditn.wrap(Preview.init,"preview");
 	Reditn.wrap(SubredditInfo.init,"subinfo");
-	Reditn.wrap(UserInfo.init,"useringo");
+	Reditn.wrap(UserInfo.init,"userinfo");
 	Reditn.wrap(UserTagger.init,"user-tag");
 	Reditn.wrap(SubredditTagger.init,"sub-tag");
 	window.history.replaceState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
@@ -1157,12 +1154,32 @@ $hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
 haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
 haxe.ds.StringMap.__interfaces__ = [IMap];
 haxe.ds.StringMap.prototype = {
-	keys: function() {
+	toString: function() {
+		var s = new StringBuf();
+		s.b += "{";
+		var it = this.keys();
+		while( it.hasNext() ) {
+			var i = it.next();
+			s.b += Std.string(i);
+			s.b += " => ";
+			s.b += Std.string(Std.string(this.get(i)));
+			if(it.hasNext()) s.b += ", ";
+		}
+		s.b += "}";
+		return s.b;
+	}
+	,keys: function() {
 		var a = [];
 		for( var key in this.h ) {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
 		return HxOverrides.iter(a);
+	}
+	,remove: function(key) {
+		key = "$" + key;
+		if(!this.h.hasOwnProperty(key)) return false;
+		delete(this.h[key]);
+		return true;
 	}
 	,exists: function(key) {
 		return this.h.hasOwnProperty("$" + key);
@@ -2018,12 +2035,23 @@ Preview.preview = function(e) {
 var Settings = function() { }
 $hxClasses["Settings"] = Settings;
 Settings.__name__ = ["Settings"];
+Settings.optimise = function() {
+	var $it0 = Settings.settings.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		var sv = Settings.settings.get(k), cv = ext.Storage.data.get(k);
+		if(sv.def != cv) {
+			var value = cv;
+			ext.Storage.data.set(k,value);
+		} else ext.Storage.data.remove(k);
+	}
+}
 Settings.fixMissing = function(def) {
 	if(def == null) def = false;
 	var $it0 = Settings.settings.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		if(!ext.Storage.data.exists(k) || def) {
+		if(!ext.Storage.data.exists(k) || def || ext.Storage.data.get(k) == undefined) {
 			var value = Settings.settings.get(k).def;
 			ext.Storage.data.set(k,value);
 		}
@@ -2087,15 +2115,23 @@ Settings.settingsPopUp = function() {
 			var value = val;
 			ext.Storage.data.set(i1.name,value);
 		}
+		Settings.optimise();
 		ext.Storage.flush();
+		Settings.fixMissing();
+		ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 	};
 	var delb = document.createElement("input");
 	delb.type = "button";
 	delb.value = "Restore default settings";
 	delb.onclick = function(_) {
-		Settings.fixMissing(true);
-		ext.Storage.flush();
-		Settings.settingsPopUp();
+		if(window.confirm("Are you sure? This will delete all user tags, subreddit tags and settings!")) {
+			Settings.fixMissing(true);
+			Settings.optimise();
+			ext.Storage.flush();
+			Settings.fixMissing();
+			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
+			Settings.settingsPopUp();
+		}
 	};
 	form.appendChild(delb);
 	form.appendChild(document.createElement("br"));
@@ -2135,7 +2171,10 @@ $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
 	var s = document.createElement("style");
-	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button {\n\tfloat: left;\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
+	s.type = "text/css";
+	ext.Resource.get("data/sprites.png",function(url) {
+		s.textContent = ".expando-button.image.collapsed{\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button {\n\tfloat: left;\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
+	});
 	document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
@@ -2205,7 +2244,10 @@ SubredditTagger.getTag = function(a) {
 		box.onchange = function(ev) {
 			ext.Storage.data.get("sub-tags").set(sub,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.optimise();
 			ext.Storage.flush();
+			Settings.fixMissing();
+			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
@@ -2399,7 +2441,10 @@ UserTagger.getTag = function(a) {
 		box.onchange = function(ev) {
 			ext.Storage.data.get("user-tags").set(user,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.optimise();
 			ext.Storage.flush();
+			Settings.fixMissing();
+			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
@@ -2426,18 +2471,29 @@ ext.Browser.onload = function(cb) {
 	}
 }
 ext.Browser.notify = function(n) {
-	var opt = { type : "basic", title : n.title, message : n.message, iconUrl : n.icon};
-	try {
-		chrome.notifications.create(Std.string(ext.Browser.nid++),opt,function(id) {
-		});
-	} catch( e ) {
-		if(window.notifications != null) {
-			if(window.notifications.checkPermission() != 0) window.notifications.requestPermission(function() {
-				window.notifications.createNotification(null,n.title,n.message);
-				return true;
-			}); else window.notifications.createNotification(null,n.title,n.message);
-		} else console.log("No notifications object found");
-	}
+	Notification.requestPermission(function(g) {
+		var _g = g.toLowerCase();
+		switch(_g) {
+		case "granted":
+			var f = new Notification(n.title,{ body : n.message});
+			f.onshow = function(_) {
+				if(n.timeout != null) setTimeout($bind(f,f.close),n.timeout * 1000);
+			};
+			f.onclose = function(_) {
+				if(n.onclick != null) n.onclick();
+			};
+			break;
+		default:
+			console.log("Permission " + g + " granted or not?");
+			throw g;
+		}
+	});
+}
+ext.Resource = function() { }
+$hxClasses["ext.Resource"] = ext.Resource;
+ext.Resource.__name__ = ["ext","Resource"];
+ext.Resource.get = function(path,callb) {
+	callb(chrome.extension.getURL(path));
 }
 haxe.Unserializer = function(buf) {
 	this.buf = buf;
@@ -2706,7 +2762,11 @@ ext.Storage = function() { }
 $hxClasses["ext.Storage"] = ext.Storage;
 ext.Storage.__name__ = ["ext","Storage"];
 ext.Storage.flush = function() {
-	chrome.storage.sync.set("data",haxe.Seralizer.run(ext.Storage.data));
+	var adata = haxe.Serializer.run(ext.Storage.data);
+	console.log("Saving: " + ext.Storage.data.toString());
+	chrome.storage.sync.set({ data : adata},function() {
+		console.log("Extension storage saved");
+	});
 }
 haxe.Serializer = function() {
 	this.buf = new StringBuf();
@@ -3103,7 +3163,13 @@ Xml.ProcessingInstruction = "processingInstruction";
 Xml.Document = "document";
 ext.Storage.data = new haxe.ds.StringMap();
 chrome.storage.sync.get("data",function(d) {
-	if(d != null && js.Boot.__instanceof(d,String)) ext.Storage.data = haxe.Unserializer.run(d);
+	if(d != null && d.data != null) {
+		ext.Storage.data = haxe.Unserializer.run(d.data);
+		console.log("" + ext.Storage.data.toString() + " loaded");
+	} else {
+		console.log("Incompatible value given by Chrome:");
+		console.log(d);
+	}
 });
 AutoScroll.regex = new EReg("\\?count=([0-9]*)&after=([a-z0-9_]*)","");
 AutoScroll.count = 50;
@@ -3585,7 +3651,7 @@ Settings.settings = (function($this) {
 	_g.set("user-tag",{ def : true, desc : "Tag users with nicknames"});
 	_g.set("sub-tag",{ def : true, desc : "Tag subreddits with nicknames"});
 	_g.set("autoscroll",{ def : true, desc : "Seamless scrolling between pages"});
-	_g.set("preview",{ def : true, desc : "Preview comments and self posts before they are publishes"});
+	_g.set("preview",{ def : true, desc : "Preview comments and self posts before they are published"});
 	_g.set("keyboard",{ def : false, desc : "Keyboard navigation of the links in the page"});
 	_g.set("nsfw-filter",{ def : false, desc : "Filter NSFW posts"});
 	_g.set("user-tags",{ def : new haxe.ds.StringMap(), desc : null});
@@ -3593,7 +3659,6 @@ Settings.settings = (function($this) {
 	$r = _g;
 	return $r;
 }(this));
-ext.Browser.nid = 0;
 haxe.Unserializer.DEFAULT_RESOLVER = Type;
 haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe.Serializer.USE_CACHE = false;
@@ -3604,3 +3669,5 @@ js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 Reditn.main();
 })();
+
+//@ sourceMappingURL=reditn.js.map

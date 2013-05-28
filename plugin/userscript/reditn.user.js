@@ -474,7 +474,6 @@ Konami.translate = function(p) {
 	while(Konami.filter.matchSub(p,pos)) {
 		var mp = Konami.filter.matchedPos();
 		var word = Konami.words[Std.random(Konami.words.length)];
-		console.log(word);
 		pos = mp.pos + word.length;
 		p = Konami.filter.matchedLeft() + word + Konami.filter.matchedRight();
 	}
@@ -533,6 +532,7 @@ var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
 Reditn.__name__ = ["Reditn"];
 Reditn.main = function() {
+	console.log({ 'short' : "reditn", full : "Reditn - the comprehensive reddit plugin"});
 	ext.Browser.onload(Reditn.init);
 }
 Reditn.getThingId = function(e) {
@@ -573,14 +573,13 @@ Reditn.init = function() {
 	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
 	Reditn.refreshLinks();
 	Style.init();
-	ext.Browser.notify({ title : "Hello world!", message : "HELLO!", icon : "icon128.png"});
 	Reditn.wrap(AutoScroll.init,"autoscroll");
 	Reditn.wrap(Expand.init,"expand");
 	Reditn.wrap(TextExpand.init,"text-expand");
 	Reditn.wrap(Keyboard.init,"keyboard");
 	Reditn.wrap(Preview.init,"preview");
 	Reditn.wrap(SubredditInfo.init,"subinfo");
-	Reditn.wrap(UserInfo.init,"useringo");
+	Reditn.wrap(UserInfo.init,"userinfo");
 	Reditn.wrap(UserTagger.init,"user-tag");
 	Reditn.wrap(SubredditTagger.init,"sub-tag");
 	unsafeWindow.history.replaceState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
@@ -1165,6 +1164,12 @@ haxe.ds.StringMap.prototype = {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
 		return HxOverrides.iter(a);
+	}
+	,remove: function(key) {
+		key = "$" + key;
+		if(!this.h.hasOwnProperty(key)) return false;
+		delete(this.h[key]);
+		return true;
 	}
 	,exists: function(key) {
 		return this.h.hasOwnProperty("$" + key);
@@ -2020,12 +2025,23 @@ Preview.preview = function(e) {
 var Settings = function() { }
 $hxClasses["Settings"] = Settings;
 Settings.__name__ = ["Settings"];
+Settings.optimise = function() {
+	var $it0 = Settings.settings.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		var sv = Settings.settings.get(k), cv = ext.Storage.data.get(k);
+		if(sv.def != cv) {
+			var value = cv;
+			ext.Storage.data.set(k,value);
+		} else ext.Storage.data.remove(k);
+	}
+}
 Settings.fixMissing = function(def) {
 	if(def == null) def = false;
 	var $it0 = Settings.settings.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		if(!ext.Storage.data.exists(k) || def) {
+		if(!ext.Storage.data.exists(k) || def || ext.Storage.data.get(k) == undefined) {
 			var value = Settings.settings.get(k).def;
 			ext.Storage.data.set(k,value);
 		}
@@ -2089,15 +2105,23 @@ Settings.settingsPopUp = function() {
 			var value = val;
 			ext.Storage.data.set(i1.name,value);
 		}
+		Settings.optimise();
 		ext.Storage.flush();
+		Settings.fixMissing();
+		ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 	};
 	var delb = document.createElement("input");
 	delb.type = "button";
 	delb.value = "Restore default settings";
 	delb.onclick = function(_) {
-		Settings.fixMissing(true);
-		ext.Storage.flush();
-		Settings.settingsPopUp();
+		if(unsafeWindow.confirm("Are you sure? This will delete all user tags, subreddit tags and settings!")) {
+			Settings.fixMissing(true);
+			Settings.optimise();
+			ext.Storage.flush();
+			Settings.fixMissing();
+			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
+			Settings.settingsPopUp();
+		}
 	};
 	form.appendChild(delb);
 	form.appendChild(document.createElement("br"));
@@ -2137,7 +2161,8 @@ $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
 	var s = document.createElement("style");
-	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button {\n\tfloat: left;\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
+	s.type = "text/css";
+	s.textContent = ".expando-button.image.collapsed{\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button {\n\tfloat: left;\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
 	document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
@@ -2207,7 +2232,10 @@ SubredditTagger.getTag = function(a) {
 		box.onchange = function(ev) {
 			ext.Storage.data.get("sub-tags").set(sub,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.optimise();
 			ext.Storage.flush();
+			Settings.fixMissing();
+			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
@@ -2401,7 +2429,10 @@ UserTagger.getTag = function(a) {
 		box.onchange = function(ev) {
 			ext.Storage.data.get("user-tags").set(user,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.optimise();
 			ext.Storage.flush();
+			Settings.fixMissing();
+			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
@@ -2427,18 +2458,283 @@ ext.Browser.onload = function(cb) {
 	}
 }
 ext.Browser.notify = function(n) {
-	if(unsafeWindow.notifications != null) {
-		if(unsafeWindow.notifications.checkPermission() != 0) unsafeWindow.notifications.requestPermission(function() {
-			unsafeWindow.notifications.createNotification(null,n.title,n.message);
+	var not = unsafeWindow.notifications;
+	if(not != null) {
+		if(not.checkPermission() != 0) not.requestPermission(function() {
+			not.createNotification(null,n.title,n.message);
 			return true;
-		}); else unsafeWindow.notifications.createNotification(null,n.title,n.message);
+		}); else not.createNotification(null,n.title,n.message);
 	} else console.log("No notifications object found");
+}
+haxe.Unserializer = function(buf) {
+	this.buf = buf;
+	this.length = buf.length;
+	this.pos = 0;
+	this.scache = new Array();
+	this.cache = new Array();
+	var r = haxe.Unserializer.DEFAULT_RESOLVER;
+	if(r == null) {
+		r = Type;
+		haxe.Unserializer.DEFAULT_RESOLVER = r;
+	}
+	this.setResolver(r);
+};
+$hxClasses["haxe.Unserializer"] = haxe.Unserializer;
+haxe.Unserializer.__name__ = ["haxe","Unserializer"];
+haxe.Unserializer.initCodes = function() {
+	var codes = new Array();
+	var _g1 = 0, _g = haxe.Unserializer.BASE64.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		codes[haxe.Unserializer.BASE64.charCodeAt(i)] = i;
+	}
+	return codes;
+}
+haxe.Unserializer.run = function(v) {
+	return new haxe.Unserializer(v).unserialize();
+}
+haxe.Unserializer.prototype = {
+	unserialize: function() {
+		var _g = this.buf.charCodeAt(this.pos++);
+		switch(_g) {
+		case 110:
+			return null;
+		case 116:
+			return true;
+		case 102:
+			return false;
+		case 122:
+			return 0;
+		case 105:
+			return this.readDigits();
+		case 100:
+			var p1 = this.pos;
+			while(true) {
+				var c = this.buf.charCodeAt(this.pos);
+				if(c >= 43 && c < 58 || c == 101 || c == 69) this.pos++; else break;
+			}
+			return Std.parseFloat(HxOverrides.substr(this.buf,p1,this.pos - p1));
+		case 121:
+			var len = this.readDigits();
+			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) throw "Invalid string length";
+			var s = HxOverrides.substr(this.buf,this.pos,len);
+			this.pos += len;
+			s = StringTools.urlDecode(s);
+			this.scache.push(s);
+			return s;
+		case 107:
+			return Math.NaN;
+		case 109:
+			return Math.NEGATIVE_INFINITY;
+		case 112:
+			return Math.POSITIVE_INFINITY;
+		case 97:
+			var buf = this.buf;
+			var a = new Array();
+			this.cache.push(a);
+			while(true) {
+				var c = this.buf.charCodeAt(this.pos);
+				if(c == 104) {
+					this.pos++;
+					break;
+				}
+				if(c == 117) {
+					this.pos++;
+					var n = this.readDigits();
+					a[a.length + n - 1] = null;
+				} else a.push(this.unserialize());
+			}
+			return a;
+		case 111:
+			var o = { };
+			this.cache.push(o);
+			this.unserializeObject(o);
+			return o;
+		case 114:
+			var n = this.readDigits();
+			if(n < 0 || n >= this.cache.length) throw "Invalid reference";
+			return this.cache[n];
+		case 82:
+			var n = this.readDigits();
+			if(n < 0 || n >= this.scache.length) throw "Invalid string reference";
+			return this.scache[n];
+		case 120:
+			throw this.unserialize();
+			break;
+		case 99:
+			var name = this.unserialize();
+			var cl = this.resolver.resolveClass(name);
+			if(cl == null) throw "Class not found " + name;
+			var o = Type.createEmptyInstance(cl);
+			this.cache.push(o);
+			this.unserializeObject(o);
+			return o;
+		case 119:
+			var name = this.unserialize();
+			var edecl = this.resolver.resolveEnum(name);
+			if(edecl == null) throw "Enum not found " + name;
+			var e = this.unserializeEnum(edecl,this.unserialize());
+			this.cache.push(e);
+			return e;
+		case 106:
+			var name = this.unserialize();
+			var edecl = this.resolver.resolveEnum(name);
+			if(edecl == null) throw "Enum not found " + name;
+			this.pos++;
+			var index = this.readDigits();
+			var tag = Type.getEnumConstructs(edecl)[index];
+			if(tag == null) throw "Unknown enum index " + name + "@" + index;
+			var e = this.unserializeEnum(edecl,tag);
+			this.cache.push(e);
+			return e;
+		case 108:
+			var l = new List();
+			this.cache.push(l);
+			var buf = this.buf;
+			while(this.buf.charCodeAt(this.pos) != 104) l.add(this.unserialize());
+			this.pos++;
+			return l;
+		case 98:
+			var h = new haxe.ds.StringMap();
+			this.cache.push(h);
+			var buf = this.buf;
+			while(this.buf.charCodeAt(this.pos) != 104) {
+				var s = this.unserialize();
+				h.set(s,this.unserialize());
+			}
+			this.pos++;
+			return h;
+		case 113:
+			var h = new haxe.ds.IntMap();
+			this.cache.push(h);
+			var buf = this.buf;
+			var c = this.buf.charCodeAt(this.pos++);
+			while(c == 58) {
+				var i = this.readDigits();
+				h.set(i,this.unserialize());
+				c = this.buf.charCodeAt(this.pos++);
+			}
+			if(c != 104) throw "Invalid IntMap format";
+			return h;
+		case 77:
+			var h = new haxe.ds.ObjectMap();
+			this.cache.push(h);
+			var buf = this.buf;
+			while(this.buf.charCodeAt(this.pos) != 104) {
+				var s = this.unserialize();
+				h.set(s,this.unserialize());
+			}
+			this.pos++;
+			return h;
+		case 118:
+			var d = HxOverrides.strDate(HxOverrides.substr(this.buf,this.pos,19));
+			this.cache.push(d);
+			this.pos += 19;
+			return d;
+		case 115:
+			var len = this.readDigits();
+			var buf = this.buf;
+			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) throw "Invalid bytes length";
+			var codes = haxe.Unserializer.CODES;
+			if(codes == null) {
+				codes = haxe.Unserializer.initCodes();
+				haxe.Unserializer.CODES = codes;
+			}
+			var i = this.pos;
+			var rest = len & 3;
+			var size = (len >> 2) * 3 + (rest >= 2?rest - 1:0);
+			var max = i + (len - rest);
+			var bytes = haxe.io.Bytes.alloc(size);
+			var bpos = 0;
+			while(i < max) {
+				var c1 = codes[buf.charCodeAt(i++)];
+				var c2 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = (c1 << 2 | c2 >> 4) & 255;
+				var c3 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = (c2 << 4 | c3 >> 2) & 255;
+				var c4 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = (c3 << 6 | c4) & 255;
+			}
+			if(rest >= 2) {
+				var c1 = codes[buf.charCodeAt(i++)];
+				var c2 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = (c1 << 2 | c2 >> 4) & 255;
+				if(rest == 3) {
+					var c3 = codes[buf.charCodeAt(i++)];
+					bytes.b[bpos++] = (c2 << 4 | c3 >> 2) & 255;
+				}
+			}
+			this.pos += len;
+			this.cache.push(bytes);
+			return bytes;
+		case 67:
+			var name = this.unserialize();
+			var cl = this.resolver.resolveClass(name);
+			if(cl == null) throw "Class not found " + name;
+			var o = Type.createEmptyInstance(cl);
+			this.cache.push(o);
+			o.hxUnserialize(this);
+			if(this.buf.charCodeAt(this.pos++) != 103) throw "Invalid custom data";
+			return o;
+		default:
+		}
+		this.pos--;
+		throw "Invalid char " + this.buf.charAt(this.pos) + " at position " + this.pos;
+	}
+	,unserializeEnum: function(edecl,tag) {
+		if(this.buf.charCodeAt(this.pos++) != 58) throw "Invalid enum format";
+		var nargs = this.readDigits();
+		if(nargs == 0) return Type.createEnum(edecl,tag);
+		var args = new Array();
+		while(nargs-- > 0) args.push(this.unserialize());
+		return Type.createEnum(edecl,tag,args);
+	}
+	,unserializeObject: function(o) {
+		while(true) {
+			if(this.pos >= this.length) throw "Invalid object";
+			if(this.buf.charCodeAt(this.pos) == 103) break;
+			var k = this.unserialize();
+			if(!js.Boot.__instanceof(k,String)) throw "Invalid object key";
+			var v = this.unserialize();
+			o[k] = v;
+		}
+		this.pos++;
+	}
+	,readDigits: function() {
+		var k = 0;
+		var s = false;
+		var fpos = this.pos;
+		while(true) {
+			var c = this.buf.charCodeAt(this.pos);
+			if(c != c) break;
+			if(c == 45) {
+				if(this.pos != fpos) break;
+				s = true;
+				this.pos++;
+				continue;
+			}
+			if(c < 48 || c > 57) break;
+			k = k * 10 + (c - 48);
+			this.pos++;
+		}
+		if(s) k *= -1;
+		return k;
+	}
+	,setResolver: function(r) {
+		if(r == null) this.resolver = { resolveClass : function(_) {
+			return null;
+		}, resolveEnum : function(_) {
+			return null;
+		}}; else this.resolver = r;
+	}
+	,__class__: haxe.Unserializer
 }
 ext.Storage = function() { }
 $hxClasses["ext.Storage"] = ext.Storage;
 ext.Storage.__name__ = ["ext","Storage"];
 ext.Storage.flush = function() {
-	GM_setValue("data",ext.Storage.data);
+	var adata = haxe.Serializer.run(ext.Storage.data);
+	GM_setValue("data",adata);
 }
 haxe.Serializer = function() {
 	this.buf = new StringBuf();
@@ -2720,269 +3016,6 @@ haxe.Timer.prototype = {
 	}
 	,__class__: haxe.Timer
 }
-haxe.Unserializer = function(buf) {
-	this.buf = buf;
-	this.length = buf.length;
-	this.pos = 0;
-	this.scache = new Array();
-	this.cache = new Array();
-	var r = haxe.Unserializer.DEFAULT_RESOLVER;
-	if(r == null) {
-		r = Type;
-		haxe.Unserializer.DEFAULT_RESOLVER = r;
-	}
-	this.setResolver(r);
-};
-$hxClasses["haxe.Unserializer"] = haxe.Unserializer;
-haxe.Unserializer.__name__ = ["haxe","Unserializer"];
-haxe.Unserializer.initCodes = function() {
-	var codes = new Array();
-	var _g1 = 0, _g = haxe.Unserializer.BASE64.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		codes[haxe.Unserializer.BASE64.charCodeAt(i)] = i;
-	}
-	return codes;
-}
-haxe.Unserializer.run = function(v) {
-	return new haxe.Unserializer(v).unserialize();
-}
-haxe.Unserializer.prototype = {
-	unserialize: function() {
-		var _g = this.buf.charCodeAt(this.pos++);
-		switch(_g) {
-		case 110:
-			return null;
-		case 116:
-			return true;
-		case 102:
-			return false;
-		case 122:
-			return 0;
-		case 105:
-			return this.readDigits();
-		case 100:
-			var p1 = this.pos;
-			while(true) {
-				var c = this.buf.charCodeAt(this.pos);
-				if(c >= 43 && c < 58 || c == 101 || c == 69) this.pos++; else break;
-			}
-			return Std.parseFloat(HxOverrides.substr(this.buf,p1,this.pos - p1));
-		case 121:
-			var len = this.readDigits();
-			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) throw "Invalid string length";
-			var s = HxOverrides.substr(this.buf,this.pos,len);
-			this.pos += len;
-			s = StringTools.urlDecode(s);
-			this.scache.push(s);
-			return s;
-		case 107:
-			return Math.NaN;
-		case 109:
-			return Math.NEGATIVE_INFINITY;
-		case 112:
-			return Math.POSITIVE_INFINITY;
-		case 97:
-			var buf = this.buf;
-			var a = new Array();
-			this.cache.push(a);
-			while(true) {
-				var c = this.buf.charCodeAt(this.pos);
-				if(c == 104) {
-					this.pos++;
-					break;
-				}
-				if(c == 117) {
-					this.pos++;
-					var n = this.readDigits();
-					a[a.length + n - 1] = null;
-				} else a.push(this.unserialize());
-			}
-			return a;
-		case 111:
-			var o = { };
-			this.cache.push(o);
-			this.unserializeObject(o);
-			return o;
-		case 114:
-			var n = this.readDigits();
-			if(n < 0 || n >= this.cache.length) throw "Invalid reference";
-			return this.cache[n];
-		case 82:
-			var n = this.readDigits();
-			if(n < 0 || n >= this.scache.length) throw "Invalid string reference";
-			return this.scache[n];
-		case 120:
-			throw this.unserialize();
-			break;
-		case 99:
-			var name = this.unserialize();
-			var cl = this.resolver.resolveClass(name);
-			if(cl == null) throw "Class not found " + name;
-			var o = Type.createEmptyInstance(cl);
-			this.cache.push(o);
-			this.unserializeObject(o);
-			return o;
-		case 119:
-			var name = this.unserialize();
-			var edecl = this.resolver.resolveEnum(name);
-			if(edecl == null) throw "Enum not found " + name;
-			var e = this.unserializeEnum(edecl,this.unserialize());
-			this.cache.push(e);
-			return e;
-		case 106:
-			var name = this.unserialize();
-			var edecl = this.resolver.resolveEnum(name);
-			if(edecl == null) throw "Enum not found " + name;
-			this.pos++;
-			var index = this.readDigits();
-			var tag = Type.getEnumConstructs(edecl)[index];
-			if(tag == null) throw "Unknown enum index " + name + "@" + index;
-			var e = this.unserializeEnum(edecl,tag);
-			this.cache.push(e);
-			return e;
-		case 108:
-			var l = new List();
-			this.cache.push(l);
-			var buf = this.buf;
-			while(this.buf.charCodeAt(this.pos) != 104) l.add(this.unserialize());
-			this.pos++;
-			return l;
-		case 98:
-			var h = new haxe.ds.StringMap();
-			this.cache.push(h);
-			var buf = this.buf;
-			while(this.buf.charCodeAt(this.pos) != 104) {
-				var s = this.unserialize();
-				h.set(s,this.unserialize());
-			}
-			this.pos++;
-			return h;
-		case 113:
-			var h = new haxe.ds.IntMap();
-			this.cache.push(h);
-			var buf = this.buf;
-			var c = this.buf.charCodeAt(this.pos++);
-			while(c == 58) {
-				var i = this.readDigits();
-				h.set(i,this.unserialize());
-				c = this.buf.charCodeAt(this.pos++);
-			}
-			if(c != 104) throw "Invalid IntMap format";
-			return h;
-		case 77:
-			var h = new haxe.ds.ObjectMap();
-			this.cache.push(h);
-			var buf = this.buf;
-			while(this.buf.charCodeAt(this.pos) != 104) {
-				var s = this.unserialize();
-				h.set(s,this.unserialize());
-			}
-			this.pos++;
-			return h;
-		case 118:
-			var d = HxOverrides.strDate(HxOverrides.substr(this.buf,this.pos,19));
-			this.cache.push(d);
-			this.pos += 19;
-			return d;
-		case 115:
-			var len = this.readDigits();
-			var buf = this.buf;
-			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) throw "Invalid bytes length";
-			var codes = haxe.Unserializer.CODES;
-			if(codes == null) {
-				codes = haxe.Unserializer.initCodes();
-				haxe.Unserializer.CODES = codes;
-			}
-			var i = this.pos;
-			var rest = len & 3;
-			var size = (len >> 2) * 3 + (rest >= 2?rest - 1:0);
-			var max = i + (len - rest);
-			var bytes = haxe.io.Bytes.alloc(size);
-			var bpos = 0;
-			while(i < max) {
-				var c1 = codes[buf.charCodeAt(i++)];
-				var c2 = codes[buf.charCodeAt(i++)];
-				bytes.b[bpos++] = (c1 << 2 | c2 >> 4) & 255;
-				var c3 = codes[buf.charCodeAt(i++)];
-				bytes.b[bpos++] = (c2 << 4 | c3 >> 2) & 255;
-				var c4 = codes[buf.charCodeAt(i++)];
-				bytes.b[bpos++] = (c3 << 6 | c4) & 255;
-			}
-			if(rest >= 2) {
-				var c1 = codes[buf.charCodeAt(i++)];
-				var c2 = codes[buf.charCodeAt(i++)];
-				bytes.b[bpos++] = (c1 << 2 | c2 >> 4) & 255;
-				if(rest == 3) {
-					var c3 = codes[buf.charCodeAt(i++)];
-					bytes.b[bpos++] = (c2 << 4 | c3 >> 2) & 255;
-				}
-			}
-			this.pos += len;
-			this.cache.push(bytes);
-			return bytes;
-		case 67:
-			var name = this.unserialize();
-			var cl = this.resolver.resolveClass(name);
-			if(cl == null) throw "Class not found " + name;
-			var o = Type.createEmptyInstance(cl);
-			this.cache.push(o);
-			o.hxUnserialize(this);
-			if(this.buf.charCodeAt(this.pos++) != 103) throw "Invalid custom data";
-			return o;
-		default:
-		}
-		this.pos--;
-		throw "Invalid char " + this.buf.charAt(this.pos) + " at position " + this.pos;
-	}
-	,unserializeEnum: function(edecl,tag) {
-		if(this.buf.charCodeAt(this.pos++) != 58) throw "Invalid enum format";
-		var nargs = this.readDigits();
-		if(nargs == 0) return Type.createEnum(edecl,tag);
-		var args = new Array();
-		while(nargs-- > 0) args.push(this.unserialize());
-		return Type.createEnum(edecl,tag,args);
-	}
-	,unserializeObject: function(o) {
-		while(true) {
-			if(this.pos >= this.length) throw "Invalid object";
-			if(this.buf.charCodeAt(this.pos) == 103) break;
-			var k = this.unserialize();
-			if(!js.Boot.__instanceof(k,String)) throw "Invalid object key";
-			var v = this.unserialize();
-			o[k] = v;
-		}
-		this.pos++;
-	}
-	,readDigits: function() {
-		var k = 0;
-		var s = false;
-		var fpos = this.pos;
-		while(true) {
-			var c = this.buf.charCodeAt(this.pos);
-			if(c != c) break;
-			if(c == 45) {
-				if(this.pos != fpos) break;
-				s = true;
-				this.pos++;
-				continue;
-			}
-			if(c < 48 || c > 57) break;
-			k = k * 10 + (c - 48);
-			this.pos++;
-		}
-		if(s) k *= -1;
-		return k;
-	}
-	,setResolver: function(r) {
-		if(r == null) this.resolver = { resolveClass : function(_) {
-			return null;
-		}, resolveEnum : function(_) {
-			return null;
-		}}; else this.resolver = r;
-	}
-	,__class__: haxe.Unserializer
-}
 haxe.ds.IntMap = function() {
 	this.h = { };
 };
@@ -3092,7 +3125,8 @@ Xml.DocType = "doctype";
 Xml.ProcessingInstruction = "processingInstruction";
 Xml.Document = "document";
 ext.Storage.data = new haxe.ds.StringMap();
-ext.Storage.data = GM_getValue("data",ext.Storage.data);
+var tdata = GM_getValue("data",null);
+if(tdata != null) ext.Storage.data = haxe.Unserializer.run(tdata);
 AutoScroll.regex = new EReg("\\?count=([0-9]*)&after=([a-z0-9_]*)","");
 AutoScroll.count = 50;
 AutoScroll.canLoad = true;
@@ -3573,7 +3607,7 @@ Settings.settings = (function($this) {
 	_g.set("user-tag",{ def : true, desc : "Tag users with nicknames"});
 	_g.set("sub-tag",{ def : true, desc : "Tag subreddits with nicknames"});
 	_g.set("autoscroll",{ def : true, desc : "Seamless scrolling between pages"});
-	_g.set("preview",{ def : true, desc : "Preview comments and self posts before they are publishes"});
+	_g.set("preview",{ def : true, desc : "Preview comments and self posts before they are published"});
 	_g.set("keyboard",{ def : false, desc : "Keyboard navigation of the links in the page"});
 	_g.set("nsfw-filter",{ def : false, desc : "Filter NSFW posts"});
 	_g.set("user-tags",{ def : new haxe.ds.StringMap(), desc : null});
@@ -3581,11 +3615,11 @@ Settings.settings = (function($this) {
 	$r = _g;
 	return $r;
 }(this));
+haxe.Unserializer.DEFAULT_RESOLVER = Type;
+haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe.Serializer.USE_CACHE = false;
 haxe.Serializer.USE_ENUM_INDEX = false;
 haxe.Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
-haxe.Unserializer.DEFAULT_RESOLVER = Type;
-haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe.ds.ObjectMap.count = 0;
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;

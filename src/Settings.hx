@@ -17,7 +17,7 @@ class Settings {
 		"user-tag" => { def: true, desc: "Tag users with nicknames" },
 		"sub-tag" => { def: true, desc: "Tag subreddits with nicknames" },
 		"autoscroll" => { def: true, desc: "Seamless scrolling between pages" },
-		"preview" => { def: true, desc: "Preview comments and self posts before they are publishes" },
+		"preview" => { def: true, desc: "Preview comments and self posts before they are published" },
 		"keyboard" => { def: false, desc: "Keyboard navigation of the links in the page" },
 		"nsfw-filter" => { def: false, desc: "Filter NSFW posts" },
 		"user-tags" => { def: new Map<String, String>(), desc: null },
@@ -27,12 +27,24 @@ class Settings {
 	static inline function get_data() {
 		return Storage.data;
 	}
+	static function optimise() {
+		for(k in settings.keys()) {
+			var sv = settings.get(k), cv = data.get(k);
+			if(sv.def != cv)
+				data.set(k, cv);
+			else
+				data.remove(k);
+		}
+	}
 	public static inline function save() {
+		optimise();
 		Storage.flush();
+		fixMissing();
+		Browser.notify({title: "Reditn", message: "Saved settings", timeout: 5, icon: "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 	}
 	static function fixMissing(def:Bool=false) {
 		for(k in settings.keys())
-			if(!data.exists(k) || def)
+			if(!data.exists(k) || def || data.get(k) == untyped __js__("undefined"))
 				data.set(k, settings.get(k).def);
 	}
 	public static function init() {
@@ -83,15 +95,17 @@ class Settings {
 				}
 				data.set(i.name, val);
 			}
-			flush();
+			save();
 		}
 		var delb = Browser.document.createInputElement();
 		delb.type = "button";
 		delb.value = "Restore default settings";
 		delb.onclick = function(_) {
-			fixMissing(true);
-			flush();
-			settingsPopUp();
+			if(Browser.window.confirm("Are you sure? This will delete all user tags, subreddit tags and settings!")) {
+				fixMissing(true);
+				save();
+				settingsPopUp();
+			}
 		}
 		form.appendChild(delb);
 		/*

@@ -464,7 +464,6 @@ Konami.translate = function(p) {
 	while(Konami.filter.matchSub(p,pos)) {
 		var mp = Konami.filter.matchedPos();
 		var word = Konami.words[Std.random(Konami.words.length)];
-		console.log(word);
 		pos = mp.pos + word.length;
 		p = Konami.filter.matchedLeft() + word + Konami.filter.matchedRight();
 	}
@@ -523,6 +522,7 @@ var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
 Reditn.__name__ = ["Reditn"];
 Reditn.main = function() {
+	console.log({ 'short' : "reditn", full : "Reditn - the comprehensive reddit plugin"});
 	ext.Browser.onload(Reditn.init);
 }
 Reditn.getThingId = function(e) {
@@ -563,14 +563,13 @@ Reditn.init = function() {
 	Reditn.wrap(NSFWFilter.init,"nsfw-filter");
 	Reditn.refreshLinks();
 	Style.init();
-	ext.Browser.notify({ title : "Hello world!", message : "HELLO!", icon : "icon128.png"});
 	Reditn.wrap(AutoScroll.init,"autoscroll");
 	Reditn.wrap(Expand.init,"expand");
 	Reditn.wrap(TextExpand.init,"text-expand");
 	Reditn.wrap(Keyboard.init,"keyboard");
 	Reditn.wrap(Preview.init,"preview");
 	Reditn.wrap(SubredditInfo.init,"subinfo");
-	Reditn.wrap(UserInfo.init,"useringo");
+	Reditn.wrap(UserInfo.init,"userinfo");
 	Reditn.wrap(UserTagger.init,"user-tag");
 	Reditn.wrap(SubredditTagger.init,"sub-tag");
 	window.history.replaceState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
@@ -1161,6 +1160,12 @@ haxe.ds.StringMap.prototype = {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
 		return HxOverrides.iter(a);
+	}
+	,remove: function(key) {
+		key = "$" + key;
+		if(!this.h.hasOwnProperty(key)) return false;
+		delete(this.h[key]);
+		return true;
 	}
 	,exists: function(key) {
 		return this.h.hasOwnProperty("$" + key);
@@ -2016,12 +2021,23 @@ Preview.preview = function(e) {
 var Settings = function() { }
 $hxClasses["Settings"] = Settings;
 Settings.__name__ = ["Settings"];
+Settings.optimise = function() {
+	var $it0 = Settings.settings.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		var sv = Settings.settings.get(k), cv = ext.Storage.data.get(k);
+		if(sv.def != cv) {
+			var value = cv;
+			ext.Storage.data.set(k,value);
+		} else ext.Storage.data.remove(k);
+	}
+}
 Settings.fixMissing = function(def) {
 	if(def == null) def = false;
 	var $it0 = Settings.settings.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		if(!ext.Storage.data.exists(k) || def) {
+		if(!ext.Storage.data.exists(k) || def || ext.Storage.data.get(k) == undefined) {
 			var value = Settings.settings.get(k).def;
 			ext.Storage.data.set(k,value);
 		}
@@ -2085,15 +2101,23 @@ Settings.settingsPopUp = function() {
 			var value = val;
 			ext.Storage.data.set(i1.name,value);
 		}
+		Settings.optimise();
 		ext.Storage.flush();
+		Settings.fixMissing();
+		ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 	};
 	var delb = document.createElement("input");
 	delb.type = "button";
 	delb.value = "Restore default settings";
 	delb.onclick = function(_) {
-		Settings.fixMissing(true);
-		ext.Storage.flush();
-		Settings.settingsPopUp();
+		if(window.confirm("Are you sure? This will delete all user tags, subreddit tags and settings!")) {
+			Settings.fixMissing(true);
+			Settings.optimise();
+			ext.Storage.flush();
+			Settings.fixMissing();
+			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
+			Settings.settingsPopUp();
+		}
 	};
 	form.appendChild(delb);
 	form.appendChild(document.createElement("br"));
@@ -2133,7 +2157,8 @@ $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
 	var s = document.createElement("style");
-	s.innerHTML = ".expando-button.image.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"https://raw.github.com/TopHattedCoder/reditn/master/src/sprites.png\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button {\n\tfloat: left;\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
+	s.type = "text/css";
+	s.textContent = ".expando-button.image.collapsed{\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"" + "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAuCAYAAABOMsWRAAAABHNCSVQICAgIfAhkiAAABBhJREFUeJztmz1P21AUhl/bgUpsjKm69AcgQURSFbF16ZAyVHRrFVVENwWJjR/gtRJbpSKbZIi6og4oQ5duKFKTKFDlB7C0ZWRDIshxB2r3xrl2/HFMuMiPZMXXSU7enHPuh29OFADYNM/sdmcAKtZKSzhiy4rTPjju2marT2a/bzAoiuLaT1v/CjNsMuP/ODVrirJpntnnvR+khueGl3iy9hJHbFk5OO7aza/fcVLfI7GtaRqev/+IyusX2N4oKpvmmf2r/Q0384sk9oFx/SvMsB8NL8n0A8B6dR/X84vItTsD5NXxJ0cRDKmCazfzi3Ay0Wz10a3vQdO02GK9nNT3UNxpAADanQHyhI4HxvU7n5eGfjWvXpEZzYhGzjkpbzH34nHDBDCZ1VF6hBe9w52XEhh6QOSASaf2DSZ46SSFmhnrQ1dDvq8XUgcQL3lEQ6YfaSSPm/kig7rPeRxajUmHlznntmIGUkTY5AmbBHHfNy15cn5P6ACeNpv/25VK4gDwlA02Zr9ssEQBkDF5hM7Xcev4SqXiXms2m2QBcBz/qX3tXttFM3EAeHTc/+TxzXyZ0SFH8kSZczKI8R129EoFTa5bnRN221bNRNlg2MW4fcpJVwZygDj9ddwGgG97SdJtnADwbSp0yJE8gWO+HsJAz2Cxl2xhxBZqZuilI4+O6cmTBIrkyV2MFpBXr2I7MCxRbpio0FO2n7S3PpjVjozJE8v5XiF8O4wTLMsK3CX0blvw7ThDkJcgR6ahn4fXH8v5vMA4Y/607VleYNwxP4ikvSSK/iCydf4MyZw/QxI7P+2JjnrIuU+oa6UlzA0vSY3ODS+xVloCALByAevVfViWRXasV/fBygUAtz92p6kfQCr6AUCxbdt+c/gTMlUvsHIB2xtF6asXVL4EQxY+vFqdtQQSstIRAXdVOqKKuuvFaGHi6BnMPR8B7iHCWzrilF4EHc92GlNf46yvT+p7cIaxdmcw4fhp+qfhVzpCoV/TNDeQwtKRvHqFvHqF34dv3UcAbpsKZ6XkfUyKLPqFS00+q4O2EijwCqYIgCz6VUA8fDjr60LNdPcqnEcVyW8QHJE9g7kOoXRMkH4KKPQLfcjf2HgdTfEFgrKDIgCy6PdNYNEHUGS8Q9r7+zLo99UyC+dQIoN+ofO9W8bUX8S7/08dCFn0Tx12eOOUX4SfpJxzykDIoD/SEJgNFcHEWu3EnYSyHwOSEcl/oshSZqsoMynX5vetZ7mlIzy8yKg/joeBt+OdHCmQRb/vakc0YVHhvStM45ZfBv1Z6YiHuywdUR5Xv9hJdvr8SkcuRgv4U3+nrDDD7n7eiv1vPlHpiGVZKO40cGrWEuv3g0q/CEd/tmCZIZnzZ0hWOjJDstKRKfqBrHRkjIdSOvIXJ9W2SxOFeaUAAAAASUVORK5CYII=" + "\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button {\n\tfloat: left;\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
 	document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
@@ -2203,7 +2228,10 @@ SubredditTagger.getTag = function(a) {
 		box.onchange = function(ev) {
 			ext.Storage.data.get("sub-tags").set(sub,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.optimise();
 			ext.Storage.flush();
+			Settings.fixMissing();
+			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
@@ -2397,7 +2425,10 @@ UserTagger.getTag = function(a) {
 		box.onchange = function(ev) {
 			ext.Storage.data.get("user-tags").set(user,box.value);
 			tagName.innerHTML = StringTools.htmlEscape(box.value) + " ";
+			Settings.optimise();
 			ext.Storage.flush();
+			Settings.fixMissing();
+			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
@@ -2424,12 +2455,23 @@ ext.Browser.onload = function(cb) {
 	}
 }
 ext.Browser.notify = function(n) {
-	if(window.notifications != null) {
-		if(window.notifications.checkPermission() != 0) window.notifications.requestPermission(function() {
-			window.notifications.createNotification(null,n.title,n.message);
-			return true;
-		}); else window.notifications.createNotification(null,n.title,n.message);
-	} else console.log("No notifications object found");
+	Notification.requestPermission(function(g) {
+		var _g = g.toLowerCase();
+		switch(_g) {
+		case "granted":
+			var f = new Notification(n.title,{ body : n.message});
+			f.onshow = function(_) {
+				if(n.timeout != null) setTimeout($bind(f,f.close),n.timeout * 1000);
+			};
+			f.onclose = function(_) {
+				if(n.onclick != null) n.onclick();
+			};
+			break;
+		default:
+			console.log("Permission " + g + " granted or not?");
+			throw g;
+		}
+	});
 }
 haxe.Unserializer = function(buf) {
 	this.buf = buf;
@@ -2698,7 +2740,8 @@ ext.Storage = function() { }
 $hxClasses["ext.Storage"] = ext.Storage;
 ext.Storage.__name__ = ["ext","Storage"];
 ext.Storage.flush = function() {
-	window.localStorage.setItem("data",haxe.Serializer.run(ext.Storage.data));
+	var adata = haxe.Serializer.run(ext.Storage.data);
+	window.localStorage.setItem("data",adata);
 }
 haxe.Serializer = function() {
 	this.buf = new StringBuf();
@@ -3576,7 +3619,7 @@ Settings.settings = (function($this) {
 	_g.set("user-tag",{ def : true, desc : "Tag users with nicknames"});
 	_g.set("sub-tag",{ def : true, desc : "Tag subreddits with nicknames"});
 	_g.set("autoscroll",{ def : true, desc : "Seamless scrolling between pages"});
-	_g.set("preview",{ def : true, desc : "Preview comments and self posts before they are publishes"});
+	_g.set("preview",{ def : true, desc : "Preview comments and self posts before they are published"});
 	_g.set("keyboard",{ def : false, desc : "Keyboard navigation of the links in the page"});
 	_g.set("nsfw-filter",{ def : false, desc : "Filter NSFW posts"});
 	_g.set("user-tags",{ def : new haxe.ds.StringMap(), desc : null});

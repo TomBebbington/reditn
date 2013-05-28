@@ -9,7 +9,6 @@ class Konami {
 		while(filter.matchSub(p, pos)) {
 			var mp = filter.matchedPos();
 			var word = words[Std.random(words.length)];
-			trace(word);
 			pos = mp.pos + word.length;
 			p = filter.matchedLeft() + word + filter.matchedRight();
 		}

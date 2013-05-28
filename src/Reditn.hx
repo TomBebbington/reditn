@@ -55,11 +55,15 @@ class Reditn {
 				"omdbapi.com"
 			],
 			icons: [
-				"128" => "icon128.png",
-				"64" => "icon64.png"
+				"128" => "icons/icon128.png",
+				"64" => "icons/icon64.png"
+			],
+			resources: [
+				"data"
 			],
 			skip_compile: true
 		});
+		trace(ext.Builder.meta(this.name));
 		Browser.onload(init);
 	}
 	public static inline function getLinkContainer(l:Element):Element {
@@ -91,18 +95,13 @@ class Reditn {
 		wrap(NSFWFilter.init, "nsfw-filter");
 		refreshLinks();
 		Style.init();
-		#if chrome
-		trace(untyped chrome);
-		trace(Reflect.fields(untyped chrome));
-		#end
-		Browser.notify({title: "Hello world!", message: "HELLO!", icon: "icon128.png"});
 		wrap(AutoScroll.init, "autoscroll");
 		wrap(Expand.init, "expand");
 		wrap(TextExpand.init, "text-expand");
 		wrap(Keyboard.init, "keyboard");
 		wrap(Preview.init, "preview");
 		wrap(SubredditInfo.init, "subinfo");
-		wrap(UserInfo.init, "useringo");
+		wrap(UserInfo.init, "userinfo");
 		wrap(UserTagger.init, "user-tag");
 		wrap(SubredditTagger.init, "sub-tag");
 		Browser.window.history.replaceState(haxe.Serializer.run(state()), null, Expand.toggled ? "#showall" : null);
