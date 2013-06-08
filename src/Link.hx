@@ -16,9 +16,6 @@ class Link {
 	public static inline var FACEBOOK_KEY = "CAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrCAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrf";
 	static var LINK = ~/[src|href]="(\/([^\/]*))*?([^\/]*)"/;
 	static var HTML_IMG = ~/<img .*?src="([^"]*)"\/?>/;
-	static function noRel(html:String):String {
-		return LINK.replace(html, "$1, $2");
-	}
 	static var sites:Array<Site> = [
 		{
 			regex: ~/.*\.(jpeg|gif|jpg|bmp|png|webp)/i,
@@ -27,6 +24,15 @@ class Link {
 					url: 'http://${e.matched(0)}',
 					caption: null,
 					author: null
+				}]);
+			}
+		},
+		{
+			regex: ~/twitpic\.com\/([a-zA-Z0-9]*)/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				cb([{
+					url: 'http://twitpic.com/show/full/$id'
 				}]);
 			}
 		},
@@ -445,28 +451,14 @@ class Link {
 			}
 		},
 		{
-			regex: ~/facebook.com\/photo\.php\?v=([0-9]*)/,
+			regex: ~/facebook.com\/photo\.php\?(v|fbid)=([0-9]*).*/,
 			method: function(e, cb) {
-				var id = e.matched(1);
-				/*
-				Reditn.getJSON('https://graph.facebook.com/${id}?access_token=${FACEBOOK_KEY}', function(d) {
-					trace(d);
-					cb([{
-						caption: d.name,
-						url: d.source,http://graph.facebook.com/{ID of object}/picture?type=large
-						author: d.from.name
-					}]);
-				});	*/
-				cb([{ caption: null, url: "http://graph.facebook.com/${id}/picture?type=small&access_token="+FACEBOOK_KEY, author: null}]);
-			}
-		},
-		{
-			regex: ~/facebook\.com\/([a-zA-Z0-9]*)/,
-			method: function(e, cb) {
-				var id = e.matched(1);
-				cb({
-					album: [{url: "https://graph.facebook.com/"+id+"/picture?type=large", caption: null, author: null}],
-					urls: new Map<String, String>()
+				Reditn.getJSON("http://noembed.com/embed?url="+'http://${e.matched(0)}'.urlEncode(), function(data:data.OEmbed) {
+					return [{
+						url: data.url,
+						caption: data.title,
+						author: data.author_name
+					}];
 				});
 			}
 		},

@@ -23,9 +23,12 @@ class Settings {
 		"user-tags" => { def: new Map<String, String>(), desc: null },
 		"sub-tags" => { def: new Map<String, String>(), desc: null }
 	];
-	public static var data(get, never):Map<String, Dynamic>;
+	public static var data(get, set):Map<String, Dynamic>;
 	static inline function get_data() {
 		return Storage.data;
+	}
+	static inline function set_data(d:Map<String, Dynamic>) {
+		return Storage.data = d;
 	}
 	static function optimise() {
 		for(k in settings.keys()) {
@@ -40,12 +43,14 @@ class Settings {
 		optimise();
 		Storage.flush();
 		fixMissing();
-		Browser.notify({title: "Reditn", message: "Saved settings", timeout: 5, icon: "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 	}
 	static function fixMissing(def:Bool=false) {
-		for(k in settings.keys())
-			if(!data.exists(k) || def || data.get(k) == untyped __js__("undefined"))
-				data.set(k, settings.get(k).def);
+		data = [for(k in settings.keys()) k => 
+			if(def || !data.exists(k) || !data.get(k))
+				settings.get(k).def
+			else
+				data.get(k)
+		];
 	}
 	public static function init() {
 		fixMissing();
@@ -108,16 +113,6 @@ class Settings {
 			}
 		}
 		form.appendChild(delb);
-		/*
-		var export = makeButton("Export settings to text", function() Browser.window.alert(Browser.window.btoa(data)));
-		form.appendChild(export);
-		var importbtn = makeButton("Import settings", function() {
-			data = haxe.Unserializer.run(Browser.window.atob(Browser.window.prompt("Settings to import", Browser.window.btoa(data))));
-			fixMissing();
-			flush();
-			settingsPopUp();
-		});
-		form.appendChild(importbtn);*/
 		form.appendChild(Browser.document.createBRElement());
 		for(k in settings.keys()) {
 			var s = settings.get(k);

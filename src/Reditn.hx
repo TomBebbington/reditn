@@ -52,7 +52,8 @@ class Reditn {
 				"bbcamerica.com",
 				"youtube.com",
 				"vimeo.com",
-				"omdbapi.com"
+				"omdbapi.com",
+				"https://graph.facebook.com"
 			],
 			icons: [
 				"128" => "icons/icon128.png",
@@ -63,7 +64,6 @@ class Reditn {
 			],
 			skip_compile: true
 		});
-		trace(ext.Builder.meta(this.name));
 		Browser.onload(init);
 	}
 	public static inline function getLinkContainer(l:Element):Element {

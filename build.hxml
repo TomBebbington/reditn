@@ -2,7 +2,6 @@
 -main Reditn
 -js test.js
 -D chrome
--debug
 -lib extend
 --next
 -cp src

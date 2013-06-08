@@ -522,7 +522,6 @@ var Reditn = function() { }
 $hxClasses["Reditn"] = Reditn;
 Reditn.__name__ = ["Reditn"];
 Reditn.main = function() {
-	console.log({ 'short' : "reditn", full : "Reditn - the comprehensive reddit plugin"});
 	ext.Browser.onload(Reditn.init);
 }
 Reditn.getThingId = function(e) {
@@ -1154,21 +1153,7 @@ $hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
 haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
 haxe.ds.StringMap.__interfaces__ = [IMap];
 haxe.ds.StringMap.prototype = {
-	toString: function() {
-		var s = new StringBuf();
-		s.b += "{";
-		var it = this.keys();
-		while( it.hasNext() ) {
-			var i = it.next();
-			s.b += Std.string(i);
-			s.b += " => ";
-			s.b += Std.string(Std.string(this.get(i)));
-			if(it.hasNext()) s.b += ", ";
-		}
-		s.b += "}";
-		return s.b;
-	}
-	,keys: function() {
+	keys: function() {
 		var a = [];
 		for( var key in this.h ) {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
@@ -2048,14 +2033,18 @@ Settings.optimise = function() {
 }
 Settings.fixMissing = function(def) {
 	if(def == null) def = false;
-	var $it0 = Settings.settings.keys();
-	while( $it0.hasNext() ) {
-		var k = $it0.next();
-		if(!ext.Storage.data.exists(k) || def || ext.Storage.data.get(k) == undefined) {
-			var value = Settings.settings.get(k).def;
-			ext.Storage.data.set(k,value);
+	ext.Storage.data = (function($this) {
+		var $r;
+		var _g = new haxe.ds.StringMap();
+		var $it0 = Settings.settings.keys();
+		while( $it0.hasNext() ) {
+			var k = $it0.next();
+			var value = def || !ext.Storage.data.exists(k) || !ext.Storage.data.get(k)?Settings.settings.get(k).def:ext.Storage.data.get(k);
+			_g.set(k,value);
 		}
-	}
+		$r = _g;
+		return $r;
+	}(this));
 }
 Settings.init = function() {
 	Settings.fixMissing();
@@ -2118,7 +2107,6 @@ Settings.settingsPopUp = function() {
 		Settings.optimise();
 		ext.Storage.flush();
 		Settings.fixMissing();
-		ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 	};
 	var delb = document.createElement("input");
 	delb.type = "button";
@@ -2129,7 +2117,6 @@ Settings.settingsPopUp = function() {
 			Settings.optimise();
 			ext.Storage.flush();
 			Settings.fixMissing();
-			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 			Settings.settingsPopUp();
 		}
 	};
@@ -2170,11 +2157,10 @@ var Style = function() { }
 $hxClasses["Style"] = Style;
 Style.__name__ = ["Style"];
 Style.init = function() {
-	var s = document.createElement("style");
+	var s = document.createElement("link");
 	s.type = "text/css";
-	ext.Resource.get("data/sprites.png",function(url) {
-		s.textContent = ".expando-button.image.collapsed{\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-24px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.collapsed:hover {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-0px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-72px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.image.expanded:hover {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-48px -0px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed{\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-24px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.collapsed:hover {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-0px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-72px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button.item.expanded:hover {\n\tbackground-image:url(\"" + url + "\");\n\tbackground-position:-48px -23px;\n\tbackground-repeat:no-repeat\n}\n.expando-button {\n\tfloat: left;\n}\n.expando-button.collapsed {\n\tpadding: 0px;\n}\np .expando-button {\n\tdisplay: inline-block;\n\tfloat: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\ndl.reditn-table  {\n\tfloat: left;\n\twidth: 100%;\n\tpadding: 0;\n}\n.reditn-table dt {\n\tclear: left;\n\tfloat: left;\n\twidth: 16%;\n\tfont-weight: bold;\n\ttext-align: right;\n}\n.reditn-table dd {\n\tfloat: left;\n\ttext-align: left;\n}";
-	});
+	s.rel = "stylesheet";
+	s.href = chrome.extension.getURL("data/reditn-default.css");
 	document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
@@ -2247,7 +2233,6 @@ SubredditTagger.getTag = function(a) {
 			Settings.optimise();
 			ext.Storage.flush();
 			Settings.fixMissing();
-			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
@@ -2444,7 +2429,6 @@ UserTagger.getTag = function(a) {
 			Settings.optimise();
 			ext.Storage.flush();
 			Settings.fixMissing();
-			ext.Browser.notify({ title : "Reditn", message : "Saved settings", timeout : 5, icon : "http://f.thumbs.redditmedia.com/9czWHOWglYtAM40q.jpg"});
 			div.parentElement.removeChild(div);
 		};
 		div.appendChild(box);
@@ -2469,31 +2453,6 @@ ext.Browser.onload = function(cb) {
 			cb();
 		};
 	}
-}
-ext.Browser.notify = function(n) {
-	Notification.requestPermission(function(g) {
-		var _g = g.toLowerCase();
-		switch(_g) {
-		case "granted":
-			var f = new Notification(n.title,{ body : n.message});
-			f.onshow = function(_) {
-				if(n.timeout != null) setTimeout($bind(f,f.close),n.timeout * 1000);
-			};
-			f.onclose = function(_) {
-				if(n.onclick != null) n.onclick();
-			};
-			break;
-		default:
-			console.log("Permission " + g + " granted or not?");
-			throw g;
-		}
-	});
-}
-ext.Resource = function() { }
-$hxClasses["ext.Resource"] = ext.Resource;
-ext.Resource.__name__ = ["ext","Resource"];
-ext.Resource.get = function(path,callb) {
-	callb(chrome.extension.getURL(path));
 }
 haxe.Unserializer = function(buf) {
 	this.buf = buf;
@@ -2763,9 +2722,7 @@ $hxClasses["ext.Storage"] = ext.Storage;
 ext.Storage.__name__ = ["ext","Storage"];
 ext.Storage.flush = function() {
 	var adata = haxe.Serializer.run(ext.Storage.data);
-	console.log("Saving: " + ext.Storage.data.toString());
 	chrome.storage.sync.set({ data : adata},function() {
-		console.log("Extension storage saved");
 	});
 }
 haxe.Serializer = function() {
@@ -3163,13 +3120,7 @@ Xml.ProcessingInstruction = "processingInstruction";
 Xml.Document = "document";
 ext.Storage.data = new haxe.ds.StringMap();
 chrome.storage.sync.get("data",function(d) {
-	if(d != null && d.data != null) {
-		ext.Storage.data = haxe.Unserializer.run(d.data);
-		console.log("" + ext.Storage.data.toString() + " loaded");
-	} else {
-		console.log("Incompatible value given by Chrome:");
-		console.log(d);
-	}
+	if(d != null && d.data != null) ext.Storage.data = haxe.Unserializer.run(d.data);
 });
 AutoScroll.regex = new EReg("\\?count=([0-9]*)&after=([a-z0-9_]*)","");
 AutoScroll.count = 50;
@@ -3203,6 +3154,9 @@ haxe.xml.Parser.escapes = (function($this) {
 Link.HTML_IMG = new EReg("<img .*?src=\"([^\"]*)\"/?>","");
 Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method : function(e,cb) {
 	cb([{ url : "http://" + e.matched(0), caption : null, author : null}]);
+}},{ regex : new EReg("twitpic\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
+	var id = e.matched(1);
+	cb([{ url : "http://twitpic.com/show/full/" + id}]);
 }},{ regex : new EReg("i?\\.?imgur.com/(a|gallery)/([^/]*)(/.*)?",""), method : function(e,cb1) {
 	var id = e.matched(2);
 	var albumType = (function($this) {
@@ -3544,12 +3498,10 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		return $r;
 	}(this));
 	nextPage();
-}},{ regex : new EReg("facebook.com/photo\\.php\\?v=([0-9]*)",""), method : function(e,cb) {
-	var id = e.matched(1);
-	cb([{ caption : null, url : "http://graph.facebook.com/${id}/picture?type=small&access_token=" + "CAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrCAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrf", author : null}]);
-}},{ regex : new EReg("facebook\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
-	var id = e.matched(1);
-	cb({ album : [{ url : "https://graph.facebook.com/" + id + "/picture?type=large", caption : null, author : null}], urls : new haxe.ds.StringMap()});
+}},{ regex : new EReg("facebook.com/photo\\.php\\?(v|fbid)=([0-9]*).*",""), method : function(e,cb) {
+	Reditn.getJSON("http://noembed.com/embed?url=" + StringTools.urlEncode("http://" + e.matched(0)),function(data) {
+		return [{ url : data.url, caption : data.title, author : data.author_name}];
+	});
 }},{ regex : new EReg("plus\\.google.com/u?/?[0-9]*/([0-9]*)(/about)?",""), method : function(e,cb16) {
 	var id = e.matched(1);
 	Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + id + "?key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(d) {
@@ -3669,5 +3621,3 @@ js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
 Reditn.main();
 })();
-
-//@ sourceMappingURL=reditn.js.map
