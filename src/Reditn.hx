@@ -271,7 +271,7 @@ class Reditn {
 		}, year = Std.string(d.getFullYear());
 		return '$month, $year';
 	}
-	public static function embedMap(m:Map<String, String>):js.html.DListElement {
+	public static function embedMap(m:Map<String, String>, md:Bool=true):js.html.DListElement {
 		var e = ext.Browser.document.createDListElement();
 		for(k in m.keys()) {
 			if(m.get(k) != null && m.get(k).length > 0) {
@@ -283,7 +283,7 @@ class Reditn {
 				e.appendChild(keyv);
 			}
 		}
-		e.className = "md reditn-table";
+		e.className = (md ? "md " : "") + "reditn-table";
 		return e;
 	}
 	public static function getJSON<T>(url:String, func:T->Void, ?auth:String, type:String="application/json", ?postData:String):Void {

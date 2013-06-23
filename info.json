@@ -39,7 +39,8 @@
 		"youtube.com",
 		"vimeo.com",
 		"omdbapi.com",
-		"https://graph.facebook.com"
+		"https://graph.facebook.com",
+		"https://api.twitch.tv"
 	],
 	"icons": {
 		"128" : "icons/icon128.png",

@@ -756,7 +756,8 @@ Reditn.getText = function(url,func,auth,type,postData) {
 	}
 	h.request(postData != null);
 }
-Reditn.embedMap = function(m) {
+Reditn.embedMap = function(m,md) {
+	if(md == null) md = true;
 	var e = document.createElement("dl");
 	var $it0 = m.keys();
 	while( $it0.hasNext() ) {
@@ -770,7 +771,7 @@ Reditn.embedMap = function(m) {
 			e.appendChild(keyv);
 		}
 	}
-	e.className = "md reditn-table";
+	e.className = (md?"md ":"") + "reditn-table";
 	return e;
 }
 Reditn.getJSON = function(url,func,auth,type,postData) {
@@ -1816,6 +1817,7 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 				var div = js.Browser.document.createElement("div");
 				div.className = "usertext";
 				var content1 = js.Browser.document.createElement("div");
+				content1.className = "md";
 				content1.appendChild(Reditn.embedMap((function($this) {
 					var $r;
 					var _g1 = new haxe.ds.StringMap();
@@ -1824,7 +1826,7 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 					_g1.set("Links",urls.join(""));
 					$r = _g1;
 					return $r;
-				}($this))));
+				}($this)),false));
 				if(p.album.length > 0) {
 					content1.appendChild(js.Browser.document.createElement("br"));
 					content1.appendChild(Reditn.embedAlbum(p.album));
@@ -3559,9 +3561,16 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 			var $as = d.Actors;
 			roles.set("Actors",$as.split(", "));
 		}
-		var m = { title : d.Title, year : d.Year, certificate : d.Rated, released : d.Released, length : d.Duration, roles : roles, plot : d.Plot, images : [{ url : d.Poster}]};
-		console.log(m);
-		cb23(m);
+		cb23({ title : d.Title, year : d.Year, certificate : d.Rated, released : d.Released, length : d.Duration, roles : roles, plot : d.Plot, images : [{ url : d.Poster}]});
+	});
+}},{ regex : new EReg("twitch\\.tv/([a-zA-Z0-9]*).*",""), method : function(e,cb24) {
+	var id = e.matched(1);
+	Reditn.getJSON("https://api.twitch.tv/kraken/channels/" + id + "?client_id=" + "1wwdpen4v07k90baoohh7gmf2lv8eit",function(data) {
+		var images = [];
+		if(data.logo != null) images.push({ url : data.logo});
+		if(data.background != null) images.push({ url : data.background});
+		if(data.video_planner != null) images.push({ url : data.video_planner});
+		cb24({ urls : new haxe.ds.StringMap(), name : data.display_name != null?data.display_name:data.name, description : "" + data.status + " - " + data.game, album : images});
 	});
 }}];
 Link.HTML_FILTERS = [Link.HTML_IMG,new EReg("<meta[^>]*/>","g"),new EReg("<(h1|header)[^>]*>.*</\\1>","g"),new EReg("<table([^>]*)>(.|\n|\n\r)*</table>","gm"),new EReg("<div class=\"(seperator|ga-ads)\"[^>]*>(.|\n|\n\r)*</div>","g"),new EReg("<([^>]*)( [^>]*)?></\\1>","g"),new EReg("<script[^>/]*/>","g"),new EReg("<script[^>/]*></script>","g"),new EReg("style ?= ?\"[^\"]*\"","g")];

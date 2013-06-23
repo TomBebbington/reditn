@@ -5,6 +5,7 @@ import js.html.*;
 import ext.Browser.*;
 using StringTools;
 class Link {
+	public static inline var TWITCH_KEY = "1wwdpen4v07k90baoohh7gmf2lv8eit";
 	public static inline var FLICKR_KEY = "99dcc3e77bcd8fb489f17e58191f32f7";
 	public static inline var TUMBLR_KEY = "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE";
 	public static inline var IMGUR_KEY = "cc1f254578d6c52";
@@ -614,7 +615,7 @@ class Link {
 						var as:String = d.Actors;
 						roles.set("Actors", as.split(", "));
 					}
-					var m:Movie = {
+					cb({
 						title: d.Title,
 						year: d.Year,
 						certificate: d.Rated,
@@ -623,9 +624,28 @@ class Link {
 						roles: roles,
 						plot: d.Plot,
 						images: [{url: d.Poster}]
-					};
-					trace(m);
-					cb(m);
+					});
+				});
+			}
+		},
+		{
+			regex: ~/twitch\.tv\/([a-zA-Z0-9]*).*/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				Reditn.getJSON('https://api.twitch.tv/kraken/channels/$id?client_id=${TWITCH_KEY}', function(data) {
+					var images:Album = [];
+					if(data.logo != null)
+						images.push({url: data.logo});
+					if(data.background != null)
+						images.push({url: data.background});
+					if(data.video_planner != null)
+						images.push({url: data.video_planner});
+					cb({
+						urls: new Map<String, String>(),
+						name: data.display_name != null ? data.display_name : data.name,
+						description: '${data.status} - ${data.game}',
+						album: images
+					});
 				});
 			}
 		}
@@ -726,11 +746,12 @@ class Link {
 					var div = Browser.document.createDivElement();
 					div.className = "usertext";
 					var content = Browser.document.createDivElement();
+					content.className = "md";
 					content.appendChild(Reditn.embedMap([
 						"Name" => d.name,
 						"Description" => d.description,
 						"Links" => urls.join("")
-					]));
+					], false));
 					if(p.album.length > 0) {
 						content.appendChild(Browser.document.createBRElement());
 						content.appendChild(Reditn.embedAlbum(p.album));
