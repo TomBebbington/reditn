@@ -34,24 +34,20 @@ EReg.prototype = {
 	}
 	,matchSub: function(s,pos,len) {
 		if(len == null) len = -1;
-		return this.r.global?(function($this) {
-			var $r;
-			$this.r.lastIndex = pos;
-			$this.r.m = $this.r.exec(len < 0?s:HxOverrides.substr(s,0,pos + len));
-			var b = $this.r.m != null;
-			if(b) $this.r.s = s;
-			$r = b;
-			return $r;
-		}(this)):(function($this) {
-			var $r;
-			var b = $this.match(len < 0?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len));
+		if(this.r.global) {
+			this.r.lastIndex = pos;
+			this.r.m = this.r.exec(len < 0?s:HxOverrides.substr(s,0,pos + len));
+			var b = this.r.m != null;
+			if(b) this.r.s = s;
+			return b;
+		} else {
+			var b = this.match(len < 0?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len));
 			if(b) {
-				$this.r.s = s;
-				$this.r.m.index += pos;
+				this.r.s = s;
+				this.r.m.index += pos;
 			}
-			$r = b;
-			return $r;
-		}(this));
+			return b;
+		}
 	}
 	,matchedPos: function() {
 		if(this.r.m == null) throw "No string matched";
@@ -67,11 +63,7 @@ EReg.prototype = {
 		return this.r.s.substr(0,this.r.m.index);
 	}
 	,matched: function(n) {
-		return this.r.m != null && n >= 0 && n < this.r.m.length?this.r.m[n]:(function($this) {
-			var $r;
-			throw "EReg::matched";
-			return $r;
-		}(this));
+		if(this.r.m != null && n >= 0 && n < this.r.m.length) return this.r.m[n]; else throw "EReg::matched";
 	}
 	,match: function(s) {
 		if(this.r.global) this.r.lastIndex = 0;
@@ -536,20 +528,14 @@ Reditn.getThingId = function(e) {
 }
 Reditn.refreshLinks = function() {
 	Reditn.links = document.body.getElementsByClassName("title");
-	Reditn.links = (function($this) {
-		var $r;
-		var _g = [];
-		{
-			var _g1 = 0, _g2 = Reditn.links;
-			while(_g1 < _g2.length) {
-				var l = _g2[_g1];
-				++_g1;
-				if(l.nodeName.toLowerCase() == "a" && l.parentElement.className != "parent") _g.push(l);
-			}
-		}
-		$r = _g;
-		return $r;
-	}(this));
+	var _g = [];
+	var _g1 = 0, _g2 = Reditn.links;
+	while(_g1 < _g2.length) {
+		var l = _g2[_g1];
+		++_g1;
+		if(l.nodeName.toLowerCase() == "a" && l.parentElement.className != "parent") _g.push(l);
+	}
+	Reditn.links = _g;
 }
 Reditn.init = function() {
 	if(window.location.href.indexOf("reddit.") == -1 || window.reditn_loaded) return;
@@ -601,8 +587,7 @@ Reditn.wrap = function(fn,id) {
 	if(id == null || d) fn();
 }
 Reditn.formatNumber = function(n) {
-	return !Math.isFinite(n)?Std.string(n):(function($this) {
-		var $r;
+	if(!Math.isFinite(n)) return Std.string(n); else {
 		var s = Std.string(Math.abs(n));
 		var ad = s.indexOf(".") != -1?(function($this) {
 			var $r;
@@ -610,7 +595,7 @@ Reditn.formatNumber = function(n) {
 			s = HxOverrides.substr(s,0,s.indexOf("."));
 			$r = t;
 			return $r;
-		}($this)):"";
+		}(this)):"";
 		if(s.length >= 3) {
 			var ns = "";
 			var _g1 = 0, _g = s.length;
@@ -621,19 +606,18 @@ Reditn.formatNumber = function(n) {
 			}
 			s = ns;
 		}
-		$r = (n < 0?"-" + s:s) + ad;
-		return $r;
-	}(this));
+		return (n < 0?"-" + s:s) + ad;
+	}
 }
 Reditn.formatPrice = function(n) {
 	var first = Reditn.formatNumber(n | 0);
 	var last = Std.string(n);
-	last = last.indexOf(".") == -1?".":HxOverrides.substr(last,last.indexOf("."),null);
+	if(last.indexOf(".") == -1) last = "."; else last = HxOverrides.substr(last,last.indexOf("."),null);
 	while(last.length < 3) last += "0";
 	return "" + first + last;
 }
 Reditn.show = function(e,shown) {
-	e.style.display = shown?"":"none";
+	if(shown) e.style.display = ""; else e.style.display = "none";
 	if(e.className.indexOf("link") != -1 && !shown) {
 		var en = e.getElementsByClassName("entry")[0];
 		HxOverrides.remove(Reditn.links,en.getElementsByTagName("a")[0]);
@@ -827,7 +811,7 @@ StringTools.urlDecode = function(s) {
 }
 StringTools.htmlEscape = function(s,quotes) {
 	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
+	if(quotes) return s.split("\"").join("&quot;").split("'").join("&#039;"); else return s;
 }
 StringTools.htmlUnescape = function(s) {
 	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
@@ -916,7 +900,7 @@ haxe.Json.prototype = {
 		}
 		var f = Std.parseFloat(HxOverrides.substr(this.str,start,this.pos - start));
 		var i = f | 0;
-		return i == f?i:f;
+		if(i == f) return i; else return f;
 	}
 	,invalidNumber: function(start) {
 		throw "Invalid number at position " + start + ": " + HxOverrides.substr(this.str,start,this.pos - start);
@@ -1193,7 +1177,7 @@ Std.parseFloat = function(x) {
 	return parseFloat(x);
 }
 Std.random = function(x) {
-	return x <= 0?0:Math.floor(Math.random() * x);
+	if(x <= 0) return 0; else return Math.floor(Math.random() * x);
 }
 var js = {}
 js.Boot = function() { }
@@ -1801,7 +1785,7 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 			return isToggled;
 		}, toggle : function(v,ps) {
 			isToggled = v;
-			b.className = cn + (cl = isToggled?"expanded":"collapsed");
+			b.className = cn + (isToggled?cl = "expanded":cl = "collapsed");
 			if(exp != null) Reditn.show(exp,v);
 			if(ps) window.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
 		}, url : url, element : b};
@@ -1948,7 +1932,7 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 			}
 		});
 	}
-	return btn != null?btn.element:null;
+	if(btn != null) return btn.element; else return null;
 }
 var List = function() {
 	this.length = 0;
@@ -2033,18 +2017,14 @@ Settings.optimise = function() {
 }
 Settings.fixMissing = function(def) {
 	if(def == null) def = false;
-	ext.Storage.data = (function($this) {
-		var $r;
-		var _g = new haxe.ds.StringMap();
-		var $it0 = Settings.settings.keys();
-		while( $it0.hasNext() ) {
-			var k = $it0.next();
-			var value = def || !ext.Storage.data.exists(k) || !ext.Storage.data.get(k)?Settings.settings.get(k).def:ext.Storage.data.get(k);
-			_g.set(k,value);
-		}
-		$r = _g;
-		return $r;
-	}(this));
+	var _g = new haxe.ds.StringMap();
+	var $it0 = Settings.settings.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		var value = def || !ext.Storage.data.exists(k) || !ext.Storage.data.get(k)?Settings.settings.get(k).def:ext.Storage.data.get(k);
+		_g.set(k,value);
+	}
+	ext.Storage.data = _g;
 }
 Settings.init = function() {
 	Settings.fixMissing();
@@ -2143,7 +2123,7 @@ Settings.settingsPopUp = function() {
 			input.name = k;
 			form.appendChild(input);
 			form.appendChild(document.createElement("br"));
-			input.type = js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":"text";
+			if(js.Boot.__instanceof(d,Bool)) input.type = "checkbox"; else if(js.Boot.__instanceof(d,String)) input.type = "text"; else if(js.Boot.__instanceof(d,Date)) input.type = "datetime"; else if(js.Boot.__instanceof(d,Int)) input.type = "number"; else input.type = "text";
 			if(js.Boot.__instanceof(d,Bool)) input.checked = ext.Storage.data.get(k); else input.value = ext.Storage.data.get(k);
 		}
 	}
@@ -2211,7 +2191,7 @@ SubredditTagger.getTag = function(a) {
 	var currentTag = ext.Storage.data.get("sub-tags").exists(sub)?ext.Storage.data.get("sub-tags").get(sub):null;
 	tag.className = "flair";
 	var tagName = js.Browser.document.createElement("span");
-	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
+	if(currentTag == null) tagName.innerHTML = ""; else tagName.innerHTML = StringTools.htmlEscape(currentTag) + " ";
 	tag.appendChild(tagName);
 	var link = js.Browser.document.createElement("a");
 	link.href = "javascript:void(0);";
@@ -2407,7 +2387,7 @@ UserTagger.getTag = function(a) {
 	var currentTag = ext.Storage.data.get("user-tags").exists(user)?ext.Storage.data.get("user-tags").get(user):null;
 	tag.className = "flair";
 	var tagName = document.createElement("span");
-	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
+	if(currentTag == null) tagName.innerHTML = ""; else tagName.innerHTML = StringTools.htmlEscape(currentTag) + " ";
 	tag.appendChild(tagName);
 	var link = document.createElement("a");
 	link.href = "javascript:void(0);";
@@ -2743,8 +2723,7 @@ haxe.Serializer.run = function(v) {
 haxe.Serializer.prototype = {
 	serialize: function(v) {
 		var _g = Type["typeof"](v);
-		var $e = (_g);
-		switch( $e[1] ) {
+		switch(_g[1]) {
 		case 0:
 			this.buf.b += "n";
 			break;
@@ -2766,7 +2745,7 @@ haxe.Serializer.prototype = {
 			this.buf.b += Std.string(v?"t":"f");
 			break;
 		case 6:
-			var c = $e[2];
+			var c = _g[2];
 			if(c == String) {
 				this.serializeString(v);
 				return;
@@ -2905,7 +2884,7 @@ haxe.Serializer.prototype = {
 			this.serializeFields(v);
 			break;
 		case 7:
-			var e = $e[2];
+			var e = _g[2];
 			if(this.useCache && this.serializeRef(v)) return;
 			this.cache.pop();
 			this.buf.b += Std.string(this.useEnumIndex?"j":"w");
@@ -2996,7 +2975,6 @@ haxe.Timer.stamp = function() {
 }
 haxe.Timer.prototype = {
 	run: function() {
-		console.log("run");
 	}
 	,stop: function() {
 		if(this.id == null) return;
@@ -3451,7 +3429,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		var $r;
 		var nextPage1 = null;
 		nextPage1 = function(tk) {
-			tk = tk == null?"":"&requestToken=" + tk;
+			if(tk == null) tk = ""; else tk = "&requestToken=" + tk;
 			if(num > 8) return;
 			Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + pid + "/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o" + tk,function(d) {
 				var items = d.items, url = e2.matched(0);

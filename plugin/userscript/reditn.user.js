@@ -44,24 +44,20 @@ EReg.prototype = {
 	}
 	,matchSub: function(s,pos,len) {
 		if(len == null) len = -1;
-		return this.r.global?(function($this) {
-			var $r;
-			$this.r.lastIndex = pos;
-			$this.r.m = $this.r.exec(len < 0?s:HxOverrides.substr(s,0,pos + len));
-			var b = $this.r.m != null;
-			if(b) $this.r.s = s;
-			$r = b;
-			return $r;
-		}(this)):(function($this) {
-			var $r;
-			var b = $this.match(len < 0?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len));
+		if(this.r.global) {
+			this.r.lastIndex = pos;
+			this.r.m = this.r.exec(len < 0?s:HxOverrides.substr(s,0,pos + len));
+			var b = this.r.m != null;
+			if(b) this.r.s = s;
+			return b;
+		} else {
+			var b = this.match(len < 0?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len));
 			if(b) {
-				$this.r.s = s;
-				$this.r.m.index += pos;
+				this.r.s = s;
+				this.r.m.index += pos;
 			}
-			$r = b;
-			return $r;
-		}(this));
+			return b;
+		}
 	}
 	,matchedPos: function() {
 		if(this.r.m == null) throw "No string matched";
@@ -77,11 +73,7 @@ EReg.prototype = {
 		return this.r.s.substr(0,this.r.m.index);
 	}
 	,matched: function(n) {
-		return this.r.m != null && n >= 0 && n < this.r.m.length?this.r.m[n]:(function($this) {
-			var $r;
-			throw "EReg::matched";
-			return $r;
-		}(this));
+		if(this.r.m != null && n >= 0 && n < this.r.m.length) return this.r.m[n]; else throw "EReg::matched";
 	}
 	,match: function(s) {
 		if(this.r.global) this.r.lastIndex = 0;
@@ -546,20 +538,14 @@ Reditn.getThingId = function(e) {
 }
 Reditn.refreshLinks = function() {
 	Reditn.links = document.body.getElementsByClassName("title");
-	Reditn.links = (function($this) {
-		var $r;
-		var _g = [];
-		{
-			var _g1 = 0, _g2 = Reditn.links;
-			while(_g1 < _g2.length) {
-				var l = _g2[_g1];
-				++_g1;
-				if(l.nodeName.toLowerCase() == "a" && l.parentElement.className != "parent") _g.push(l);
-			}
-		}
-		$r = _g;
-		return $r;
-	}(this));
+	var _g = [];
+	var _g1 = 0, _g2 = Reditn.links;
+	while(_g1 < _g2.length) {
+		var l = _g2[_g1];
+		++_g1;
+		if(l.nodeName.toLowerCase() == "a" && l.parentElement.className != "parent") _g.push(l);
+	}
+	Reditn.links = _g;
 }
 Reditn.init = function() {
 	if(unsafeWindow.location.href.indexOf("reddit.") == -1 || window.reditn_loaded) return;
@@ -611,8 +597,7 @@ Reditn.wrap = function(fn,id) {
 	if(id == null || d) fn();
 }
 Reditn.formatNumber = function(n) {
-	return !Math.isFinite(n)?Std.string(n):(function($this) {
-		var $r;
+	if(!Math.isFinite(n)) return Std.string(n); else {
 		var s = Std.string(Math.abs(n));
 		var ad = s.indexOf(".") != -1?(function($this) {
 			var $r;
@@ -620,7 +605,7 @@ Reditn.formatNumber = function(n) {
 			s = HxOverrides.substr(s,0,s.indexOf("."));
 			$r = t;
 			return $r;
-		}($this)):"";
+		}(this)):"";
 		if(s.length >= 3) {
 			var ns = "";
 			var _g1 = 0, _g = s.length;
@@ -631,19 +616,18 @@ Reditn.formatNumber = function(n) {
 			}
 			s = ns;
 		}
-		$r = (n < 0?"-" + s:s) + ad;
-		return $r;
-	}(this));
+		return (n < 0?"-" + s:s) + ad;
+	}
 }
 Reditn.formatPrice = function(n) {
 	var first = Reditn.formatNumber(n | 0);
 	var last = Std.string(n);
-	last = last.indexOf(".") == -1?".":HxOverrides.substr(last,last.indexOf("."),null);
+	if(last.indexOf(".") == -1) last = "."; else last = HxOverrides.substr(last,last.indexOf("."),null);
 	while(last.length < 3) last += "0";
 	return "" + first + last;
 }
 Reditn.show = function(e,shown) {
-	e.style.display = shown?"":"none";
+	if(shown) e.style.display = ""; else e.style.display = "none";
 	if(e.className.indexOf("link") != -1 && !shown) {
 		var en = e.getElementsByClassName("entry")[0];
 		HxOverrides.remove(Reditn.links,en.getElementsByTagName("a")[0]);
@@ -846,7 +830,7 @@ StringTools.urlDecode = function(s) {
 }
 StringTools.htmlEscape = function(s,quotes) {
 	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-	return quotes?s.split("\"").join("&quot;").split("'").join("&#039;"):s;
+	if(quotes) return s.split("\"").join("&quot;").split("'").join("&#039;"); else return s;
 }
 StringTools.htmlUnescape = function(s) {
 	return s.split("&gt;").join(">").split("&lt;").join("<").split("&quot;").join("\"").split("&#039;").join("'").split("&amp;").join("&");
@@ -935,7 +919,7 @@ haxe.Json.prototype = {
 		}
 		var f = Std.parseFloat(HxOverrides.substr(this.str,start,this.pos - start));
 		var i = f | 0;
-		return i == f?i:f;
+		if(i == f) return i; else return f;
 	}
 	,invalidNumber: function(start) {
 		throw "Invalid number at position " + start + ": " + HxOverrides.substr(this.str,start,this.pos - start);
@@ -1198,7 +1182,7 @@ Std.parseFloat = function(x) {
 	return parseFloat(x);
 }
 Std.random = function(x) {
-	return x <= 0?0:Math.floor(Math.random() * x);
+	if(x <= 0) return 0; else return Math.floor(Math.random() * x);
 }
 var js = {}
 js.Boot = function() { }
@@ -1806,7 +1790,7 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 			return isToggled;
 		}, toggle : function(v,ps) {
 			isToggled = v;
-			b.className = cn + (cl = isToggled?"expanded":"collapsed");
+			b.className = cn + (isToggled?cl = "expanded":cl = "collapsed");
 			if(exp != null) Reditn.show(exp,v);
 			if(ps) unsafeWindow.history.pushState(haxe.Serializer.run(Reditn.state()),null,null);
 		}, url : url, element : b};
@@ -1953,7 +1937,7 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 			}
 		});
 	}
-	return btn != null?btn.element:null;
+	if(btn != null) return btn.element; else return null;
 }
 var List = function() {
 	this.length = 0;
@@ -2038,18 +2022,14 @@ Settings.optimise = function() {
 }
 Settings.fixMissing = function(def) {
 	if(def == null) def = false;
-	ext.Storage.data = (function($this) {
-		var $r;
-		var _g = new haxe.ds.StringMap();
-		var $it0 = Settings.settings.keys();
-		while( $it0.hasNext() ) {
-			var k = $it0.next();
-			var value = def || !ext.Storage.data.exists(k) || !ext.Storage.data.get(k)?Settings.settings.get(k).def:ext.Storage.data.get(k);
-			_g.set(k,value);
-		}
-		$r = _g;
-		return $r;
-	}(this));
+	var _g = new haxe.ds.StringMap();
+	var $it0 = Settings.settings.keys();
+	while( $it0.hasNext() ) {
+		var k = $it0.next();
+		var value = def || !ext.Storage.data.exists(k) || !ext.Storage.data.get(k)?Settings.settings.get(k).def:ext.Storage.data.get(k);
+		_g.set(k,value);
+	}
+	ext.Storage.data = _g;
 }
 Settings.init = function() {
 	Settings.fixMissing();
@@ -2148,7 +2128,7 @@ Settings.settingsPopUp = function() {
 			input.name = k;
 			form.appendChild(input);
 			form.appendChild(document.createElement("br"));
-			input.type = js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":"text";
+			if(js.Boot.__instanceof(d,Bool)) input.type = "checkbox"; else if(js.Boot.__instanceof(d,String)) input.type = "text"; else if(js.Boot.__instanceof(d,Date)) input.type = "datetime"; else if(js.Boot.__instanceof(d,Int)) input.type = "number"; else input.type = "text";
 			if(js.Boot.__instanceof(d,Bool)) input.checked = ext.Storage.data.get(k); else input.value = ext.Storage.data.get(k);
 		}
 	}
@@ -2165,7 +2145,7 @@ Style.init = function() {
 	var s = document.createElement("link");
 	s.type = "text/css";
 	s.rel = "stylesheet";
-	s.href = "data:text/css;base64,LnJlZGl0bi1leHBhbmRvLWJ1dHRvbiB7CgliYWNrZ3JvdW5kLWltYWdlOnVybCgiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFGOEFBQUF1Q0FZQUFBQk9Nc1dSQUFBQUJITkNTVlFJQ0FnSWZBaGtpQUFBQkJoSlJFRlVlSnp0bXoxUDIxQVVobC9iZ1Vwc2pLbTY5QWNnUVVSU0ZiRjE2WkF5VkhSckZWVkVOd1dKalIvZ3RSSmJwU0tiWklpNm9nNG9RNWR1S0ZLVEtGRGxCN0MwWldSRElzaHhCMnIzeHJsMi9IRk11TWlQWk1YWFNVN2VuSFB1aDI5T0ZBRFlOTS9zZG1jQUt0WktTemhpeTRyVFBqanUybWFyVDJhL2J6QW9pdUxhVDF2L0NqTnNNdVAvT0RWcmlySnBudG5udlIra2h1ZUdsM2l5OWhKSGJGazVPTzdhemEvZmNWTGZJN0d0YVJxZXYvK0l5dXNYMk40b0twdm1tZjJyL1EwMzg0c2s5b0Z4L1N2TXNCOE5MOG4wQThCNmRSL1g4NHZJdFRzRDVOWHhKMGNSREttQ2F6ZnppM0F5MFd6MTBhM3ZRZE8wMkdLOW5OVDNVTnhwQUFEYW5RSHloSTRIeHZVN241ZUdmald2WHBFWnpZaEd6amtwYnpIMzRuSERCRENaMVZGNmhCZTl3NTJYRWhoNlFPU0FTYWYyRFNaNDZTU0ZtaG5yUTFkRHZxOFhVZ2NRTDNsRVE2WWZhU1NQbS9raWc3clBlUnhhalVtSGx6bm50bUlHVWtUWTVBbWJCSEhmTnkxNWNuNVA2QUNlTnB2LzI1Vks0Z0R3bEEwMlpyOXNzRVFCa0RGNWhNN1hjZXY0U3FYaVhtczJtMlFCY0J6L3FYM3RYdHRGTTNFQWVIVGMvK1R4elh5WjBTRkg4a1NaY3pLSThSMTI5RW9GVGE1Ym5STjIyMWJOUk5sZzJNVzRmY3BKVndaeWdEajlkZHdHZ0c5N1NkSnRuQUR3YlNwMHlKRThnV08rSHNKQXoyQ3hsMnhoeEJacVp1aWxJNCtPNmNtVEJJcmt5VjJNRnBCWHIySTdNQ3hSYnBpbzBGTzJuN1MzUHBqVmpvekpFOHY1WGlGOE80d1RMTXNLM0NYMGJsdnc3VGhEa0pjZ1I2YWhuNGZYSDh2NXZNQTRZLzYwN1ZsZVlOd3hQNGlrdlNTSy9pQ3lkZjRNeVp3L1F4STdQKzJKam5ySXVVK29hNlVsekEwdlNZM09EUyt4VmxvQ0FMQnlBZXZWZlZpV1JYYXNWL2ZCeWdVQXR6OTJwNmtmUUNyNkFVQ3hiZHQrYy9nVE1sVXZzSElCMnh0RjZhc1hWTDRFUXhZK3ZGcWR0UVFTc3RJUkFYZFZPcUtLdXV2RmFHSGk2Qm5NUFI4QjdpSENXenJpbEY0RUhjOTJHbE5mNDZ5dlQrcDdjSWF4ZG1jdzRmaHArcWZoVnpwQ29WL1RORGVRd3RLUnZIcUZ2SHFGMzRkdjNVY0FicHNLWjZYa2ZVeUtMUHFGUzAwK3E0TzJFaWp3Q3FZSWdDejZWVUE4ZkRqcjYwTE5kUGNxbkVjVnlXOFFISkU5ZzdrT29YUk1rSDRLS1BRTGZjamYySGdkVGZFRmdyS0RJZ0N5NlBkTllORUhVR1M4UTlyNyt6TG85OVV5QytkUUlvTitvZk85VzhiVVg4UzcvMDhkQ0ZuMFR4MTJlT09VWDRTZnBKeHp5a0RJb0QvU0VKZ05GY0hFV3UzRW5ZU3lId09TRWNsL29zaFNacXNvTXluWDV2ZXRaN21sSXp5OHlLZy9qb2VCdCtPZEhDbVFSYi92YWtjMFlWSGh2U3RNNDVaZkJ2MVo2WWlIdXl3ZFVSNVh2OWhKZHZyOFNrY3VSZ3Y0VTMrbnJEREQ3bjdlaXYxdlBsSHBpR1ZaS080MGNHcldFdXYzZzBxL0NFZC90bUNaSVpuelowaFdPakpEc3RLUktmcUJySFJraklkU092SVhKOVcyU3hPRmVhVUFBQUFBU1VWT1JLNUNZSUk9Iik7CgliYWNrZ3JvdW5kLXJlcGVhdDpuby1yZXBlYXQKfQouZXhwYW5kby1idXR0b24uaW1hZ2UuY29sbGFwc2VkewoJYmFja2dyb3VuZC1wb3NpdGlvbjotMjRweCAtMHB4Owp9Ci5leHBhbmRvLWJ1dHRvbi5pbWFnZS5jb2xsYXBzZWQ6aG92ZXIgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotMHB4IC0wcHg7Cn0KLmV4cGFuZG8tYnV0dG9uLmltYWdlLmV4cGFuZGVkIHsKCWJhY2tncm91bmQtcG9zaXRpb246LTcycHggLTBweDsKfQouZXhwYW5kby1idXR0b24uaW1hZ2UuZXhwYW5kZWQ6aG92ZXIgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotNDhweCAtMHB4Owp9Ci5leHBhbmRvLWJ1dHRvbi5pdGVtLmNvbGxhcHNlZHsKCWJhY2tncm91bmQtcG9zaXRpb246LTI0cHggLTIzcHg7Cn0KLmV4cGFuZG8tYnV0dG9uLml0ZW0uY29sbGFwc2VkOmhvdmVyIHsKCWJhY2tncm91bmQtcG9zaXRpb246LTBweCAtMjNweDsKfQouZXhwYW5kby1idXR0b24uaXRlbS5leHBhbmRlZCB7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi03MnB4IC0yM3B4Owp9Ci5leHBhbmRvLWJ1dHRvbi5pdGVtLmV4cGFuZGVkOmhvdmVyIHsKCWJhY2tncm91bmQtcG9zaXRpb246LTQ4cHggLTIzcHg7Cn0KLmV4cGFuZG8tYnV0dG9uIHsKCWZsb2F0OiBsZWZ0Owp9Ci5leHBhbmRvLWJ1dHRvbi5jb2xsYXBzZWQgewoJcGFkZGluZzogMHB4Owp9CnAgLmV4cGFuZG8tYnV0dG9uIHsKCWRpc3BsYXk6IGlubGluZS1ibG9jazsKCWZsb2F0OiBub25lOwoJbWFyZ2luOiAwcHg7CglwYWRkaW5nOiAwcHg7Cn0KZGwucmVkaXRuLXRhYmxlICB7CglmbG9hdDogbGVmdDsKCXdpZHRoOiAxMDAlOwoJcGFkZGluZzogMDsKfQoucmVkaXRuLXRhYmxlIGR0IHsKCWNsZWFyOiBsZWZ0OwoJZmxvYXQ6IGxlZnQ7Cgl3aWR0aDogMTYlOwoJZm9udC13ZWlnaHQ6IGJvbGQ7Cgl0ZXh0LWFsaWduOiByaWdodDsKfQoucmVkaXRuLXRhYmxlIGRkIHsKCWZsb2F0OiBsZWZ0OwoJdGV4dC1hbGlnbjogbGVmdDsKfQ==";
+	s.href = "data:text/css;base64,LnJlZGl0bi1leHBhbmRvLWJ1dHRvbiB7CgliYWNrZ3JvdW5kLWltYWdlOnVybCgiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFGOEFBQUF1Q0FZQUFBQk9Nc1dSQUFBQUJITkNTVlFJQ0FnSWZBaGtpQUFBQkJoSlJFRlVlSnp0bXoxUDIxQVVobC9iZ1Vwc2pLbTY5QWNnUVVSU0ZiRjE2WkF5VkhSckZWVkVOd1dKalIvZ3RSSmJwU0tiWklpNm9nNG9RNWR1S0ZLVEtGRGxCN0MwWldSRElzaHhCMnIzeHJsMi9IRk11TWlQWk1YWFNVN2VuSFB1aDI5T0ZBRFlOTS9zZG1jQUt0WktTemhpeTRyVFBqanUybWFyVDJhL2J6QW9pdUxhVDF2L0NqTnNNdVAvT0RWcmlySnBudG5udlIra2h1ZUdsM2l5OWhKSGJGazVPTzdhemEvZmNWTGZJN0d0YVJxZXYvK0l5dXNYMk40b0twdm1tZjJyL1EwMzg0c2s5b0Z4L1N2TXNCOE5MOG4wQThCNmRSL1g4NHZJdFRzRDVOWHhKMGNSREttQ2F6ZnppM0F5MFd6MTBhM3ZRZE8wMkdLOW5OVDNVTnhwQUFEYW5RSHloSTRIeHZVN241ZUdmald2WHBFWnpZaEd6amtwYnpIMzRuSERCRENaMVZGNmhCZTl3NTJYRWhoNlFPU0FTYWYyRFNaNDZTU0ZtaG5yUTFkRHZxOFhVZ2NRTDNsRVE2WWZhU1NQbS9raWc3clBlUnhhalVtSGx6bm50bUlHVWtUWTVBbWJCSEhmTnkxNWNuNVA2QUNlTnB2LzI1Vks0Z0R3bEEwMlpyOXNzRVFCa0RGNWhNN1hjZXY0U3FYaVhtczJtMlFCY0J6L3FYM3RYdHRGTTNFQWVIVGMvK1R4elh5WjBTRkg4a1NaY3pLSThSMTI5RW9GVGE1Ym5STjIyMWJOUk5sZzJNVzRmY3BKVndaeWdEajlkZHdHZ0c5N1NkSnRuQUR3YlNwMHlKRThnV08rSHNKQXoyQ3hsMnhoeEJacVp1aWxJNCtPNmNtVEJJcmt5VjJNRnBCWHIySTdNQ3hSYnBpbzBGTzJuN1MzUHBqVmpvekpFOHY1WGlGOE80d1RMTXNLM0NYMGJsdnc3VGhEa0pjZ1I2YWhuNGZYSDh2NXZNQTRZLzYwN1ZsZVlOd3hQNGlrdlNTSy9pQ3lkZjRNeVp3L1F4STdQKzJKam5ySXVVK29hNlVsekEwdlNZM09EUyt4VmxvQ0FMQnlBZXZWZlZpV1JYYXNWL2ZCeWdVQXR6OTJwNmtmUUNyNkFVQ3hiZHQrYy9nVE1sVXZzSElCMnh0RjZhc1hWTDRFUXhZK3ZGcWR0UVFTc3RJUkFYZFZPcUtLdXV2RmFHSGk2Qm5NUFI4QjdpSENXenJpbEY0RUhjOTJHbE5mNDZ5dlQrcDdjSWF4ZG1jdzRmaHArcWZoVnpwQ29WL1RORGVRd3RLUnZIcUZ2SHFGMzRkdjNVY0FicHNLWjZYa2ZVeUtMUHFGUzAwK3E0TzJFaWp3Q3FZSWdDejZWVUE4ZkRqcjYwTE5kUGNxbkVjVnlXOFFISkU5ZzdrT29YUk1rSDRLS1BRTGZjamYySGdkVGZFRmdyS0RJZ0N5NlBkTllORUhVR1M4UTlyNyt6TG85OVV5QytkUUlvTitvZk85VzhiVVg4UzcvMDhkQ0ZuMFR4MTJlT09VWDRTZnBKeHp5a0RJb0QvU0VKZ05GY0hFV3UzRW5ZU3lId09TRWNsL29zaFNacXNvTXluWDV2ZXRaN21sSXp5OHlLZy9qb2VCdCtPZEhDbVFSYi92YWtjMFlWSGh2U3RNNDVaZkJ2MVo2WWlIdXl3ZFVSNVh2OWhKZHZyOFNrY3VSZ3Y0VTMrbnJEREQ3bjdlaXYxdlBsSHBpR1ZaS080MGNHcldFdXYzZzBxL0NFZC90bUNaSVpuelowaFdPakpEc3RLUktmcUJySFJraklkU092SVhKOVcyU3hPRmVhVUFBQUFBU1VWT1JLNUNZSUk9Iik7CgliYWNrZ3JvdW5kLXJlcGVhdDpuby1yZXBlYXQKfQoucmVkaXRuLWV4cGFuZG8tYnV0dG9uLmltYWdlewoJYmFja2dyb3VuZC1wb3NpdGlvbjotMjRweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaW1hZ2UuY29sbGFwc2VkOmhvdmVyIHsKCWJhY2tncm91bmQtcG9zaXRpb246LTBweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaW1hZ2UuZXhwYW5kZWQgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotNzJweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaW1hZ2UuZXhwYW5kZWQ6aG92ZXIgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotNDhweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5jb2xsYXBzZWR7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi0yNHB4IC0yM3B4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5jb2xsYXBzZWQ6aG92ZXIgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotMHB4IC0yM3B4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5leHBhbmRlZCB7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi03MnB4IC0yM3B4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5leHBhbmRlZDpob3ZlciB7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi00OHB4IC0yM3B4Owp9Ci5leHBhbmRvLWJ1dHRvbiB7CglmbG9hdDogbGVmdDsKfQouZXhwYW5kby1idXR0b24uY29sbGFwc2VkIHsKCXBhZGRpbmc6IDBweDsKfQpwIC5leHBhbmRvLWJ1dHRvbiB7CglkaXNwbGF5OiBpbmxpbmUtYmxvY2s7CglmbG9hdDogbm9uZTsKCW1hcmdpbjogMHB4OwoJcGFkZGluZzogMHB4Owp9CmRsLnJlZGl0bi10YWJsZSAgewoJZmxvYXQ6IGxlZnQ7Cgl3aWR0aDogMTAwJTsKCXBhZGRpbmc6IDA7Cn0KLnJlZGl0bi10YWJsZSBkdCB7CgljbGVhcjogbGVmdDsKCWZsb2F0OiBsZWZ0OwoJd2lkdGg6IDE2JTsKCWZvbnQtd2VpZ2h0OiBib2xkOwoJdGV4dC1hbGlnbjogcmlnaHQ7Cn0KLnJlZGl0bi10YWJsZSBkZCB7CglmbG9hdDogbGVmdDsKCXRleHQtYWxpZ246IGxlZnQ7Cn0=";
 	document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
@@ -2216,7 +2196,7 @@ SubredditTagger.getTag = function(a) {
 	var currentTag = ext.Storage.data.get("sub-tags").exists(sub)?ext.Storage.data.get("sub-tags").get(sub):null;
 	tag.className = "flair";
 	var tagName = js.Browser.document.createElement("span");
-	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
+	if(currentTag == null) tagName.innerHTML = ""; else tagName.innerHTML = StringTools.htmlEscape(currentTag) + " ";
 	tag.appendChild(tagName);
 	var link = js.Browser.document.createElement("a");
 	link.href = "javascript:void(0);";
@@ -2412,7 +2392,7 @@ UserTagger.getTag = function(a) {
 	var currentTag = ext.Storage.data.get("user-tags").exists(user)?ext.Storage.data.get("user-tags").get(user):null;
 	tag.className = "flair";
 	var tagName = document.createElement("span");
-	tagName.innerHTML = currentTag == null?"":StringTools.htmlEscape(currentTag) + " ";
+	if(currentTag == null) tagName.innerHTML = ""; else tagName.innerHTML = StringTools.htmlEscape(currentTag) + " ";
 	tag.appendChild(tagName);
 	var link = document.createElement("a");
 	link.href = "javascript:void(0);";
@@ -2746,8 +2726,7 @@ haxe.Serializer.run = function(v) {
 haxe.Serializer.prototype = {
 	serialize: function(v) {
 		var _g = Type["typeof"](v);
-		var $e = (_g);
-		switch( $e[1] ) {
+		switch(_g[1]) {
 		case 0:
 			this.buf.b += "n";
 			break;
@@ -2769,7 +2748,7 @@ haxe.Serializer.prototype = {
 			this.buf.b += Std.string(v?"t":"f");
 			break;
 		case 6:
-			var c = $e[2];
+			var c = _g[2];
 			if(c == String) {
 				this.serializeString(v);
 				return;
@@ -2908,7 +2887,7 @@ haxe.Serializer.prototype = {
 			this.serializeFields(v);
 			break;
 		case 7:
-			var e = $e[2];
+			var e = _g[2];
 			if(this.useCache && this.serializeRef(v)) return;
 			this.cache.pop();
 			this.buf.b += Std.string(this.useEnumIndex?"j":"w");
@@ -2999,7 +2978,6 @@ haxe.Timer.stamp = function() {
 }
 haxe.Timer.prototype = {
 	run: function() {
-		console.log("run");
 	}
 	,stop: function() {
 		if(this.id == null) return;
@@ -3448,7 +3426,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		var $r;
 		var nextPage1 = null;
 		nextPage1 = function(tk) {
-			tk = tk == null?"":"&requestToken=" + tk;
+			if(tk == null) tk = ""; else tk = "&requestToken=" + tk;
 			if(num > 8) return;
 			Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + pid + "/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o" + tk,function(d) {
 				var items = d.items, url = e2.matched(0);

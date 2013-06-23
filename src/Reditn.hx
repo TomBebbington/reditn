@@ -12,58 +12,7 @@ class Reditn {
 	public static var links:Array<AnchorElement> = null;
 	public static var fullPage:Bool = true;
 	static function main() {
-		ext.Builder.build({
-			name: {
-				short: "reditn",
-				full: "Reditn - the comprehensive reddit plugin"
-			},
-			author: {
-				name: "Tom Bebbington",
-				username: "TopHattedCoder"
-			},
-			description: "The comprehensive reddit plugin - allows you to expand images, albums, articles, etc, tag users and comments, never stop scrolling, control it with your keyboard and more!",
-			version: "1.6.3",
-			sites: [
-				"*.reddit.com"
-			],
-			permissions: [
-				"*.reddit.com",
-				"xkcd.com",
-				"explosm.net",
-				"livememe.com",
-				"backend.deviantart.com",
-				"flickr.com",
-				"open.api.ebay.com",
-				"public-api.wordpress.com",
-				"*.wikinews.org",
-				"*.wikia.com",
-				"en.wikipedia.org",
-				"api.github.com",
-				"sourceforge.net",
-				"https://api.twitter.com",
-				"digitaltrends.com",
-				"webupd8.org",
-				"api.tumblr.com",
-				"api.imgur.com",
-				"api.longurl.org",
-				"webservices.amazon.com",
-				"doctorwho.tv",
-				"gamejolt.com",
-				"bbcamerica.com",
-				"youtube.com",
-				"vimeo.com",
-				"omdbapi.com",
-				"https://graph.facebook.com"
-			],
-			icons: [
-				"128" => "icons/icon128.png",
-				"64" => "icons/icon64.png"
-			],
-			resources: [
-				"data"
-			],
-			skip_compile: true
-		});
+		ext.Builder.build("info.json");
 		Browser.onload(init);
 	}
 	public static inline function getLinkContainer(l:Element):Element {
