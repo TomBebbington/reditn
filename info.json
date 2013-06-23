@@ -40,7 +40,8 @@
 		"vimeo.com",
 		"omdbapi.com",
 		"https://graph.facebook.com",
-		"https://api.twitch.tv"
+		"https://api.twitch.tv",
+		"http://private-b32b-themoviedb.apiary.io"
 	],
 	"icons": {
 		"128" : "icons/icon128.png",

@@ -5,7 +5,10 @@ typedef Movie = {
 	?certificate: String,
 	?released: String,
 	?length: String,
-	roles: Map<String, Array<String>>,
+	?roles: Map<String, Array<String>>,
+	?genres:Array<String>,
 	?plot: String,
-	images: Album
+	images: Album,
+	?tagline: String,
+	?status: String
 }

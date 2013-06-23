@@ -283,7 +283,8 @@ class Reditn {
 				e.appendChild(keyv);
 			}
 		}
-		e.className = (md ? "md " : "") + "reditn-table";
+		e.className = md ? "reditn-table md" : "reditn-table";
+		trace(e.className);
 		return e;
 	}
 	public static function getJSON<T>(url:String, func:T->Void, ?auth:String, type:String="application/json", ?postData:String):Void {

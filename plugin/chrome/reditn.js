@@ -752,7 +752,8 @@ Reditn.embedMap = function(m,md) {
 			e.appendChild(keyv);
 		}
 	}
-	e.className = (md?"md ":"") + "reditn-table";
+	if(md) e.className = "reditn-table md"; else e.className = "reditn-table";
+	console.log(e.className);
 	return e;
 }
 Reditn.getJSON = function(url,func,auth,type,postData) {
@@ -1891,6 +1892,53 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 				}
 				art.className = "md";
 				div.appendChild(art);
+				$r = div;
+				return $r;
+			}(this)):Reflect.hasField(d,"roles")?(function($this) {
+				var $r;
+				var m = d;
+				console.log(m);
+				var div = js.Browser.document.createElement("div");
+				div.className = "usertext";
+				var cont1 = js.Browser.document.createElement("div");
+				cont1.className = "md";
+				cont1.appendChild(Reditn.embedMap((function($this) {
+					var $r;
+					var _g = new haxe.ds.StringMap();
+					_g.set("Released",m.released);
+					_g.set("Length",m.length == null?null:"" + m.length + " mins");
+					_g.set("Tagline",m.tagline);
+					_g.set("Plot",m.plot == null?null:"<p>" + m.plot + "</p>");
+					_g.set("Genres","<ul>" + ((function($this) {
+						var $r;
+						var _g1 = [];
+						{
+							var _g2 = 0, _g3 = m.genres;
+							while(_g2 < _g3.length) {
+								var g = _g3[_g2];
+								++_g2;
+								_g1.push("<li>" + g + "</li>");
+							}
+						}
+						$r = _g1;
+						return $r;
+					}($this))).join("") + "</ul>");
+					_g.set("Certificate",m.certificate);
+					$r = _g;
+					return $r;
+				}($this)),false));
+				if(cont1.offsetHeight < 400) cont1.innerHTML += "<br>";
+				if(m.images != null && m.images.length > 0) {
+					var album = Reditn.embedAlbum(m.images);
+					album.style.position = "absolute";
+					album.style.right = "0px";
+					album.style.top = "0px";
+					cont1.style.overflow = "hidden";
+					cont1.style.position = "relative";
+					cont1.style.minHeight = album.offsetHeight + "px";
+					cont1.appendChild(album);
+				}
+				div.appendChild(cont1);
 				$r = div;
 				return $r;
 			}(this)):js.Boot.__instanceof(d,Array) && Reflect.hasField(d[0],"url")?(function($this) {
@@ -3478,10 +3526,6 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		return $r;
 	}(this));
 	nextPage();
-}},{ regex : new EReg("facebook.com/photo\\.php\\?(v|fbid)=([0-9]*).*",""), method : function(e,cb) {
-	Reditn.getJSON("http://noembed.com/embed?url=" + StringTools.urlEncode("http://" + e.matched(0)),function(data) {
-		return [{ url : data.url, caption : data.title, author : data.author_name}];
-	});
 }},{ regex : new EReg("plus\\.google.com/u?/?[0-9]*/([0-9]*)(/about)?",""), method : function(e,cb16) {
 	var id = e.matched(1);
 	Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + id + "?key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(d) {
@@ -3554,17 +3598,29 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 			cb22({ title : data1.title, author : data1.author, content : c, images : null});
 		}
 	});
-}},{ regex : new EReg("imdb.com/title/([a-zA-Z0-9]*)",""), method : function(e,cb23) {
-	var id = e.matched(1);
-	Reditn.getJSON("http://www.omdbapi.com/?i=" + id,function(d) {
+}},{ regex : new EReg("(imdb\\.com|themoviedb\\.com)/(title|movie)/([a-zA-Z0-9]*)",""), method : function(e,cb23) {
+	var id = e.matched(3);
+	var root = "http://private-b32b-themoviedb.apiary.io/3";
+	Reditn.getJSON("" + root + "/movie/" + id + "?api_key=" + "64360f9266bc7e77c6381c5fd20712b6",function(d) {
 		var roles = new haxe.ds.StringMap();
-		if(d.Writer != null) roles.set("Writers",[d.Writer]);
-		if(d.Director != null) roles.set("Director",[d.Director]);
-		if(d.Actors != null) {
-			var $as = d.Actors;
-			roles.set("Actors",$as.split(", "));
-		}
-		cb23({ title : d.Title, year : d.Year, certificate : d.Rated, released : d.Released, length : d.Duration, roles : roles, plot : d.Plot, images : [{ url : d.Poster}]});
+		var imgs = [];
+		if(d.poster_path != null) imgs.push({ url : "http://d3gtl9l2a4fn1j.cloudfront.net/t/p/original" + Std.string(d.poster_path)});
+		var oldgenres = d.genres;
+		var genres = (function($this) {
+			var $r;
+			var _g = [];
+			{
+				var _g1 = 0;
+				while(_g1 < oldgenres.length) {
+					var g = oldgenres[_g1];
+					++_g1;
+					_g.push(g.name);
+				}
+			}
+			$r = _g;
+			return $r;
+		}(this));
+		cb23({ title : d.title, year : d.Year, certificate : d.adult?"Mature":"All ages", released : d.release_date, length : d.runtime, roles : roles, plot : d.overview, status : d.status, tagline : d.tagline, genres : genres, images : imgs});
 	});
 }},{ regex : new EReg("twitch\\.tv/([a-zA-Z0-9]*).*",""), method : function(e,cb24) {
 	var id = e.matched(1);

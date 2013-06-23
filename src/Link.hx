@@ -14,6 +14,7 @@ class Link {
 	public static inline var GITHUB_KEY = "39d85b9ac427f1176763";
 	public static inline var GITHUB_KEYS = "5117570b83363ca0c71a196edc5b348af150c25d";
 	public static inline var AMAZON_KEY = "AKIAJMR3XPXGBMZJE6IA";
+	public static inline var MOV_DB_KEY = "64360f9266bc7e77c6381c5fd20712b6";
 	public static inline var FACEBOOK_KEY = "CAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrCAAFdBpahq7IBAFZBcSH9UOZAaREy2V3hSd2e0D9liaI48X5xavt3lI8rwdXd6YTizhZAip1D3cY4XriGV7FxZAH7HmFe3Khnj7sFATZAKiKZAHx5qJwLcRHwc2ZBH7ePQw5T7eZBUeRZBM7A5YymTPxjrf";
 	static var LINK = ~/[src|href]="(\/([^\/]*))*?([^\/]*)"/;
 	static var HTML_IMG = ~/<img .*?src="([^"]*)"\/?>/;
@@ -452,18 +453,6 @@ class Link {
 			}
 		},
 		{
-			regex: ~/facebook.com\/photo\.php\?(v|fbid)=([0-9]*).*/,
-			method: function(e, cb) {
-				Reditn.getJSON("http://noembed.com/embed?url="+'http://${e.matched(0)}'.urlEncode(), function(data:data.OEmbed) {
-					return [{
-						url: data.url,
-						caption: data.title,
-						author: data.author_name
-					}];
-				});
-			}
-		},
-		{
 			regex: ~/plus\.google.com\/u?\/?[0-9]*\/([0-9]*)(\/about)?/,
 			method: function(e, cb) {
 				var id = e.matched(1);
@@ -602,28 +591,29 @@ class Link {
 			}
 		},
 		{
-			regex: ~/imdb.com\/title\/([a-zA-Z0-9]*)/,
+			regex: ~/(imdb\.com|themoviedb\.com)\/(title|movie)\/([a-zA-Z0-9]*)/,
 			method: function(e, cb) {
-				var id = e.matched(1);
-				Reditn.getJSON('http://www.omdbapi.com/?i=$id', function(d:Dynamic) {
-					var roles = new Map();
-					if(d.Writer != null)
-						roles.set("Writers", [cast d.Writer]);
-					if(d.Director != null)
-						roles.set("Director", [cast d.Director]);
-					if(d.Actors != null) {
-						var as:String = d.Actors;
-						roles.set("Actors", as.split(", "));
-					}
+				var id = e.matched(3);
+				var root = "http://private-b32b-themoviedb.apiary.io/3";
+				Reditn.getJSON('$root/movie/$id?api_key=${MOV_DB_KEY}', function(d:Dynamic) {
+					var roles = new Map<String, String>();
+					var imgs = [];
+					if(d.poster_path != null)
+						imgs.push({url: 'http://d3gtl9l2a4fn1j.cloudfront.net/t/p/original${d.poster_path}'});
+					var oldgenres:Array<{name:String}> = d.genres;
+					var genres = [for(g in oldgenres) g.name];
 					cb({
-						title: d.Title,
+						title: d.title,
 						year: d.Year,
-						certificate: d.Rated,
-						released: d.Released,
-						length: d.Duration,
+						certificate: d.adult ? "Mature" : "All ages",
+						released: d.release_date,
+						length: d.runtime,
 						roles: roles,
-						plot: d.Plot,
-						images: [{url: d.Poster}]
+						plot: d.overview,
+						status: d.status,
+						tagline: d.tagline,
+						genres: genres,
+						images: imgs
 					});
 				});
 			}
@@ -805,6 +795,35 @@ class Link {
 					}
 					art.className = "md";
 					div.appendChild(art);
+					div;
+				} else if(Reflect.hasField(d, "roles")) {
+					var m:Movie = d;
+					trace(m);
+					var div = Browser.document.createDivElement();
+					div.className = "usertext";
+					var cont = Browser.document.createDivElement();
+					cont.className = "md";
+					cont.appendChild(Reditn.embedMap([
+						"Released" => m.released,
+						"Length" => (m.length == null ? null : '${m.length} mins'),
+						"Tagline" => m.tagline,
+						"Plot" => (m.plot == null ? null : '<p>${m.plot}</p>'),
+						"Genres" => "<ul>" + [for(g in m.genres) '<li>$g</li>'].join("") + "</ul>",
+						"Certificate" => m.certificate
+					], false));
+					if(cont.offsetHeight < 400)
+						cont.innerHTML += "<br>";
+					if(m.images != null && m.images.length > 0) {
+						var album = Reditn.embedAlbum(m.images);
+						album.style.position = "absolute";
+						album.style.right = "0px";
+						album.style.top = "0px";
+						cont.style.overflow = "hidden";
+						cont.style.position = "relative";
+						cont.style.minHeight = album.offsetHeight + "px";
+						cont.appendChild(album);
+					}
+					div.appendChild(cont);
 					div;
 				} else if(Std.is(d, Array) && Reflect.hasField(untyped d[0], "url")) {
 					var a:Album = d;
