@@ -3,21 +3,25 @@
 -js test.js
 -D chrome
 -lib extend
+-lib obfuscate
 --next
 -cp src
 -main Reditn
 -js test.js
 -D firefox
 -lib extend
+-lib obfuscate
 --next
 -cp src
 -main Reditn
 -js test.js
 -D userscript
 -lib extend
+-lib obfuscate
 --next
 -cp src
 -main Reditn
 -js test.js
 -D opera
 -lib extend
+-lib obfuscate
