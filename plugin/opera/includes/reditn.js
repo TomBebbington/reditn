@@ -19,7 +19,8 @@ Adblock.init = function() {
 	if(sidebarAd != null) Reditn.show(sidebarAd,false);
 }
 Adblock.hideAll = function(a) {
-	var _g1 = 0, _g = a.length;
+	var _g1 = 0;
+	var _g = a.length;
 	while(_g1 < _g) {
 		var i = _g1++;
 		Reditn.show(a[i],false);
@@ -89,7 +90,8 @@ AutoScroll.init = function() {
 	AutoScroll.refresh();
 	AutoScroll.last = document.body.getElementsByClassName("sitetable")[0];
 	window.addEventListener("scroll",function(e) {
-		var bottom = window.scrollY + window.innerHeight, h = document.body.offsetHeight;
+		var bottom = window.scrollY + window.innerHeight;
+		var h = document.body.offsetHeight;
 		if(bottom > h - window.innerHeight && AutoScroll.canLoad) AutoScroll.loadNext();
 	});
 }
@@ -117,15 +119,15 @@ AutoScroll.refresh = function() {
 		var root = window.location.href;
 		if(root.indexOf("?") != -1) root = HxOverrides.substr(root,0,root.indexOf("?"));
 		if(StringTools.endsWith(root,"/")) root = HxOverrides.substr(root,0,root.length - 1);
-		var hash = root.indexOf("#") != -1?(function($this) {
-			var $r;
+		var hash;
+		if(root.indexOf("#") != -1) {
 			root = HxOverrides.substr(root,0,root.indexOf("#"));
-			$r = window.location.hash;
-			return $r;
-		}(this)):"";
+			hash = window.location.hash;
+		} else hash = "";
 		var after = AutoScroll.getLastId();
 		AutoScroll.next = "" + root + "/?count=" + AutoScroll.count + "&after=" + after + hash;
-		var _g = 0, _g1 = AutoScroll.nextBtn.childNodes;
+		var _g = 0;
+		var _g1 = AutoScroll.nextBtn.childNodes;
 		while(_g < _g1.length) {
 			var i = _g1[_g];
 			++_g;
@@ -139,7 +141,8 @@ $hxClasses["DuplicateHider"] = DuplicateHider;
 DuplicateHider.__name__ = ["DuplicateHider"];
 DuplicateHider.init = function() {
 	var seen = [];
-	var _g = 0, _g1 = Reditn.links;
+	var _g = 0;
+	var _g1 = Reditn.links;
 	while(_g < _g1.length) {
 		var link = _g1[_g];
 		++_g;
@@ -202,20 +205,16 @@ Expand.refresh = function(check,e) {
 		while(_g < nps.length) {
 			var np = nps[_g];
 			++_g;
-			var np1 = (function($this) {
-				var $r;
-				var _g1 = [];
-				{
-					var _g2 = 0, _g3 = np.getElementsByTagName("a");
-					while(_g2 < _g3.length) {
-						var l = _g3[_g2];
-						++_g2;
-						_g1.push(l);
-					}
-				}
-				$r = _g1;
-				return $r;
-			}(this));
+			var np1;
+			var _g1 = [];
+			var _g2 = 0;
+			var _g3 = np.getElementsByTagName("a");
+			while(_g2 < _g3.length) {
+				var l = _g3[_g2];
+				++_g2;
+				_g1.push(l);
+			}
+			np1 = _g1;
 			var _g2 = 0;
 			while(_g2 < np1.length) {
 				var i = np1[_g2];
@@ -225,14 +224,17 @@ Expand.refresh = function(check,e) {
 			}
 		}
 	}
-	var _g = 0, _g1 = e == null?Reditn.links:e.getElementsByClassName("title");
+	var _g = 0;
+	var _g1;
+	if(e == null) _g1 = Reditn.links; else _g1 = e.getElementsByClassName("title");
 	while(_g < _g1.length) {
 		var l = _g1[_g];
 		++_g;
 		if(l.nodeName.toLowerCase() != "a") continue;
 		var q = false;
 		if(check) {
-			var _g2 = 0, _g3 = Expand.buttons;
+			var _g2 = 0;
+			var _g3 = Expand.buttons;
 			while(_g2 < _g3.length) {
 				var b = _g3[_g2];
 				++_g2;
@@ -249,7 +251,8 @@ Expand.refresh = function(check,e) {
 }
 Expand.toggle = function(t) {
 	Expand.toggled = t;
-	var _g = 0, _g1 = Expand.buttons;
+	var _g = 0;
+	var _g1 = Expand.buttons;
 	while(_g < _g1.length) {
 		var btn = _g1[_g];
 		++_g;
@@ -284,13 +287,18 @@ Expand.loadImage = function(url) {
 	return img;
 }
 Expand.initResize = function(i) {
-	var drx = 0.0, dry = 0.0, rt = 0.0, ow = 0, oh = 0;
+	var drx = 0.0;
+	var dry = 0.0;
+	var rt = 0.0;
+	var ow = 0;
+	var oh = 0;
 	var drag = false;
 	i.addEventListener("mousedown",function(ev) {
 		if(!ev.altKey && !ev.ctrlKey && !ev.metaKey) {
 			drag = true;
 			var cr = i.getBoundingClientRect();
-			var relx = ev.clientX - cr.left, rely = ev.clientY - cr.top;
+			var relx = ev.clientX - cr.left;
+			var rely = ev.clientY - cr.top;
 			var ev1 = ev;
 			drx = i.offsetWidth / relx;
 			dry = i.offsetHeight / rely;
@@ -301,7 +309,8 @@ Expand.initResize = function(i) {
 	i.addEventListener("mousemove",function(ev) {
 		if(drag) {
 			var cr = i.getBoundingClientRect();
-			var relx = ev.clientX - cr.left, rely = ev.clientY - cr.top;
+			var relx = ev.clientX - cr.left;
+			var rely = ev.clientY - cr.top;
 			var nw = relx * drx;
 			var nwh = nw / rt;
 			var nh = rely * dry;
@@ -411,7 +420,8 @@ Keyboard.highlight = function(dir) {
 Keyboard.show = function(s) {
 	if(s == null) s = true;
 	var btn = (Reditn.links[Keyboard.current] != null?Reditn.links[Keyboard.current].parentElement.parentElement.parentElement:null).getElementsByClassName("expando-button")[0];
-	var _g = 0, _g1 = Expand.buttons;
+	var _g = 0;
+	var _g1 = Expand.buttons;
 	while(_g < _g1.length) {
 		var b = _g1[_g];
 		++_g;
@@ -426,7 +436,8 @@ Keyboard.keyDown = function(c) {
 	Keyboard.keys.push(c);
 	while(Keyboard.keys.length > Keyboard.konami.length) HxOverrides.remove(Keyboard.keys,Keyboard.keys[0]);
 	var isKon = Keyboard.keys.length >= Keyboard.konami.length;
-	var _g1 = 0, _g = Keyboard.keys.length;
+	var _g1 = 0;
+	var _g = Keyboard.keys.length;
 	while(_g1 < _g) {
 		var i = _g1++;
 		if(Keyboard.keys[i] != Keyboard.konami[i]) {
@@ -466,34 +477,39 @@ Konami.translate = function(p) {
 }
 Konami.run = function() {
 	js.Browser.document.title = "Dubbit - the back page of the wubbanet";
-	var _g = 0, _g1 = Reditn.links;
+	var _g = 0;
+	var _g1 = Reditn.links;
 	while(_g < _g1.length) {
 		var l = _g1[_g];
 		++_g;
 		l.innerHTML = Konami.translate(l.innerHTML);
 	}
-	var _g = 0, _g1 = js.Browser.document.body.getElementsByClassName("author");
+	var _g = 0;
+	var _g1 = js.Browser.document.body.getElementsByClassName("author");
 	while(_g < _g1.length) {
 		var a = _g1[_g];
 		++_g;
 		var a1 = a;
 		a1.innerHTML = "dubstep";
 	}
-	var _g = 0, _g1 = js.Browser.document.body.getElementsByClassName("subreddit");
+	var _g = 0;
+	var _g1 = js.Browser.document.body.getElementsByClassName("subreddit");
 	while(_g < _g1.length) {
 		var s = _g1[_g];
 		++_g;
 		var s1 = s;
 		s1.innerHTML = "people with brains";
 	}
-	var _g = 0, _g1 = js.Browser.document.body.getElementsByClassName("score");
+	var _g = 0;
+	var _g1 = js.Browser.document.body.getElementsByClassName("score");
 	while(_g < _g1.length) {
 		var s = _g1[_g];
 		++_g;
 		var s1 = s;
 		s1.innerHTML = "-&infin;";
 	}
-	var _g = 0, _g1 = document.body.getElementsByTagName("p");
+	var _g = 0;
+	var _g1 = document.body.getElementsByTagName("p");
 	while(_g < _g1.length) {
 		var p = _g1[_g];
 		++_g;
@@ -521,7 +537,8 @@ Reditn.main = function() {
 }
 Reditn.getThingId = function(e) {
 	var cn = e.className;
-	var _g = 0, _g1 = cn.split(" ");
+	var _g = 0;
+	var _g1 = cn.split(" ");
 	while(_g < _g1.length) {
 		var v = _g1[_g];
 		++_g;
@@ -532,7 +549,8 @@ Reditn.getThingId = function(e) {
 Reditn.refreshLinks = function() {
 	Reditn.links = document.body.getElementsByClassName("title");
 	var _g = [];
-	var _g1 = 0, _g2 = Reditn.links;
+	var _g1 = 0;
+	var _g2 = Reditn.links;
 	while(_g1 < _g2.length) {
 		var l = _g2[_g1];
 		++_g1;
@@ -566,7 +584,8 @@ Reditn.init = function() {
 		if(s == null) return;
 		var state = haxe.Unserializer.run(s);
 		if(state.allExpanded != Expand.toggled) Expand.toggle(state.allExpanded);
-		var _g = 0, _g1 = Expand.buttons;
+		var _g = 0;
+		var _g1 = Expand.buttons;
 		while(_g < _g1.length) {
 			var btn = _g1[_g];
 			++_g;
@@ -577,7 +596,8 @@ Reditn.init = function() {
 }
 Reditn.state = function() {
 	var exp = new haxe.ds.StringMap();
-	var _g = 0, _g1 = Expand.buttons;
+	var _g = 0;
+	var _g1 = Expand.buttons;
 	while(_g < _g1.length) {
 		var btn = _g1[_g];
 		++_g;
@@ -586,22 +606,23 @@ Reditn.state = function() {
 	return { allExpanded : Expand.toggled, expanded : exp};
 }
 Reditn.wrap = function(fn,id) {
-	var d = id == null?null:ext.Storage.data.get(id);
+	var d;
+	if(id == null) d = null; else d = ext.Storage.data.get(id);
 	if(id == null || d) fn();
 }
 Reditn.formatNumber = function(n) {
 	if(!Math.isFinite(n)) return Std.string(n); else {
 		var s = Std.string(Math.abs(n));
-		var ad = s.indexOf(".") != -1?(function($this) {
-			var $r;
+		var ad;
+		if(s.indexOf(".") != -1) {
 			var t = HxOverrides.substr(s,s.indexOf("."),null);
 			s = HxOverrides.substr(s,0,s.indexOf("."));
-			$r = t;
-			return $r;
-		}(this)):"";
+			ad = t;
+		} else ad = "";
 		if(s.length >= 3) {
 			var ns = "";
-			var _g1 = 0, _g = s.length;
+			var _g1 = 0;
+			var _g = s.length;
 			while(_g1 < _g) {
 				var i = _g1++;
 				ns += s.charAt(i);
@@ -643,34 +664,31 @@ Reditn.age = function(t) {
 Reditn.embedAlbum = function(a) {
 	var span = document.createElement("span");
 	span.style.textAlign = "center";
-	var imgs = (function($this) {
-		var $r;
-		var _g = [];
-		{
-			var _g1 = 0;
-			while(_g1 < a.length) {
-				var im = a[_g1];
-				++_g1;
-				_g.push((function($this) {
-					var $r;
-					var i = Expand.loadImage(im.url);
-					i.title = (im.caption != null?im.caption + " ":"") + (im.author != null?"by " + im.author:"");
-					span.appendChild(i);
-					Reditn.show(i,false);
-					$r = i;
-					return $r;
-				}($this)));
-			}
-		}
-		$r = _g;
-		return $r;
-	}(this));
+	var imgs;
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < a.length) {
+		var im = a[_g1];
+		++_g1;
+		_g.push((function($this) {
+			var $r;
+			var i = Expand.loadImage(im.url);
+			i.title = (im.caption != null?im.caption + " ":"") + (im.author != null?"by " + im.author:"");
+			span.appendChild(i);
+			Reditn.show(i,false);
+			$r = i;
+			return $r;
+		}(this)));
+	}
+	imgs = _g;
 	var img = null;
 	var caption = document.createElement("span");
 	caption.style.fontWeight = "bold";
 	caption.style.marginLeft = "10px";
 	var currentIndex = 0;
-	var prev = null, info = null, next = null;
+	var prev = null;
+	var info = null;
+	var next = null;
 	if(a.length > 1) {
 		prev = document.createElement("button");
 		prev.innerHTML = "Prev";
@@ -871,8 +889,13 @@ haxe.Json.parse = function(text) {
 haxe.Json.prototype = {
 	parseNumber: function(c) {
 		var start = this.pos - 1;
-		var minus = c == 45, digit = !minus, zero = c == 48;
-		var point = false, e = false, pm = false, end = false;
+		var minus = c == 45;
+		var digit = !minus;
+		var zero = c == 48;
+		var point = false;
+		var e = false;
+		var pm = false;
+		var end = false;
 		while(true) {
 			c = this.str.charCodeAt(this.pos++);
 			switch(c) {
@@ -968,7 +991,9 @@ haxe.Json.prototype = {
 			case 32:case 13:case 10:case 9:
 				break;
 			case 123:
-				var obj = { }, field = null, comma = null;
+				var obj = { };
+				var field = null;
+				var comma = null;
 				while(true) {
 					var c1 = this.str.charCodeAt(this.pos++);
 					switch(c1) {
@@ -996,7 +1021,8 @@ haxe.Json.prototype = {
 				}
 				break;
 			case 91:
-				var arr = [], comma = null;
+				var arr = [];
+				var comma = null;
 				while(true) {
 					var c1 = this.str.charCodeAt(this.pos++);
 					switch(c1) {
@@ -1079,15 +1105,12 @@ ext.Http.prototype = {
 		var r = new window.XMLHttpRequest();
 		var onreadystatechange = function(_) {
 			if(r.readyState != 4) return;
-			var s = (function($this) {
-				var $r;
-				try {
-					$r = r.status;
-				} catch( e ) {
-					$r = null;
-				}
-				return $r;
-			}(this));
+			var s;
+			try {
+				s = r.status;
+			} catch( e ) {
+				s = null;
+			}
 			if(s == undefined) s = null;
 			if(s != null) me.onStatus(s);
 			if(s != null && s >= 200 && s < 400) me.onData(me.responseData = r.responseText); else if(s == null) me.onError("Failed to connect or resolve host"); else switch(s) {
@@ -1202,7 +1225,8 @@ js.Boot.__string_rec = function(o,s) {
 				if(o.length == 2) return o[0];
 				var str = o[0] + "(";
 				s += "\t";
-				var _g1 = 2, _g = o.length;
+				var _g1 = 2;
+				var _g = o.length;
 				while(_g1 < _g) {
 					var i = _g1++;
 					if(i != 2) str += "," + js.Boot.__string_rec(o[i],s); else str += js.Boot.__string_rec(o[i],s);
@@ -1261,7 +1285,8 @@ js.Boot.__interfLoop = function(cc,cl) {
 	if(cc == cl) return true;
 	var intf = cc.__interfaces__;
 	if(intf != null) {
-		var _g1 = 0, _g = intf.length;
+		var _g1 = 0;
+		var _g = intf.length;
 		while(_g1 < _g) {
 			var i = _g1++;
 			var i1 = intf[i];
@@ -1338,7 +1363,8 @@ parser.MediaWiki = function() { }
 $hxClasses["parser.MediaWiki"] = parser.MediaWiki;
 parser.MediaWiki.__name__ = ["parser","MediaWiki"];
 parser.MediaWiki.parse = function(s,base) {
-	var _g = 0, _g1 = parser.MediaWiki.regex;
+	var _g = 0;
+	var _g1 = parser.MediaWiki.regex;
 	while(_g < _g1.length) {
 		var r = _g1[_g];
 		++_g;
@@ -1355,7 +1381,8 @@ parser.MediaWiki.parse = function(s,base) {
 }
 parser.MediaWiki.trimTo = function(h,s) {
 	s = StringTools.trim(StringTools.replace(s,"_"," "));
-	var pos = { pos : 0, len : 0}, level = null;
+	var pos = { pos : 0, len : 0};
+	var level = null;
 	while(parser.MediaWiki.sections.matchSub(h,pos.pos + pos.len)) {
 		pos = parser.MediaWiki.sections.matchedPos();
 		if(StringTools.trim(parser.MediaWiki.sections.matched(2)) == StringTools.trim(s)) {
@@ -1385,11 +1412,13 @@ $hxClasses["parser.Markdown"] = parser.Markdown;
 parser.Markdown.__name__ = ["parser","Markdown"];
 parser.Markdown.parse = function(s) {
 	while(parser.Markdown.header.match(s)) {
-		var pos = parser.Markdown.header.matchedPos(), len = 1 + parser.Markdown.header.matched(1).length;
+		var pos = parser.Markdown.header.matchedPos();
+		var len = 1 + parser.Markdown.header.matched(1).length;
 		if(len > 6) len = 6;
 		s = parser.Markdown.header.matchedLeft() + ("<h" + len + ">" + parser.Markdown.header.matched(2) + "</h" + len + ">") + parser.Markdown.header.matchedRight();
 	}
-	var _g = 0, _g1 = parser.Markdown.regex;
+	var _g = 0;
+	var _g1 = parser.Markdown.regex;
 	while(_g < _g1.length) {
 		var r = _g1[_g];
 		++_g;
@@ -1704,7 +1733,8 @@ haxe.xml.Parser.doParse = function(str,p,parent) {
 			if(c == 59) {
 				var s = HxOverrides.substr(str,start,p - start);
 				if(s.charCodeAt(0) == 35) {
-					var i = s.charCodeAt(1) == 120?Std.parseInt("0" + HxOverrides.substr(s,1,s.length - 1)):Std.parseInt(HxOverrides.substr(s,1,s.length - 1));
+					var i;
+					if(s.charCodeAt(1) == 120) i = Std.parseInt("0" + HxOverrides.substr(s,1,s.length - 1)); else i = Std.parseInt(HxOverrides.substr(s,1,s.length - 1));
 					buf.b += Std.string(String.fromCharCode(i));
 				} else if(!haxe.xml.Parser.escapes.exists(s)) buf.b += Std.string("&" + s + ";"); else buf.b += Std.string(haxe.xml.Parser.escapes.get(s));
 				start = p + 1;
@@ -1740,7 +1770,8 @@ $hxClasses["Link"] = Link;
 Link.__name__ = ["Link"];
 Link.resolve = function(url) {
 	url = Link.trimURL(url);
-	var _g = 0, _g1 = Link.sites;
+	var _g = 0;
+	var _g1 = Link.sites;
 	while(_g < _g1.length) {
 		var s = _g1[_g];
 		++_g;
@@ -1762,13 +1793,15 @@ Link.trimURL = function(url) {
 	return url;
 }
 Link.filterHTML = function(h) {
-	var _g = 0, _g1 = Link.HTML_FILTERS;
+	var _g = 0;
+	var _g1 = Link.HTML_FILTERS;
 	while(_g < _g1.length) {
 		var f = _g1[_g];
 		++_g;
 		while(f.match(h)) h = f.replace(h,"");
 	}
-	var _g = 0, _g1 = Link.HTML_CLEANERS;
+	var _g = 0;
+	var _g1 = Link.HTML_CLEANERS;
 	while(_g < _g1.length) {
 		var c = _g1[_g];
 		++_g;
@@ -1785,7 +1818,8 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 		var b = document.createElement("div");
 		var cn = "expando-button reditn-expando-button ";
 		var isToggled = Expand.toggled;
-		var cl = isToggled?"expanded":"collapsed";
+		var cl;
+		if(isToggled) cl = "expanded"; else cl = "collapsed";
 		var exp = null;
 		b.className = "" + cn + " " + cl;
 		btn = { toggled : function() {
@@ -1801,20 +1835,17 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 		};
 		site.method(site.regex,function(d) {
 			var name = "selftext";
-			var content = Reflect.hasField(d,"urls")?(function($this) {
-				var $r;
+			var content;
+			if(Reflect.hasField(d,"urls")) {
 				var p = d;
-				var urls = (function($this) {
-					var $r;
-					var _g = [];
-					var $it0 = p.urls.keys();
-					while( $it0.hasNext() ) {
-						var uk = $it0.next();
-						_g.push("<li><a href=\"" + p.urls.get(uk) + "\">" + uk + "</a></li>");
-					}
-					$r = _g;
-					return $r;
-				}($this));
+				var urls;
+				var _g = [];
+				var $it0 = p.urls.keys();
+				while( $it0.hasNext() ) {
+					var uk = $it0.next();
+					_g.push("<li><a href=\"" + p.urls.get(uk) + "\">" + uk + "</a></li>");
+				}
+				urls = _g;
 				var div = js.Browser.document.createElement("div");
 				div.className = "usertext";
 				var content1 = js.Browser.document.createElement("div");
@@ -1827,16 +1858,14 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 					_g1.set("Links",urls.join(""));
 					$r = _g1;
 					return $r;
-				}($this)),false));
+				}(this)),false));
 				if(p.album.length > 0) {
 					content1.appendChild(js.Browser.document.createElement("br"));
 					content1.appendChild(Reditn.embedAlbum(p.album));
 				}
 				div.appendChild(content1);
-				$r = div;
-				return $r;
-			}(this)):Reflect.hasField(d,"price")?(function($this) {
-				var $r;
+				content = div;
+			} else if(Reflect.hasField(d,"price")) {
 				var i = d;
 				console.log(i);
 				var div = js.Browser.document.createElement("div");
@@ -1851,14 +1880,12 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 					_g.set("Description",i.description);
 					$r = _g;
 					return $r;
-				}($this))));
+				}(this))));
 				cont1.appendChild(Reditn.embedAlbum(i.images));
 				div.appendChild(cont1);
 				name = "item";
-				$r = div;
-				return $r;
-			}(this)):Reflect.hasField(d,"subscribers")?(function($this) {
-				var $r;
+				content = div;
+			} else if(Reflect.hasField(d,"subscribers")) {
 				var s = d;
 				var div = js.Browser.document.createElement("div");
 				div.className = "usertext";
@@ -1871,19 +1898,15 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 					_g.set("Description",parser.Markdown.parse(s.description));
 					$r = _g;
 					return $r;
-				}($this))));
-				$r = div;
-				return $r;
-			}(this)):Reflect.hasField(d,"html")?(function($this) {
-				var $r;
+				}(this))));
+				content = div;
+			} else if(Reflect.hasField(d,"html")) {
 				var v = d;
 				var div = js.Browser.document.createElement("div");
 				div.innerHTML = v.html;
 				name = "video";
-				$r = div;
-				return $r;
-			}(this)):Reflect.hasField(d,"content")?(function($this) {
-				var $r;
+				content = div;
+			} else if(Reflect.hasField(d,"content")) {
 				var a = d;
 				var div = js.Browser.document.createElement("div");
 				div.className = "usertext";
@@ -1897,10 +1920,8 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 				}
 				art.className = "md";
 				div.appendChild(art);
-				$r = div;
-				return $r;
-			}(this)):Reflect.hasField(d,"roles")?(function($this) {
-				var $r;
+				content = div;
+			} else if(Reflect.hasField(d,"roles")) {
 				var m = d;
 				console.log(m);
 				var div = js.Browser.document.createElement("div");
@@ -1918,7 +1939,8 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 						var $r;
 						var _g1 = [];
 						{
-							var _g2 = 0, _g3 = m.genres;
+							var _g2 = 0;
+							var _g3 = m.genres;
 							while(_g2 < _g3.length) {
 								var g = _g3[_g2];
 								++_g2;
@@ -1931,7 +1953,7 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 					_g.set("Certificate",m.certificate);
 					$r = _g;
 					return $r;
-				}($this)),false));
+				}(this)),false));
 				if(cont1.offsetHeight < 400) cont1.innerHTML += "<br>";
 				if(m.images != null && m.images.length > 0) {
 					var album = Reditn.embedAlbum(m.images);
@@ -1944,17 +1966,13 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 					cont1.appendChild(album);
 				}
 				div.appendChild(cont1);
-				$r = div;
-				return $r;
-			}(this)):js.Boot.__instanceof(d,Array) && Reflect.hasField(d[0],"url")?(function($this) {
-				var $r;
+				content = div;
+			} else if(js.Boot.__instanceof(d,Array) && Reflect.hasField(d[0],"url")) {
 				var a = d;
 				var div = Reditn.embedAlbum(a);
 				name = "image";
-				$r = div;
-				return $r;
-			}(this)):Reflect.hasField(d,"developers")?(function($this) {
-				var $r;
+				content = div;
+			} else if(Reflect.hasField(d,"developers")) {
 				console.log(url);
 				var r = d;
 				var div = document.createElement("div");
@@ -1966,14 +1984,11 @@ Link.createButton = function(url,cont,expalign,btnalign) {
 				cont1.appendChild(inner);
 				cont1.className = "md";
 				div.appendChild(cont1);
-				$r = div;
-				return $r;
-			}(this)):(function($this) {
-				var $r;
+				content = div;
+			} else {
 				console.log("Unknown value: " + Std.string(d));
-				$r = null;
-				return $r;
-			}(this));
+				content = null;
+			}
 			if(content != null) {
 				exp = document.createElement("div");
 				exp.className = "expando";
@@ -2063,7 +2078,8 @@ Settings.optimise = function() {
 	var $it0 = Settings.settings.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		var sv = Settings.settings.get(k), cv = ext.Storage.data.get(k);
+		var sv = Settings.settings.get(k);
+		var cv = ext.Storage.data.get(k);
 		if(sv.def != cv) {
 			var value = cv;
 			ext.Storage.data.set(k,value);
@@ -2076,7 +2092,8 @@ Settings.fixMissing = function(def) {
 	var $it0 = Settings.settings.keys();
 	while( $it0.hasNext() ) {
 		var k = $it0.next();
-		var value = def || !ext.Storage.data.exists(k) || !ext.Storage.data.get(k)?Settings.settings.get(k).def:ext.Storage.data.get(k);
+		var value;
+		if(def || !ext.Storage.data.exists(k) || !ext.Storage.data.get(k)) value = Settings.settings.get(k).def; else value = ext.Storage.data.get(k);
 		_g.set(k,value);
 	}
 	ext.Storage.data = _g;
@@ -2120,22 +2137,15 @@ Settings.settingsPopUp = function() {
 			if(i.type == "button") continue;
 			if(i.nodeName.toLowerCase() != "input") continue;
 			var i1 = i;
-			var val = (function($this) {
-				var $r;
-				var _g1 = i1.type.toLowerCase();
-				$r = (function($this) {
-					var $r;
-					switch(_g1) {
-					case "checkbox":
-						$r = i1.checked;
-						break;
-					default:
-						$r = i1.value;
-					}
-					return $r;
-				}($this));
-				return $r;
-			}(this));
+			var val;
+			var _g1 = i1.type.toLowerCase();
+			switch(_g1) {
+			case "checkbox":
+				val = i1.checked;
+				break;
+			default:
+				val = i1.value;
+			}
 			var value = val;
 			ext.Storage.data.set(i1.name,value);
 		}
@@ -2216,7 +2226,11 @@ SubredditInfo._onMouseOverSubreddit = function(e) {
 	var div = js.Browser.document.createElement("div");
 	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
 	Reditn.getJSON("/r/" + name + "/about.json",function(d) {
-		var title = d.display_name, subs = Reditn.formatNumber(d.subscribers), users = Reditn.formatNumber(d.accounts_active), desc = parser.Markdown.parse(d.public_description), age = Reditn.age(d.created_utc);
+		var title = d.display_name;
+		var subs = Reditn.formatNumber(d.subscribers);
+		var users = Reditn.formatNumber(d.accounts_active);
+		var desc = parser.Markdown.parse(d.public_description);
+		var age = Reditn.age(d.created_utc);
 		var html = "<b>Name:</b> " + name + " <br>";
 		var ts = ext.Storage.data.get("sub-tags");
 		if(ts.exists(name)) html += "<b>Tag:</b> " + ts.get(name) + "<br>";
@@ -2243,7 +2257,8 @@ SubredditTagger.getTag = function(a) {
 	var tagline = a.parentNode;
 	var tag = js.Browser.document.createElement("span");
 	var sub = StringTools.trim(a.innerHTML);
-	var currentTag = ext.Storage.data.get("sub-tags").exists(sub)?ext.Storage.data.get("sub-tags").get(sub):null;
+	var currentTag;
+	if(ext.Storage.data.get("sub-tags").exists(sub)) currentTag = ext.Storage.data.get("sub-tags").get(sub); else currentTag = null;
 	tag.className = "flair";
 	var tagName = js.Browser.document.createElement("span");
 	if(currentTag == null) tagName.innerHTML = ""; else tagName.innerHTML = StringTools.htmlEscape(currentTag) + " ";
@@ -2285,15 +2300,12 @@ TextExpand.init = function() {
 	while(_g < posts.length) {
 		var c = posts[_g];
 		++_g;
-		var ac = (function($this) {
-			var $r;
-			try {
-				$r = (js.Boot.__cast(c , Element)).getElementsByClassName("md")[0];
-			} catch( e ) {
-				$r = null;
-			}
-			return $r;
-		}(this));
+		var ac;
+		try {
+			ac = (js.Boot.__cast(c , Element)).getElementsByClassName("md")[0];
+		} catch( e ) {
+			ac = null;
+		}
 		if(ac == null) continue;
 		var links = ac.getElementsByTagName("a");
 		var _g1 = 0;
@@ -2412,7 +2424,10 @@ UserInfo._onMouseOverUser = function(e) {
 	var div = js.Browser.document.createElement("div");
 	Reditn.popUp(e1,div,e1.offsetLeft + e1.offsetWidth,e1.offsetTop);
 	Reditn.getJSON("/user/" + user + "/about.json",function(i) {
-		var name = i.name, age = Reditn.age(i.created_utc), linkKarma = Reditn.formatNumber(i.link_karma), commentKarma = Reditn.formatNumber(i.comment_karma);
+		var name = i.name;
+		var age = Reditn.age(i.created_utc);
+		var linkKarma = Reditn.formatNumber(i.link_karma);
+		var commentKarma = Reditn.formatNumber(i.comment_karma);
 		var html = "<b>User:</b> " + name + "<br>";
 		var ts = ext.Storage.data.get("user-tags");
 		if(ts.exists(name)) html += "<b>Tag:</b> " + ts.get(name) + "<br>";
@@ -2439,7 +2454,8 @@ UserTagger.getTag = function(a) {
 	var tagline = a.parentNode;
 	var tag = document.createElement("span");
 	var user = StringTools.trim(a.innerHTML);
-	var currentTag = ext.Storage.data.get("user-tags").exists(user)?ext.Storage.data.get("user-tags").get(user):null;
+	var currentTag;
+	if(ext.Storage.data.get("user-tags").exists(user)) currentTag = ext.Storage.data.get("user-tags").get(user); else currentTag = null;
 	tag.className = "flair";
 	var tagName = document.createElement("span");
 	if(currentTag == null) tagName.innerHTML = ""; else tagName.innerHTML = StringTools.htmlEscape(currentTag) + " ";
@@ -2505,7 +2521,8 @@ $hxClasses["haxe.Unserializer"] = haxe.Unserializer;
 haxe.Unserializer.__name__ = ["haxe","Unserializer"];
 haxe.Unserializer.initCodes = function() {
 	var codes = new Array();
-	var _g1 = 0, _g = haxe.Unserializer.BASE64.length;
+	var _g1 = 0;
+	var _g = haxe.Unserializer.BASE64.length;
 	while(_g1 < _g) {
 		var i = _g1++;
 		codes[haxe.Unserializer.BASE64.charCodeAt(i)] = i;
@@ -2664,7 +2681,8 @@ haxe.Unserializer.prototype = {
 			}
 			var i = this.pos;
 			var rest = len & 3;
-			var size = (len >> 2) * 3 + (rest >= 2?rest - 1:0);
+			var size;
+			size = (len >> 2) * 3 + (rest >= 2?rest - 1:0);
 			var max = i + (len - rest);
 			var bytes = haxe.io.Bytes.alloc(size);
 			var bpos = 0;
@@ -2964,7 +2982,8 @@ haxe.Serializer.prototype = {
 		}
 	}
 	,serializeFields: function(v) {
-		var _g = 0, _g1 = Reflect.fields(v);
+		var _g = 0;
+		var _g1 = Reflect.fields(v);
 		while(_g < _g1.length) {
 			var f = _g1[_g];
 			++_g;
@@ -2975,7 +2994,8 @@ haxe.Serializer.prototype = {
 	}
 	,serializeRef: function(v) {
 		var vt = typeof(v);
-		var _g1 = 0, _g = this.cache.length;
+		var _g1 = 0;
+		var _g = this.cache.length;
 		while(_g1 < _g) {
 			var i = _g1++;
 			var ci = this.cache[i];
@@ -3074,7 +3094,8 @@ haxe.ds.ObjectMap.prototype = {
 		return HxOverrides.iter(a);
 	}
 	,set: function(key,value) {
-		var id = key.__id__ != null?key.__id__:key.__id__ = ++haxe.ds.ObjectMap.count;
+		var id;
+		if(key.__id__ != null) id = key.__id__; else id = key.__id__ = ++haxe.ds.ObjectMap.count;
 		this.h[id] = value;
 		this.h.__keys__[id] = key;
 	}
@@ -3177,36 +3198,33 @@ haxe.xml.Parser.escapes = (function($this) {
 	return $r;
 }(this));
 Link.HTML_IMG = new EReg("<img .*?src=\"([^\"]*)\"/?>","");
-Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method : function(e,cb) {
-	cb([{ url : "http://" + e.matched(0), caption : null, author : null}]);
+Link.sites = [{ regex : new EReg("memedad\\.com/memes?/([0-9]*).+",""), method : function(e,cb) {
+	var id = e.matched(1);
+	cb([{ url : "http://www.memedad.com/memes/" + id + ".jpg"}]);
+}},{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method : function(e,cb) {
+	cb([{ url : "http://" + e.matched(0), author : null}]);
 }},{ regex : new EReg("twitpic\\.com/([a-zA-Z0-9]*)",""), method : function(e,cb) {
 	var id = e.matched(1);
 	cb([{ url : "http://twitpic.com/show/full/" + id}]);
 }},{ regex : new EReg("i?\\.?imgur.com/(a|gallery)/([^/]*)(/.*)?",""), method : function(e,cb1) {
 	var id = e.matched(2);
-	var albumType = (function($this) {
-		var $r;
-		var _g = e.matched(1).toLowerCase();
-		$r = (function($this) {
-			var $r;
-			switch(_g) {
-			case "a":
-				$r = "album";
-				break;
-			case "gallery":
-				$r = "gallery/album";
-				break;
-			default:
-				$r = "album";
-			}
-			return $r;
-		}($this));
-		return $r;
-	}(this));
+	var albumType;
+	var _g = e.matched(1).toLowerCase();
+	switch(_g) {
+	case "a":
+		albumType = "album";
+		break;
+	case "gallery":
+		albumType = "gallery/album";
+		break;
+	default:
+		albumType = "album";
+	}
 	Reditn.getJSON("https://api.imgur.com/3/" + albumType + "/" + id,function(d) {
 		var album = [];
 		if(d.images_count <= 0) album.push({ url : "http://i.imgur.com/" + d.id + ".jpg", caption : d.title, author : d.account_url}); else {
-			var _g1 = 0, _g2 = d.images;
+			var _g1 = 0;
+			var _g2 = d.images;
 			while(_g1 < _g2.length) {
 				var i = _g2[_g1];
 				++_g1;
@@ -3216,7 +3234,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		cb1(album);
 	},"Client-ID " + "cc1f254578d6c52");
 }},{ regex : new EReg("i?\\.?imgur\\.com/(r/[^/]*/)?([a-zA-Z0-9,]*)",""), method : function(e,cb) {
-	var id = e.matched(1) == null || e.matched(1).indexOf("/") != -1?e.matched(2):e.matched(1);
+	var id;
+	if(e.matched(1) == null || e.matched(1).indexOf("/") != -1) id = e.matched(2); else id = e.matched(1);
 	var ids = id.split(",");
 	cb((function($this) {
 		var $r;
@@ -3226,20 +3245,20 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 			while(_g1 < ids.length) {
 				var id1 = ids[_g1];
 				++_g1;
-				_g.push({ url : "http://i.imgur.com/" + id1 + ".jpg", caption : null, author : null});
+				_g.push({ url : "http://i.imgur.com/" + id1 + ".jpg", author : null});
 			}
 		}
 		$r = _g;
 		return $r;
 	}(this)));
 }},{ regex : new EReg("(qkme\\.me/3piqes\\?id=|qkme\\.me/|quickmeme\\.com/meme/|m\\.quickmeme.com/meme/)([^/]*)",""), method : function(e,cb) {
-	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", caption : null, author : null}]);
+	cb([{ url : "http://i.qkme.me/" + e.matched(2) + ".jpg", author : null}]);
 }},{ regex : new EReg("memecrunch.com/meme/([^/]*)/([^/]*)",""), method : function(e,cb) {
-	cb([{ url : "http://" + e.matched(0) + "/image.png", caption : null, author : null}]);
+	cb([{ url : "http://" + e.matched(0) + "/image.png", author : null}]);
 }},{ regex : new EReg("memegenerator\\.net/instance/([^/]*)",""), method : function(e,cb) {
-	cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + e.matched(1) + ".jpg", caption : null, author : null}]);
+	cb([{ url : "http://cdn.memegenerator.net/instances/400x/" + e.matched(1) + ".jpg", author : null}]);
 }},{ regex : new EReg("imgflip\\.com/i/([^/]*)",""), method : function(e,cb) {
-	cb([{ url : "http://i.imgflip.com/" + e.matched(1) + ".jpg", caption : null, author : null}]);
+	cb([{ url : "http://i.imgflip.com/" + e.matched(1) + ".jpg", author : null}]);
 }},{ regex : new EReg("what-if.xkcd.com/([0-9]*)",""), method : function(e,cb) {
 }},{ regex : new EReg("xkcd.com/([0-9]*)",""), method : function(e,cb2) {
 	Reditn.getJSON("http://www.xkcd.com/" + e.matched(1) + "/info.0.json",function(d) {
@@ -3248,10 +3267,10 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 }},{ regex : new EReg("explosm.net/comics/([0-9]*)",""), method : function(e1,cb3) {
 	Reditn.getText("http://www." + e1.matched(0),function(txt) {
 		var rg = new EReg("\"http://www\\.explosm\\.net/db/files/Comics/([^\"]*)\"","");
-		if(rg.match(txt)) cb3([{ url : rg.matched(0).substring(1,rg.matched(0).length - 1), caption : null, author : null}]); else throw "" + Std.string(rg) + " not matched by " + e1.matched(0) + " in " + txt;
+		if(rg.match(txt)) cb3([{ url : rg.matched(0).substring(1,rg.matched(0).length - 1), author : null}]); else throw "" + Std.string(rg) + " not matched by " + e1.matched(0) + " in " + txt;
 	});
 }},{ regex : new EReg("livememe.com/([^/]*)",""), method : function(e,cb) {
-	cb([{ url : "http://livememe.com/" + e.matched(1) + ".jpg", caption : null, author : null}]);
+	cb([{ url : "http://livememe.com/" + e.matched(1) + ".jpg", author : null}]);
 }},{ regex : new EReg("(([^\\.]*\\.)?deviantart\\.com/art|fav\\.me)/.*",""), method : function(e,cb4) {
 	Reditn.getJSON("http://backend.deviantart.com/oembed?url=" + StringTools.urlEncode(e.matched(0)) + "&format=json",function(e1) {
 		cb4([{ url : e1.url, caption : e1.title, author : e1.author_name}]);
@@ -3279,66 +3298,68 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		cb7({ author : d.author_name, content : Link.filterHTML(d.html), images : imgs});
 	});
 }},{ regex : new EReg("(.*)/wiki/([^#]*)(#.*)?",""), method : function(e,cb8) {
-	var aroot = "http://" + e.matched(1), title = e.matched(2), to = e.matched(3);
+	var aroot = "http://" + e.matched(1);
+	var title = e.matched(2);
+	var to = e.matched(3);
 	if(to != null) to = StringTools.trim(HxOverrides.substr(to,1,null));
 	if(to != null && to.length == 0) to = null;
 	var urlroot = aroot;
 	if(!StringTools.endsWith(urlroot,".wikia.com")) urlroot += "/w";
-	var getWikiPage = (function($this) {
-		var $r;
-		var getWikiPage1 = null;
-		getWikiPage1 = function(name) {
-			Reditn.getJSON("" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(d) {
-				var pages = d.query.pages;
-				var _g = 0, _g1 = Reflect.fields(pages);
-				while(_g < _g1.length) {
-					var p = _g1[_g];
-					++_g;
-					var page = [Reflect.field(pages,p)];
-					var cont = [Reflect.field(page[0].revisions[0],"*")];
-					if(StringTools.startsWith(cont[0],"#REDIRECT [[")) {
-						getWikiPage1(cont[0].substring(12,cont[0].lastIndexOf("]]")));
-						return;
-					}
-					var images = [parser.MediaWiki.getAlbum(cont[0])];
-					if(to != null) cont[0] = parser.MediaWiki.trimTo(cont[0],to);
-					cont[0] = parser.MediaWiki.parse(cont[0],aroot);
-					if(images[0].length > 0) {
-						var nimages = [[]];
-						var _g2 = 0;
-						while(_g2 < images[0].length) {
-							var i1 = [images[0][_g2]];
-							++_g2;
-							Reditn.getJSON("" + urlroot + "/api.php?action=query&titles=" + StringTools.urlEncode(i1[0].url) + "&prop=imageinfo&iiprop=url&format=json",(function(i1,nimages,images,cont,page) {
-								return function(d1) {
-									var pages1 = d1.query.pages;
-									var _g3 = 0, _g4 = Reflect.fields(pages1);
-									while(_g3 < _g4.length) {
-										var p1 = _g4[_g3];
-										++_g3;
-										var page1 = Reflect.field(pages1,p1);
-										if(page1 != null && page1.imageinfo != null) {
-											var url = page1.imageinfo[0].url;
-											nimages[0].push({ url : url, caption : i1[0].caption, author : null});
-										} else {
-											console.log("Error whilst processing " + Std.string(page1) + " for " + i1[0].url);
-											HxOverrides.remove(images[0],i1[0]);
-										}
-									}
-									if(nimages[0].length >= images[0].length) cb8({ title : page[0].title, content : cont[0], author : null, images : nimages[0]});
-								};
-							})(i1,nimages,images,cont,page));
-						}
-					} else cb8({ title : page[0].title, content : cont[0], author : null, images : null});
+	var getWikiPage;
+	var getWikiPage1 = null;
+	getWikiPage1 = function(name) {
+		Reditn.getJSON("" + urlroot + "/api.php?format=json&prop=revisions&action=query&titles=" + name + "&rvprop=content",function(d) {
+			var pages = d.query.pages;
+			var _g = 0;
+			var _g1 = Reflect.fields(pages);
+			while(_g < _g1.length) {
+				var p = _g1[_g];
+				++_g;
+				var page = [Reflect.field(pages,p)];
+				var cont = [Reflect.field(page[0].revisions[0],"*")];
+				if(StringTools.startsWith(cont[0],"#REDIRECT [[")) {
+					getWikiPage1(cont[0].substring(12,cont[0].lastIndexOf("]]")));
+					return;
 				}
-			});
-		};
-		$r = getWikiPage1;
-		return $r;
-	}(this));
+				var images = [parser.MediaWiki.getAlbum(cont[0])];
+				if(to != null) cont[0] = parser.MediaWiki.trimTo(cont[0],to);
+				cont[0] = parser.MediaWiki.parse(cont[0],aroot);
+				if(images[0].length > 0) {
+					var nimages = [[]];
+					var _g2 = 0;
+					while(_g2 < images[0].length) {
+						var i1 = [images[0][_g2]];
+						++_g2;
+						Reditn.getJSON("" + urlroot + "/api.php?action=query&titles=" + StringTools.urlEncode(i1[0].url) + "&prop=imageinfo&iiprop=url&format=json",(function(i1,nimages,images,cont,page) {
+							return function(d1) {
+								var pages1 = d1.query.pages;
+								var _g3 = 0;
+								var _g4 = Reflect.fields(pages1);
+								while(_g3 < _g4.length) {
+									var p1 = _g4[_g3];
+									++_g3;
+									var page1 = Reflect.field(pages1,p1);
+									if(page1 != null && page1.imageinfo != null) {
+										var url = page1.imageinfo[0].url;
+										nimages[0].push({ url : url, caption : i1[0].caption, author : null});
+									} else {
+										console.log("Error whilst processing " + Std.string(page1) + " for " + i1[0].url);
+										HxOverrides.remove(images[0],i1[0]);
+									}
+								}
+								if(nimages[0].length >= images[0].length) cb8({ title : page[0].title, content : cont[0], author : null, images : nimages[0]});
+							};
+						})(i1,nimages,images,cont,page));
+					}
+				} else cb8({ title : page[0].title, content : cont[0], author : null, images : null});
+			}
+		});
+	};
+	getWikiPage = getWikiPage1;
 	getWikiPage(title);
 }},{ regex : new EReg("github\\.com/([^/]*)/([^/]*)",""), method : function(e,cb9) {
-	var author = e.matched(1), repo = e.matched(2);
+	var author = e.matched(1);
+	var repo = e.matched(2);
 	Reditn.getJSON("https://api.github.com/repos/" + author + "/" + repo + "/readme?client_id=" + "39d85b9ac427f1176763" + "&client_secret=" + "5117570b83363ca0c71a196edc5b348af150c25d",function(d) {
 		if(d.content == null) return;
 		var c = d.content;
@@ -3380,7 +3401,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 			var $r;
 			var u = Reflect.field(data,"download-page");
 			{
-				var _g1 = 0, _g2 = Reflect.fields(data);
+				var _g1 = 0;
+				var _g2 = Reflect.fields(data);
 				while(_g1 < _g2.length) {
 					var f = _g2[_g1];
 					++_g1;
@@ -3404,11 +3426,12 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 			cont = HxOverrides.substr(cont,cont.indexOf(">") + 1,null);
 			cont = HxOverrides.substr(cont,0,cont.indexOf("</article>"));
 			cont = Link.filterHTML(cont);
-			cb11({ title : t.matched(1), content : cont, author : null, images : []});
+			cb11({ title : t.matched(1), content : cont, images : []});
 		}
 	});
 }},{ regex : new EReg("([^\\.]*)\\.tumblr\\.com/(post|image)/([0-9]*)(/.*)?",""), method : function(e,cb12) {
-	var author = e.matched(1), id = e.matched(3);
+	var author = e.matched(1);
+	var id = e.matched(3);
 	Reditn.getJSON("http://api.tumblr.com/v2/blog/" + author + ".tumblr.com/posts/json?api_key=" + "k6pU8NIG57YiPAtXFD5s9DGegNPBZIpMahvbK4d794JreYIyYE" + "&id=" + id,function(d) {
 		var post = d.posts[0];
 		cb12((function($this) {
@@ -3419,7 +3442,7 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 					var $r;
 					var images = [];
 					while(Link.HTML_IMG.match(post.body)) {
-						images.push({ url : Link.HTML_IMG.matched(1), caption : null, author : d.blog.name});
+						images.push({ url : Link.HTML_IMG.matched(1), author : d.blog.name});
 						post.body = Link.HTML_IMG.replace(post.body,"");
 					}
 					post.body = Link.filterHTML(post.body);
@@ -3471,57 +3494,60 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		console.log(d);
 	});
 }},{ regex : new EReg("plus\\.google\\.com/([0-9]*)/posts/([a-zA-Z]*)",""), method : function(e2,cb15) {
-	var pid = e2.matched(1), id2 = e2.matched(2), num = 0, title1 = new EReg("<b>([^>]*)</b><br />","");
-	var nextPage = (function($this) {
-		var $r;
-		var nextPage1 = null;
-		nextPage1 = function(tk) {
-			if(tk == null) tk = ""; else tk = "&requestToken=" + tk;
-			if(num > 8) return;
-			Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + pid + "/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o" + tk,function(d) {
-				var items = d.items, url = e2.matched(0);
-				var _g = 0;
-				while(_g < items.length) {
-					var i = items[_g];
-					++_g;
-					if(i.url.indexOf(id2) != -1) {
-						Reditn.getJSON("https://www.googleapis.com/plus/v1/activities/" + Std.string(i.id) + "?fields=actor%2FdisplayName%2Cannotation%2Cobject(actor%2Cattachments%2Ccontent%2Cid%2CobjectType%2CoriginalContent%2Curl)&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(d1) {
-							var type = d1.object.objectType, name = d1.actor.actorName, cont = d1.object.content;
-							title1.match(cont);
-							switch(type) {
-							case "note":
-								var titl = title1.matched(1);
-								cont = title1.replace(cont,"");
-								cont = Link.filterHTML(cont);
-								cb15({ title : titl, author : name, content : cont, images : []});
-								break;
-							default:
-								var att = d1.object.attachments;
-								cb15((function($this) {
-									var $r;
-									var _g1 = [];
-									{
-										var _g2 = 0;
-										while(_g2 < att.length) {
-											var a = att[_g2];
-											++_g2;
-											_g1.push({ url : a.image.url, caption : a.content.length == 0?d1.object.content:a.content, author : null});
-										}
+	var pid = e2.matched(1);
+	var id2 = e2.matched(2);
+	var num = 0;
+	var title1 = new EReg("<b>([^>]*)</b><br />","");
+	var nextPage;
+	var nextPage1 = null;
+	nextPage1 = function(tk) {
+		if(tk == null) tk = ""; else tk = "&requestToken=" + tk;
+		if(num > 8) return;
+		Reditn.getJSON("https://www.googleapis.com/plus/v1/people/" + pid + "/activities/public?fields=items(id%2Curl)%2CnextPageToken&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o" + tk,function(d) {
+			var items = d.items;
+			var url = e2.matched(0);
+			var _g = 0;
+			while(_g < items.length) {
+				var i = items[_g];
+				++_g;
+				if(i.url.indexOf(id2) != -1) {
+					Reditn.getJSON("https://www.googleapis.com/plus/v1/activities/" + Std.string(i.id) + "?fields=actor%2FdisplayName%2Cannotation%2Cobject(actor%2Cattachments%2Ccontent%2Cid%2CobjectType%2CoriginalContent%2Curl)&key=" + "AIzaSyC-LFpB6Y-kC6re81ohFnPIvO4hbJYGS3o",function(d1) {
+						var type = d1.object.objectType;
+						var name = d1.actor.actorName;
+						var cont = d1.object.content;
+						title1.match(cont);
+						switch(type) {
+						case "note":
+							var titl = title1.matched(1);
+							cont = title1.replace(cont,"");
+							cont = Link.filterHTML(cont);
+							cb15({ title : titl, author : name, content : cont, images : []});
+							break;
+						default:
+							var att = d1.object.attachments;
+							cb15((function($this) {
+								var $r;
+								var _g1 = [];
+								{
+									var _g2 = 0;
+									while(_g2 < att.length) {
+										var a = att[_g2];
+										++_g2;
+										_g1.push({ url : a.image.url, caption : a.content.length == 0?d1.object.content:a.content, author : null});
 									}
-									$r = _g1;
-									return $r;
-								}(this)));
-							}
-						});
-						return;
-					}
+								}
+								$r = _g1;
+								return $r;
+							}(this)));
+						}
+					});
+					return;
 				}
-				if(d.items.length != 0) nextPage1(d.requestToken);
-			});
-		};
-		$r = nextPage1;
-		return $r;
-	}(this));
+			}
+			if(d.items.length != 0) nextPage1(d.requestToken);
+		});
+	};
+	nextPage = nextPage1;
 	nextPage();
 }},{ regex : new EReg("plus\\.google.com/u?/?[0-9]*/([0-9]*)(/about)?",""), method : function(e,cb16) {
 	var id = e.matched(1);
@@ -3533,7 +3559,8 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 			while(_g < urls.length) {
 				var u = urls[_g];
 				++_g;
-				var key = u.label, value = u.value;
+				var key = u.label;
+				var value = u.value;
 				aurls.set(key,value);
 			}
 		}
@@ -3562,16 +3589,15 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 	});
 }},{ regex : new EReg("vine\\.co/v/(.*)",""), method : function(e,cb) {
 	var id = e.matched(1);
-	cb({ title : null, author : null, html : "<iframe class=\"vine-embed\" src=\"https://vine.co/v/" + id + "/embed/simple\" width=\"610\" height=\"348\" frameborder=\"0\"></iframe><script async src=\"//platform.vine.co/static/scripts/embed.js\" charset=\"utf-8\"></script>"});
+	cb({ title : null, html : "<iframe class=\"vine-embed\" src=\"https://vine.co/v/" + id + "/embed/simple\" width=\"610\" height=\"348\" frameborder=\"0\"></iframe><script async src=\"//platform.vine.co/static/scripts/embed.js\" charset=\"utf-8\"></script>"});
 }},{ regex : new EReg("vimeo\\.com/([0-9]*)",""), method : function(e,cb20) {
 	var id = e.matched(1);
 	Reditn.getJSON("http://vimeo.com/api/oembed.json?url=http%3A//vimeo.com/" + id + "&maxwidth=500",function(data) {
-		cb20({ title : null, author : null, html : data.html});
+		cb20({ title : null, html : data.html});
 	});
 }},{ regex : new EReg("viewrz\\.com/video/([a-z-A-Z0-9]*)",""), method : function(e,cb) {
 	var id = e.matched(1);
-	console.log(id);
-	cb({ title : null, author : null, html : "<iframe height=\"310\" width=\"480\"  src=\"http://viewrz.com/embed/" + id + "\" frameborder=\"0\"></iframe>"});
+	cb({ title : null, html : "<iframe height=\"310\" width=\"480\"  src=\"http://viewrz.com/embed/" + id + "\" frameborder=\"0\"></iframe>"});
 }},{ regex : new EReg("reddit\\.com/r/[^/]*/comments/[0-9a-zA-Z]*/[^/]*/([0-9a-zA-Z]*)",""), method : function(e,cb21) {
 	var id = e.matched(1);
 	Reditn.getJSON("http://www." + e.matched(0) + ".json",function(data) {
@@ -3603,20 +3629,15 @@ Link.sites = [{ regex : new EReg(".*\\.(jpeg|gif|jpg|bmp|png|webp)","i"), method
 		var imgs = [];
 		if(d.poster_path != null) imgs.push({ url : "http://d3gtl9l2a4fn1j.cloudfront.net/t/p/original" + Std.string(d.poster_path)});
 		var oldgenres = d.genres;
-		var genres = (function($this) {
-			var $r;
-			var _g = [];
-			{
-				var _g1 = 0;
-				while(_g1 < oldgenres.length) {
-					var g = oldgenres[_g1];
-					++_g1;
-					_g.push(g.name);
-				}
-			}
-			$r = _g;
-			return $r;
-		}(this));
+		var genres;
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < oldgenres.length) {
+			var g = oldgenres[_g1];
+			++_g1;
+			_g.push(g.name);
+		}
+		genres = _g;
 		cb23({ title : d.title, year : d.Year, certificate : d.adult?"Mature":"All ages", released : d.release_date, length : d.runtime, roles : roles, plot : d.overview, status : d.status, tagline : d.tagline, genres : genres, images : imgs});
 	});
 }},{ regex : new EReg("twitch\\.tv/([a-zA-Z0-9]*).*",""), method : function(e,cb24) {

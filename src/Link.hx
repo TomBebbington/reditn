@@ -20,11 +20,19 @@ class Link {
 	static var HTML_IMG = ~/<img .*?src="([^"]*)"\/?>/;
 	static var sites:Array<Site> = [
 		{
+			regex: ~/memedad\.com\/memes?\/([0-9]*).+/,
+			method: function(e, cb) {
+				var id = e.matched(1);
+				cb([{
+					url: 'http://www.memedad.com/memes/$id.jpg'
+				}]);
+			}
+		},
+		{
 			regex: ~/.*\.(jpeg|gif|jpg|bmp|png|webp)/i,
 			method: function(e, cb) {
 				cb([{
 					url: 'http://${e.matched(0)}',
-					caption: null,
 					author: null
 				}]);
 			}
@@ -73,7 +81,6 @@ class Link {
 				var ids = id.split(",");
 				cb([for(id in ids) {
 					url: 'http://i.imgur.com/${id}.jpg',
-					caption: null,
 					author: null
 				}]);
 			}
@@ -83,7 +90,6 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://i.qkme.me/${e.matched(2)}.jpg',
-					caption: null,
 					author: null
 				}]);
 			}
@@ -93,7 +99,6 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://${e.matched(0)}/image.png',
-					caption: null,
 					author: null
 				}]);
 			}
@@ -103,7 +108,6 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://cdn.memegenerator.net/instances/400x/${e.matched(1)}.jpg',
-					caption: null,
 					author: null
 				}]);
 			}
@@ -113,7 +117,6 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://i.imgflip.com/${e.matched(1)}.jpg',
-					caption: null,
 					author: null
 				}]);
 			}
@@ -144,7 +147,6 @@ class Link {
 					if(rg.match(txt)) {
 						cb([{
 							url: rg.matched(0).substring(1, rg.matched(0).length-1),
-							caption: null,
 							author: null
 						}]);
 					}
@@ -158,7 +160,6 @@ class Link {
 			method: function(e, cb) {
 				cb([{
 					url: 'http://livememe.com/${e.matched(1)}.jpg',
-					caption: null,
 					author: null
 				}]);
 			}
@@ -340,7 +341,6 @@ class Link {
 						cb({
 							title: t.matched(1),
 							content: cont,
-							author: null,
 							images: []
 						});
 					}
@@ -359,7 +359,6 @@ class Link {
 						while(HTML_IMG.match(post.body)) {
 							images.push({
 								url: HTML_IMG.matched(1),
-								caption: null,
 								author: d.blog.name
 							});
 							post.body = HTML_IMG.replace(post.body, "");
@@ -518,7 +517,6 @@ class Link {
 				var id = e.matched(1);
 				cb({
 					title: null,
-					author: null,
 					html: '<iframe class="vine-embed" src="https://vine.co/v/${id}/embed/simple" width="610" height="348" frameborder="0"></iframe><script async src="//platform.vine.co/static/scripts/embed.js" charset="utf-8"></script>'
 				});
 			}
@@ -530,7 +528,6 @@ class Link {
 				Reditn.getJSON('http://vimeo.com/api/oembed.json?url=http%3A//vimeo.com/${id}&maxwidth=500',function(data:Dynamic) {
 					cb({
 						title: null,
-						author: null,
 						html: data.html
 					});
 				});
@@ -540,10 +537,8 @@ class Link {
 			regex: ~/viewrz\.com\/video\/([a-z-A-Z0-9]*)/,
 			method: function(e, cb) {
 				var id = e.matched(1);
-				trace(id);
 				cb({
 					title: null,
-					author: null,
 					html: '<iframe height="310" width="480"  src="http://viewrz.com/embed/$id" frameborder="0"></iframe>',
 				});
 			}
