@@ -17,6 +17,7 @@ class Reditn {
 			Browser.window.alert('$d');
 		}
 		#end
+		trace(untyped __js__("self"));
 		ext.Builder.build("info.json");
 		Browser.onload(init);
 	}
