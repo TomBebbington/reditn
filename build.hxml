@@ -1,5 +1,23 @@
 -cp src
 -main Reditn
 -js test.js
+-D chrome
+-lib extend
+--next
+-cp src
+-main Reditn
+-js test.js
 -D firefox
+-lib extend
+--next
+-cp src
+-main Reditn
+-js test.js
+-D userscript
+-lib extend
+--next
+-cp src
+-main Reditn
+-js test.js
+-D opera
 -lib extend
