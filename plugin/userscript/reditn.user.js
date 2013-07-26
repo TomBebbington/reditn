@@ -2,7 +2,7 @@
 // @name	reditn
 
 // @description	The comprehensive reddit plugin - allows you to expand images, albums, articles, etc, tag users and comments, never stop scrolling, control it with your keyboard and more!
-// @include	*.reddit.com
+// @include	http://*.reddit.com/*
 // @version	1.6.3
 // @grant	GM_xmlhttpRequest
 // @grant	GM_getValue
@@ -585,6 +585,7 @@ Reditn.init = function() {
 	Reditn.wrap(UserInfo.init,"userinfo");
 	Reditn.wrap(UserTagger.init,"user-tag");
 	Reditn.wrap(SubredditTagger.init,"sub-tag");
+	ThemeChooser.init();
 	unsafeWindow.history.replaceState(haxe.Serializer.run(Reditn.state()),null,Expand.toggled?"#showall":null);
 	unsafeWindow.onpopstate = function(e) {
 		var s = e.state;
@@ -803,7 +804,7 @@ Reditn.getJSON = function(url,func,auth,type,postData) {
 Reditn.getXML = function(url,func,auth,type,postData) {
 	if(type == null) type = "application/json";
 	Reditn.getText(url,function(data) {
-		func(Reditn.getData(Xml.parse(data)));
+		func(Xml.parse(data));
 	},auth,type,postData);
 }
 Reditn.popUp = function(bs,el,x,y) {
@@ -1159,7 +1160,21 @@ $hxClasses["haxe.ds.StringMap"] = haxe.ds.StringMap;
 haxe.ds.StringMap.__name__ = ["haxe","ds","StringMap"];
 haxe.ds.StringMap.__interfaces__ = [IMap];
 haxe.ds.StringMap.prototype = {
-	iterator: function() {
+	toString: function() {
+		var s = new StringBuf();
+		s.b += "{";
+		var it = this.keys();
+		while( it.hasNext() ) {
+			var i = it.next();
+			s.b += Std.string(i);
+			s.b += " => ";
+			s.b += Std.string(Std.string(this.get(i)));
+			if(it.hasNext()) s.b += ", ";
+		}
+		s.b += "}";
+		return s.b;
+	}
+	,iterator: function() {
 		return { ref : this.h, it : this.keys(), hasNext : function() {
 			return this.it.hasNext();
 		}, next : function() {
@@ -2121,12 +2136,12 @@ Settings.settingsPopUp = function() {
 	var old = document.getElementById("reditn-config");
 	if(old != null) old.parentElement.removeChild(old);
 	var e = document.createElement("div");
+	e.id = "reditn-config";
 	var h = document.createElement("h1");
 	h.innerHTML = "Reditn settings";
 	e.appendChild(h);
 	Reditn.fullPopUp(e);
 	var form = document.createElement("form");
-	form.id = "reditn-config";
 	form.action = "javascript:void(0);";
 	form.onchange = function(ev) {
 		var a = form.childNodes;
@@ -2134,26 +2149,37 @@ Settings.settingsPopUp = function() {
 		while(_g < a.length) {
 			var i = a[_g];
 			++_g;
-			if(i.type == "button") continue;
-			if(i.nodeName.toLowerCase() != "input") continue;
-			var i1 = i;
-			var val;
-			var _g1 = i1.type.toLowerCase();
-			switch(_g1) {
-			case "checkbox":
-				val = i1.checked;
+			if(i.getAttribute("type") == "button") continue;
+			switch(i.nodeName) {
+			case "input":
+				var i1 = i;
+				var val;
+				var _g1 = i1.type.toLowerCase();
+				switch(_g1) {
+				case "checkbox":
+					val = i1.checked;
+					break;
+				default:
+					val = i1.value;
+				}
+				var value = val;
+				ext.Storage.data.set(i1.name,value);
+				break;
+			case "select":
+				var s = i;
+				ext.Storage.data.set(s.name,s.children[s.selectedIndex].value);
 				break;
 			default:
-				val = i1.value;
+				continue;
 			}
-			var value = val;
-			ext.Storage.data.set(i1.name,value);
+			console.log(ext.Storage.data.toString());
 		}
 		Settings.optimise();
 		ext.Storage.flush();
 		Settings.fixMissing();
 	};
 	var delb = document.createElement("input");
+	delb.id = "restore";
 	delb.type = "button";
 	delb.value = "Restore default settings";
 	delb.onclick = function(_) {
@@ -2175,21 +2201,29 @@ Settings.settingsPopUp = function() {
 		if(s.desc != null) {
 			var label = document.createElement("label");
 			label.setAttribute("for",k);
-			label.style.position = "absolute";
-			label.style.width = "46%";
-			label.style.textAlign = "right";
 			label.innerHTML = s.desc;
 			form.appendChild(label);
-			var input = document.createElement("input");
-			input.style.position = "absolute";
-			input.style.left = "54%";
-			input.style.textAlign = "left";
-			input.style.width = "46%";
-			input.name = k;
+			var input = null;
+			if(s.options == null) {
+				input = document.createElement("input");
+				input.setAttribute("type",js.Boot.__instanceof(d,Bool)?"checkbox":js.Boot.__instanceof(d,String)?"text":js.Boot.__instanceof(d,Date)?"datetime":js.Boot.__instanceof(d,Int)?"number":"text");
+				if(js.Boot.__instanceof(d,Bool)) input.setAttribute("checked",ext.Storage.data.get(k)); else input.setAttribute("value",ext.Storage.data.get(k));
+			} else {
+				input = document.createElement("select");
+				if(s.def != null) input.setAttribute("value",ext.Storage.data.get(k));
+				var _g = 0;
+				var _g1 = s.options;
+				while(_g < _g1.length) {
+					var o = _g1[_g];
+					++_g;
+					var op = document.createElement("option");
+					op.textContent = op.value = o;
+					input.appendChild(op);
+				}
+			}
+			input.setAttribute("name",k);
 			form.appendChild(input);
 			form.appendChild(document.createElement("br"));
-			if(js.Boot.__instanceof(d,Bool)) input.type = "checkbox"; else if(js.Boot.__instanceof(d,String)) input.type = "text"; else if(js.Boot.__instanceof(d,Date)) input.type = "datetime"; else if(js.Boot.__instanceof(d,Int)) input.type = "number"; else input.type = "text";
-			if(js.Boot.__instanceof(d,Bool)) input.checked = ext.Storage.data.get(k); else input.value = ext.Storage.data.get(k);
 		}
 	}
 	var note = document.createElement("div");
@@ -2205,7 +2239,7 @@ Style.init = function() {
 	var s = document.createElement("link");
 	s.type = "text/css";
 	s.rel = "stylesheet";
-	s.href = "data:text/css;base64,LnJlZGl0bi1leHBhbmRvLWJ1dHRvbiB7CgliYWNrZ3JvdW5kLWltYWdlOnVybCgiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFGOEFBQUF1Q0FZQUFBQk9Nc1dSQUFBQUJITkNTVlFJQ0FnSWZBaGtpQUFBQkJoSlJFRlVlSnp0bXoxUDIxQVVobC9iZ1Vwc2pLbTY5QWNnUVVSU0ZiRjE2WkF5VkhSckZWVkVOd1dKalIvZ3RSSmJwU0tiWklpNm9nNG9RNWR1S0ZLVEtGRGxCN0MwWldSRElzaHhCMnIzeHJsMi9IRk11TWlQWk1YWFNVN2VuSFB1aDI5T0ZBRFlOTS9zZG1jQUt0WktTemhpeTRyVFBqanUybWFyVDJhL2J6QW9pdUxhVDF2L0NqTnNNdVAvT0RWcmlySnBudG5udlIra2h1ZUdsM2l5OWhKSGJGazVPTzdhemEvZmNWTGZJN0d0YVJxZXYvK0l5dXNYMk40b0twdm1tZjJyL1EwMzg0c2s5b0Z4L1N2TXNCOE5MOG4wQThCNmRSL1g4NHZJdFRzRDVOWHhKMGNSREttQ2F6ZnppM0F5MFd6MTBhM3ZRZE8wMkdLOW5OVDNVTnhwQUFEYW5RSHloSTRIeHZVN241ZUdmald2WHBFWnpZaEd6amtwYnpIMzRuSERCRENaMVZGNmhCZTl3NTJYRWhoNlFPU0FTYWYyRFNaNDZTU0ZtaG5yUTFkRHZxOFhVZ2NRTDNsRVE2WWZhU1NQbS9raWc3clBlUnhhalVtSGx6bm50bUlHVWtUWTVBbWJCSEhmTnkxNWNuNVA2QUNlTnB2LzI1Vks0Z0R3bEEwMlpyOXNzRVFCa0RGNWhNN1hjZXY0U3FYaVhtczJtMlFCY0J6L3FYM3RYdHRGTTNFQWVIVGMvK1R4elh5WjBTRkg4a1NaY3pLSThSMTI5RW9GVGE1Ym5STjIyMWJOUk5sZzJNVzRmY3BKVndaeWdEajlkZHdHZ0c5N1NkSnRuQUR3YlNwMHlKRThnV08rSHNKQXoyQ3hsMnhoeEJacVp1aWxJNCtPNmNtVEJJcmt5VjJNRnBCWHIySTdNQ3hSYnBpbzBGTzJuN1MzUHBqVmpvekpFOHY1WGlGOE80d1RMTXNLM0NYMGJsdnc3VGhEa0pjZ1I2YWhuNGZYSDh2NXZNQTRZLzYwN1ZsZVlOd3hQNGlrdlNTSy9pQ3lkZjRNeVp3L1F4STdQKzJKam5ySXVVK29hNlVsekEwdlNZM09EUyt4VmxvQ0FMQnlBZXZWZlZpV1JYYXNWL2ZCeWdVQXR6OTJwNmtmUUNyNkFVQ3hiZHQrYy9nVE1sVXZzSElCMnh0RjZhc1hWTDRFUXhZK3ZGcWR0UVFTc3RJUkFYZFZPcUtLdXV2RmFHSGk2Qm5NUFI4QjdpSENXenJpbEY0RUhjOTJHbE5mNDZ5dlQrcDdjSWF4ZG1jdzRmaHArcWZoVnpwQ29WL1RORGVRd3RLUnZIcUZ2SHFGMzRkdjNVY0FicHNLWjZYa2ZVeUtMUHFGUzAwK3E0TzJFaWp3Q3FZSWdDejZWVUE4ZkRqcjYwTE5kUGNxbkVjVnlXOFFISkU5ZzdrT29YUk1rSDRLS1BRTGZjamYySGdkVGZFRmdyS0RJZ0N5NlBkTllORUhVR1M4UTlyNyt6TG85OVV5QytkUUlvTitvZk85VzhiVVg4UzcvMDhkQ0ZuMFR4MTJlT09VWDRTZnBKeHp5a0RJb0QvU0VKZ05GY0hFV3UzRW5ZU3lId09TRWNsL29zaFNacXNvTXluWDV2ZXRaN21sSXp5OHlLZy9qb2VCdCtPZEhDbVFSYi92YWtjMFlWSGh2U3RNNDVaZkJ2MVo2WWlIdXl3ZFVSNVh2OWhKZHZyOFNrY3VSZ3Y0VTMrbnJEREQ3bjdlaXYxdlBsSHBpR1ZaS080MGNHcldFdXYzZzBxL0NFZC90bUNaSVpuelowaFdPakpEc3RLUktmcUJySFJraklkU092SVhKOVcyU3hPRmVhVUFBQUFBU1VWT1JLNUNZSUk9Iik7CgliYWNrZ3JvdW5kLXJlcGVhdDpuby1yZXBlYXQKfQoucmVkaXRuLWV4cGFuZG8tYnV0dG9uLmltYWdlewoJYmFja2dyb3VuZC1wb3NpdGlvbjotMjRweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaW1hZ2UuY29sbGFwc2VkOmhvdmVyIHsKCWJhY2tncm91bmQtcG9zaXRpb246LTBweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaW1hZ2UuZXhwYW5kZWQgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotNzJweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaW1hZ2UuZXhwYW5kZWQ6aG92ZXIgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotNDhweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5jb2xsYXBzZWR7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi0yNHB4IC0yM3B4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5jb2xsYXBzZWQ6aG92ZXIgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotMHB4IC0yM3B4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5leHBhbmRlZCB7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi03MnB4IC0yM3B4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5leHBhbmRlZDpob3ZlciB7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi00OHB4IC0yM3B4Owp9Ci5leHBhbmRvLWJ1dHRvbiB7CglmbG9hdDogbGVmdDsKfQouZXhwYW5kby1idXR0b24uY29sbGFwc2VkIHsKCXBhZGRpbmc6IDBweDsKfQpwIC5leHBhbmRvLWJ1dHRvbiB7CglkaXNwbGF5OiBpbmxpbmUtYmxvY2s7CglmbG9hdDogbm9uZTsKCW1hcmdpbjogMHB4OwoJcGFkZGluZzogMHB4Owp9CmRsLnJlZGl0bi10YWJsZSAgewoJZmxvYXQ6IGxlZnQ7Cgl3aWR0aDogMTAwJTsKCXBhZGRpbmc6IDA7Cn0KLnJlZGl0bi10YWJsZSBkdCB7CgljbGVhcjogbGVmdDsKCWZsb2F0OiBsZWZ0OwoJd2lkdGg6IDE2JTsKCWZvbnQtd2VpZ2h0OiBib2xkOwoJdGV4dC1hbGlnbjogcmlnaHQ7Cn0KLnJlZGl0bi10YWJsZSBkZCB7CglmbG9hdDogbGVmdDsKCXRleHQtYWxpZ246IGxlZnQ7Cn0=";
+	s.href = "data:text/css;base64,LnJlZGl0bi1leHBhbmRvLWJ1dHRvbiB7CgliYWNrZ3JvdW5kLWltYWdlOnVybCgiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFGOEFBQUF1Q0FZQUFBQk9Nc1dSQUFBQUJITkNTVlFJQ0FnSWZBaGtpQUFBQkJoSlJFRlVlSnp0bXoxUDIxQVVobC9iZ1Vwc2pLbTY5QWNnUVVSU0ZiRjE2WkF5VkhSckZWVkVOd1dKalIvZ3RSSmJwU0tiWklpNm9nNG9RNWR1S0ZLVEtGRGxCN0MwWldSRElzaHhCMnIzeHJsMi9IRk11TWlQWk1YWFNVN2VuSFB1aDI5T0ZBRFlOTS9zZG1jQUt0WktTemhpeTRyVFBqanUybWFyVDJhL2J6QW9pdUxhVDF2L0NqTnNNdVAvT0RWcmlySnBudG5udlIra2h1ZUdsM2l5OWhKSGJGazVPTzdhemEvZmNWTGZJN0d0YVJxZXYvK0l5dXNYMk40b0twdm1tZjJyL1EwMzg0c2s5b0Z4L1N2TXNCOE5MOG4wQThCNmRSL1g4NHZJdFRzRDVOWHhKMGNSREttQ2F6ZnppM0F5MFd6MTBhM3ZRZE8wMkdLOW5OVDNVTnhwQUFEYW5RSHloSTRIeHZVN241ZUdmald2WHBFWnpZaEd6amtwYnpIMzRuSERCRENaMVZGNmhCZTl3NTJYRWhoNlFPU0FTYWYyRFNaNDZTU0ZtaG5yUTFkRHZxOFhVZ2NRTDNsRVE2WWZhU1NQbS9raWc3clBlUnhhalVtSGx6bm50bUlHVWtUWTVBbWJCSEhmTnkxNWNuNVA2QUNlTnB2LzI1Vks0Z0R3bEEwMlpyOXNzRVFCa0RGNWhNN1hjZXY0U3FYaVhtczJtMlFCY0J6L3FYM3RYdHRGTTNFQWVIVGMvK1R4elh5WjBTRkg4a1NaY3pLSThSMTI5RW9GVGE1Ym5STjIyMWJOUk5sZzJNVzRmY3BKVndaeWdEajlkZHdHZ0c5N1NkSnRuQUR3YlNwMHlKRThnV08rSHNKQXoyQ3hsMnhoeEJacVp1aWxJNCtPNmNtVEJJcmt5VjJNRnBCWHIySTdNQ3hSYnBpbzBGTzJuN1MzUHBqVmpvekpFOHY1WGlGOE80d1RMTXNLM0NYMGJsdnc3VGhEa0pjZ1I2YWhuNGZYSDh2NXZNQTRZLzYwN1ZsZVlOd3hQNGlrdlNTSy9pQ3lkZjRNeVp3L1F4STdQKzJKam5ySXVVK29hNlVsekEwdlNZM09EUyt4VmxvQ0FMQnlBZXZWZlZpV1JYYXNWL2ZCeWdVQXR6OTJwNmtmUUNyNkFVQ3hiZHQrYy9nVE1sVXZzSElCMnh0RjZhc1hWTDRFUXhZK3ZGcWR0UVFTc3RJUkFYZFZPcUtLdXV2RmFHSGk2Qm5NUFI4QjdpSENXenJpbEY0RUhjOTJHbE5mNDZ5dlQrcDdjSWF4ZG1jdzRmaHArcWZoVnpwQ29WL1RORGVRd3RLUnZIcUZ2SHFGMzRkdjNVY0FicHNLWjZYa2ZVeUtMUHFGUzAwK3E0TzJFaWp3Q3FZSWdDejZWVUE4ZkRqcjYwTE5kUGNxbkVjVnlXOFFISkU5ZzdrT29YUk1rSDRLS1BRTGZjamYySGdkVGZFRmdyS0RJZ0N5NlBkTllORUhVR1M4UTlyNyt6TG85OVV5QytkUUlvTitvZk85VzhiVVg4UzcvMDhkQ0ZuMFR4MTJlT09VWDRTZnBKeHp5a0RJb0QvU0VKZ05GY0hFV3UzRW5ZU3lId09TRWNsL29zaFNacXNvTXluWDV2ZXRaN21sSXp5OHlLZy9qb2VCdCtPZEhDbVFSYi92YWtjMFlWSGh2U3RNNDVaZkJ2MVo2WWlIdXl3ZFVSNVh2OWhKZHZyOFNrY3VSZ3Y0VTMrbnJEREQ3bjdlaXYxdlBsSHBpR1ZaS080MGNHcldFdXYzZzBxL0NFZC90bUNaSVpuelowaFdPakpEc3RLUktmcUJySFJraklkU092SVhKOVcyU3hPRmVhVUFBQUFBU1VWT1JLNUNZSUk9Iik7CgliYWNrZ3JvdW5kLXJlcGVhdDpuby1yZXBlYXQKfQoucmVkaXRuLWV4cGFuZG8tYnV0dG9uLmltYWdlewoJYmFja2dyb3VuZC1wb3NpdGlvbjotMjRweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaW1hZ2UuY29sbGFwc2VkOmhvdmVyIHsKCWJhY2tncm91bmQtcG9zaXRpb246LTBweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaW1hZ2UuZXhwYW5kZWQgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotNzJweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaW1hZ2UuZXhwYW5kZWQ6aG92ZXIgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotNDhweCAtMHB4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5jb2xsYXBzZWR7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi0yNHB4IC0yM3B4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5jb2xsYXBzZWQ6aG92ZXIgewoJYmFja2dyb3VuZC1wb3NpdGlvbjotMHB4IC0yM3B4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5leHBhbmRlZCB7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi03MnB4IC0yM3B4Owp9Ci5yZWRpdG4tZXhwYW5kby1idXR0b24uaXRlbS5leHBhbmRlZDpob3ZlciB7CgliYWNrZ3JvdW5kLXBvc2l0aW9uOi00OHB4IC0yM3B4Owp9Ci5leHBhbmRvLWJ1dHRvbiB7CglmbG9hdDogbGVmdDsKfQouZXhwYW5kby1idXR0b24uY29sbGFwc2VkIHsKCXBhZGRpbmc6IDBweDsKfQpwIC5leHBhbmRvLWJ1dHRvbiB7CglkaXNwbGF5OiBpbmxpbmUtYmxvY2s7CglmbG9hdDogbm9uZTsKCW1hcmdpbjogMHB4OwoJcGFkZGluZzogMHB4Owp9CmRsLnJlZGl0bi10YWJsZSAgewoJZmxvYXQ6IGxlZnQ7Cgl3aWR0aDogMTAwJTsKCXBhZGRpbmc6IDA7Cn0KLnJlZGl0bi10YWJsZSBkdCB7CgljbGVhcjogbGVmdDsKCWZsb2F0OiBsZWZ0OwoJd2lkdGg6IDE2JTsKCWZvbnQtd2VpZ2h0OiBib2xkOwoJdGV4dC1hbGlnbjogcmlnaHQ7Cn0KLnJlZGl0bi10YWJsZSBkZCB7CglmbG9hdDogbGVmdDsKCXRleHQtYWxpZ246IGxlZnQ7Cn0KI3JlZGl0bi1jb25maWcgewoJdGV4dC1hbGlnbjogY2VudGVyOwp9CiNyZWRpdG4tY29uZmlnIGgxIHsKCXRleHQtZGVjb3JhdGlvbjogdW5kZXJsaW5lOwoJZm9udC1mYW1pbHk6ICJDb3VyaWVyIE5ldyIsICJDb3VyaWVyIiwgbW9ub3NwYWNlOwoJZm9udC13ZWlnaHQ6IGJvbGQ7Cgl0ZXh0LXNoYWRvdzogMHB4IDBweCAycHggZ3JheTsKfQojcmVkaXRuLWNvbmZpZyBmb3JtIHsKCWxpbmUtaGVpZ2h0OiAxLjllbTsKCWZvbnQtc2l6ZTogMS40ZW07Cn0KI3Jlc3RvcmUgewoJcG9zaXRpb246YWJzb2x1dGU7CglsZWZ0OiAwcHg7Cn0KI3JlZGl0bi1jb25maWcgZm9ybSBsYWJlbCB7Cglwb3NpdGlvbjogYWJzb2x1dGU7CglsZWZ0OiA2JTsKCXdpZHRoOiA0MiU7Cgl0ZXh0LWFsaWduOiByaWdodDsKfQojcmVkaXRuLWNvbmZpZyBmb3JtIGlucHV0LCAjcmVkaXRuLWNvbmZpZyBmb3JtIHNlbGVjdCB7Cglwb3NpdGlvbjogYWJzb2x1dGU7CglsZWZ0OiA1NCU7Cgl0ZXh0LWFsaWduOiBsZWZ0OwoJd2lkdGg6IDQyJTsKfQ==";
 	document.head.appendChild(s);
 }
 var SubredditInfo = function() { }
@@ -2314,6 +2348,29 @@ TextExpand.init = function() {
 			++_g1;
 			Link.createButton(l.href,l.parentElement,l.nextSibling);
 		}
+	}
+}
+var ThemeChooser = function() { }
+$hxClasses["ThemeChooser"] = ThemeChooser;
+ThemeChooser.__name__ = ["ThemeChooser"];
+ThemeChooser.init = function() {
+	Settings.settings.get("theme-chooser").options = ["default"].concat((function($this) {
+		var $r;
+		var _g = [];
+		{
+			var _g1 = 0;
+			var _g2 = ThemeChooser.themes;
+			while(_g1 < _g2.length) {
+				var t = _g2[_g1];
+				++_g1;
+				_g.push(t.name);
+			}
+		}
+		$r = _g;
+		return $r;
+	}(this)));
+	var theme = ext.Storage.data.get("theme-chooser");
+	if(theme != "default") {
 	}
 }
 var ValueType = $hxClasses["ValueType"] = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
@@ -2793,192 +2850,194 @@ haxe.Serializer.run = function(v) {
 }
 haxe.Serializer.prototype = {
 	serialize: function(v) {
-		var _g = Type["typeof"](v);
-		switch(_g[1]) {
-		case 0:
-			this.buf.b += "n";
-			break;
-		case 1:
-			if(v == 0) {
-				this.buf.b += "z";
-				return;
-			}
-			this.buf.b += "i";
-			this.buf.b += Std.string(v);
-			break;
-		case 2:
-			if(Math.isNaN(v)) this.buf.b += "k"; else if(!Math.isFinite(v)) this.buf.b += Std.string(v < 0?"m":"p"); else {
-				this.buf.b += "d";
+		{
+			var _g = Type["typeof"](v);
+			switch(_g[1]) {
+			case 0:
+				this.buf.b += "n";
+				break;
+			case 1:
+				if(v == 0) {
+					this.buf.b += "z";
+					return;
+				}
+				this.buf.b += "i";
 				this.buf.b += Std.string(v);
-			}
-			break;
-		case 3:
-			this.buf.b += Std.string(v?"t":"f");
-			break;
-		case 6:
-			var c = _g[2];
-			if(c == String) {
-				this.serializeString(v);
-				return;
-			}
-			if(this.useCache && this.serializeRef(v)) return;
-			switch(c) {
-			case Array:
-				var ucount = 0;
-				this.buf.b += "a";
+				break;
+			case 2:
+				if(Math.isNaN(v)) this.buf.b += "k"; else if(!Math.isFinite(v)) this.buf.b += Std.string(v < 0?"m":"p"); else {
+					this.buf.b += "d";
+					this.buf.b += Std.string(v);
+				}
+				break;
+			case 3:
+				this.buf.b += Std.string(v?"t":"f");
+				break;
+			case 6:
+				var c = _g[2];
+				if(c == String) {
+					this.serializeString(v);
+					return;
+				}
+				if(this.useCache && this.serializeRef(v)) return;
+				switch(c) {
+				case Array:
+					var ucount = 0;
+					this.buf.b += "a";
+					var l = v.length;
+					var _g1 = 0;
+					while(_g1 < l) {
+						var i = _g1++;
+						if(v[i] == null) ucount++; else {
+							if(ucount > 0) {
+								if(ucount == 1) this.buf.b += "n"; else {
+									this.buf.b += "u";
+									this.buf.b += Std.string(ucount);
+								}
+								ucount = 0;
+							}
+							this.serialize(v[i]);
+						}
+					}
+					if(ucount > 0) {
+						if(ucount == 1) this.buf.b += "n"; else {
+							this.buf.b += "u";
+							this.buf.b += Std.string(ucount);
+						}
+					}
+					this.buf.b += "h";
+					break;
+				case List:
+					this.buf.b += "l";
+					var v1 = v;
+					var $it0 = v1.iterator();
+					while( $it0.hasNext() ) {
+						var i = $it0.next();
+						this.serialize(i);
+					}
+					this.buf.b += "h";
+					break;
+				case Date:
+					var d = v;
+					this.buf.b += "v";
+					this.buf.b += Std.string(HxOverrides.dateStr(d));
+					break;
+				case haxe.ds.StringMap:
+					this.buf.b += "b";
+					var v1 = v;
+					var $it1 = v1.keys();
+					while( $it1.hasNext() ) {
+						var k = $it1.next();
+						this.serializeString(k);
+						this.serialize(v1.get(k));
+					}
+					this.buf.b += "h";
+					break;
+				case haxe.ds.IntMap:
+					this.buf.b += "q";
+					var v1 = v;
+					var $it2 = v1.keys();
+					while( $it2.hasNext() ) {
+						var k = $it2.next();
+						this.buf.b += ":";
+						this.buf.b += Std.string(k);
+						this.serialize(v1.get(k));
+					}
+					this.buf.b += "h";
+					break;
+				case haxe.ds.ObjectMap:
+					this.buf.b += "M";
+					var v1 = v;
+					var $it3 = v1.keys();
+					while( $it3.hasNext() ) {
+						var k = $it3.next();
+						var id = Reflect.field(k,"__id__");
+						Reflect.deleteField(k,"__id__");
+						this.serialize(k);
+						k.__id__ = id;
+						this.serialize(v1.h[k.__id__]);
+					}
+					this.buf.b += "h";
+					break;
+				case haxe.io.Bytes:
+					var v1 = v;
+					var i = 0;
+					var max = v1.length - 2;
+					var charsBuf = new StringBuf();
+					var b64 = haxe.Serializer.BASE64;
+					while(i < max) {
+						var b1 = v1.b[i++];
+						var b2 = v1.b[i++];
+						var b3 = v1.b[i++];
+						charsBuf.b += Std.string(b64.charAt(b1 >> 2));
+						charsBuf.b += Std.string(b64.charAt((b1 << 4 | b2 >> 4) & 63));
+						charsBuf.b += Std.string(b64.charAt((b2 << 2 | b3 >> 6) & 63));
+						charsBuf.b += Std.string(b64.charAt(b3 & 63));
+					}
+					if(i == max) {
+						var b1 = v1.b[i++];
+						var b2 = v1.b[i++];
+						charsBuf.b += Std.string(b64.charAt(b1 >> 2));
+						charsBuf.b += Std.string(b64.charAt((b1 << 4 | b2 >> 4) & 63));
+						charsBuf.b += Std.string(b64.charAt(b2 << 2 & 63));
+					} else if(i == max + 1) {
+						var b1 = v1.b[i++];
+						charsBuf.b += Std.string(b64.charAt(b1 >> 2));
+						charsBuf.b += Std.string(b64.charAt(b1 << 4 & 63));
+					}
+					var chars = charsBuf.b;
+					this.buf.b += "s";
+					this.buf.b += Std.string(chars.length);
+					this.buf.b += ":";
+					this.buf.b += Std.string(chars);
+					break;
+				default:
+					this.cache.pop();
+					if(v.hxSerialize != null) {
+						this.buf.b += "C";
+						this.serializeString(Type.getClassName(c));
+						this.cache.push(v);
+						v.hxSerialize(this);
+						this.buf.b += "g";
+					} else {
+						this.buf.b += "c";
+						this.serializeString(Type.getClassName(c));
+						this.cache.push(v);
+						this.serializeFields(v);
+					}
+				}
+				break;
+			case 4:
+				if(this.useCache && this.serializeRef(v)) return;
+				this.buf.b += "o";
+				this.serializeFields(v);
+				break;
+			case 7:
+				var e = _g[2];
+				if(this.useCache && this.serializeRef(v)) return;
+				this.cache.pop();
+				this.buf.b += Std.string(this.useEnumIndex?"j":"w");
+				this.serializeString(Type.getEnumName(e));
+				if(this.useEnumIndex) {
+					this.buf.b += ":";
+					this.buf.b += Std.string(v[1]);
+				} else this.serializeString(v[0]);
+				this.buf.b += ":";
 				var l = v.length;
-				var _g1 = 0;
+				this.buf.b += Std.string(l - 2);
+				var _g1 = 2;
 				while(_g1 < l) {
 					var i = _g1++;
-					if(v[i] == null) ucount++; else {
-						if(ucount > 0) {
-							if(ucount == 1) this.buf.b += "n"; else {
-								this.buf.b += "u";
-								this.buf.b += Std.string(ucount);
-							}
-							ucount = 0;
-						}
-						this.serialize(v[i]);
-					}
+					this.serialize(v[i]);
 				}
-				if(ucount > 0) {
-					if(ucount == 1) this.buf.b += "n"; else {
-						this.buf.b += "u";
-						this.buf.b += Std.string(ucount);
-					}
-				}
-				this.buf.b += "h";
+				this.cache.push(v);
 				break;
-			case List:
-				this.buf.b += "l";
-				var v1 = v;
-				var $it0 = v1.iterator();
-				while( $it0.hasNext() ) {
-					var i = $it0.next();
-					this.serialize(i);
-				}
-				this.buf.b += "h";
-				break;
-			case Date:
-				var d = v;
-				this.buf.b += "v";
-				this.buf.b += Std.string(HxOverrides.dateStr(d));
-				break;
-			case haxe.ds.StringMap:
-				this.buf.b += "b";
-				var v1 = v;
-				var $it1 = v1.keys();
-				while( $it1.hasNext() ) {
-					var k = $it1.next();
-					this.serializeString(k);
-					this.serialize(v1.get(k));
-				}
-				this.buf.b += "h";
-				break;
-			case haxe.ds.IntMap:
-				this.buf.b += "q";
-				var v1 = v;
-				var $it2 = v1.keys();
-				while( $it2.hasNext() ) {
-					var k = $it2.next();
-					this.buf.b += ":";
-					this.buf.b += Std.string(k);
-					this.serialize(v1.get(k));
-				}
-				this.buf.b += "h";
-				break;
-			case haxe.ds.ObjectMap:
-				this.buf.b += "M";
-				var v1 = v;
-				var $it3 = v1.keys();
-				while( $it3.hasNext() ) {
-					var k = $it3.next();
-					var id = Reflect.field(k,"__id__");
-					Reflect.deleteField(k,"__id__");
-					this.serialize(k);
-					k.__id__ = id;
-					this.serialize(v1.h[k.__id__]);
-				}
-				this.buf.b += "h";
-				break;
-			case haxe.io.Bytes:
-				var v1 = v;
-				var i = 0;
-				var max = v1.length - 2;
-				var charsBuf = new StringBuf();
-				var b64 = haxe.Serializer.BASE64;
-				while(i < max) {
-					var b1 = v1.b[i++];
-					var b2 = v1.b[i++];
-					var b3 = v1.b[i++];
-					charsBuf.b += Std.string(b64.charAt(b1 >> 2));
-					charsBuf.b += Std.string(b64.charAt((b1 << 4 | b2 >> 4) & 63));
-					charsBuf.b += Std.string(b64.charAt((b2 << 2 | b3 >> 6) & 63));
-					charsBuf.b += Std.string(b64.charAt(b3 & 63));
-				}
-				if(i == max) {
-					var b1 = v1.b[i++];
-					var b2 = v1.b[i++];
-					charsBuf.b += Std.string(b64.charAt(b1 >> 2));
-					charsBuf.b += Std.string(b64.charAt((b1 << 4 | b2 >> 4) & 63));
-					charsBuf.b += Std.string(b64.charAt(b2 << 2 & 63));
-				} else if(i == max + 1) {
-					var b1 = v1.b[i++];
-					charsBuf.b += Std.string(b64.charAt(b1 >> 2));
-					charsBuf.b += Std.string(b64.charAt(b1 << 4 & 63));
-				}
-				var chars = charsBuf.b;
-				this.buf.b += "s";
-				this.buf.b += Std.string(chars.length);
-				this.buf.b += ":";
-				this.buf.b += Std.string(chars);
+			case 5:
+				throw "Cannot serialize function";
 				break;
 			default:
-				this.cache.pop();
-				if(v.hxSerialize != null) {
-					this.buf.b += "C";
-					this.serializeString(Type.getClassName(c));
-					this.cache.push(v);
-					v.hxSerialize(this);
-					this.buf.b += "g";
-				} else {
-					this.buf.b += "c";
-					this.serializeString(Type.getClassName(c));
-					this.cache.push(v);
-					this.serializeFields(v);
-				}
+				throw "Cannot serialize " + Std.string(v);
 			}
-			break;
-		case 4:
-			if(this.useCache && this.serializeRef(v)) return;
-			this.buf.b += "o";
-			this.serializeFields(v);
-			break;
-		case 7:
-			var e = _g[2];
-			if(this.useCache && this.serializeRef(v)) return;
-			this.cache.pop();
-			this.buf.b += Std.string(this.useEnumIndex?"j":"w");
-			this.serializeString(Type.getEnumName(e));
-			if(this.useEnumIndex) {
-				this.buf.b += ":";
-				this.buf.b += Std.string(v[1]);
-			} else this.serializeString(v[0]);
-			this.buf.b += ":";
-			var l = v.length;
-			this.buf.b += Std.string(l - 2);
-			var _g1 = 2;
-			while(_g1 < l) {
-				var i = _g1++;
-				this.serialize(v[i]);
-			}
-			this.cache.push(v);
-			break;
-		case 5:
-			throw "Cannot serialize function";
-			break;
-		default:
-			throw "Cannot serialize " + Std.string(v);
 		}
 	}
 	,serializeFields: function(v) {
@@ -3667,11 +3726,13 @@ Settings.settings = (function($this) {
 	_g.set("preview",{ def : true, desc : "Preview comments and self posts before they are published"});
 	_g.set("keyboard",{ def : false, desc : "Keyboard navigation of the links in the page"});
 	_g.set("nsfw-filter",{ def : false, desc : "Filter NSFW posts"});
+	_g.set("theme-chooser",{ def : "default", desc : "Select a theme", options : []});
 	_g.set("user-tags",{ def : new haxe.ds.StringMap(), desc : null});
 	_g.set("sub-tags",{ def : new haxe.ds.StringMap(), desc : null});
 	$r = _g;
 	return $r;
 }(this));
+ThemeChooser.themes = [{ url : "http://userstyles.org/styles/44492.css", author : "jason.barnabe@gmail.com (Greensticky)", name : "DARK Reddit Web 2.0  BEMP (auto width)"},{ url : "http://userstyles.org/styles/68755.css", author : "jason.barnabe@gmail.com (t13434)", name : "Reddit Web 2.0 Blackened (RES friendly)"},{ url : "http://userstyles.org/styles/22801.css", author : "jason.barnabe@gmail.com (The17)", name : "Darklicious Reddit - Rewritten"},{ url : "http://userstyles.org/styles/88599.css", author : "jason.barnabe@gmail.com (mwm)", name : "Reddit - Stilig mod"},{ url : "http://userstyles.org/styles/49858.css", author : "jason.barnabe@gmail.com (netMASA)", name : "My Reddit Ponies"},{ url : "http://userstyles.org/styles/75410.css", author : "jason.barnabe@gmail.com (Globex Designs, Inc.)", name : "Reddit Redesigned (by Globex Designs)"},{ url : "http://userstyles.org/styles/62209.css", author : "jason.barnabe@gmail.com (Unplacable)", name : "Reddit DUST"},{ url : "http://userstyles.org/styles/71917.css", author : "jason.barnabe@gmail.com (LaurelQuade)", name : "Aerial - a CSS style for Reddit (RES-compatible)"},{ url : "http://userstyles.org/styles/90912.css", author : "jason.barnabe@gmail.com (Mavee)", name : "fuck multireddit"},{ url : "http://userstyles.org/styles/71955.css", author : "jason.barnabe@gmail.com (hholmes)", name : "Reddacted 2.0"}];
 haxe.Unserializer.DEFAULT_RESOLVER = Type;
 haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe.Serializer.USE_CACHE = false;

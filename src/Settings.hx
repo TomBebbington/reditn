@@ -7,7 +7,7 @@ import ext.Storage.*;
 import ext.*;
 class Settings {
 	static inline var NOTE_TEXT = "Close this dialog and refresh the page to see your changes in effect. Changes will be saved automatically.";
-	static var settings:Map<String, Setting<Dynamic>> = [
+	public static var settings:Map<String, Setting<Dynamic>> = [
 		"adblock" => { def: true, desc: "Block advertisements and sponsors" },
 		"userinfo" => { def: true, desc: "Show information about a user upon hover" },
 		"subinfo" => { def: true, desc: "Show information about a subreddit upon hover" },
@@ -20,6 +20,7 @@ class Settings {
 		"preview" => { def: true, desc: "Preview comments and self posts before they are published" },
 		"keyboard" => { def: false, desc: "Keyboard navigation of the links in the page" },
 		"nsfw-filter" => { def: false, desc: "Filter NSFW posts" },
+		"theme-chooser" => { def: "default", desc: "Select a theme", options: []},
 		"user-tags" => { def: new Map<String, String>(), desc: null },
 		"sub-tags" => { def: new Map<String, String>(), desc: null }
 	];
@@ -30,30 +31,14 @@ class Settings {
 	static inline function set_data(d:Map<String, Dynamic>) {
 		return Storage.data = d;
 	}
-	static function optimise() {
-		for(k in settings.keys()) {
-			var sv = settings.get(k), cv = data.get(k);
-			if(sv.def != cv)
-				data.set(k, cv);
-			else
-				data.remove(k);
-		}
-	}
-	public static inline function save() {
-		optimise();
+	public static function save() {
 		Storage.flush();
-		fixMissing();
-	}
-	static function fixMissing(def:Bool=false) {
-		data = [for(k in settings.keys()) k => 
-			if(def || !data.exists(k) || !data.get(k))
-				settings.get(k).def
-			else
-				data.get(k)
-		];
+		ThemeChooser.update();
 	}
 	public static function init() {
-		fixMissing();
+		for(k in settings.keys())
+			if(!data.exists(k))
+				data[k] = settings[k].def;
 		var h = Browser.document.getElementById("header-bottom-right");
 		if(h == null)
 			return;
@@ -70,7 +55,7 @@ class Settings {
 		var sep = Browser.document.createSpanElement();
 		sep.innerHTML = " | ";
 		sep.className = "seperator";
-		sep.style.fontWeight = "none";
+		sep.style.fontWeight = "";
 		h.insertBefore(sep, prefs);
 	}
 	static function settingsPopUp() {
@@ -78,36 +63,42 @@ class Settings {
 		if(old != null)
 			Reditn.remove(old);
 		var e = Browser.document.createDivElement();
+		e.id = "reditn-config";
 		var h = Browser.document.createElement("h1");
 		h.innerHTML = "Reditn settings";
 		e.appendChild(h);
 		Reditn.fullPopUp(e);
-
 		var form = Browser.document.createFormElement();
-		form.id = "reditn-config";
 		form.action = "javascript:void(0);";
 		form.onchange = function(ev) {
-			var a:Array<InputElement> = cast form.childNodes;
+			var a:Array<Element> = cast form.childNodes;
 			for(i in a) {
-				if(i.type == "button")
+				if(i.getAttribute("type") == "button")
 					continue;
-				if(i.nodeName.toLowerCase() != "input")
-					continue;
-				var i:js.html.InputElement = cast i;
-				var val:Dynamic = switch(i.type.toLowerCase()) {
-					case "checkbox": i.checked;
-					default: i.value;
+				switch(i.nodeName.toLowerCase()) {
+					case "input":
+						var i:js.html.InputElement = cast i;
+						var val:Dynamic = switch(i.type.toLowerCase()) {
+							case "checkbox": i.checked;
+							default: i.value;
+						}
+						data.set(i.name, val);
+					case "select":
+						var s:js.html.SelectElement = cast i;
+						data.set(s.name, untyped s.children[s.selectedIndex].value);
+					default: continue;
 				}
-				data.set(i.name, val);
 			}
 			save();
 		}
 		var delb = Browser.document.createInputElement();
+		delb.id = "restore";
 		delb.type = "button";
 		delb.value = "Restore default settings";
 		delb.onclick = function(_) {
 			if(Browser.window.confirm("Are you sure? This will delete all user tags, subreddit tags and settings!")) {
-				fixMissing(true);
+				for(s in settings.keys())
+					data[s] = settings[s].def;
 				save();
 				settingsPopUp();
 			}
@@ -120,32 +111,42 @@ class Settings {
 			if(s.desc != null) {
 				var label = Browser.document.createLabelElement();
 				label.setAttribute("for", k);
-				label.style.position = "absolute";
-				label.style.width = "46%";
-				label.style.textAlign = "right";
 				label.innerHTML = s.desc;
 				form.appendChild(label);
-				var input = Browser.document.createInputElement();
-				input.style.position = "absolute";
-				input.style.left = "54%";
-				input.style.textAlign = "left";
-				input.style.width = "46%";
-				input.name = k;
+				var input:Element = null;
+				if(s.options == null) {
+					var inp = Browser.document.createInputElement();
+					input = inp;
+					inp.type = if(Std.is(d, Bool))
+						"checkbox";
+					else if(Std.is(d, String))
+						"text";
+					else if(Std.is(d, Date))
+						"datetime";
+					else if(Std.is(d, Int))
+						"number";
+					else
+						"text";
+					if(Std.is(d, Bool))
+						inp.checked = d;
+					else inp.value = d;
+				} else {
+					var sel = Browser.document.createSelectElement();
+					input = sel;
+					var i:Int = 0;
+					for(o in s.options) {
+						if(d == o)
+							sel.selectedIndex = i;
+						var op = Browser.document.createOptionElement();
+						op.textContent = o;
+						input.appendChild(op);
+						i++;
+					}
+					sel.value = d;
+				}
+				input.setAttribute("name", k);
 				form.appendChild(input);
 				form.appendChild(Browser.document.createBRElement());
-				input.type = if(Std.is(d, Bool))
-					"checkbox";
-				else if(Std.is(d, String))
-					"text";
-				else if(Std.is(d, Date))
-					"datetime";
-				else if(Std.is(d, Int))
-					"number";
-				else
-					"text";
-				if(Std.is(d, Bool))
-					input.checked = data.get(k);
-				else input.value = data.get(k);
 			}
 		}
 		var note = Browser.document.createDivElement();
@@ -154,15 +155,9 @@ class Settings {
 		form.appendChild(note);
 		e.appendChild(form);
 	}
-	static function makeButton(t:String, ?fn:Void->Void) {
-		var b = Browser.document.createInputElement();
-		b.type = "button";
-		b.value = t;
-		b.onclick = untyped fn;
-		return b;
-	}
 }
 typedef Setting<T> = {
 	var desc:String;
 	var def:T;
+	@:optional var options:Array<T>;
 }

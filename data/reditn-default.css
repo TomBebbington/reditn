@@ -1,5 +1,5 @@
 .reditn-expando-button {
-	background-image:file("data/sprites.png");
+	background-image:file("/data/sprites.png");
 	background-repeat:no-repeat
 }
 .reditn-expando-button.image{
@@ -53,4 +53,33 @@ dl.reditn-table  {
 .reditn-table dd {
 	float: left;
 	text-align: left;
+}
+#reditn-config {
+	text-align: center;
+}
+#reditn-config h1 {
+	text-decoration: underline;
+	font-family: "Courier New", "Courier", monospace;
+	font-weight: bold;
+	text-shadow: 0px 0px 2px gray;
+}
+#reditn-config form {
+	line-height: 1.9em;
+	font-size: 1.4em;
+}
+#restore {
+	position:absolute;
+	left: 0px;
+}
+#reditn-config form label {
+	position: absolute;
+	left: 6%;
+	width: 42%;
+	text-align: right;
+}
+#reditn-config form input, #reditn-config form select {
+	position: absolute;
+	left: 54%;
+	text-align: left;
+	width: 42%;
 }

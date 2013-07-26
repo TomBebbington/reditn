@@ -168,6 +168,7 @@ class Link {
 			regex: ~/(([^\.]*\.)?deviantart\.com\/art|fav\.me)\/.*/,
 			method: function(e, cb) {
 				Reditn.getJSON('http://backend.deviantart.com/oembed?url=${e.matched(0).urlEncode()}&format=json', function(e:OEmbed) {
+					//trace('${e.matched(0)} -> ${e.url}');
 					cb([{
 						url: e.url,
 						caption: e.title,

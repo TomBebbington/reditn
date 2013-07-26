@@ -49,6 +49,5 @@
 	},
 	"resources": [
 		"data"
-	],
-	"skip_compile": true
+	]
 }

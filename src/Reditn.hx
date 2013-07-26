@@ -12,6 +12,11 @@ class Reditn {
 	public static var links:Array<AnchorElement> = null;
 	public static var fullPage:Bool = true;
 	static function main() {
+		#if debug
+		haxe.Log.trace = function(d:Dynamic, ?p:haxe.PosInfos) {
+			Browser.window.alert('$d');
+		}
+		#end
 		ext.Builder.build("info.json");
 		Browser.onload(init);
 	}
@@ -33,6 +38,19 @@ class Reditn {
 		links = [for(l in links) if(l.nodeName.toLowerCase() == "a" && untyped l.parentElement.className != "parent") l ];
 	}
 	static function init() {
+		var spacer:Element = cast Browser.document.getElementsByClassName("spacer")[0];
+		spacer.innerHTML = "";
+		spacer.style.fontFamily = "monospace";
+		#if debug
+		haxe.Log.trace = function(d:Dynamic, ?p:haxe.PosInfos) {
+			var s:String = Std.string(d);
+			if(p != null)
+				s = "<span style=\"font-weight:bold\">"+p.fileName + ":" + p.lineNumber+": </span>" + d+"<br>";
+			spacer.innerHTML += s;
+			while(spacer.innerHTML.split("<br>").length > 10)	
+				spacer.innerHTML = spacer.innerHTML.substr(spacer.innerHTML.indexOf("<br>")+4);
+		}
+		#end
 		if(Browser.window.location.href.indexOf("reddit.") == -1 || untyped window.reditn_loaded)
 			return;
 		untyped window.reditn_loaded = true;
@@ -53,6 +71,7 @@ class Reditn {
 		wrap(UserInfo.init, "userinfo");
 		wrap(UserTagger.init, "user-tag");
 		wrap(SubredditTagger.init, "sub-tag");
+		ThemeChooser.init();
 		Browser.window.history.replaceState(haxe.Serializer.run(state()), null, Expand.toggled ? "#showall" : null);
 		Browser.window.onpopstate = function(e:Dynamic) {
 			var s:String = e.state;
@@ -249,6 +268,7 @@ class Reditn {
 			h.setHeader("Content-Type", type);
 		//h.setHeader("User-Agent", USER_AGENT);
 		h.onData = func;
+		#if debug h.onError = function(msg) trace('Error getting $url: $msg'); #end
 		if(postData != null)
 			h.setPostData(postData);
 		h.request(postData != null);
@@ -294,9 +314,9 @@ class Reditn {
 			func(getData(haxe.Json.parse(data)));
 		}, auth, type, postData);
 	}
-	public static function getXML<T>(url:String, func:T->Void, ?auth:String, type:String="application/json", ?postData:String):Void {
+	public static function getXML<T>(url:String, func:Xml->Void, ?auth:String, type:String="application/json", ?postData:String):Void {
 		getText(url, function(data:String) {
-			func(getData(Xml.parse(data)));
+			func(Xml.parse(data));
 		}, auth, type, postData);
 	}
 	public static function popUp(bs:Element, el:Element, x:Float=0, y:Float=0) {
@@ -320,11 +340,10 @@ class Reditn {
 		var close = Browser.document.createAnchorElement();
 		close.style.position = "absolute";
 		close.style.right = close.style.top = "5px";
-		close.innerHTML = "<b>Close</b>";
+		close.style.fontWeight = "bold";
+		close.textContent = "Close";
 		close.href = "javascript:void(0);";
-		close.onclick = el.onblur = function(e) {
-			remove(el);
-		}
+		close.addEventListener("click", function(e) remove(el));
 		el.appendChild(close);
 		el.className = "popup";
 		if(y != 0)
