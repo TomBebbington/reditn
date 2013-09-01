@@ -39,8 +39,11 @@ class Subreddit extends Data {
 		this.name = StringTools.urlEncode(n);
 	override function getDataUrl():String
 		return 'http://www.reddit.com/r/$name/about.json';
-	public inline function getPosts(sort:String="hot"):Array<Post>
-		return haxe.Json.parse(haxe.Http.requestUrl('http://www.reddit.com/r/$name/$sort.json')).data.children;
+	public function getPosts(sort:String="hot"):Array<Post>
+		try
+			return haxe.Json.parse(haxe.Http.requestUrl('http://www.reddit.com/r/$name/$sort.json')).data.children
+		catch(e:Dynamic)
+			return [];
 	public inline function toString():String
 		return '/r/$name: $displayName: $description';
 }

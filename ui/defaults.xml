@@ -9,10 +9,10 @@
 		<Default w="700" h="120" skin:Paint-color="0x00FF00" skin:Paint-alpha="0.5" skin:Paint-corners="[80, 120]" skin:Paint-border="16" skin:Paint-borderColor="0x00FF00" format-size="14" format-color="0xff0000" format-bold="true" />
 	</Button>
 	<Text>
-		<Title filters="[new flash.filters.DropShadowFilter()]" label-selectable="false" mouseEnabled="false" format-size="30" format-color="0xffffff" format-bold="true" id="'title'" label-type="flash.text.TextFieldType.INPUT" />
-		<Default format-size="13" format-color="0xffffff" label-selectable="false"/>
+		<Title label-selectable="false" mouseEnabled="true" format-font="Reditn.RALEWAY" format-size="30" format-color="0xffffff" format-bold="true" id="'title'" label-type="flash.text.TextFieldType.INPUT"/>
+		<Default format-font="Reditn.RALEWAY" format-size="13" format-color="0xffffff" label-selectable="false"/>
 		<PostScore format-size="22" format-color="0xFFFF00" right="0" label-selectable="false"/>
-		<PostTitle format-size="20" format-color="0xFFFFFF" format-underline="true" left="0" label-selectable="false"/>
+		<PostTitle format-font="Reditn.RALEWAY" format-size="20" format-color="0xFFFFFF" format-underline="true" left="0" label-selectable="false"/>
 	</Text>
 	<VBox>
 		<Default widthPt="100" align="'top,center'" childPadding="36"/>

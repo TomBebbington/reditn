@@ -8,22 +8,25 @@ import flash.net.URLRequest;
 import flash.events.*;
 import reddit.*;
 class Reditn {
+	public static var RALEWAY(default, null):String;
 	public static var title:Text;
 	public static var posts:VBox;
 	public static function main() {
+		Reditn.RALEWAY = openfl.Assets.getFont("assets/raleway.ttf").fontName;
 		UIBuilder.init("ui/defaults.xml");
 		UIBuilder.buildFn("ui/main.xml")().show();
 		title = cast UIBuilder.get("title");
+		title.format.font = RALEWAY;
 		title.label.multiline = false;
 		title.addEventListener(KeyboardEvent.KEY_UP, function(e:KeyboardEvent) {
 			if(e.keyCode == 13)
-				browse(new Subreddit(title.text));
+				browse(new Subreddit(title.text.substr(3)));
 		});
 		posts = cast UIBuilder.get("posts");
 		browse(new Subreddit("funny"));
 	}
 	static function browse(s:Subreddit):Void {
-		title.text = '${s.displayName}';
+		title.text = '/r/${s.name}';
 		posts.freeChildren(false);
 		for(p in s.getPosts()) {
 			var text = UIBuilder.create(Text, {
