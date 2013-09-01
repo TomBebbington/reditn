@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	
+	<meta title="Reditn" package="org.reditn" version="0.1.0" company="TopHattedCoder" />
+	<app main="Reditn" path="bin" file="reditn" />
+	<window width="640" height="480"/>
+	<source path="src" />
+	<haxelib name="openfl" />
+	<haxelib name="stablexui" />
+	<assets path="assets" exclude="*.xml"/>
+</project>

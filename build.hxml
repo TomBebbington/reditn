@@ -1,0 +1,4 @@
+-cp src
+-lib stablexui
+-lib openfl
+-cmd openfl test neko

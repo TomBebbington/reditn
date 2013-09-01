@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Floating id="'root'">
+	<Scroll>
+		<VBox>
+			<HBox defaults="'Header'">
+				<Text defaults="'Title'" text="'Reditn'"/>
+			</HBox>
+			<VBox id="'posts'">
+
+			</VBox>
+		</VBox>
+	</Scroll>
+</Floating>

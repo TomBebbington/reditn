@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Default widgets settings -->
+<Defaults>
+	<Floating>
+		<Default widthPt="100" heightPt="100" skin:Gradient-colors="[0x000000, 0x161616, 0x000000]" skin:Gradient-rotation="Math.random()*Math.PI"/>
+	</Floating>
+	<Button>
+		<Default w="700" h="120" skin:Paint-color="0x00FF00" skin:Paint-alpha="0.5" skin:Paint-corners="[80, 120]" skin:Paint-border="16" skin:Paint-borderColor="0x00FF00" format-size="14" format-color="0xff0000" format-bold="true" />
+	</Button>
+	<Text>
+		<Title filters="[new flash.filters.DropShadowFilter()]" label-selectable="false" mouseEnabled="false" format-size="30" format-color="0xffffff" format-bold="true" id="'title'" label-type="flash.text.TextFieldType.INPUT" />
+		<Default format-size="13" format-color="0xffffff" label-selectable="false"/>
+		<PostScore format-size="22" format-color="0xFFFF00" right="0" label-selectable="false"/>
+		<PostTitle format-size="20" format-color="0xFFFFFF" format-underline="true" left="0" label-selectable="false"/>
+	</Text>
+	<VBox>
+		<Default widthPt="100" align="'top,center'" childPadding="36"/>
+	</VBox>
+	<HBox>
+		<Default widthPt="100" align="'top,center'" childPadding="36"/>
+		<Header widthPt="100" align="'middle,left'" skin:Gradient-colors="[0x161616, 0x000000]" id="'header'"/>
+		<Post widthPt="100" align="'middle,left'" childPadding="50" />
+	</HBox>
+	<Scroll>
+		<Default widthPt="100" heightPt="100"/>
+	</Scroll>
+</Defaults>
